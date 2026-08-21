@@ -1,0 +1,70 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fairwddi"
+version = "0.1.0"
+description = "FAIR DDI-Lifecycle package for social science question bank interoperability"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+authors = [{ name = "Centre des Données Socio-Politiques (CDSP)" }]
+keywords = [
+    "ddi",
+    "ddi-lifecycle",
+    "fair",
+    "data-documentation-initiative",
+    "django",
+    "question-bank",
+]
+dependencies = [
+    "dartfx-ddi @ git+https://github.com/DataArtifex/ddi-toolkit.git@main",
+    "django>=5.0",
+    "django-ninja>=1.3.0",
+    "psycopg[binary]>=3.1.0",
+    "pydantic>=2.7.0",
+    "lxml>=5.0.0",
+    "typer>=0.12.0",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+fairwddi = "fairwddi.cli:app"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-django>=4.8.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.9.0",
+    "pyrefly>=1.2.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fairwddi"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+include = ["src/**/*.py", "tests/**/*.py"]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # Pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "UP", # pyupgrade
+]
+ignore = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra -q"

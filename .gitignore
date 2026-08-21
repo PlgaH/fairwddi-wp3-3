@@ -1,0 +1,63 @@
+# Project
+ddi/
+
+# Python & Virtual Environments
+.venv/
+env/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.python-version
+
+# Build & Packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Tooling & Test Caches
+.pytest_cache/
+.ruff_cache/
+.pyrefly/
+.coverage
+htmlcov/
+
+# macOS / OS X System Files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDB
+.AppleDesktop
+
+# Windows System Files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Editor & IDE Files
+.vscode/
+.vscode-test/
+*.code-workspace
+.idea/
+*.swp
+*.swo
+*~
+
+# Antigravity AI Assistant Files
+.gemini/
+.antigravity/
