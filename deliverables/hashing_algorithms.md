@@ -1,14 +1,14 @@
-# Hashing Algorithms & Content Fingerprinting Specification (Draft v0.1)
+# Hashing Algorithms & Content Fingerprinting Specification
 
-> **Project:** FAIRwDDI WP3 ST3 — Implementation of DDI-Lifecycle for ReQuest  
+> **Project:** FAIRwDDI WP3 ST3 — Implementation of DDI Architecture for ReQuest  
 > **Status:** Technical Specification Deliverable  
-> **Target System:** `request-ddi` / PostgreSQL 17 / Python `hashlib`  
+> **Target System:** `fairwddi` / PostgreSQL ≥ 17 / Python `hashlib`  
 
 ---
 
 ## 1. Overview & Objectives
 
-In the ReQuest DDI-Lifecycle 3.3 architecture, **Content Fingerprinting** (`content_hash`) is split into two distinct tiers operating at the **language level** (`lang`):
+In the ReQuest standard-agnostic DDI architecture (DDI 4 / DDI-CDI / DDI-L), **Content Fingerprinting** (`content_hash`) is split into two distinct tiers operating at the **language level** (`lang`):
 
 ```mermaid
 flowchart TD

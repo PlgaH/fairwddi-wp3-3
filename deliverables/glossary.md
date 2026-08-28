@@ -1,12 +1,12 @@
-# Glossary & Core Concepts — DDI-Lifecycle 3.3 Architecture
+# Glossary & Core Concepts — DDI Model (DDI 4 / DDI-CDI / DDI-L)
 
-> **Project:** FAIRwDDI WP3 ST3 — Implementation of DDI-Lifecycle for ReQuest  
+> **Project:** FAIRwDDI WP3 ST3 — Implementation of DDI Architecture for ReQuest  
 > **Status:** Reference Deliverable  
 > **Target Audience:** Developers, Data Engineers, Archivists, AI Agents  
 
 ---
 
-## 1. DDI-Lifecycle 3.3 Domain Model Concepts
+## 1. DDI Core Domain Model Concepts
 
 | Concept / Entity | Layer | Definition | ReQuest Upgrade Context |
 | :--- | :--- | :--- | :--- |

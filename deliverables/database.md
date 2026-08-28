@@ -1,8 +1,8 @@
-# Database Schema — DDI-Lifecycle 3.3 (Draft v0.1)
+# Database Schema — DDI Model (DDI 4 / DDI-CDI / DDI-L)
 
-> **Status:** Initial draft for review
-> **Scope:** Lightweight DDI-L profile for the ReQuest question bank only
-> **Target DB:** PostgreSQL 17 with ICU collations
+> **Status:** Implementation Complete & Validated
+> **Scope:** Standard-agnostic core DDI data model for the ReQuest question bank, aligned with DDI 4 (COGS model) and DDI-CDI, supporting DDI-Lifecycle and multi-standard ingestion
+> **Target DB:** PostgreSQL ≥ 17 (Clean standard DDL, compatible with 18.x)
 
 ---
 
@@ -17,6 +17,7 @@ erDiagram
 
     %% ── Concept layer ──
     Concept ||--o{ ConceptualVariable : categorizes
+    Concept ||--o{ ConceptRelationship : maps
     ConceptualVariable ||--o{ RepresentedVariable : represents
 
     %% ── Representation layer ──
@@ -24,6 +25,9 @@ erDiagram
     CodeList ||--o{ RepresentedVariable : uses
     CodeList ||--o{ CodeItem : contains
     Category ||--o{ CodeItem : "labeled by"
+    CategorySet ||--o{ CategorySetItem : defines
+    Category ||--o{ CategorySetItem : contains
+    CategorySet ||--o{ CodeList : schemes
 
     %% ── Dataset layer ──
     StudyUnit ||--o{ InstanceVariable : contains
@@ -33,11 +37,14 @@ erDiagram
     VariableGroup ||--o{ VariableGroupMembership : groups
     InstanceVariable ||--o{ VariableGroupMembership : "member of"
     StudyUnit ||--o{ VariableGroup : scopes
+    Collection ||--o{ VariableGroup : scopes
 
     %% ── Normalization & Harmonization infrastructure ──
     URNAlias }o--|| QuestionItem : "aliases (polymorphic)"
     URNAlias }o--|| CodeList : "aliases (polymorphic)"
     URNAlias }o--|| RepresentedVariable : "aliases (polymorphic)"
+    MetadataQuarantine }o--|| QuestionItem : "quarantines"
+    StagedImportPayload ||--o{ StagedResourceNode : parses
 ```
 
 ---
@@ -50,11 +57,10 @@ All tables in this schema follow these conventions unless stated otherwise:
 | :--- | :--- |
 | **Primary key** | `id` — `BigAutoField` (Django default). |
 | **URN columns** | `urn`, `agency`, `ddi_identifier`, `version` — present on all DDI entities (see §2.1). |
-| **Content hash** | `content_hash` — `CharField(64)`, SHA-256 hex digest for deduplication and drift detection. |
-| **Multilingual text** | `JSONB` with ISO 639-1 keys: `{"fr": "...", "en": "..."}`. Canonical hash uses sorted keys. |
+| **Content hash** | `content_hash` (`CharField(64)`) & `content_hashes` (`JSONB`) — multi-algorithm digests for drift detection and deduplication. |
+| **Multilingual text** | `JSONB` array of objects: `[{"lang": "fr", "value": "...", "type": "literal"}]`. Extensible attributes supported. |
 | **Timestamps** | `created_at` (`auto_now_add`), `updated_at` (`auto_now`) on all tables. |
-| **Collation** | `request_ddi_case_accent_insensitive_collation` (ICU `und-u-ks-level1`) for text comparison fields. |
-| **Naming** | Table names use DDI-Lifecycle 3.3 terminology. Django `db_table` is `request_ddi_{snake_case}`. |
+| **Naming** | Table names use canonical DDI model terminology (aligned with DDI 4 / DDI-CDI / DDI-L). Django `db_table` is `request_ddi_{snake_case}`. |
 
 ### 2.1 DDI Identification Mixin
 
@@ -86,8 +92,41 @@ class DDIIdentifiable(models.Model):
         abstract = True
 ```
 
-> [!NOTE]
-> The field is named `ddi_identifier` (not `identifier`) to avoid collision with Django internals and potential ORM conflicts.
+### 2.2 Database Engine Strategy: PostgreSQL ≥ 17 (Production) vs. SQLite (Development & Testing)
+
+The schema is architected to be 100% compliant with standard ANSI SQL and Django's cross-database abstraction, enabling a dual-engine development and production strategy:
+
+| Feature / Capability | SQLite (Dev & Testing) | PostgreSQL ≥ 17 (Production) | Impact on FAIRwDDI |
+| :--- | :---: | :---: | :--- |
+| **Multilingual `JSONField` (Array of Objects)** | ✅ Supported *(JSON1)* | ✅ Native Binary `JSONB` | Works in both. SQLite stores as formatted JSON text; PostgreSQL stores binary JSONB. |
+| **Relational Integrity & Foreign Keys** | ✅ Supported | ✅ Supported | Identical cascade behavior (`CASCADE`, `SET_NULL`, `M2M`). |
+| **Composite Unique Constraints** | ✅ Supported | ✅ Supported | Identical uniqueness enforcement (e.g. `(study_unit, variable_name)`). |
+| **Pydantic Validation & SHA-256 Hashes** | ✅ Supported *(Python)* | ✅ Supported *(Python)* | Hashing is decoupled in Python, so fingerprints match across both engines. |
+| **Database-Level GIN Containment Indexes** | ❌ Not available | ✅ Supported (`USING gin`) | Fast in-database JSON containment queries (`@>`, `?`) require PostgreSQL. |
+| **High Concurrency & Async Worker Queues** | ⚠️ File locking *(1 writer)* | ✅ Multi-connection MVCC | Batch ingestion with background task queues (`django-tasks-db`) requires PostgreSQL. |
+| **Streaming Bulk Loading (`COPY`)** | ❌ Not available | ✅ Native `psycopg3` `copy()` | Migrating 65,000+ historical survey variables is orders of magnitude faster in PostgreSQL. |
+| **Elasticsearch Synchronization** | ✅ Supported | ✅ Supported | Both can trigger ES indexing signals. |
+
+#### 2.2.1 In-Depth Comparison: PostgreSQL `JSONB` vs. SQLite `JSON`
+
+While Django abstracts both under `models.JSONField` and returns identical Python `list[dict]` objects, the database engines handle JSON fundamentally differently:
+
+1. **Storage Format (Decomposed Binary vs. Plain Text):**
+   * **PostgreSQL `JSONB`:** Decomposes incoming JSON into a binary tree structure on disk. Whitespace is stripped, keys are deduplicated, and lookups access specific array elements or attributes directly without scanning or re-parsing the entire document string.
+   * **SQLite JSON:** Stores JSON data as standard `TEXT`. Every query against a nested property requires SQLite's JSON1 extension to re-parse the text string at runtime.
+
+2. **Indexability (Generalized Inverted Indexes vs. Full Table Scans):**
+   * **PostgreSQL `JSONB` with GIN:** Supports Generalized Inverted Indexes (`CREATE INDEX ... USING gin (question_text jsonb_path_ops)`). This indexes every nested key, array item, and value across the document. Filtering for `[{"lang": "fr"}]` across millions of questions executes via B-tree/GIN index lookups in $O(\log N)$ time.
+   * **SQLite:** Does not support inverted indexes over arbitrary nested JSON structures. Filtering by nested JSON properties requires a full table scan ($O(N)$) where SQLite parses every row's JSON string at runtime.
+
+3. **Query Operators & Performance:**
+   * **PostgreSQL `JSONB`:** Provides native containment operators (`@>`, `<@`), key existence tests (`?`, `?|`, `?&`), and ANSI SQL standard JSONPath queries (`jsonb_path_query`).
+   * **SQLite:** Relies on scalar function calls (`json_extract()`, `json_tree()`, `json_each()`).
+
+#### 2.2.2 Why Architectural Decoupling Enables Seamless Dual-Engine Support
+1. **Decoupled Search:** Full-text multilingual search is delegated to **Elasticsearch 9.x** rather than database-specific full-text extensions or raw SQL `LIKE` queries.
+2. **Decoupled Normalization:** Canonical text cleaning and SHA-256 fingerprinting are handled in Python (`Pydantic` / `hashlib`), not in SQL stored procedures or triggers.
+3. **Decoupled Collation:** We dropped legacy custom database ICU collations in favor of standard UTF-8 JSONB storage.
 
 ---
 
@@ -149,19 +188,39 @@ Sub-series grouping. Maps to DDI-L `<SubGroup>`.
 
 #### Concept
 
-High-level thematic domain anchored to ELSST vocabulary (e.g., "Political Attitudes", "Social Inequality").
+High-level thematic domain concept from any controlled vocabulary or thesaurus (e.g. CESSDA ELSST, CESSDA Topics, DDI-CV, custom/local thesauri). Supports SKOS/XKOS hierarchical trees (`parent_id`), notation codes, vocabulary identifiers, and multilingual definitions.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `id` | `BigAutoField` | PK | |
-| `label` | `JSONField` | | Multilingual label `{"fr": "...", "en": "..."}` |
-| `elsst_uri` | `CharField(512)` | unique, nullable | ELSST concept URI for interoperability |
-| `description` | `JSONField` | nullable | Multilingual description |
+| `uri` | `CharField(512)` | unique, nullable | Controlled vocabulary concept URI (e.g. ELSST, SKOS) |
+| `vocabulary` | `CharField(128)` | default `""` | Controlled vocabulary name or scheme (e.g. `'ELSST'`, `'CESSDA'`, `'DDI-CV'`) |
+| `notation` | `CharField(128)` | nullable | Standard thesaurus classification/notation code |
+| `label` | `JSONField` | | Multilingual label `[{"lang": "fr", "value": "..."}]` |
+| `description` | `JSONField` | default `[]` | Multilingual description |
+| `definition` | `JSONField` | default `[]` | Multilingual skos:definition |
+| `parent_id` | `BigInt` | FK → Concept, nullable | Parent concept for `skos:broader` hierarchical trees |
+| `concept_type` | `CharField(64)` | default `'concept'` | Classification type (`'domain'`, `'concept'`, `'thematic_group'`) |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
 
-> [!IMPORTANT]
-> Sciences Po plans to curate a collection of high-level concepts based on the ELSST vocabulary. The `elsst_uri` field links each Concept to the authoritative CESSDA thesaurus entry, enabling cross-archive interoperability.
+> [!NOTE]
+> The Concept layer is vocabulary-agnostic. While CESSDA ELSST is a primary example of a social science multilingual thesaurus that can be linked via `uri`, the schema supports any external or local controlled vocabulary (e.g., CESSDA Topic Classification, DDI Controlled Vocabularies, or custom in-house schemes).
+
+---
+
+#### ConceptRelationship
+
+Semantic mapping between concepts (SKOS / XKOS relationships).
+
+| Column | Type | Constraints | Notes |
+| :--- | :--- | :--- | :--- |
+| `id` | `BigAutoField` | PK | |
+| `source_concept_id` | `BigInt` | FK → Concept | Source concept |
+| `target_concept_id` | `BigInt` | FK → Concept, nullable | Target concept in local DB |
+| `relationship_type` | `CharField(64)` | | SKOS relation (`'broader'`, `'narrower'`, `'related'`, `'exactMatch'`, `'correspondsTo'`) |
+| `target_uri` | `CharField(512)` | nullable | External URI if target concept is outside the local DB |
+| `created_at` | `DateTimeField` | auto | |
 
 ---
 
@@ -172,10 +231,10 @@ Abstract measurement concept (e.g., "Left-Right Political Placement"). Inherits 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `id` | `BigAutoField` | PK | |
-| `concept_id` | `BigInt` | FK → Concept, nullable | ELSST-anchored parent concept |
+| `concept_id` | `BigInt` | FK → Concept, nullable | Controlled vocabulary parent concept anchor |
 | `label` | `JSONField` | | Multilingual label |
 | `description` | `JSONField` | nullable | Multilingual description |
-| _DDIIdentifiable_ | | | `urn`, `agency`, `ddi_identifier`, `version`, `content_hash`, timestamps |
+| _DDIIdentifiable_ | | | `urn`, `agency`, `ddi_identifier`, `version`, `content_hash`, `content_hashes`, timestamps |
 
 **Content hash formula:** `SHA-256(sorted_json(label) + sorted_json(description))`
 
@@ -468,7 +527,9 @@ Stores individual broken-down raw element resources (`raw_urn`, `raw_value`) ext
 | *All DDI entities* | `urn` | UNIQUE B-tree | URN lookup for harmonization |
 | *All DDI entities* | `content_hash` | B-tree | Fingerprint comparison during import |
 | *All DDI entities* | `ddi_identifier` | B-tree | Partial URN searches |
-| `Concept` | `elsst_uri` | UNIQUE B-tree | ELSST vocabulary lookup |
+| `Concept` | `uri` | UNIQUE B-tree | Controlled vocabulary URI lookup |
+| `Concept` | `vocabulary` | B-tree | Filter concepts by vocabulary scheme |
+| `Concept` | `notation` | B-tree | Notation/code lookup |
 | `CodeItem` | `(code_list_id, code_value)` | UNIQUE composite | Code deduplication within a list |
 | `InstanceVariable` | `(study_unit_id, variable_name)` | UNIQUE composite | Column-name uniqueness per study |
 | `InstanceVariable` | `is_indexed` | Partial (where false) | Efficient ES sync queue |
@@ -540,8 +601,8 @@ flowchart TB
         Sub --> SU["StudyUnit"]
     end
 
-    subgraph Concept ["Concept Layer"]
-        ELSST["Concept\n(ELSST-anchored)"] --> CV["ConceptualVariable"]
+    subgraph ConceptLayer ["Concept Layer"]
+        ConceptNode["Concept\n(Controlled Vocab / Thesaurus)"] --> CV["ConceptualVariable"]
     end
 
     subgraph Rep ["Representation Layer"]

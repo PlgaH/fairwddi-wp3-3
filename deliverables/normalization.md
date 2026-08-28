@@ -1,14 +1,14 @@
-# Technical Specification — Metadata Normalization Engine (Draft v0.1)
+# Technical Specification — Metadata Normalization Engine
 
-> **Project:** FAIRwDDI WP3 ST3 — Implementation of DDI-Lifecycle for ReQuest  
-> **Target System:** `request-ddi` / PostgreSQL 17 / Elasticsearch 9.4.x  
+> **Project:** FAIRwDDI WP3 ST3 — Implementation of DDI Architecture for ReQuest  
+> **Target System:** `fairwddi` / PostgreSQL ≥ 17 / Elasticsearch 9.4.x  
 > **Status:** Technical Specification Deliverable  
 
 ---
 
 ## 1. Executive Summary & Core Principles
 
-The **Metadata Normalization Engine** is responsible for deduplicating, standardizing, versioning, and structuring incoming survey metadata across waves and datasets. It transforms flat, study-bound XML/JSON metadata into clean, canonical DDI-Lifecycle 3.3 entities structured around the DDI variable cascade:
+The **Metadata Normalization Engine** is responsible for deduplicating, standardizing, versioning, and structuring incoming survey metadata across waves and datasets. It transforms flat, study-bound XML/JSON metadata into clean, canonical DDI entities (aligned with DDI 4 / DDI-CDI / DDI-L) structured around the DDI variable cascade:
 
 $$\text{ConceptualVariable} \longrightarrow \text{RepresentedVariable} \longrightarrow \text{InstanceVariable}$$
 
@@ -17,9 +17,9 @@ $$\text{ConceptualVariable} \longrightarrow \text{RepresentedVariable} \longrigh
 1. **Single Active Canonical Algorithm per Entity Type:** To avoid competing canonical identities and tree fragmentation, the system uses exactly **one active algorithm** (`v1_strict_sha256`) per resource type to govern primary entity identity in PostgreSQL.
 2. **Separation of Normalization vs. Harmonization:**
    - **Technical Metadata Normalization (Deterministic SHA-256):** Standardizes raw text (NFKC, typography), extracts element nodes, generates deterministic URNs, and deduplicates identical entities in PostgreSQL.
-   - **Semantic Harmonization (ELSST Thesaurus & Concept Clustering):** Identifies conceptual similarity across survey waves. Groups wording variants or evolving response scales under shared `ConceptualVariable` entities without altering canonical database IDs.
+   - **Semantic Harmonization (Controlled Vocabularies & Concept Clustering):** Identifies conceptual similarity across survey waves. Groups wording variants or evolving response scales under shared `ConceptualVariable` entities without altering canonical database IDs.
 3. **Immutability & Provenance via `URNAlias`:** Original external or random URNs are never overwritten or discarded. They are preserved in `URNAlias` mapped to canonical database URNs along with the strategy name and source file provenance.
-4. **Pluggable Resource-Specific Normalizers:** The database infrastructure supports different specialized normalizers per resource type (e.g. Simple Text Normalizer for `Category`, Structural Compound Normalizer for `CodeList`, Set-Theoretic Normalizer for `UnorderedCategorySet`, and ELSST Thesaurus Normalizer for `ConceptualVariable`).
+4. **Pluggable Resource-Specific Normalizers:** The database infrastructure supports different specialized normalizers per resource type (e.g. Simple Text Normalizer for `Category`, Structural Compound Normalizer for `CodeList`, Set-Theoretic Normalizer for `UnorderedCategorySet`, and Thesaurus Normalizer for `ConceptualVariable`).
 
 ---
 

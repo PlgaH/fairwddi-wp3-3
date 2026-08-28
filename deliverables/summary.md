@@ -1,6 +1,6 @@
-# Executive Summary — DDI-Lifecycle 3.3 Architecture & Decisions
+# Executive Summary — Standard-Agnostic DDI Architecture & Decisions (DDI 4 / DDI-CDI / DDI-L)
 
-> **Project:** FAIRwDDI WP3 ST3 — Implementation of DDI-Lifecycle for ReQuest  
+> **Project:** FAIRwDDI WP3 ST3 — Implementation of DDI Architecture for ReQuest  
 > **Organization:** Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS  
 > **Duration:** July 20 – December 18, 2026 (25 days)  
 > **Status:** Phase I Architecture & Technical Specification Summary Deliverable  
@@ -11,14 +11,14 @@
 
 The **ReQuest** platform (`request-ddi`) is a centralized question-bank database maintained by CDSP, serving over **65,000 questions and variables** across **250+ quantitative survey datasets**. 
 
-The goal of this project is to upgrade ReQuest from a legacy pseudo-DDI architecture (DDI-Codebook 2.5 with custom Django abstractions) to a **compliant DDI-Lifecycle 3.3** architecture.
+The goal of this project is to upgrade ReQuest from a legacy pseudo-DDI architecture (DDI-Codebook 2.5 with custom Django abstractions) to a **standard-agnostic DDI architecture** aligned with **DDI 4.0 (COGS model)** and **DDI-CDI (Cross-Domain Integration)**, with full backwards and forwards compatibility for **DDI-Lifecycle 3.3** and multi-standard ingestion.
 
 ### Key Scope Principles
-1. **Lightweight Profile:** We implement only the DDI-Lifecycle 3.3 entities required for the ReQuest question bank. The full DDI-L specification covers hundreds of classes; our model remains lightweight, focused, and performant.
-2. **FAIR Interoperability:** Implements persistent DDI URNs (`urn:ddi:fr.cdsp:...`), cross-survey variable cascading (`ConceptualVariable → RepresentedVariable → InstanceVariable`), native multilingual JSONB support (`xml:lang`), and CESSDA ELSST thesaurus concept mapping.
+1. **Lightweight Profile:** We implement the core DDI variable cascade and representation entities required for the ReQuest question bank without importing monolithic specification bloat.
+2. **FAIR & Cross-Standard Interoperability:** Implements persistent DDI URNs (`urn:ddi:fr.cdsp:...`), cross-survey variable cascading (`ConceptualVariable → RepresentedVariable → InstanceVariable`), native multilingual JSONB support (`xml:lang`), and controlled vocabulary concept mapping (e.g. CESSDA ELSST).
 3. **Clean Distinction Between Normalization & Harmonization:**
    - **Technical Metadata Normalization:** The automated engineering pipeline (string cleaning, schema standardization, format adapters, SHA-256 fingerprinting, URN generation).
-   - **Semantic Harmonization:** The archivist domain workflow (linking variables across survey waves via `ConceptualVariable` and CESSDA ELSST thesaurus URIs).
+   - **Semantic Harmonization:** The archivist domain workflow (linking variables across survey waves via `ConceptualVariable` and thesaurus URIs).
 
 ---
 
@@ -60,8 +60,8 @@ flowchart TD
 
 ### A. Database Schema & Domain Model ([`deliverables/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/database.md))
 
-1. **16-Table Standard-Agnostic PostgreSQL Core:**
-   - **Concept Layer:** `Concept` (ELSST URI anchor), `ConceptualVariable`.
+1. **16-Table Standard-Agnostic PostgreSQL Core (with SQLite Dev/Test Parity):**
+   - **Concept Layer:** `Concept` (generic vocabulary URI anchor, parent hierarchy, notations), `ConceptRelationship` (SKOS/XKOS mappings), `ConceptualVariable`.
    - **Representation Layer:** `QuestionItem`, `Category`, `CategorySet`, `CategorySetItem`, `CodeList`, `CodeItem`, `RepresentedVariable`.
    - **Dataset Layer:** `StudyUnit` (renamed from `Survey`), `InstanceVariable` (renamed from `BindingSurveyRepresentedVariable`).
    - **Organization Layer:** `VariableGroup`, `VariableGroupMembership`, `Distributor`, `Collection`, `Subcollection`.
@@ -70,6 +70,7 @@ flowchart TD
 3. **Structured `QuestionItem` Breakdown:** Extracted from `RepresentedVariable` into explicit multilingual JSONB fields: `question_text` (literal question wording), `pre_question_text` (introductory preamble/routing), `post_question_text` (transition text), and `interviewer_instructions` (guidance).
 4. **Decoupled Structural `CodeList`:** Decouples numerical code values (e.g. Code `1`) from response text labels (`Category`). `CodeList` URN is derived purely from structural code-category mappings independent of list title.
 5. **Set-Theoretic Schemes (`CategorySet`):** Supports reusable, named category label schemes (`CategorySet`) independent of numerical code assignments.
+6. **Dual-Engine Strategy:** Fully ANSI-standard Django schema allowing SQLite for fast local development and sub-second CI testing, and PostgreSQL ≥ 17 for high-concurrency production ingestion and GIN indexing.
 
 ---
 

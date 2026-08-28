@@ -1,12 +1,12 @@
 # FAIRwDDI Lifecycle
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
-[![DDI-Lifecycle 3.3](https://img.shields.io/badge/DDI--Lifecycle-3.3-orange.svg)](https://ddialliance.org/Specification/DDI-Lifecycle/3.3/)
+[![DDI 4.0 & DDI-CDI](https://img.shields.io/badge/DDI-4.0%20%7C%20DDI--CDI%20%7C%20DDI--L-orange.svg)](https://ddialliance.org/)
 [![Framework](https://img.shields.io/badge/framework-Django%20%7C%20Django%20Ninja-green.svg)](https://django-ninja.rest-framework.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![CDSP / Sciences Po](https://img.shields.io/badge/Organization-CDSP%20%2F%20CNRS%20%2F%20Sciences%20Po-8b0000.svg)](https://cdsp.sciences-po.fr/)
 
-**FAIRwDDI WP3 ST3** — Implementation of **DDI-Lifecycle 3.3** for the CDSP [ReQuest](https://request.sciencespo.fr/) Question Bank.
+**FAIRwDDI WP3 ST3** — Implementation of a standard-agnostic **DDI Data Model** (aligned with **DDI 4.0** and **DDI-CDI**, with **DDI-Lifecycle 3.3** compatibility) for the CDSP [ReQuest](https://request.sciencespo.fr/) Question Bank.
 
 ---
 
@@ -14,15 +14,15 @@
 
 The **Centre de Données Socio-Politiques (CDSP, UAR 828 CNRS / Sciences Po)** preserves, documents, and disseminates high-quality research data for the social sciences. As part of this mission, CDSP operates **[ReQuest](https://request.sciencespo.fr/)**, an open platform exploring over 65,000 questions and variables across longitudinal and cross-sectional survey collections (including the ELIPSS panel and CEVIPOF French electoral surveys).
 
-As part of the **FAIRwDDI** research infrastructure initiative (Work Package 3, Subtask 3), this project modernizes the ReQuest database and ingestion pipelines from a pseudo-DDI architecture (DDI-Codebook 2.5 with custom Django abstractions) into a fully compliant **DDI-Lifecycle (DDI-L) 3.3** standard.
+As part of the **FAIRwDDI** research infrastructure initiative (Work Package 3, Subtask 3), this project modernizes the ReQuest database and ingestion pipelines from a pseudo-DDI architecture (DDI-Codebook 2.5 with custom Django abstractions) into a fully compliant, standard-agnostic **DDI Core Model** aligned with **DDI 4.0 (COGS model)**, **DDI-CDI (Cross-Domain Integration)**, and **DDI-Lifecycle 3.3**.
 
 ### Key Project Objectives
 
-1. **FAIR Interoperability:** Align ReQuest metadata models with European social science data infrastructures (CESSDA, Dataverse, Colectica) and international DDI standards.
-2. **Native Multilingual Support:** Implement multi-language metadata handling (`xml:lang`) across all question wording, response categories, and variable concepts using PostgreSQL `JSONB`.
-3. **Harmonization & Variable Cascade:** Establish the 3-tier DDI-Lifecycle variable cascade (`ConceptualVariable` → `RepresentedVariable` → `InstanceVariable`) anchored to the CESSDA [ELSST](https://elsst.cessda.eu/) multilingual thesaurus.
-4. **Lightweight & Maintainable Profile:** Deliver a focused, robust DDI-L profile specifically tailored for question banks without importing unneeded specification bloat.
-5. **Streaming Ingestion & Content Deduplication:** Implement high-performance streaming XML parsing (`lxml.etree.iterparse`), canonical URN identification, and SHA-256 fingerprinting for drift detection and deduplication.
+1. **FAIR & Cross-Domain Interoperability:** Align ReQuest metadata models with European social science data infrastructures (CESSDA, Dataverse, Colectica), cross-domain standards (**DDI-CDI**), and modern DDI 4 models.
+2. **Native Multilingual Support:** Implement multi-language metadata handling (`xml:lang`) across all question wording, response categories, and variable concepts using PostgreSQL `JSONB` array of objects.
+3. **Harmonization & Variable Cascade:** Establish the 3-tier DDI variable cascade (`ConceptualVariable` → `RepresentedVariable` → `InstanceVariable`) anchored to controlled vocabularies and multilingual thesauri (e.g. CESSDA ELSST).
+4. **Lightweight & Maintainable Profile:** Deliver a focused, robust DDI profile specifically tailored for question banks without importing unneeded specification bloat.
+5. **Streaming Ingestion & Multi-Standard Adapters:** Implement high-performance staging and streaming normalization supporting DDI 4 JSON, DDI-L 3.3 XML, DDI-C 2.5, Croissant, and CSV.
 
 > [!NOTE]
 > **DDI Document Availability & Licensing Notice:**  
@@ -32,13 +32,13 @@ As part of the **FAIRwDDI** research infrastructure initiative (Work Package 3, 
 
 ## 🏛️ Architectural Overview
 
-### 1. The DDI-Lifecycle 3.3 Variable Cascade
+### 1. The DDI Variable Cascade
 
 The upgrade introduces a clear separation between conceptual definitions, question representations, and physical survey dataset bindings:
 
 ```
 [ Concept Layer ]
-  └── ConceptualVariable (anchored to CESSDA ELSST Thesaurus)
+  └── ConceptualVariable (anchored to Controlled Vocabularies / Thesauri)
         │
 [ Representation Layer ]
   ├── QuestionItem (reusable question text & interviewer instructions)
@@ -51,9 +51,9 @@ The upgrade introduces a clear separation between conceptual definitions, questi
 
 ### 2. Terminology & Model Mapping
 
-| Legacy `request-ddi` Model | DDI-Lifecycle 3.3 Model | Layer | Description |
+| Legacy `request-ddi` Model | Target DDI Model (DDI 4 / DDI-CDI / DDI-L) | Layer | Description |
 | :--- | :--- | :--- | :--- |
-| `ConceptualVariable` | **ConceptualVariable** | Concept | Abstract measurement concept (anchored to ELSST vocabulary) |
+| `ConceptualVariable` | **ConceptualVariable** | Concept | Abstract measurement concept (anchored to controlled vocabulary) |
 | `RepresentedVariable` | **RepresentedVariable** | Representation | Question representation + code list association |
 | _(implicit / inline)_ | **QuestionItem** | Representation | Standalone reusable question text & interviewer instructions |
 | `Category` | **Category** | Representation | Canonical response text label with multilingual JSONB |
@@ -135,18 +135,29 @@ uv sync --all-extras
 
 ### 2. Command Line Interface (CLI)
 
-The `fairwddi` CLI provides tools for inspecting versions, running DDI validations, and orchestrating imports/exports:
+The `fairwddi` CLI provides tools for database administration, schema initialization, demonstration data seeding, DDL export, and status reporting:
 
 ```bash
 # Display CLI help
 uv run fairwddi --help
 
-# Check package version
-uv run fairwddi version
-
 # Display system and environment information
 uv run fairwddi info
+
+# Initialize or migrate database schema
+uv run fairwddi db init
+
+# Seed database with demonstration DDI-Lifecycle 3.3 entities
+uv run fairwddi db seed
+
+# Display database inventory and record counts
+uv run fairwddi db status
+
+# Export standalone PostgreSQL >= 17 DDL SQL
+uv run fairwddi db export-ddl --output schema.sql
 ```
+
+> 📖 **Full CLI Documentation:** See the **[CLI User Guide](docs/cli_user_guide.md)** for complete command options, environment variables, and programmatic Python examples.
 
 ### 3. Running Tests
 
@@ -184,6 +195,7 @@ uv run pyrefly check
   - Metadata normalization & deduplication: [deliverables/normalization.md](deliverables/normalization.md)
   - Hashing algorithms & drift quarantine: [deliverables/hashing_algorithms.md](deliverables/hashing_algorithms.md)
   - Terminology glossary: [deliverables/glossary.md](deliverables/glossary.md)
+- **CLI User Guide:** [docs/cli_user_guide.md](docs/cli_user_guide.md) — Comprehensive guide to the `fairwddi` command-line tools, database management, seeding, and DDL export.
 - **Official Specification:** [DDI-Lifecycle 3.3 Technical Guide](https://ddi-lifecycle-technical-guide.readthedocs.io/en/latest/)
 
 ---

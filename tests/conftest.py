@@ -1,17 +1,19 @@
-"""Pytest configuration and minimal Django settings initialization."""
+"""Pytest configuration and Django test settings initialization for FAIRwDDI."""
 
 import django
 from django.conf import settings
+from django.core.management import call_command
 
 
 def pytest_configure() -> None:
-    """Configure minimal Django settings for unit testing environment."""
+    """Configure Django settings and apply initial database migrations for tests."""
     if not settings.configured:
         settings.configure(
             SECRET_KEY="fairwddi-development-test-key-only",
             INSTALLED_APPS=[
                 "django.contrib.contenttypes",
                 "django.contrib.auth",
+                "fairwddi",
             ],
             DATABASES={
                 "default": {
@@ -22,3 +24,4 @@ def pytest_configure() -> None:
             USE_TZ=True,
         )
         django.setup()
+        call_command("migrate", interactive=False, verbosity=0)

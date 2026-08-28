@@ -1,14 +1,14 @@
 # FAIRwDDI Lifecycle — Agent Rules
 
-> **Project:** FAIRwDDI WP3 ST3 — Implementation of DDI-Lifecycle for ReQuest
+> **Project:** FAIRwDDI WP3 ST3 — Implementation of DDI Architecture for ReQuest
 > **Organization:** Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS
 > **Duration:** July 20 – December 18, 2026 (25 days)
 
 ## Purpose
 
-Transform the CDSP **ReQuest** question-bank database from a pseudo-DDI model (DDI-Codebook 2.5 with custom Django abstractions) to a **compliant DDI-Lifecycle 3.3** architecture. This upgrade ensures FAIR interoperability with European social-science archives (CESSDA), adds native multilingual support (`xml:lang`), and implements the DDI variable cascade (`ConceptualVariable → RepresentedVariable → InstanceVariable`).
+Transform the CDSP **ReQuest** question-bank database from a pseudo-DDI model (DDI-Codebook 2.5 with custom Django abstractions) to a **standard-agnostic DDI architecture** aligned with **DDI 4.0 (COGS model)** and **DDI-CDI (Cross-Domain Integration)**, with full compatibility for **DDI-Lifecycle 3.3** and multi-standard ingestion. This upgrade ensures FAIR interoperability with European social-science archives (CESSDA), adds native multilingual support (`xml:lang`), and implements the DDI variable cascade (`ConceptualVariable → RepresentedVariable → InstanceVariable`).
 
-> **⚠️ Lightweight Profile — Do NOT import the full DDI model.** We implement only the DDI-Lifecycle entities needed for the ReQuest question bank (listed in the glossary below). The full DDI-L specification covers hundreds of classes; our scope is deliberately narrow. When in doubt, leave it out.
+> **⚠️ Lightweight Profile — Do NOT import monolithic specification bloat.** We implement the core DDI entities needed for the ReQuest question bank (listed in the glossary below). The full DDI specifications cover hundreds of classes; our core model is standard-agnostic, lightweight, and focused. When in doubt, leave it out.
 
 ---
 
@@ -17,19 +17,19 @@ Transform the CDSP **ReQuest** question-bank database from a pseudo-DDI model (D
 | Resource                            | Location                                                                                                                                           | Description                                                                                                                                                             |
 | :---------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **ReQuest platform overview**       | [request_overview.md](docs/request_overview.md)                                                                                                    | Technical architecture, data model, ETL pipeline, and search mechanics of the current `request-ddi` codebase.                                                           |
-| **Upgrade requirements & roadmap**  | [request_upgrade.md](docs/request_upgrade.md)                                                                                                      | Full DDI-Lifecycle 3.3 migration specification: schema evolution, URN identification, Pydantic schemas, harmonization cascade, and Elasticsearch multilingual indexing. |
+| **Upgrade requirements & roadmap**  | [request_upgrade.md](docs/request_upgrade.md)                                                                                                      | Full DDI migration specification: schema evolution, URN identification, Pydantic schemas, harmonization cascade, and Elasticsearch multilingual indexing.               |
 | **Statement of work**               | [sow.md](docs/sow.md)                                                                                                                              | Official SOW with deliverables, risk matrix, and phase timeline.                                                                                                        |
-| **DDI-Lifecycle 3.3 specification** | [PDF](docs/ddi-lifecycle-technical-guide-readthedocs-io-en-latest.pdf) / [Online](https://ddi-lifecycle-technical-guide.readthedocs.io/en/latest/) | Normative technical guide for DDI-Lifecycle 3.3.                                                                                                                        |
+| **DDI-Lifecycle 3.3 specification** | [PDF](docs/ddi-lifecycle-technical-guide-readthedocs-io-en-latest.pdf) / [Online](https://ddi-lifecycle-technical-guide.readthedocs.io/en/latest/) | Technical guide for DDI-Lifecycle 3.3.                                                                                                                                  |
 | **ReQuest source code**             | `../fairwddi-request-ddi`                                                                                                                          | The `request-ddi` Django app / Python package repository.                                                                                                               |
-| **DDI Model (COGS)**                | `../ddialliance_ddimodel`                                                                                                                          | Model-based approach to DDI-Lifecycle using Colectica COGS.                                                                                                             |
+| **DDI Model (COGS)**                | `../ddialliance_ddimodel`                                                                                                                          | Model-based approach to DDI 4 using Colectica COGS.                                                                                                                     |
 
 ---
 
 ## DDI Terminology Glossary
 
-Agents **must** use correct DDI-Lifecycle 3.3 terminology. The table below maps between the current `request-ddi` model names and the target DDI-L names.
+Agents **must** use canonical DDI terminology (aligned with DDI 4 / DDI-CDI / DDI-L). The table below maps between the current `request-ddi` model names and the target DDI model names.
 
-| Current `request-ddi` Name         | DDI-Lifecycle 3.3 Name      | Layer          | Description                                                                                                          |
+| Current `request-ddi` Name         | Target DDI Model Name       | Layer          | Description                                                                                                          |
 | :--------------------------------- | :-------------------------- | :------------- | :------------------------------------------------------------------------------------------------------------------- |
 | `ConceptualVariable`               | **ConceptualVariable**      | Concept        | Abstract measurement concept (e.g., "Left-Right Political Placement"). Already aligned.                              |
 | `RepresentedVariable`              | **RepresentedVariable**     | Representation | Question wording + response code list. Already aligned.                                                              |
@@ -124,12 +124,12 @@ _Goal: Integrate the solution into CDSP infrastructure and close the project._
 
 1. **Variable Cascade:** Three-tier entity hierarchy — `ConceptualVariable → RepresentedVariable → InstanceVariable` — enables cross-survey harmonization where identical questions are reused and conceptual variants are clustered.
 2. **URN-First Technical Normalization:** Deterministic URN matching is the primary deduplication mechanism; ICU collation-based heuristic matching serves as fallback for legacy DDI-Codebook files or auto-generated/random URNs.
-3. **Decoupled Normalization & Harmonization:** Technical metadata normalization (string cleaning, SHA-256 fingerprinting, URN generation, format adapters) is handled by the automated ingestion pipeline ([`deliverables/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/normalization.md)), while semantic harmonization is handled at the Concept Layer via CESSDA ELSST thesaurus anchoring.
+3. **Decoupled Normalization & Harmonization:** Technical metadata normalization (string cleaning, SHA-256 fingerprinting, URN generation, format adapters) is handled by the automated ingestion pipeline ([`deliverables/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/normalization.md)), while semantic harmonization is handled at the Concept Layer via controlled vocabulary/thesaurus anchoring.
 4. **Content Fingerprinting:** SHA-256 hashes detect metadata drift (same URN, different content) and trigger quarantine for archivist review.
 5. **Multilingual JSONB:** All text fields support multiple languages via JSONB with sorted-key canonical hashing for deterministic fingerprints.
 6. **Streaming XML Parsing:** `lxml.etree.iterparse` replaces BeautifulSoup for DDI-Lifecycle XML to minimize memory footprint on large files.
 7. **Pydantic v2 Unified Schemas:** Single schema layer shared across file import validation, `django-ninja` API serialization, and Elasticsearch bulk indexing.
-8. **ELSST-Anchored Concept Mapping:** Sciences Po plans to define a curated collection of high-level `ConceptualVariable` concepts based on the **ELSST** (European Language Social Science Thesaurus) vocabulary maintained by CESSDA. This provides a controlled, multilingual concept hierarchy for clustering `RepresentedVariable` entities across surveys. Semantic harmonization and concept mapping are expected to be the project's most complex challenge — question-wording variations, evolving response scales, and cross-language equivalence all require careful archivist-guided decisions.
+8. **Controlled Vocabulary & Thesaurus Anchoring:** The `Concept` entity is vocabulary-agnostic (`uri`, `vocabulary`, `notation`, `parent_id`, `concept_type`) and supports arbitrary controlled vocabularies and classifications (e.g. CESSDA ELSST, CESSDA Topics, DDI-CV, or custom schemes). Sciences Po can use ELSST or other selected thesauri to establish a controlled, multilingual concept hierarchy for clustering `RepresentedVariable` entities across surveys.
 
 ---
 
@@ -138,7 +138,7 @@ _Goal: Integrate the solution into CDSP infrastructure and close the project._
 | Risk                               | Impact                            | Mitigation                                                 |
 | :--------------------------------- | :-------------------------------- | :--------------------------------------------------------- |
 | No source DDI-L profiles available | Divergence from CDSP expectations | Early dialogue with partners; use standard DDI-L examples.                                                |
-| Semantic harmonization complexity  | Inconsistent concept mapping      | Anchor `ConceptualVariable` to ELSST vocabulary; human-in-the-loop QA for ambiguous variable clustering. |
+| Semantic harmonization complexity  | Inconsistent concept mapping      | Anchor `ConceptualVariable` to controlled vocabularies; human-in-the-loop QA for ambiguous variable clustering. |
 | Internal support availability      | Delays or schema misalignment     | Designate a dedicated technical point of contact at CDSP.                                                 |
 | Over-engineering                   | Increased structural complexity   | Prioritize a lightweight, rigorous schema initially.                                                      |
 | ReQuest environment conflicts      | Tech/library incompatibilities    | Early, close collaboration with existing developers.                                                      |
