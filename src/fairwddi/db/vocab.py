@@ -96,42 +96,51 @@ def load_skos_vocabulary(
 
     # 2. Determine / infer vocabulary name if not supplied
     if not vocabulary_name:
-        # Check skos:ConceptScheme / owl:Ontology labels
-        scheme_labels: list[str] = []
-        for s in graph.subjects(RDF.type, SKOS.ConceptScheme):
-            for label_lit in graph.objects(s, SKOS.prefLabel) or graph.objects(s, DCTERMS.title):
-                if isinstance(label_lit, rdflib.Literal):
-                    scheme_labels.append(str(label_lit))
-        if scheme_labels:
-            vocabulary_name = scheme_labels[0]
-        else:
-            # Fallback to file stem (e.g. "ELSST_R6" or "cessda_topics")
-            vocabulary_name = path.stem.split("_")[0].upper()
+        # Prefer concise name: file stem prefix, e.g. "ELSST" from "ELSST_R6.ttl"
+        vocabulary_name = path.stem.split("_")[0].upper()
 
-    # 3. Check if already loaded
+    # 3. Identify all concepts in the RDF graph
+    all_concepts_in_graph = set(graph.subjects(RDF.type, SKOS.Concept))
+    for s in graph.subjects(SKOS.prefLabel, None):
+        if isinstance(s, rdflib.URIRef):
+            all_concepts_in_graph.add(s)
+
+    all_concept_uri_strs = [str(c) for c in all_concepts_in_graph]
+
+    # 4. Check if already loaded by vocabulary name OR matching URIs
     status = check_vocabulary_loaded(vocabulary=vocabulary_name)
-    if status["loaded"] and not reload:
+    existing_by_uri_count = (
+        Concept.objects.filter(uri__in=all_concept_uri_strs[:50]).count()
+        if all_concept_uri_strs
+        else 0
+    )
+    is_already_present = status["loaded"] or (existing_by_uri_count > 0)
+
+    if is_already_present and not reload:
+        found_count = (
+            status["total_concepts"] or Concept.objects.filter(uri__in=all_concept_uri_strs).count()
+        )
         return {
             "status": "already_loaded",
             "message": (
-                f"Vocabulary '{vocabulary_name}' is already loaded with "
-                f"{status['total_concepts']} concepts ({status['top_concepts']} top concepts). "
+                f"Vocabulary '{vocabulary_name}' (or concepts from {path.name}) is already "
+                f"loaded in the database ({found_count} concepts found). "
                 f"Use --reload / -r to overwrite."
             ),
             **status,
         }
 
-    # 4. If reload, remove existing concepts for this vocabulary
-    if reload and status["loaded"]:
-        ConceptRelationship.objects.filter(source_concept__vocabulary=vocabulary_name).delete()
-        Concept.objects.filter(vocabulary=vocabulary_name).delete()
+    # 5. If reload or existing concepts with these URIs exist, clean them up cleanly
+    if reload or is_already_present:
+        from django.db.models import Q
 
-    # 5. Identify all concepts in the RDF graph
-    all_concepts_in_graph = set(graph.subjects(RDF.type, SKOS.Concept))
-    # Include subjects with prefLabel even if RDF.type skos:Concept wasn't explicitly asserted
-    for s in graph.subjects(SKOS.prefLabel, None):
-        if isinstance(s, rdflib.URIRef):
-            all_concepts_in_graph.add(s)
+        ConceptRelationship.objects.filter(
+            Q(source_concept__vocabulary=vocabulary_name)
+            | Q(source_concept__uri__in=all_concept_uri_strs)
+        ).delete()
+        Concept.objects.filter(
+            Q(vocabulary=vocabulary_name) | Q(uri__in=all_concept_uri_strs)
+        ).delete()
 
     # 6. Identify Top Concepts (Level 1)
     top_concept_uris = set(graph.subjects(SKOS.topConceptOf, None)) | set(
@@ -267,15 +276,17 @@ def load_skos_vocabulary(
                 if parent_uri is not None:
                     parent_model = created_concepts_by_uri.get(str(parent_uri))
 
-                concept_obj = Concept.objects.create(
+                concept_obj, _ = Concept.objects.update_or_create(
                     uri=uri_str,
-                    vocabulary=vocabulary_name,
-                    notation=notation_val,
-                    label=labels,
-                    description=descriptions,
-                    definition=definitions,
-                    parent=parent_model,
-                    concept_type="top_concept" if lvl == 1 else "concept",
+                    defaults={
+                        "vocabulary": vocabulary_name,
+                        "notation": notation_val,
+                        "label": labels,
+                        "description": descriptions,
+                        "definition": definitions,
+                        "parent": parent_model,
+                        "concept_type": "top_concept" if lvl == 1 else "concept",
+                    },
                 )
                 created_concepts_by_uri[uri_str] = concept_obj
                 total_inserted += 1
