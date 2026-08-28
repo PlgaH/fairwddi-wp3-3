@@ -1,5 +1,7 @@
 """FAIRwDDI Lifecycle CLI application using Typer and Rich."""
 
+from pathlib import Path
+
 import typer
 from rich.console import Console
 from rich.panel import Panel
@@ -162,6 +164,226 @@ def db_status() -> None:
         table.add_row(model.__name__, model._meta.db_table, str(count))
 
     console.print(table)
+
+
+@db_app.command("wipe")
+def db_wipe(
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Bypass string confirmation prompt.",
+    ),
+    confirm: str | None = typer.Option(
+        None,
+        "--confirm",
+        help="Pass confirmation string directly (must equal 'WIPE').",
+    ),
+) -> None:
+    """Permanently delete ALL data in the database (requires string confirmation)."""
+    from django.core.management import call_command
+
+    from fairwddi.db.wipe import wipe_database
+
+    configure_django_for_cli()
+    call_command("migrate", interactive=False, verbosity=0)
+
+    db_config = get_database_config()
+    db_engine = db_config.get("ENGINE", "").split(".")[-1]
+    db_name = db_config.get("NAME", "")
+
+    if not force:
+        confirmation_input = confirm
+        if confirmation_input is None:
+            console.print(
+                f"[bold red]⚠️  WARNING:[/bold red] You are about to permanently delete "
+                f"[bold red]ALL records[/bold red] from [cyan]{db_engine}[/cyan] database "
+                f"[yellow]{db_name}[/yellow]!"
+            )
+            confirmation_input = typer.prompt(
+                "Type 'WIPE' to confirm complete database erasure",
+                type=str,
+            )
+
+        if confirmation_input.strip() != "WIPE":
+            console.print(
+                "[yellow]Aborted. Confirmation did not match 'WIPE'. "
+                "Database was not modified.[/yellow]"
+            )
+            raise typer.Abort()
+
+    console.print("[dim]Wiping database records...[/dim]")
+    summary = wipe_database()
+
+    table = Table(title=f"Wipe Summary [{db_engine}: {db_name}]", border_style="red")
+    table.add_column("Entity / Table", style="bold red")
+    table.add_column("Deleted Count", justify="right", style="yellow")
+
+    total_deleted = 0
+    for key, count in summary.items():
+        if count > 0:
+            table.add_row(key.replace("_", " ").title(), str(count))
+            total_deleted += count
+
+    if total_deleted > 0:
+        console.print(table)
+        console.print(
+            f"[bold green]Database wiped successfully "
+            f"({total_deleted} records removed).[/bold green]"
+        )
+    else:
+        console.print("[green]Database was already empty (0 records removed).[/green]")
+
+
+@db_app.command("load-vocab")
+def db_load_vocab(
+    file_path: str = typer.Argument(
+        "vocab/ELSST_R6.ttl",
+        help="Path to RDF vocabulary file (.ttl, .rdf, .xml, .jsonld, .nt, etc.).",
+    ),
+    levels: int | None = typer.Option(
+        None,
+        "--levels",
+        "-l",
+        help="Limit hierarchy depth (1 for top concepts, 2 for top + level 1, etc.).",
+    ),
+    reload: bool = typer.Option(
+        False,
+        "--reload",
+        "-r",
+        help="Force reload / overwrite concepts if already loaded.",
+    ),
+    vocabulary: str | None = typer.Option(
+        None,
+        "--vocabulary",
+        "-v",
+        help="Vocabulary name / scheme (inferred from file/metadata if omitted).",
+    ),
+    rdf_format: str | None = typer.Option(
+        None,
+        "--format",
+        "-f",
+        help="Explicit RDF serialization format (turtle, xml, json-ld, nt).",
+    ),
+    check: bool = typer.Option(
+        False,
+        "--check",
+        "-c",
+        help="Check if vocabulary is already loaded without modifying data.",
+    ),
+) -> None:
+    """Load any SKOS / XKOS controlled vocabulary into the Concept table."""
+    from django.core.management import call_command
+
+    from fairwddi.db.vocab import check_vocabulary_loaded, load_skos_vocabulary
+
+    configure_django_for_cli()
+    call_command("migrate", interactive=False, verbosity=0)
+
+    vocab_target = vocabulary or "ELSST"
+
+    if check:
+        status = check_vocabulary_loaded(vocabulary=vocab_target)
+        if status["loaded"]:
+            console.print(
+                f"[bold green]Vocabulary '{vocab_target}' is LOADED:[/bold green] "
+                f"{status['total_concepts']} concepts ({status['top_concepts']} top concepts), "
+                f"{status['relationships']} relationships."
+            )
+        else:
+            console.print(
+                f"[yellow]Vocabulary '{vocab_target}' is NOT loaded in the database.[/yellow]"
+            )
+        return
+
+    resolved_path = Path(file_path)
+    if not resolved_path.exists():
+        console.print(
+            f"[bold red]Error:[/bold red] Vocabulary file not found: [cyan]{resolved_path}[/cyan]"
+        )
+        raise typer.Exit(code=1)
+
+    console.print(
+        f"[dim]Loading SKOS vocabulary from [cyan]{resolved_path}[/cyan] "
+        f"(Levels: [yellow]{levels or 'ALL'}[/yellow])...[/dim]"
+    )
+
+    result = load_skos_vocabulary(
+        file_path=resolved_path,
+        max_levels=levels,
+        reload=reload,
+        vocabulary_name=vocabulary,
+        rdf_format=rdf_format,
+    )
+
+    if result.get("status") == "already_loaded":
+        console.print(f"[bold yellow]Notice:[/bold yellow] {result['message']}")
+        return
+
+    loaded_vocab = result["vocabulary"]
+    table = Table(
+        title=f"Vocabulary Load Summary [{loaded_vocab} ({result.get('format', 'rdf')})]",
+        border_style="green",
+    )
+    table.add_column("Metric", style="bold cyan")
+    table.add_column("Value", justify="right", style="yellow")
+
+    table.add_row("Total Concepts Loaded", str(result["total_concepts"]))
+    table.add_row("Top Concepts (Level 1)", str(result["top_concepts"]))
+    table.add_row("Levels Traversed", str(result["levels_loaded"]))
+    table.add_row("Relationships Created", str(result["relationships_created"]))
+    table.add_row("Elapsed Time", f"{result['elapsed_seconds']}s")
+
+    console.print(table)
+    console.print(f"[bold green]Vocabulary '{loaded_vocab}' loaded successfully.[/bold green]")
+
+
+@db_app.command("check-vocab")
+def db_check_vocab(
+    vocabulary: str | None = typer.Option(
+        None,
+        "--vocabulary",
+        "-v",
+        help="Name of the controlled vocabulary / scheme to check (e.g. 'ELSST').",
+    ),
+) -> None:
+    """Check if controlled vocabularies are loaded in the database."""
+    from django.core.management import call_command
+
+    from fairwddi.db.vocab import check_vocabulary_loaded
+
+    configure_django_for_cli()
+    call_command("migrate", interactive=False, verbosity=0)
+
+    status = check_vocabulary_loaded(vocabulary=vocabulary)
+    if vocabulary:
+        if status["loaded"]:
+            vocab_name = status.get("vocabulary", vocabulary)
+            console.print(
+                f"[bold green]Vocabulary '{vocab_name}' is LOADED:[/bold green] "
+                f"{status['total_concepts']} concepts ({status['top_concepts']} top concepts), "
+                f"{status['relationships']} relationships."
+            )
+        else:
+            console.print(
+                f"[yellow]Vocabulary '{vocabulary}' is NOT loaded in the database.[/yellow]"
+            )
+    else:
+        if status["loaded"]:
+            table = Table(title="Loaded Controlled Vocabularies", border_style="cyan")
+            table.add_column("Vocabulary Scheme", style="bold green")
+            table.add_column("Concepts Count", justify="right", style="yellow")
+            for item in status.get("vocabularies", []):
+                table.add_row(item["vocabulary"] or "Uncategorized", str(item["total"]))
+            console.print(table)
+            console.print(
+                f"[dim]Total Concept Records:[/dim] "
+                f"[bold green]{status['total_concepts']}[/bold green]"
+            )
+        else:
+            console.print(
+                "[yellow]No controlled vocabularies are currently loaded in the database.[/yellow]"
+            )
 
 
 if __name__ == "__main__":

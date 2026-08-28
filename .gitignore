@@ -1,6 +1,11 @@
 # Project
 ddi/
 
+# Environment & Secrets (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+
 # Python & Virtual Environments
 .venv/
 env/
@@ -11,7 +16,18 @@ __pycache__/
 *.so
 .python-version
 *.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
 *.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Local Artifacts, Logs & Dumps
+*.log
+schema.sql
+dump.rdb
 
 # Build & Packaging
 dist/

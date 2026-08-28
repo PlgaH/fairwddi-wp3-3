@@ -147,7 +147,7 @@ uv run fairwddi info
 # Initialize or migrate database schema
 uv run fairwddi db init
 
-# Seed database with demonstration DDI-Lifecycle 3.3 entities
+# Seed database with demonstration DDI entities
 uv run fairwddi db seed
 
 # Display database inventory and record counts
@@ -155,6 +155,15 @@ uv run fairwddi db status
 
 # Export standalone PostgreSQL >= 17 DDL SQL
 uv run fairwddi db export-ddl --output schema.sql
+
+# Ingest SKOS controlled vocabulary (e.g. ELSST R6 with Level 2 depth)
+uv run fairwddi db load-vocab vocab/ELSST_R6.ttl --levels 2
+
+# Inspect loaded vocabularies inventory
+uv run fairwddi db check-vocab
+
+# Wipe all database records (requires string confirmation 'WIPE')
+uv run fairwddi db wipe
 ```
 
 > 📖 **Full CLI Documentation:** See the **[CLI User Guide](docs/cli_user_guide.md)** for complete command options, environment variables, and programmatic Python examples.

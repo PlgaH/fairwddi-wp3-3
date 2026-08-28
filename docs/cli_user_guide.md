@@ -215,6 +215,139 @@ Success: DDL written to schema.sql
 
 ---
 
+### 3.5 Wipe Database (`fairwddi db wipe`)
+
+Permanently deletes all records across all tables in safe reverse topological order (respecting foreign key relationships).
+
+> [!WARNING]
+> This command completely erases all data in the active database. To prevent accidental data loss, it requires explicit string confirmation by default.
+
+#### Interactive Confirmation (Default):
+```bash
+uv run fairwddi db wipe
+```
+**Interactive Prompt:**
+```
+⚠️  WARNING: You are about to permanently delete ALL records from sqlite3 database /Users/pascal/git-plgah/fairwddi-lifecycle/fairwddi_dev.sqlite3!
+Type 'WIPE' to confirm complete database erasure: WIPE
+Wiping database records...
+                 Wipe Summary                 
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Entity / Table             ┃ Deleted Count ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ Variable Group Memberships │             1 │
+│ Variable Groups            │             1 │
+│ Instance Variables         │             2 │
+│ Study Units                │             2 │
+│ Represented Variables      │             1 │
+│ Code Items                 │             6 │
+│ Code Lists                 │             1 │
+│ Category Set Items         │             4 │
+│ Category Sets              │             1 │
+│ Categories                 │             6 │
+│ Question Items             │             1 │
+│ Conceptual Variables       │             2 │
+│ Concept Relationships      │             1 │
+│ Concepts                   │             2 │
+│ Subcollections             │             1 │
+│ Collections                │             1 │
+│ Distributors               │             1 │
+│ Urn Aliases                │             1 │
+│ Staged Nodes               │             1 │
+│ Staged Payloads            │             1 │
+└────────────────────────────┴───────────────┘
+Database wiped successfully (37 records removed).
+```
+
+#### Non-Interactive / Script Execution:
+
+Pass confirmation string directly:
+```bash
+uv run fairwddi db wipe --confirm WIPE
+```
+
+Or bypass confirmation entirely using the force flag:
+```bash
+uv run fairwddi db wipe --force
+# or short flag
+uv run fairwddi db wipe -f
+```
+
+---
+
+### 3.6 Load Controlled Vocabulary (`fairwddi db load-vocab`)
+
+Generic SKOS / SKOS-XL / XKOS loader that ingests any controlled vocabulary from RDF files into the `Concept` and `ConceptRelationship` tables.
+
+#### Supported RDF Formats & Standards:
+- **Formats:** Turtle (`.ttl`), RDF/XML (`.rdf`, `.xml`), JSON-LD (`.jsonld`, `.json`), N-Triples (`.nt`), Notation3 (`.n3`).
+- **Vocabularies:** CESSDA ELSST, CESSDA Topics, DDI-CV, UNESCO Thesaurus, Eurostat RAMON, Agrovoc, STW, custom project taxonomies.
+- **Predicates Ingested:** `skos:prefLabel`, `skos:altLabel`, `skos:definition`, `skos:scopeNote`, `skos:notation`, `skos:broader`, `skos:narrower`, `skos:related`, `skos:exactMatch`, `skos:closeMatch`, `xkos:correspondsTo`, `dct:identifier`.
+
+#### Basic Usage:
+```bash
+# Ingest ELSST Release 6 Turtle file
+uv run fairwddi db load-vocab vocab/ELSST_R6.ttl
+
+# Ingest CESSDA Topics RDF/XML file
+uv run fairwddi db load-vocab path/to/cessda_topics.rdf --vocabulary "CESSDA Topics"
+
+# Ingest DDI Controlled Vocabulary in JSON-LD format
+uv run fairwddi db load-vocab path/to/ddi_cv.jsonld --format json-ld
+```
+
+#### Hierarchy Level Control:
+You can limit loading to top-level domains, intermediate themes, or load the full concept tree:
+
+```bash
+# Load Level 1 only (Top concepts / domains: 249 concepts for ELSST)
+uv run fairwddi db load-vocab vocab/ELSST_R6.ttl --levels 1
+
+# Load Levels 1 & 2 (Top concepts + direct children: 1,254 concepts for ELSST)
+uv run fairwddi db load-vocab vocab/ELSST_R6.ttl --levels 2
+
+# Load Levels 1 through 3 (2,402 concepts)
+uv run fairwddi db load-vocab vocab/ELSST_R6.ttl --levels 3
+```
+
+#### Checking Loaded Status:
+Check all loaded vocabularies or filter by a specific scheme without modifying data:
+
+```bash
+# List all loaded vocabularies
+uv run fairwddi db check-vocab
+
+# Check specific vocabulary
+uv run fairwddi db check-vocab --vocabulary ELSST
+```
+
+#### Forcing Reload / Overwrite:
+If the vocabulary is already loaded in the database, `load-vocab` safely detects this and halts. To reload or overwrite:
+
+```bash
+uv run fairwddi db load-vocab vocab/ELSST_R6.ttl --levels 2 --reload
+# or short flag
+uv run fairwddi db load-vocab vocab/ELSST_R6.ttl -l 2 -r
+```
+
+**Example Output:**
+```
+Loading vocabulary ELSST from vocab/ELSST_R6.ttl (Levels: 2)...
+ Vocabulary Load Summary [ELSST]  
+┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
+┃ Metric                 ┃ Value ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━┩
+│ Total Concepts Loaded  │  1254 │
+│ Top Concepts (Level 1) │   249 │
+│ Levels Traversed       │     2 │
+│ Relationships Created  │  1716 │
+│ Elapsed Time           │ 3.38s │
+└────────────────────────┴───────┘
+Vocabulary 'ELSST' loaded successfully.
+```
+
+---
+
 ## 4. Database Connection Configuration & `.env` Files
 
 The CLI automatically looks for and loads a `.env` file in the current working directory or any parent directory.

@@ -206,6 +206,8 @@ High-level thematic domain concept from any controlled vocabulary or thesaurus (
 
 > [!NOTE]
 > The Concept layer is vocabulary-agnostic. While CESSDA ELSST is a primary example of a social science multilingual thesaurus that can be linked via `uri`, the schema supports any external or local controlled vocabulary (e.g., CESSDA Topic Classification, DDI Controlled Vocabularies, or custom in-house schemes).
+> 
+> The database utilities include a high-performance, generic SKOS/XKOS RDF loader (`fairwddi db load-vocab`, `src/fairwddi/db/vocab.py`) that parses Turtle (`.ttl`), RDF/XML (`.rdf`), JSON-LD (`.jsonld`), and N-Triples (`.nt`) formats with hierarchical depth filtering (`--levels`), automatic pre-flight checks, and bilingual/multilingual array storage.
 
 ---
 

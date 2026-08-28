@@ -27,7 +27,6 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         ConceptualVariable,
         Distributor,
         InstanceVariable,
-        MetadataQuarantine,
         QuestionItem,
         RepresentedVariable,
         StagedImportPayload,
@@ -40,28 +39,9 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
     )
 
     if reset:
-        # Delete in reverse topological order
-        VariableGroupMembership.objects.all().delete()
-        VariableGroup.objects.all().delete()
-        InstanceVariable.objects.all().delete()
-        StudyUnit.objects.all().delete()
-        RepresentedVariable.objects.all().delete()
-        CodeItem.objects.all().delete()
-        CodeList.objects.all().delete()
-        CategorySetItem.objects.all().delete()
-        CategorySet.objects.all().delete()
-        Category.objects.all().delete()
-        QuestionItem.objects.all().delete()
-        ConceptualVariable.objects.all().delete()
-        ConceptRelationship.objects.all().delete()
-        Concept.objects.all().delete()
-        Subcollection.objects.all().delete()
-        Collection.objects.all().delete()
-        Distributor.objects.all().delete()
-        URNAlias.objects.all().delete()
-        MetadataQuarantine.objects.all().delete()
-        StagedResourceNode.objects.all().delete()
-        StagedImportPayload.objects.all().delete()
+        from fairwddi.db.wipe import wipe_database
+
+        wipe_database()
 
     # -------------------------------------------------------------------------
     # 1. Organizational Hierarchy
