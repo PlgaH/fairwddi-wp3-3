@@ -60,8 +60,8 @@ flowchart TD
 
 ### A. Database Schema & Domain Model ([`deliverables/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/database.md))
 
-1. **16-Table Standard-Agnostic PostgreSQL Core (with SQLite Dev/Test Parity):**
-   - **Concept Layer:** `Concept` (generic vocabulary URI anchor, parent hierarchy, notations), `ConceptRelationship` (SKOS/XKOS mappings), `ConceptualVariable`.
+1. **15-Table Standard-Agnostic PostgreSQL Core (with SQLite Dev/Test Parity):**
+   - **Concept Layer:** `Concept` (generic vocabulary URI anchor, parent hierarchy, notations), `ConceptualVariable`.
    - **Representation Layer:** `QuestionItem`, `Category`, `CategorySet`, `CategorySetItem`, `CodeList`, `CodeItem`, `RepresentedVariable`.
    - **Dataset Layer:** `StudyUnit` (renamed from `Survey`), `InstanceVariable` (renamed from `BindingSurveyRepresentedVariable`).
    - **Organization Layer:** `VariableGroup`, `VariableGroupMembership`, `Distributor`, `Collection`, `Subcollection`.
@@ -122,7 +122,7 @@ flowchart TD
 
 | Deliverable File | Path | Key Contents |
 | :--- | :--- | :--- |
-| **Database Schema** | [`deliverables/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/database.md) | 16-table PostgreSQL 17 schema, ER diagram, `DDIIdentifiable` mixin, `StagedImportPayload` & `StagedResourceNode`, index strategy, zero-data-loss migration path. |
+| **Database Schema** | [`deliverables/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/database.md) | 15-table PostgreSQL 17 schema, ER diagram, `DDIIdentifiable` mixin, `StagedImportPayload` & `StagedResourceNode`, index strategy, zero-data-loss migration path. |
 | **Normalization Engine** | [`deliverables/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/normalization.md) | 4-phase cascade, standard-agnostic core, 2-stage ingestion pipeline, multi-standard format adapters, multilingual 3-tier strategy, architectural complexity evaluation (§5). |
 | **Hashing Specification** | [`deliverables/hashing_algorithms.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/hashing_algorithms.md) | Master resource-algorithm table, Simple vs. Compound hashing, shortened hash URN strategy, `CategorySet` / `CodeList` set hashing, Preferred Algorithm pattern, worked examples, BLAKE3 benchmark. |
 | **Glossary & Terminology** | [`deliverables/glossary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/glossary.md) | Authoritative domain reference mapping DDI-L entities, URN classifications (Authoritative vs. Random vs. Canonical vs. Alias), hashing terminology, ELSST thesaurus, and staging concepts. |

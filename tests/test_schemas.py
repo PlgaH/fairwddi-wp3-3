@@ -5,7 +5,6 @@ from pydantic import ValidationError
 
 from fairwddi.schemas import (
     CategorySchema,
-    ConceptRelationshipSchema,
     ConceptSchema,
     ConceptualVariableSchema,
     DistributorSchema,
@@ -128,11 +127,6 @@ def test_domain_entity_schemas() -> None:
     assert concept_schema.uri == "https://elsst.cessda.eu/id/4/Politics"
     assert concept_schema.vocabulary == "ELSST"
     assert concept_schema.label.get("fr") == "Politique"
-
-    rel_schema = ConceptRelationshipSchema(
-        source_concept_id=1, target_concept_id=2, relationship_type="broader"
-    )
-    assert rel_schema.relationship_type == "broader"
 
     cv_schema = ConceptualVariableSchema(label=MultilingualText.from_single("Concept", lang="fr"))
     assert cv_schema.label.get("fr") == "Concept"

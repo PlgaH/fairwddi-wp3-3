@@ -31,7 +31,7 @@
 ## ✅ Completed Activities
 
 - **Standard-Agnostic DDI Database Architecture & Implementation:**
-  - Designed and implemented the complete 16-table relational data model in Django, fully aligned with **DDI 4.0 (COGS model)**, **DDI-CDI (Cross-Domain Integration)**, and **DDI-Lifecycle 3.3**.
+  - Designed and implemented the complete 15-table relational data model in Django, fully aligned with **DDI 4.0 (COGS model)**, **DDI-CDI (Cross-Domain Integration)**, and **DDI-Lifecycle 3.3**.
   - Implemented the three-tier DDI variable cascade: `ConceptualVariable → RepresentedVariable → InstanceVariable`.
   - Configured PostgreSQL binary `JSONB` array of objects format `[{"lang": "fr", "value": "..."}]` across all multilingual text fields.
   - Established abstract `DDIIdentifiable` base model providing persistent URN resolution (`urn:ddi:{agency}:{identifier}:{version}`) and SHA-256 content fingerprinting.
@@ -41,8 +41,7 @@
 - **Generic SKOS / XKOS Controlled Vocabulary Ingestion Engine:**
   - Developed standard-agnostic RDF vocabulary loader (`fairwddi.db.vocab`, `fairwddi db load-vocab`) using `rdflib`.
   - Multi-format RDF parsing: Turtle (`.ttl`), RDF/XML (`.rdf`, `.xml`), JSON-LD (`.jsonld`), N-Triples (`.nt`), Notation3 (`.n3`).
-  - Hierarchy depth control (`--levels 1`, `--levels 2`, `--levels 3`, `all`) with bidirectional parent/child traversal (`skos:broader` / `skos:narrower`).
-  - Semantic relationship and mapping extraction (`skos:related`, `skos:exactMatch`, `skos:closeMatch`, `xkos:correspondsTo`) into `ConceptRelationship`.
+  - Hierarchy depth control (`--levels 1`, `--levels 2`, `--levels 3`, `all`) with bidirectional parent/child traversal (`skos:broader` / `skos:narrower`) directly into `Concept.parent`.
   - Integrated **CESSDA ELSST Release 6** vocabulary (`vocab/ELSST_R6.ttl`, 3,470 concepts across 8 hierarchical levels).
   - Built pre-flight "already loaded" detection and global vocabulary inventory reporting (`fairwddi db check-vocab`).
 

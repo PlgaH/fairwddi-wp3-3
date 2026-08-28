@@ -82,24 +82,6 @@ class ConceptSchema(BaseModel):
     updated_at: datetime | None = None
 
 
-class ConceptRelationshipSchema(BaseModel):
-    """Schema for SKOS/XKOS concept-to-concept semantic mappings."""
-
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int | None = None
-    source_concept_id: int
-    target_concept_id: int | None = None
-    relationship_type: str = Field(
-        ...,
-        description="SKOS relation: broader, narrower, related, exactMatch, correspondsTo.",
-    )
-    target_uri: str | None = Field(
-        default=None, description="External URI if target is outside DB."
-    )
-    created_at: datetime | None = None
-
-
 class ConceptualVariableSchema(DDIIdentifiableSchema):
     """Schema for abstract ConceptualVariable."""
 

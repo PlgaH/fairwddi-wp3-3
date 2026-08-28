@@ -77,44 +77,6 @@ class Concept(models.Model):
     def __str__(self) -> str:
         if isinstance(self.label, list) and self.label:
             return self.label[0].get("value", str(self.pk))
-        return str(self.pk)
-
-
-class ConceptRelationship(models.Model):
-    """Semantic mapping between concepts (SKOS / XKOS relationships)."""
-
-    source_concept = models.ForeignKey(
-        Concept,
-        on_delete=models.CASCADE,
-        related_name="outgoing_relationships",
-    )
-    target_concept = models.ForeignKey(
-        Concept,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="incoming_relationships",
-    )
-    relationship_type = models.CharField(
-        max_length=64,
-        help_text="SKOS relation: broader, narrower, related, exactMatch, correspondsTo.",
-    )
-    target_uri = models.CharField(
-        max_length=512,
-        null=True,
-        blank=True,
-        help_text="External URI if target concept is outside the local database.",
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "request_ddi_concept_relationship"
-        verbose_name = "Concept Relationship"
-        verbose_name_plural = "Concept Relationships"
-
-    def __str__(self) -> str:
-        target = self.target_concept.pk if self.target_concept else self.target_uri
-        return f"{self.source_concept_id} -[{self.relationship_type}]-> {target}"
 
 
 class ConceptualVariable(DDIIdentifiable):

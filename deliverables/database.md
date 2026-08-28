@@ -16,8 +16,8 @@ erDiagram
     Subcollection ||--o{ StudyUnit : groups
 
     %% ── Concept layer ──
+    Concept ||--o{ Concept : "parent (broader/narrower)"
     Concept ||--o{ ConceptualVariable : categorizes
-    Concept ||--o{ ConceptRelationship : maps
     ConceptualVariable ||--o{ RepresentedVariable : represents
 
     %% ── Representation layer ──
@@ -208,21 +208,6 @@ High-level thematic domain concept from any controlled vocabulary or thesaurus (
 > The Concept layer is vocabulary-agnostic. While CESSDA ELSST is a primary example of a social science multilingual thesaurus that can be linked via `uri`, the schema supports any external or local controlled vocabulary (e.g., CESSDA Topic Classification, DDI Controlled Vocabularies, or custom in-house schemes).
 > 
 > The database utilities include a high-performance, generic SKOS/XKOS RDF loader (`fairwddi db load-vocab`, `src/fairwddi/db/vocab.py`) that parses Turtle (`.ttl`), RDF/XML (`.rdf`), JSON-LD (`.jsonld`), and N-Triples (`.nt`) formats with hierarchical depth filtering (`--levels`), automatic pre-flight checks, and bilingual/multilingual array storage.
-
----
-
-#### ConceptRelationship
-
-Semantic mapping between concepts (SKOS / XKOS relationships).
-
-| Column | Type | Constraints | Notes |
-| :--- | :--- | :--- | :--- |
-| `id` | `BigAutoField` | PK | |
-| `source_concept_id` | `BigInt` | FK → Concept | Source concept |
-| `target_concept_id` | `BigInt` | FK → Concept, nullable | Target concept in local DB |
-| `relationship_type` | `CharField(64)` | | SKOS relation (`'broader'`, `'narrower'`, `'related'`, `'exactMatch'`, `'correspondsTo'`) |
-| `target_uri` | `CharField(512)` | nullable | External URI if target concept is outside the local DB |
-| `created_at` | `DateTimeField` | auto | |
 
 ---
 

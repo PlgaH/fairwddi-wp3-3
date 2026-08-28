@@ -12,7 +12,6 @@ from fairwddi.models import (
     CodeList,
     Collection,
     Concept,
-    ConceptRelationship,
     ConceptualVariable,
     Distributor,
     InstanceVariable,
@@ -75,14 +74,6 @@ class TestFairwDDIModels(TestCase):
         assert parent_concept.vocabulary == "ELSST"
         assert parent_concept.narrower_concepts.count() == 1
         assert child_concept.parent == parent_concept
-
-        # ConceptRelationship
-        rel = ConceptRelationship.objects.create(
-            source_concept=child_concept,
-            target_concept=parent_concept,
-            relationship_type="broader",
-        )
-        assert rel.relationship_type == "broader"
 
         # ConceptualVariable
         cv = ConceptualVariable.objects.create(

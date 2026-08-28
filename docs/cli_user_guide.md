@@ -167,7 +167,6 @@ uv run fairwddi db status
 ┃ Model Name              ┃ Database Table                      ┃ Record Count ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
 │ Concept                 │ request_ddi_concept                 │            2 │
-│ ConceptRelationship     │ request_ddi_concept_relationship    │            1 │
 │ ConceptualVariable      │ request_ddi_conceptualvariable      │            2 │
 │ Distributor             │ request_ddi_distributor             │            1 │
 │ Collection              │ request_ddi_collection              │            1 │
@@ -277,7 +276,7 @@ uv run fairwddi db wipe -f
 
 ### 3.6 Load Controlled Vocabulary (`fairwddi db load-vocab`)
 
-Generic SKOS / SKOS-XL / XKOS loader that ingests any controlled vocabulary from RDF files into the `Concept` and `ConceptRelationship` tables.
+Generic SKOS / SKOS-XL / XKOS loader that ingests any controlled vocabulary from RDF files into the `Concept` table.
 
 #### Supported RDF Formats & Standards:
 - **Formats:** Turtle (`.ttl`), RDF/XML (`.rdf`, `.xml`), JSON-LD (`.jsonld`, `.json`), N-Triples (`.nt`), Notation3 (`.n3`).

@@ -22,16 +22,13 @@ def check_vocabulary_loaded(vocabulary: str | None = None) -> dict[str, Any]:
     """
     from django.db.models import Count
 
-    from fairwddi.models import Concept, ConceptRelationship
+    from fairwddi.models import Concept
 
     if vocabulary:
         # Match exact or case-insensitive prefix / contains
         qs = Concept.objects.filter(vocabulary__icontains=vocabulary)
         total_count = qs.count()
         top_count = qs.filter(parent__isnull=True).count()
-        rel_count = ConceptRelationship.objects.filter(
-            source_concept__vocabulary__icontains=vocabulary
-        ).count()
 
         matched_vocab_name = (
             qs.values_list("vocabulary", flat=True).first() if total_count > 0 else vocabulary
@@ -42,7 +39,6 @@ def check_vocabulary_loaded(vocabulary: str | None = None) -> dict[str, Any]:
             "vocabulary": matched_vocab_name,
             "total_concepts": total_count,
             "top_concepts": top_count,
-            "relationships": rel_count,
         }
 
     # Summary of all loaded vocabularies
@@ -66,7 +62,7 @@ def load_skos_vocabulary(
     vocabulary_name: str | None = None,
     rdf_format: str | None = None,
 ) -> dict[str, Any]:
-    """Load any SKOS / XKOS vocabulary into the database from an RDF file.
+    """Load any SKOS / XKOS vocabulary into the Concept table from an RDF file.
 
     Parameters:
     - file_path: Path to the RDF file (.ttl, .rdf, .xml, .jsonld, .nt, etc.).
@@ -81,7 +77,7 @@ def load_skos_vocabulary(
     from rdflib.namespace import DCTERMS, RDF, RDFS, SKOS
     from rdflib.util import guess_format
 
-    from fairwddi.models import Concept, ConceptRelationship
+    from fairwddi.models import Concept
 
     path = Path(file_path)
     if not path.exists():
@@ -130,14 +126,10 @@ def load_skos_vocabulary(
             **status,
         }
 
-    # 5. If reload or existing concepts with these URIs exist, clean them up cleanly
+    # 5. If reload or existing concepts with these URIs exist, clean them up
     if reload or is_already_present:
         from django.db.models import Q
 
-        ConceptRelationship.objects.filter(
-            Q(source_concept__vocabulary=vocabulary_name)
-            | Q(source_concept__uri__in=all_concept_uri_strs)
-        ).delete()
         Concept.objects.filter(
             Q(vocabulary=vocabulary_name) | Q(uri__in=all_concept_uri_strs)
         ).delete()
@@ -231,20 +223,6 @@ def load_skos_vocabulary(
                 return str(lit).strip()
         return None
 
-    # XKOS / SKOS mapping predicate URIs
-    mapping_predicates = [
-        ("related", SKOS.related),
-        ("exactMatch", SKOS.exactMatch),
-        ("closeMatch", SKOS.closeMatch),
-        ("broadMatch", SKOS.broadMatch),
-        ("narrowMatch", SKOS.narrowMatch),
-        ("relatedMatch", SKOS.relatedMatch),
-        (
-            "correspondsTo",
-            rdflib.URIRef("http://rdf-vocabulary.ddialliance.org/xkos#correspondsTo"),
-        ),
-    ]
-
     # 9. Insert concepts level by level inside a database transaction
     created_concepts_by_uri: dict[str, Concept] = {}
     total_inserted = 0
@@ -291,28 +269,6 @@ def load_skos_vocabulary(
                 created_concepts_by_uri[uri_str] = concept_obj
                 total_inserted += 1
 
-        # 10. Create ConceptRelationship entries (related, matches, xkos mappings)
-        relationships_to_create: list[ConceptRelationship] = []
-        for uri_str, concept_obj in created_concepts_by_uri.items():
-            c_uriref = rdflib.URIRef(uri_str)
-            for rel_type, pred in mapping_predicates:
-                for target_uri in graph.objects(c_uriref, pred):
-                    target_str = str(target_uri)
-                    target_obj = created_concepts_by_uri.get(target_str)
-                    if target_obj:
-                        relationships_to_create.append(
-                            ConceptRelationship(
-                                source_concept=concept_obj,
-                                target_concept=target_obj,
-                                relationship_type=rel_type,
-                            )
-                        )
-
-        if relationships_to_create:
-            ConceptRelationship.objects.bulk_create(
-                relationships_to_create, ignore_conflicts=True, batch_size=1000
-            )
-
     elapsed = time.perf_counter() - start_time
 
     return {
@@ -324,7 +280,6 @@ def load_skos_vocabulary(
         "top_concepts": len(level_nodes.get(1, [])),
         "levels_loaded": len(level_nodes),
         "max_levels_limit": max_levels,
-        "relationships_created": len(relationships_to_create),
         "elapsed_seconds": round(elapsed, 2),
     }
 

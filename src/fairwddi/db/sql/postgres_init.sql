@@ -58,15 +58,6 @@ CREATE INDEX IF NOT EXISTS req_ddi_concept_uri_idx ON request_ddi_concept (uri);
 CREATE INDEX IF NOT EXISTS req_ddi_concept_vocab_idx ON request_ddi_concept (vocabulary);
 CREATE INDEX IF NOT EXISTS req_ddi_concept_notation_idx ON request_ddi_concept (notation);
 
-CREATE TABLE IF NOT EXISTS request_ddi_concept_relationship (
-    id BIGSERIAL PRIMARY KEY,
-    source_concept_id BIGINT NOT NULL REFERENCES request_ddi_concept(id) ON DELETE CASCADE,
-    target_concept_id BIGINT REFERENCES request_ddi_concept(id) ON DELETE CASCADE,
-    relationship_type VARCHAR(64) NOT NULL,
-    target_uri VARCHAR(512),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
 CREATE TABLE IF NOT EXISTS request_ddi_conceptualvariable (
     id BIGSERIAL PRIMARY KEY,
     urn VARCHAR(512) UNIQUE,

@@ -23,7 +23,6 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         CodeList,
         Collection,
         Concept,
-        ConceptRelationship,
         ConceptualVariable,
         Distributor,
         InstanceVariable,
@@ -119,12 +118,6 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
                 }
             ],
         },
-    )
-
-    ConceptRelationship.objects.get_or_create(
-        source_concept=sub_concept,
-        target_concept=root_concept,
-        relationship_type="broader",
     )
 
     hash_example = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -431,7 +424,6 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         "collections": Collection.objects.count(),
         "subcollections": Subcollection.objects.count(),
         "concepts": Concept.objects.count(),
-        "concept_relationships": ConceptRelationship.objects.count(),
         "conceptual_variables": ConceptualVariable.objects.count(),
         "question_items": QuestionItem.objects.count(),
         "categories": Category.objects.count(),

@@ -287,8 +287,7 @@ def db_load_vocab(
         if status["loaded"]:
             console.print(
                 f"[bold green]Vocabulary '{vocab_target}' is LOADED:[/bold green] "
-                f"{status['total_concepts']} concepts ({status['top_concepts']} top concepts), "
-                f"{status['relationships']} relationships."
+                f"{status['total_concepts']} concepts ({status['top_concepts']} top concepts)."
             )
         else:
             console.print(
@@ -331,7 +330,6 @@ def db_load_vocab(
     table.add_row("Total Concepts Loaded", str(result["total_concepts"]))
     table.add_row("Top Concepts (Level 1)", str(result["top_concepts"]))
     table.add_row("Levels Traversed", str(result["levels_loaded"]))
-    table.add_row("Relationships Created", str(result["relationships_created"]))
     table.add_row("Elapsed Time", f"{result['elapsed_seconds']}s")
 
     console.print(table)
@@ -361,8 +359,7 @@ def db_check_vocab(
             vocab_name = status.get("vocabulary", vocabulary)
             console.print(
                 f"[bold green]Vocabulary '{vocab_name}' is LOADED:[/bold green] "
-                f"{status['total_concepts']} concepts ({status['top_concepts']} top concepts), "
-                f"{status['relationships']} relationships."
+                f"{status['total_concepts']} concepts ({status['top_concepts']} top concepts)."
             )
         else:
             console.print(

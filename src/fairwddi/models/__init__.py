@@ -3,7 +3,6 @@
 from fairwddi.models.base import DDIIdentifiable
 from fairwddi.models.concept import (
     Concept,
-    ConceptRelationship,
     ConceptualVariable,
 )
 from fairwddi.models.dataset import (
@@ -41,7 +40,6 @@ __all__ = [
     "Collection",
     "Subcollection",
     "Concept",
-    "ConceptRelationship",
     "ConceptualVariable",
     "QuestionItem",
     "Category",
