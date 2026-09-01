@@ -13,7 +13,7 @@ from fairwddi.schemas import (
     MultilingualText,
     QuestionItemSchema,
     RepresentedVariableSchema,
-    StagedImportPayloadSchema,
+    StagedImportSchema,
     StagedResourceNodeSchema,
     StudyUnitSchema,
     VariableGroupSchema,
@@ -155,17 +155,22 @@ def test_domain_entity_schemas() -> None:
     )
     assert vg_schema.label.get("fr") == "Démographie"
 
-    payload_schema = StagedImportPayloadSchema(
+    import_schema = StagedImportSchema(
         source_format="ddi_l_3.3",
         file_name="sample.xml",
+        import_options={"agency": "fr.cdsp"},
+        total_resources=5,
     )
-    assert payload_schema.source_format == "ddi_l_3.3"
+    assert import_schema.source_format == "ddi_l_3.3"
+    assert import_schema.import_options["agency"] == "fr.cdsp"
+    assert import_schema.total_resources == 5
 
     staged_node = StagedResourceNodeSchema(
-        import_payload_id=1,
+        staged_import_id=1,
         resource_type="QuestionItem",
         raw_urn="raw:qstn:001",
         raw_value={"question_text": [{"lang": "fr", "value": "Test question"}]},
     )
     assert staged_node.raw_urn == "raw:qstn:001"
+    assert staged_node.staged_import_id == 1
     assert staged_node.status == "staged"

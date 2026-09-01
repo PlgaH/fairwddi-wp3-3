@@ -295,13 +295,14 @@ CREATE TABLE IF NOT EXISTS request_ddi_metadataquarantine (
 
 CREATE INDEX IF NOT EXISTS req_ddi_mq_resolution_idx ON request_ddi_metadataquarantine (resolution);
 
-CREATE TABLE IF NOT EXISTS request_ddi_stagedimportpayload (
+CREATE TABLE IF NOT EXISTS request_ddi_stagedimport (
     id BIGSERIAL PRIMARY KEY,
     source_format VARCHAR(64) NOT NULL,
     file_name VARCHAR(512) NOT NULL,
     file_path VARCHAR(512),
-    raw_payload JSONB,
-    original_urns JSONB NOT NULL DEFAULT '{}'::jsonb,
+    import_options JSONB NOT NULL DEFAULT '{}'::jsonb,
+    total_resources INT NOT NULL DEFAULT 0,
+    processed_resources INT NOT NULL DEFAULT 0,
     status VARCHAR(32) NOT NULL DEFAULT 'staged',
     import_task_id VARCHAR(255),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -310,7 +311,7 @@ CREATE TABLE IF NOT EXISTS request_ddi_stagedimportpayload (
 
 CREATE TABLE IF NOT EXISTS request_ddi_stagedresourcenode (
     id BIGSERIAL PRIMARY KEY,
-    import_payload_id BIGINT NOT NULL REFERENCES request_ddi_stagedimportpayload(id) ON DELETE CASCADE,
+    staged_import_id BIGINT NOT NULL REFERENCES request_ddi_stagedimport(id) ON DELETE CASCADE,
     resource_type VARCHAR(64) NOT NULL,
     raw_urn VARCHAR(512) NOT NULL,
     raw_value JSONB NOT NULL,

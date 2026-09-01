@@ -8,7 +8,7 @@
 
 ## 🔄 Ongoing Activities
 
-- [ ] **DDI-L 4 Ingester Implementation:** Implement Stage 1 streaming XML/JSON parser and staging queue populating `StagedImportPayload` and `StagedResourceNode` tables.
+- [ ] **DDI-L 4 Ingester Implementation:** Implement Stage 1 streaming XML/JSON parser and staging queue populating `StagedImport` and `StagedResourceNode` tables.
 - [ ] **Harmonization & Mapping Workflows:** Implement Stage 2 normalization pipeline mapping staged resource graphs to the canonical variable cascade (`ConceptualVariable` → `RepresentedVariable` → `InstanceVariable`).
 - [ ] **Elasticsearch Multilingual Search Sync:** Wire Django signals / Pydantic schemas to Elasticsearch 9.x multilingual index templates.
 

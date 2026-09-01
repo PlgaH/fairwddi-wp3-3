@@ -15,7 +15,7 @@ from fairwddi.models.grouping import (
 )
 from fairwddi.models.infrastructure import (
     MetadataQuarantine,
-    StagedImportPayload,
+    StagedImport,
     StagedResourceNode,
     URNAlias,
 )
@@ -54,6 +54,6 @@ __all__ = [
     "VariableGroupMembership",
     "URNAlias",
     "MetadataQuarantine",
-    "StagedImportPayload",
+    "StagedImport",
     "StagedResourceNode",
 ]

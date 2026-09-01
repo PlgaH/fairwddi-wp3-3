@@ -67,7 +67,7 @@
 
 | Concept | Definition | Purpose in ReQuest Architecture |
 | :--- | :--- | :--- |
-| **StagedImportPayload** | A PostgreSQL table storing raw uploaded file bundles (`file_name`, `source_format`, `file_path`, `raw_payload`). | Decouples Stage 1 raw file upload from Stage 2 background normalization. Prevents HTTP 504 timeouts. |
+| **StagedImport** | A PostgreSQL table storing upload batch jobs and file references (`file_name`, `source_format`, `file_path`, `import_options`, `total_resources`). | Decouples Stage 1 raw file upload from Stage 2 background normalization. Prevents HTTP 504 timeouts. |
 | **StagedResourceNode** | A PostgreSQL table storing individual broken-down raw element nodes (`resource_type`, `raw_urn`, `raw_value` JSONB). | Enables granular resource-level normalization, native DDI-L 4 JSON ingestion, and selective re-normalization without re-parsing files. |
 | **DDI-L 4 JSON (COGS Model)** | A structured JSON/JSON-LD serialization of DDI-Lifecycle 3.3 (Colectica COGS model). | Parsed directly into `StagedResourceNode` rows in milliseconds during Stage 1 staging. |
 | **Standard-Agnostic Core** | The 15 core PostgreSQL tables (`QuestionItem`, `CodeList`, `Category`, `StudyUnit`, etc.) holding normalized domain concepts. | Independent of specific file formats; receives parsed entities from DDI 2.5, DDI 3.3, DDI-L 4 JSON, Croissant, and CSV adapters. |

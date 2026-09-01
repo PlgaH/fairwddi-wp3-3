@@ -18,7 +18,7 @@ from fairwddi.models import (
     MetadataQuarantine,
     QuestionItem,
     RepresentedVariable,
-    StagedImportPayload,
+    StagedImport,
     StagedResourceNode,
     StudyUnit,
     Subcollection,
@@ -250,17 +250,19 @@ class TestFairwDDIModels(TestCase):
         assert quarantine.conflict_type == "hash_mismatch"
         assert quarantine.resolution is None
 
-        # StagedImportPayload & StagedResourceNode
-        payload = StagedImportPayload.objects.create(
+        # StagedImport & StagedResourceNode
+        staged_import = StagedImport.objects.create(
             source_format="ddi_l_4_json",
             file_name="closer_sample.json",
-            raw_payload={"type": "bundle", "count": 10},
+            import_options={"agency": "fr.cdsp", "strict": True},
+            total_resources=1,
+            processed_resources=0,
         )
         node = StagedResourceNode.objects.create(
-            import_payload=payload,
+            staged_import=staged_import,
             resource_type="QuestionItem",
             raw_urn="urn:closer:qi:999",
             raw_value={"question_text": [{"lang": "en", "value": "Are you employed?"}]},
         )
-        assert payload.nodes.count() == 1
-        assert node.import_payload == payload
+        assert staged_import.nodes.count() == 1
+        assert node.staged_import == staged_import

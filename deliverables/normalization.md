@@ -50,7 +50,7 @@ flowchart TD
 
 ### 1.2 Standard-Agnostic Normalized Core & Multi-Standard Format Adapters
 
-By decoupling raw file loading into `StagedImportPayload` and `StagedResourceNode`, the core PostgreSQL tables (`ConceptualVariable`, `RepresentedVariable`, `InstanceVariable`, `QuestionItem`, `CodeList`, `Category`, `StudyUnit`) operate as a **Standard-Agnostic Normalized Core**. 
+By decoupling raw file loading into `StagedImport` and `StagedResourceNode`, the core PostgreSQL tables (`ConceptualVariable`, `RepresentedVariable`, `InstanceVariable`, `QuestionItem`, `CodeList`, `Category`, `StudyUnit`) operate as a **Standard-Agnostic Normalized Core**. 
 
 Lightweight **Format Adapters** map incoming metadata standards into standard-agnostic core entities:
 
@@ -111,7 +111,7 @@ To maximize ingestion speed, support DDI-L 4 JSON / COGS models, and allow selec
 flowchart TD
     subgraph Stage1 ["Stage 1: Raw File Staging & Resource Decomposition"]
         Upload["Uploaded DDI-L 3.3 / DDI-L 4 JSON / DDI 2.5 File"] --> StreamingParser["lxml / JSON Parser"]
-        StreamingParser --> PayloadBundle["1. File Bundle Record\n(StagedImportPayload)"]
+        StreamingParser --> PayloadBundle["1. File Bundle Record\n(StagedImport)"]
         StreamingParser --> RawNodes["2. Broken-Down Element Nodes\n(StagedResourceNode: raw_urn, raw_value JSONB)"]
     end
 
@@ -121,8 +121,6 @@ flowchart TD
         
         ResourceNormalizer --> HashPipeline["Canonical Normalization & Fingerprinting"]
         HashPipeline --> ComputeHash["Compute SHA-256 Hashes (Preferred & Multi-Algorithm)"]
-        ComputeHash --> GenURN["Derive Canonical URN:\nurn:ddi:fr.cdsp:{EntityType}:{prefix}-{short_hash}:1.0.0"]
-        
         GenURN --> DBCheck{"Canonical Record\nExists in DB?"}
         
         DBCheck -->|"Yes (Exists)"| Reuse["Reuse Existing Canonical Entity\n(Zero Duplicate Rows Created)"]
@@ -200,7 +198,7 @@ Evaluating the technical complexity of a **Direct DDI-Lifecycle 3.3 Model** vs. 
 
 | Evaluation Dimension | Direct DDI-Lifecycle Model | Standard-Agnostic Core + Multi-Adapter Architecture | Net Complexity Assessment |
 | :--- | :--- | :--- | :--- |
-| **PostgreSQL Database Schema** | 15 tables | 16 tables | **Minimal (+1 table):** Adds only `StagedImportPayload` for raw file storage. Core domain tables remain identical. |
+| **PostgreSQL Database Schema** | 15 tables | 16 tables | **Minimal (+1 table):** Adds only `StagedImport` for raw file storage. Core domain tables remain identical. |
 | **Ingestion Code Structure** | Monolithic XML parser coupled to Django ORM models. | **Pluggable Adapters:** 1 base contract + isolated class per standard (`DDILifecycleAdapter`, `CroissantAdapter`). | **Easier to Maintain (-30% Coupling):** Each format parser is an isolated, testable Python class (~150 LOC each). |
 | **Content Hashing Engine** | Single `content_hash` string per row. | **Two-Tier Hashing:** Simple text hashing + Compound URN hashing + auxiliary `content_hashes` JSONB. | **+100 LOC in Hashing Utility:** Requires simple string-joining & set-sorting logic. |
 | **Archivist Manual Review Workload** | **High:** Item reordering or minor punctuation triggers false-alarm `MetadataQuarantine` reviews. | **Very Low:** `UnorderedCodeList` set hashes auto-match reordered items without manual review. | **-70% Manual QA Burden:** Saves hundreds of hours of manual archivist reviews. |
@@ -214,7 +212,7 @@ The added implementation effort is minimal and cleanly isolated:
 
 1. **Database Layer (+1 Field, +1 Staging Table):**
    - Adding `content_hashes = JSONField(default=dict)` to `DDIIdentifiable` (1 line of code).
-   - Adding `StagedImportPayload` model for raw uploads (~20 lines of code).
+   - Adding `StagedImport` model for raw uploads (~20 lines of code).
 2. **Adapter Layer (~300 lines of Python):**
    - Creating an abstract `MetadataAdapter` class.
    - Writing `DDILifecycleAdapter` and `DDICodebookAdapter` subclasses.

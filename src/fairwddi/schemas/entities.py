@@ -304,8 +304,8 @@ class MetadataQuarantineSchema(BaseModel):
     created_at: datetime | None = None
 
 
-class StagedImportPayloadSchema(BaseModel):
-    """Schema for raw StagedImportPayload record."""
+class StagedImportSchema(BaseModel):
+    """Schema for raw StagedImport record."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -315,8 +315,9 @@ class StagedImportPayloadSchema(BaseModel):
     )
     file_name: str
     file_path: str | None = None
-    raw_payload: dict[str, Any] | list[Any] | None = None
-    original_urns: dict[str, str] = Field(default_factory=dict)
+    import_options: dict[str, Any] = Field(default_factory=dict)
+    total_resources: int = 0
+    processed_resources: int = 0
     status: str = Field(default="staged", description="staged, harmonized, quarantined, failed.")
     import_task_id: str | None = None
     created_at: datetime | None = None
@@ -329,7 +330,7 @@ class StagedResourceNodeSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int | None = None
-    import_payload_id: int
+    staged_import_id: int
     resource_type: str = Field(..., description="QuestionItem, CodeList, Category, etc.")
     raw_urn: str = Field(..., description="Incoming raw URN or element identifier.")
     raw_value: dict[str, Any] = Field(..., description="Un-harmonized raw JSON dictionary.")

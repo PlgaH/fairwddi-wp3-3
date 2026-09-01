@@ -35,7 +35,7 @@ flowchart TD
     end
 
     subgraph Stage1 ["2. Stage 1: Fast Raw File & Resource Staging"]
-        Bundle["File Bundle Record\n(StagedImportPayload)"]
+        Bundle["File Bundle Record\n(StagedImport)"]
         Nodes["Broken-Down Element Nodes\n(StagedResourceNode: raw_urn, raw_value JSONB)"]
     end
 
@@ -65,7 +65,7 @@ flowchart TD
    - **Representation Layer:** `QuestionItem`, `Category`, `CategorySet`, `CategorySetItem`, `CodeList`, `CodeItem`, `RepresentedVariable`.
    - **Dataset Layer:** `StudyUnit` (renamed from `Survey`), `InstanceVariable` (renamed from `BindingSurveyRepresentedVariable`).
    - **Organization Layer:** `VariableGroup`, `VariableGroupMembership`, `Distributor`, `Collection`, `Subcollection`.
-   - **Infrastructure & Staging Layer:** `URNAlias`, `MetadataQuarantine`, `StagedImportPayload`, `StagedResourceNode`.
+   - **Infrastructure & Staging Layer:** `URNAlias`, `MetadataQuarantine`, `StagedImport`, `StagedResourceNode`.
 2. **`DDIIdentifiable` Abstract Mixin:** Universal identification mixin providing `urn`, `agency`, `ddi_identifier`, `version`, `content_hash` (primary SHA-256 digest), and `content_hashes` (JSONB multi-algorithm digests).
 3. **Structured `QuestionItem` Breakdown:** Extracted from `RepresentedVariable` into explicit multilingual JSONB fields: `question_text` (literal question wording), `pre_question_text` (introductory preamble/routing), `post_question_text` (transition text), and `interviewer_instructions` (guidance).
 4. **Decoupled Structural `CodeList`:** Decouples numerical code values (e.g. Code `1`) from response text labels (`Category`). `CodeList` URN is derived purely from structural code-category mappings independent of list title.
@@ -78,7 +78,7 @@ flowchart TD
 
 1. **Standard-Agnostic Core:** Core database tables represent pure domain entities independent of input metadata standards.
 2. **Two-Stage Decoupled Ingestion Pipeline:**
-   - **Stage 1 (Synchronous Fast Staging):** Streams uploaded files into `StagedImportPayload` (file bundle) and decomposes elements into **`StagedResourceNode`** rows (`raw_urn`, `raw_value` JSONB). Returns HTTP 200 immediately to prevent browser timeouts.
+   - **Stage 1 (Synchronous Fast Staging):** Streams uploaded files into `StagedImport` (file bundle) and decomposes elements into **`StagedResourceNode`** rows (`raw_urn`, `raw_value` JSONB). Returns HTTP 200 immediately to prevent browser timeouts.
    - **Stage 2 (Asynchronous Normalization Worker):** Executed in background via `django-tasks-db`. Runs specialized Resource Normalizers, computes content hashes, resolves URNs, inserts database rows, and syncs to Elasticsearch.
 3. **Pluggable Format Adapters (`MetadataAdapter`):** Isolated Python parsers for each standard (`DDILifecycleAdapter`, `DDIL4JSONAdapter` for native DDI-L 4 / COGS models, `DDICodebookAdapter`, `CroissantAdapter`, `CSVMetadataAdapter`).
 4. **Granular Offline Re-Normalization:** If thesaurus mappings or normalization rules update, Stage 2 can re-normalize **only affected `StagedResourceNode` rows** (`WHERE resource_type = 'CodeList'`) without re-parsing raw files.
@@ -122,7 +122,7 @@ flowchart TD
 
 | Deliverable File | Path | Key Contents |
 | :--- | :--- | :--- |
-| **Database Schema** | [`deliverables/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/database.md) | 15-table PostgreSQL 17 schema, ER diagram, `DDIIdentifiable` mixin, `StagedImportPayload` & `StagedResourceNode`, index strategy, zero-data-loss migration path. |
+| **Database Schema** | [`deliverables/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/database.md) | 15-table PostgreSQL 17 schema, ER diagram, `DDIIdentifiable` mixin, `StagedImport` & `StagedResourceNode`, index strategy, zero-data-loss migration path. |
 | **Normalization Engine** | [`deliverables/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/normalization.md) | 4-phase cascade, standard-agnostic core, 2-stage ingestion pipeline, multi-standard format adapters, multilingual 3-tier strategy, architectural complexity evaluation (§5). |
 | **Hashing Specification** | [`deliverables/hashing_algorithms.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/hashing_algorithms.md) | Master resource-algorithm table, Simple vs. Compound hashing, shortened hash URN strategy, `CategorySet` / `CodeList` set hashing, Preferred Algorithm pattern, worked examples, BLAKE3 benchmark. |
 | **Glossary & Terminology** | [`deliverables/glossary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/glossary.md) | Authoritative domain reference mapping DDI-L entities, URN classifications (Authoritative vs. Random vs. Canonical vs. Alias), hashing terminology, ELSST thesaurus, and staging concepts. |

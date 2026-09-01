@@ -44,7 +44,7 @@ erDiagram
     URNAlias }o--|| CodeList : "aliases (polymorphic)"
     URNAlias }o--|| RepresentedVariable : "aliases (polymorphic)"
     MetadataQuarantine }o--|| QuestionItem : "quarantines"
-    StagedImportPayload ||--o{ StagedResourceNode : parses
+    StagedImport ||--o{ StagedResourceNode : parses
 ```
 
 ---
@@ -471,18 +471,19 @@ Holds incoming metadata that requires archivist review due to URN collisions or 
 
 ### 3.7 Staging & Multi-Standard Ingestion Layer
 
-#### StagedImportPayload
+#### StagedImport
 
-Stores raw uploaded metadata file bundles and un-harmonized payloads prior to Stage 2 background harmonization. Decouples raw source formats (`ddi_l_3.3`, `ddi_l_4_json`, `ddi_c_2.5`, `croissant_1.0`, `csv`) from the standard-agnostic harmonized core.
+Stores metadata and parameters for uploaded metadata file bundles and batch import jobs prior to asynchronous Stage 2 background normalization. Decouples raw source formats (`ddi_l_3.3`, `ddi_l_4_json`, `ddi_c_2.5`, `croissant_1.0`, `csv`) from the standard-agnostic harmonized core.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `id` | `BigAutoField` | PK | |
 | `source_format` | `CharField(64)` | | `"ddi_l_3.3"`, `"ddi_l_4_json"`, `"ddi_c_2.5"`, `"croissant_1.0"`, `"csv"` |
 | `file_name` | `CharField(512)` | | Original uploaded file name |
-| `file_path` | `FileField` | nullable | File storage path for large XML/CSV files (`media/raw_imports/`) |
-| `raw_payload` | `JSONField` | nullable | Staged JSON representation of parsed raw file bundle |
-| `original_urns` | `JSONField` | default=`dict` | Mapping of original external URNs found in the raw file |
+| `file_path` | `FileField` | nullable | File storage path on disk/object storage (`media/raw_imports/`) |
+| `import_options` | `JSONField` | default=`dict` | Lightweight batch parameters and options (e.g. `{"agency": "fr.cdsp"}`) |
+| `total_resources` | `IntegerField` | default=`0` | Total staged resource nodes extracted from this payload |
+| `processed_resources` | `IntegerField` | default=`0` | Count of successfully processed resource nodes |
 | `status` | `CharField(32)` | default=`"staged"` | `"staged"`, `"harmonized"`, `"quarantined"`, `"failed"` |
 | `import_task_id` | `CharField(255)` | nullable | Link to `django-tasks-db` background task |
 | `created_at` | `DateTimeField` | auto | Upload timestamp |
@@ -497,7 +498,7 @@ Stores individual broken-down raw element resources (`raw_urn`, `raw_value`) ext
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `id` | `BigAutoField` | PK | |
-| `import_payload_id` | `BigInt` | FK → StagedImportPayload | Parent staged import file bundle |
+| `staged_import_id` | `BigInt` | FK → StagedImport | Parent staged import file bundle |
 | `resource_type` | `CharField(64)` | db_index | `"QuestionItem"`, `"CodeList"`, `"Category"`, `"StudyUnit"`, etc. |
 | `raw_urn` | `CharField(512)` | db_index | Raw external URN / identifier from incoming file |
 | `raw_value` | `JSONField` | | Un-harmonized raw JSON dictionary of fields/attributes |

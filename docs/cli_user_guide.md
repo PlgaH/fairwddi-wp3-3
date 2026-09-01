@@ -184,7 +184,7 @@ uv run fairwddi db status
 │ VariableGroupMembership │ request_ddi_variablegroupmembership │            1 │
 │ URNAlias                │ request_ddi_urnalias                │            1 │
 │ MetadataQuarantine      │ request_ddi_metadataquarantine      │            0 │
-│ StagedImportPayload     │ request_ddi_stagedimportpayload     │            1 │
+│ StagedImport            │ request_ddi_stagedimport            │            1 │
 │ StagedResourceNode      │ request_ddi_stagedresourcenode      │            1 │
 └─────────────────────────┴─────────────────────────────────────┴──────────────┘
 ```

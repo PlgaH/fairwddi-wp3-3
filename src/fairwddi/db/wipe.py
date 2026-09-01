@@ -25,7 +25,7 @@ def wipe_database() -> dict[str, int]:
         MetadataQuarantine,
         QuestionItem,
         RepresentedVariable,
-        StagedImportPayload,
+        StagedImport,
         StagedResourceNode,
         StudyUnit,
         Subcollection,
@@ -54,7 +54,7 @@ def wipe_database() -> dict[str, int]:
         ("urn_aliases", URNAlias),
         ("metadata_quarantine", MetadataQuarantine),
         ("staged_nodes", StagedResourceNode),
-        ("staged_payloads", StagedImportPayload),
+        ("staged_imports", StagedImport),
     ]
 
     deleted_counts: dict[str, int] = {}

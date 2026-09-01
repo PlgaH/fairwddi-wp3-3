@@ -28,7 +28,7 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         InstanceVariable,
         QuestionItem,
         RepresentedVariable,
-        StagedImportPayload,
+        StagedImport,
         StagedResourceNode,
         StudyUnit,
         Subcollection,
@@ -395,20 +395,22 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         },
     )
 
-    payload, _ = StagedImportPayload.objects.get_or_create(
+    staged_import, _ = StagedImport.objects.get_or_create(
         file_name="ddi_l_4_closer_sample.json",
         defaults={
             "source_format": "ddi_l_4_json",
             "status": "staged",
-            "raw_payload": {
-                "ResourceType": "QuestionItem",
-                "Text": "Sample DDI 4 staged question bundle",
+            "import_options": {
+                "source_system": "CLOSER",
+                "target_agency": "fr.cdsp",
             },
+            "total_resources": 1,
+            "processed_resources": 0,
         },
     )
 
     StagedResourceNode.objects.get_or_create(
-        import_payload=payload,
+        staged_import=staged_import,
         raw_urn="urn:closer:raw:item-001",
         defaults={
             "resource_type": "QuestionItem",

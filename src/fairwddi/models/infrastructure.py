@@ -1,6 +1,6 @@
 """Infrastructure, Provenance, Quarantine, and Staging Layer models for FAIRwDDI.
 
-Includes URNAlias, MetadataQuarantine, StagedImportPayload, and StagedResourceNode.
+Includes URNAlias, MetadataQuarantine, StagedImport, and StagedResourceNode.
 """
 
 from django.db import models
@@ -121,8 +121,8 @@ class MetadataQuarantine(models.Model):
         return f"Quarantine: {self.entity_type} ({self.incoming_urn}) - {self.conflict_type}"
 
 
-class StagedImportPayload(models.Model):
-    """Stores raw uploaded metadata file bundles prior to asynchronous normalization."""
+class StagedImport(models.Model):
+    """Stores metadata about uploaded file bundles and batch import jobs."""
 
     source_format = models.CharField(
         max_length=64,
@@ -138,15 +138,18 @@ class StagedImportPayload(models.Model):
         blank=True,
         help_text="File storage path for large XML/JSON/CSV file payloads.",
     )
-    raw_payload = models.JSONField(
-        null=True,
-        blank=True,
-        help_text="Staged JSON representation of parsed raw file bundle.",
-    )
-    original_urns = models.JSONField(
+    import_options = models.JSONField(
         default=dict,
         blank=True,
-        help_text="Mapping of original external URNs found in the raw file.",
+        help_text="Lightweight batch configuration and options passed with the upload.",
+    )
+    total_resources = models.IntegerField(
+        default=0,
+        help_text="Total staged resource nodes extracted from the payload.",
+    )
+    processed_resources = models.IntegerField(
+        default=0,
+        help_text="Count of successfully processed resource nodes.",
     )
     status = models.CharField(
         max_length=32,
@@ -163,12 +166,12 @@ class StagedImportPayload(models.Model):
     processed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        db_table = "request_ddi_stagedimportpayload"
-        verbose_name = "Staged Import Payload"
-        verbose_name_plural = "Staged Import Payloads"
+        db_table = "request_ddi_stagedimport"
+        verbose_name = "Staged Import"
+        verbose_name_plural = "Staged Imports"
 
     def __str__(self) -> str:
-        return f"Payload #{self.pk}: {self.file_name} ({self.source_format})"
+        return f"Import #{self.pk}: {self.file_name} ({self.source_format})"
 
 
 class StagedResourceNode(models.Model):
@@ -178,8 +181,8 @@ class StagedResourceNode(models.Model):
     and native DDI-L 4 JSON / COGS model object ingestion.
     """
 
-    import_payload = models.ForeignKey(
-        StagedImportPayload,
+    staged_import = models.ForeignKey(
+        StagedImport,
         on_delete=models.CASCADE,
         related_name="nodes",
         help_text="Parent staged import bundle.",
