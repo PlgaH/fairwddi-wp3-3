@@ -311,14 +311,14 @@ class StagedImportSchema(BaseModel):
 
     id: int | None = None
     source_format: str = Field(
-        ..., description="ddi_l_3.3, ddi_l_4_json, ddi_c_2.5, croissant, csv."
+        ..., description="ddi-l:3.3:xml, ddi-l:4.0:json, ddi-c:2.5:xml, croissant, csv."
     )
     file_name: str
     file_path: str | None = None
     import_options: dict[str, Any] = Field(default_factory=dict)
     total_resources: int = 0
     processed_resources: int = 0
-    status: str = Field(default="staged", description="staged, harmonized, quarantined, failed.")
+    status: str = Field(default="staged", description="staged, normalized, quarantined, failed.")
     import_task_id: str | None = None
     created_at: datetime | None = None
     processed_at: datetime | None = None
@@ -333,7 +333,7 @@ class StagedResourceNodeSchema(BaseModel):
     staged_import_id: int
     resource_type: str = Field(..., description="QuestionItem, CodeList, Category, etc.")
     raw_urn: str = Field(..., description="Incoming raw URN or element identifier.")
-    raw_value: dict[str, Any] = Field(..., description="Un-harmonized raw JSON dictionary.")
+    raw_value: dict[str, Any] = Field(..., description="Pre-normalized raw JSON dictionary.")
     canonical_urn: str | None = None
-    status: str = Field(default="staged", description="staged, harmonized, quarantined, failed.")
+    status: str = Field(default="staged", description="staged, normalized, quarantined, failed.")
     created_at: datetime | None = None

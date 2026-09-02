@@ -113,26 +113,34 @@ def test_cli_db_status() -> None:
 
 
 @pytest.mark.django_db
-def test_cli_db_wipe_prompt_confirm() -> None:
-    """Test fairwddi db wipe with interactive string confirmation 'WIPE'."""
+def test_cli_db_wipe_prompt_confirm(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test fairwddi db wipe with interactive 4-digit confirmation code."""
+    import secrets
+
+    monkeypatch.setattr(secrets, "randbelow", lambda n: 4829 - 1000)
+
     runner.invoke(app, ["db", "seed"])
-    result = runner.invoke(app, ["db", "wipe"], input="WIPE\n")
+    result = runner.invoke(app, ["db", "wipe"], input="4829\n")
     assert result.exit_code == 0
     assert "Database wiped successfully" in result.stdout
 
 
 @pytest.mark.django_db
-def test_cli_db_wipe_prompt_reject() -> None:
-    """Test fairwddi db wipe aborts when confirmation is not 'WIPE'."""
+def test_cli_db_wipe_prompt_reject(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test fairwddi db wipe aborts when confirmation code is wrong."""
+    import secrets
+
+    monkeypatch.setattr(secrets, "randbelow", lambda n: 4829 - 1000)
+
     runner.invoke(app, ["db", "seed"])
-    result = runner.invoke(app, ["db", "wipe"], input="NO\n")
+    result = runner.invoke(app, ["db", "wipe"], input="0000\n")
     assert result.exit_code != 0
     assert "Aborted" in result.stdout
 
 
 @pytest.mark.django_db
 def test_cli_db_wipe_confirm_flag() -> None:
-    """Test fairwddi db wipe with --confirm WIPE flag."""
+    """Test fairwddi db wipe with --confirm flag."""
     runner.invoke(app, ["db", "seed"])
     result = runner.invoke(app, ["db", "wipe", "--confirm", "WIPE"])
     assert result.exit_code == 0

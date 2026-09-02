@@ -1,0 +1,2846 @@
+<?xml version="1.0" encoding="utf-8"?>
+<codeBook xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="ddi:codebook:2_5" version="2.5" xsi:schemaLocation="ddi:codebook:2_5 http://www.ddialliance.org/Specification/DDI-Codebook/2.5/XMLSchema/codebook.xsd" xml:lang="en">
+  <docDscr>
+    <citation>
+      <titlStmt>
+        <titl>DDI description: Citizens' Pulse 10/2021</titl>
+        <parTitl xml:lang="fi">DDI-kuvailu: Kansalaispulssi 10/2021</parTitl>
+        <IDNo agency="FSD">3562</IDNo>
+      </titlStmt>
+      <prodStmt>
+        <producer abbr="FSD">Finnish Social Science Data Archive</producer>
+        <copyright>Finnish Social Science Data Archive</copyright>
+        <prodPlac>Finnish Social Science Data Archive</prodPlac>
+      </prodStmt>
+      <verStmt>
+        <version date="2021-10-06" type="mef_eng">1.0.0</version>
+      </verStmt>
+      <biblCit>Citizens' Pulse 10/2021 [metadata]. Metadata version 1.0.0 (2021-10-06). Finnish Social Science Data Archive [producer and distributor]. DOI: https://doi.org/10.60686/t-fsd3562; URN: https://urn.fi/urn:nbn:fi:fsd:T-FSD3562</biblCit>
+      <holdings location="Finnish Social Science Data Archive FSD" URI="https://urn.fi/urn:nbn:fi:fsd:T-FSD3562" />
+    </citation>
+    <notes xml:lang="fi">FSD:n aineistokuvailut (FSD metadata records), jonka tekijä on Suomen yhteiskuntatieteellinen tietoarkisto (Finnish Social Science Data Archive), on lisensoitu Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0) -lisenssillä.
+      <ExtLink URI="https://creativecommons.org/licenses/by/4.0/deed.fi" />
+    </notes>
+    <notes xml:lang="en">FSD:n aineistokuvailut (FSD metadata records) by Suomen yhteiskuntatieteellinen tietoarkisto (Finnish Social Science Data Archive) are licensed under a Creative Commons Attribution 4.0 International (CC BY 4.0) license.
+      <ExtLink URI="https://creativecommons.org/licenses/by/4.0/deed.en" />
+    </notes>
+    <notes xml:lang="sv">FSD:n aineistokuvailut (FSD metadata records) av Suomen yhteiskuntatieteellinen tietoarkisto (Finlands samhällsvetenskapliga dataarkiv) är licensierad under en Creative Commons Erkännande 4.0 Internationell (CC BY 4.0) licens.
+      <ExtLink URI="https://creativecommons.org/licenses/by/4.0/deed.sv" />
+    </notes>
+  </docDscr>
+  <stdyDscr>
+    <citation>
+      <titlStmt>
+        <titl>Citizens' Pulse 10/2021</titl>
+        <parTitl xml:lang="fi">Kansalaispulssi 10/2021</parTitl>
+        <IDNo agency="FSD">3562</IDNo>
+        <IDNo agency="URN">urn:nbn:fi:fsd:T-FSD3562</IDNo>
+        <IDNo agency="DOI">10.60686/t-fsd3562</IDNo>
+      </titlStmt>
+      <rspStmt>
+        <AuthEnty>Statistics Finland</AuthEnty>
+        <AuthEnty>Prime Minister's Office</AuthEnty>
+      </rspStmt>
+      <prodStmt>
+        <copyright>In accordance with the agreement between FSD and the depositor.</copyright>
+      </prodStmt>
+      <distStmt>
+        <distrbtr abbr="FSD" URI="https://www.fsd.tuni.fi/">Finnish Social Science Data Archive</distrbtr>
+        <distDate date="2021-10-14" />
+      </distStmt>
+      <serStmt ID="S86" URI="https://services.fsd.tuni.fi/catalogue/series/86?lang=en">
+        <serName>Citizens' Pulse</serName>
+        <serInfo>
+          <p>The Citizens' Pulse surveys, conducted by the Prime Minister's Office and Statistics Finland, examine Finnish views on current issues. The surveys explore views on the activity and communication of authorities, compliance with regulations, future expectations, and trust, as well as the respondents' own state of mind, health and well-being, livelihood, and concerns relating to everyday life. Central themes of the surveys include, for instance, the coronavirus (COVID-19) pandemic and Russia's invasion of Ukraine in 2022. The online survey is conducted approximately once a month and most questions are repeated in each survey. The group of respondents changes for each round. Data were first collected in the beginning of April 2020. The data archived at FSD have been collected from the beginning of 2021 onwards. The data collection for this series finished at the end of 2024.</p>
+        </serInfo>
+      </serStmt>
+      <verStmt>
+        <version date="2021-10-06" type="main_data">1.0</version>
+        <version date="2021-10-06" type="translated_data">1.0</version>
+      </verStmt>
+      <biblCit>Statistics Finland &amp; Prime Minister's Office: Citizens' Pulse 10/2021 [dataset]. Data version 1.0 (2021-10-06). Finnish Social Science Data Archive [distributor]. DOI: https://doi.org/10.60686/t-fsd3562; URN: https://urn.fi/urn:nbn:fi:fsd:T-FSD3562</biblCit>
+      <holdings location="Finnish Social Science Data Archive FSD" URI="https://urn.fi/urn:nbn:fi:fsd:T-FSD3562" />
+    </citation>
+    <stdyInfo>
+      <subject>
+        <keyword vocab="ELSST" vocabURI="https://elsst.cessda.eu/id">bacterial and virus diseases</keyword>
+        <keyword vocab="ELSST" vocabURI="https://elsst.cessda.eu/id">COVID-19</keyword>
+        <keyword vocab="ELSST" vocabURI="https://elsst.cessda.eu/id">dissemination of information</keyword>
+        <keyword vocab="ELSST" vocabURI="https://elsst.cessda.eu/id">emotional states</keyword>
+        <keyword vocab="ELSST" vocabURI="https://elsst.cessda.eu/id">health</keyword>
+        <keyword vocab="ELSST" vocabURI="https://elsst.cessda.eu/id">income</keyword>
+        <keyword vocab="ELSST" vocabURI="https://elsst.cessda.eu/id">regulations</keyword>
+        <keyword vocab="ELSST" vocabURI="https://elsst.cessda.eu/id">trust</keyword>
+        <keyword vocab="ELSST" vocabURI="https://elsst.cessda.eu/id">well-being (health)</keyword>
+        <topcClas vocab="OKM" vocabURI="http://www.yso.fi/onto/okm-tieteenala/conceptscheme">Social sciences</topcClas>
+        <topcClas vocab="CESSDA Topic Classification" vocabURI="https://vocabularies.cessda.eu/urn/urn:ddi:int.cessda.cv:TopicClassification:4.2">Government, political systems and organisations</topcClas>
+        <topcClas vocab="CESSDA Topic Classification" vocabURI="https://vocabularies.cessda.eu/urn/urn:ddi:int.cessda.cv:TopicClassification:4.2">Social conditions and indicators</topcClas>
+        <topcClas vocab="CESSDA Topic Classification" vocabURI="https://vocabularies.cessda.eu/urn/urn:ddi:int.cessda.cv:TopicClassification:4.2">Social behaviour and attitudes</topcClas>
+        <topcClas vocab="CESSDA Topic Classification" vocabURI="https://vocabularies.cessda.eu/urn/urn:ddi:int.cessda.cv:TopicClassification:4.2">Public health</topcClas>
+      </subject>
+      <abstract>
+        <p>The Citizens' Pulse surveys examine Finnish attitudes and opinions in the context of the coronavirus pandemic (COVID-19). Main themes in the surveys include the activity and communication of authorities, compliance with regulations, future expectations, trust, and the respondents' own state of mind.</p>
+        <p>The tenth collection round of 2021 surveyed the respondents' opinions on the reliability of the information provided by various Finnish authorities (e.g. the Finnish Institute for Health and Welfare) and members of various groups (e.g. health care employees, researchers) on the coronavirus crisis. The respondents were asked to evaluate how fair or unfair they thought Finnish society was at present and how well Finnish authorities (including the Government, Ministries, and other authorities such as the police and the Finnish Institute for Health and Welfare) had been prepared for epidemics such as COVID-19. The respondents' state of mind was examined with questions on various matters relating to health and well-being. The questions covered, for example, whether the respondents were worried about their own risk or the risk of people close to them contracting COVID-19, the availability of health care for them and people close to them for issues unrelated to COVID-19, and their own mental well-being. Additionally, the respondents' concerns were charted with questions regarding livelihood and everyday life (e.g. whether they were worried about the adequacy of their income or the income of people close to them, the uncertainty regarding how long the exceptional circumstances would last, and their children's schooling).</p>
+        <p>Next, the respondents' confidence in their future and experiences of stress were surveyed. The respondents were asked to evaluate whether an atmosphere of crisis prevailed amongst Finns. The availability and findability of relevant information on the coronavirus crisis was charted. Compliance with coronavirus restrictions was examined by asking the respondents whether they had followed the restrictions and recommendations set by authorities for preventing transmission of the virus, including maintaining safe distances, washing hands regularly, wearing a face mask, avoiding touching the eyes, nose or mouth with unwashed hands, using a hand sanitiser when it was available in public places, and minimising contacts with people outside immediate family and friends. Finally, the respondents' views on the coronavirus vaccine were surveyed, including whether they would be willing to get a COVID-19 vaccine for themselves or for their children.</p>
+        <p>Background variables included the respondent's gender, age group, NUTS3 region of residence, highest level of education, household composition, and perceived financial situation of household.</p>
+      </abstract>
+      <sumDscr>
+        <timePrd event="single" date="2021" />
+        <collDate event="start" date="2021-08-04" />
+        <collDate event="end" date="2021-08-09" />
+        <nation abbr="FI">Finland</nation>
+        <geogCover>Finland</geogCover>
+        <anlyUnit>Individual
+          <concept vocab="DDI Analysis Unit" vocabURI="https://vocabularies.cessda.eu/urn/urn:ddi:int.ddi.cv:AnalysisUnit:2.1">Individual</concept>
+        </anlyUnit>
+        <universe clusion="I">People aged 15-74 residing in mainland Finland</universe>
+        <dataKind>Quantitative</dataKind>
+      </sumDscr>
+    </stdyInfo>
+    <method>
+      <dataColl>
+        <timeMeth>Longitudinal: Trend/Repeated cross-section
+          <concept vocab="DDI Time Method" vocabURI="https://vocabularies.cessda.eu/urn/urn:ddi:int.ddi.cv:TimeMethod:1.2">Longitudinal.TrendRepeatedCrossSection</concept>
+        </timeMeth>
+        <dataCollector>Statistics Finland</dataCollector>
+        <sampProc>Probability: Stratified
+          <concept vocab="DDI Sampling Procedure" vocabURI="https://vocabularies.cessda.eu/urn/urn:ddi:int.ddi.cv:SamplingProcedure:1.1">Probability.Stratified</concept>
+        </sampProc>
+        <sampProc>
+          <p>The sample for the ninth collection round of 2021 was formed of the target persons aged 15 to 74 living in mainland Finland who had responded to Statistics Finland's Labour Force Survey, Consumer Confidence Survey, or Finnish Travel Survey between 27 May and 21 June 2021, and for whom a current telephone number could be found. The sample size was 2,686 persons. The persons included in the sample for Citizens' Pulse had expressed their willingness to respond to an additional survey when responding to the three surveys mentioned above. The samples for the Labour Force Survey, Consumer Confidence Survey and Finnish Travel Survey are drawn as stratified random samples from Statistics Finland's population database, which is based on the Central Population Register.</p>
+          <p>An invitation to participate in the study and a personal direct link to a Webropol survey were sent to the respondents by text message. The text message also contained a link to the Statistics Finland data collection webpage, where the participants were informed about, for instance, data protection. The data collection page includes a link to the privacy notice. Reminder messages were sent to those who had not yet responded two days after the first text message and on the last day of data collection. Most of the responses were received in the first three days after data collection began.</p>
+        </sampProc>
+        <collMode>Self-administered questionnaire: Web-based (CAWI)
+          <concept vocab="DDI Mode of Collection" vocabURI="https://vocabularies.cessda.eu/urn/urn:ddi:int.ddi.cv:ModeOfCollection:4.0">SelfAdministeredQuestionnaire.CAWI</concept>
+        </collMode>
+        <resInstru>Structured questionnaire
+          <concept vocab="DDI Type of Instrument" vocabURI="https://vocabularies.cessda.eu/urn/urn:ddi:int.ddi.cv:TypeOfInstrument:1.1">Questionnaire.Structured</concept>
+        </resInstru>
+        <weight>The data contain a weight variable [paino] which weights the data to correspond to the target population (people aged 15-74 residing in mainland Finland). Statistics Finland based the weight on population information from the beginning of May 2021 (4,074,068 persons). The weight variable is an expansion weight which aims to correct for non-response bias. Expansion weights expand the sample to correspond to the population. The sum of the expansion weights equals to the number of people aged 15-74 living in mainland Finland in the population. The mean of the expansion weights, 3,163, indicates how many people in the population each respondent roughly represents. The starting point for the weighting was the creation of a base weight, i.e. the inverse of a sampling unit's inclusion probability. Because there was nonresponse, the original sample size was replaced by the actual sample in the data (=number of respondents) and thus the base weight was 4,074,068/1,288. In calibration, the base weights were altered so that correct population distributions could be produced according to the calibration variables used. The calibration variables included gender, NUTS2 major region, age (10-year grouping), and level of education. The weights were calibrated with the CALMAR2 SAS macro program.</weight>
+      </dataColl>
+      <anlyInfo>
+        <respRate>48</respRate>
+        <dataAppr>Men responded to the survey less often than women. For age groups, people aged between 20 and 30 responded least often. The response rate was slightly lower for respondents who had completed only primary and lower secondary education than for those who had attained tertiary level education.</dataAppr>
+      </anlyInfo>
+      <stdyClas type="A">Detailed and specific data description in Finnish and English. The data are checked and processed in detail. If necessary, the data are anonymised.</stdyClas>
+    </method>
+    <dataAccs>
+      <setAvail>
+        <accsPlac URI="https://www.fsd.tuni.fi/">Finnish Social Science Data Archive</accsPlac>
+      </setAvail>
+      <useStmt>
+        <restrctn>The dataset is (A) openly available for all users without registration (CC BY 4.0).</restrctn>
+        <citReq>The data and its creators shall be cited in all publications and presentations for which the data have been used. The bibliographic citation may be in the form suggested by the archive or in the form required by the publication.</citReq>
+        <deposReq>Notify FSD of all publications where you have used the data by sending the citation information to user-services.fsd@tuni.fi.</deposReq>
+        <disclaimer>The original data creators and the archive bear no responsibility for any results or interpretations arising from the reuse of the data.</disclaimer>
+      </useStmt>
+    </dataAccs>
+    <othrStdyMat>
+      <relMat>Kansalaispulssi 10/2021. Tutkimusseloste 11.8.2021 [verkkodokumentti]. Helsinki: Tilastokeskus.Tietovarannot/Tiedonkeruupalvelut. https://www.stat.fi/static/media/uploads/tup/htpalvelut/kansalaispulssi/kansalaispulssi_10_2021_tutkimusseloste.pdf [viitattu 6.10.2021]</relMat>
+      <relPubl xml:lang="fi">Kansalaispulssi 10/2021. Tutkimusseloste 11.8.2021 [verkkodokumentti]. Helsinki: Tilastokeskus.Tietovarannot/Tiedonkeruupalvelut. https://www.stat.fi/static/media/uploads/tup/htpalvelut/kansalaispulssi/kansalaispulssi_10_2021_tutkimusseloste.pdf [viitattu 6.10.2021]
+        <citation>
+          <titlStmt>
+            <titl>Kansalaispulssi 10/2021. Tutkimusseloste</titl>
+          </titlStmt>
+          <distStmt>
+            <distDate date="2021" />
+          </distStmt>
+        </citation>
+      </relPubl>
+      <relPubl xml:lang="fi">Kansalaispulssi 12.8.2021. Kansalaispulssi: 24. kierros. Verkkokysely 4.8.-9.8.2021. 15-74-vuotiaat mannersuomalaiset. [verkkodokumentti]. Helsinki: Valtioneuvosto. VNK Strategiaosasto. https://valtioneuvosto.fi/ajankohtaista/kansalaispulssi/yhteenvedot [viitattu 1.12.2022].
+        <citation>
+          <titlStmt>
+            <titl>Kansalaispulssi 12.8.2021</titl>
+          </titlStmt>
+          <distStmt>
+            <distDate date="2021" />
+          </distStmt>
+        </citation>
+      </relPubl>
+    </othrStdyMat>
+  </stdyDscr>
+  <fileDscr>
+    <fileTxt>
+      <fileName ID="FSD3562_file_1">daF3562e.sav</fileName>
+      <dimensns>
+      <caseQnty>1288</caseQnty>
+      <varQnty>74</varQnty>
+      </dimensns>
+      <fileType>SPSS Portable</fileType>
+    </fileTxt>
+  </fileDscr>
+  <dataDscr>
+    <var ID="FSD3562_FSD_NO_var" dcml="0" intrvl="contin" name="FSD_NO">
+      <labl>[fsd_no] FSD study number</labl>
+      <qstn ID="FSD3562_FSD_NO_qstn">
+        <qstnLit>FSD study number</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="3562" min="3562" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">3562</sumStat>
+      <sumStat type="max">3562</sumStat>
+      <sumStat type="mean">3562.00</sumStat>
+      <sumStat type="stdev">.000</sumStat>
+    </var>
+    <var ID="FSD3562_FSD_VR_var" dcml="1" intrvl="contin" name="FSD_VR">
+      <labl>[fsd_vr] FSD edition number</labl>
+      <qstn ID="FSD3562_FSD_VR_qstn">
+        <qstnLit>FSD edition number</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1.0" min="1.0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">1.0</sumStat>
+      <sumStat type="max">1.0</sumStat>
+      <sumStat type="mean">1.000</sumStat>
+      <sumStat type="stdev">.0000</sumStat>
+    </var>
+    <var ID="FSD3562_FSD_ID_var" dcml="0" intrvl="contin" name="FSD_ID">
+      <labl>[fsd_id] FSD case id</labl>
+      <qstn ID="FSD3562_FSD_ID_qstn">
+        <qstnLit>FSD case id</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1288" min="1" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">1288</sumStat>
+      <sumStat type="mean">644.50</sumStat>
+      <sumStat type="stdev">371.958</sumStat>
+    </var>
+    <var ID="FSD3562_FSD_LI_var" dcml="0" intrvl="discrete" name="FSD_LI">
+      <labl>[fsd_li] FSD license CC BY 4.0</labl>
+      <qstn ID="FSD3562_FSD_LI_qstn">
+        <qstnLit>FSD license CC BY 4.0</qstnLit>
+      </qstn>
+    </var>
+    <var ID="FSD3562_T1_var" dcml="0" intrvl="discrete" name="T1">
+      <labl>[t1] Respondent's gender</labl>
+      <qstn ID="FSD3562_T1_qstn">
+        <qstnLit>Respondent's gender</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="3" min="1" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">3</sumStat>
+      <sumStat type="mean">1.58</sumStat>
+      <sumStat type="stdev">.505</sumStat>
+      <catgry ID="FSD3562_T1_catgry_1">
+        <catValu>1</catValu>
+        <labl>Male</labl>
+        <catStat>554</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T1_catgry_2">
+        <catValu>2</catValu>
+        <labl>Female</labl>
+        <catStat>727</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T1_catgry_3">
+        <catValu>3</catValu>
+        <labl>Other</labl>
+        <catStat>7</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_T2_var" dcml="0" intrvl="discrete" name="T2">
+      <labl>[t2] Respondent's age group</labl>
+      <qstn ID="FSD3562_T2_qstn">
+        <qstnLit>Respondent's age group</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="12" min="1" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">12</sumStat>
+      <sumStat type="mean">7.76</sumStat>
+      <sumStat type="stdev">2.987</sumStat>
+      <catgry ID="FSD3562_T2_catgry_1">
+        <catValu>1</catValu>
+        <labl>Under 20 years old</labl>
+        <catStat>33</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T2_catgry_2">
+        <catValu>2</catValu>
+        <labl>20 - 24 years old</labl>
+        <catStat>36</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T2_catgry_3">
+        <catValu>3</catValu>
+        <labl>25 - 29 years old</labl>
+        <catStat>64</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T2_catgry_4">
+        <catValu>4</catValu>
+        <labl>30 - 34 years old</labl>
+        <catStat>96</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T2_catgry_5">
+        <catValu>5</catValu>
+        <labl>35 - 39 years old</labl>
+        <catStat>94</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T2_catgry_6">
+        <catValu>6</catValu>
+        <labl>40 - 44 years old</labl>
+        <catStat>105</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T2_catgry_7">
+        <catValu>7</catValu>
+        <labl>45 - 49 years old</labl>
+        <catStat>112</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T2_catgry_8">
+        <catValu>8</catValu>
+        <labl>50 - 54 years old</labl>
+        <catStat>134</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T2_catgry_9">
+        <catValu>9</catValu>
+        <labl>55 - 59 years old</labl>
+        <catStat>170</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T2_catgry_10">
+        <catValu>10</catValu>
+        <labl>60 - 64 years old</labl>
+        <catStat>160</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T2_catgry_11">
+        <catValu>11</catValu>
+        <labl>65 - 69 years old</labl>
+        <catStat>175</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T2_catgry_12">
+        <catValu>12</catValu>
+        <labl>70 years or older</labl>
+        <catStat>109</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_T5_var" dcml="0" intrvl="discrete" name="T5">
+      <labl>[t5] Household composition</labl>
+      <qstn ID="FSD3562_T5_qstn">
+        <qstnLit>Household composition</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="3" min="1" />
+      </valrng>
+      <sumStat type="vald">1272</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">3</sumStat>
+      <sumStat type="mean">1.81</sumStat>
+      <sumStat type="stdev">.492</sumStat>
+      <catgry ID="FSD3562_T5_catgry_1">
+        <catValu>1</catValu>
+        <labl>Living alone</labl>
+        <catStat>298</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T5_catgry_2">
+        <catValu>2</catValu>
+        <labl>Living with my family</labl>
+        <catStat>918</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T5_catgry_3">
+        <catValu>3</catValu>
+        <labl>Living with other persons</labl>
+        <catStat>56</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T5_catgry_4" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>16</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_T6_var" dcml="0" intrvl="discrete" name="T6">
+      <labl>[t6] Are there any children under 18 years old living in your household?</labl>
+      <qstn ID="FSD3562_T6_qstn">
+        <qstnLit>Are there any children under 18 years old living in your household?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="2" min="1" />
+      </valrng>
+      <sumStat type="vald">963</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">2</sumStat>
+      <sumStat type="mean">1.67</sumStat>
+      <sumStat type="stdev">.469</sumStat>
+      <catgry ID="FSD3562_T6_catgry_1">
+        <catValu>1</catValu>
+        <labl>Yes</labl>
+        <catStat>313</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T6_catgry_2">
+        <catValu>2</catValu>
+        <labl>No</labl>
+        <catStat>650</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T6_catgry_3" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>325</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_T3_var" dcml="0" intrvl="discrete" name="T3">
+      <labl>[t3] Respondent's NUTS3 region of residence</labl>
+      <qstn ID="FSD3562_T3_qstn">
+        <qstnLit>Respondent's NUTS3 region of residence</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="18" min="1" />
+      </valrng>
+      <sumStat type="vald">1282</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">18</sumStat>
+      <sumStat type="mean">12.94</sumStat>
+      <sumStat type="stdev">4.929</sumStat>
+      <catgry ID="FSD3562_T3_catgry_1">
+        <catValu>1</catValu>
+        <labl>South Karelia</labl>
+        <catStat>36</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_2">
+        <catValu>2</catValu>
+        <labl>South Ostrobothnia</labl>
+        <catStat>28</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_3">
+        <catValu>3</catValu>
+        <labl>South Savo</labl>
+        <catStat>25</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_4">
+        <catValu>4</catValu>
+        <labl>Kainuu</labl>
+        <catStat>16</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_5">
+        <catValu>5</catValu>
+        <labl>Kanta-Häme</labl>
+        <catStat>28</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_6">
+        <catValu>6</catValu>
+        <labl>Central Ostrobothnia</labl>
+        <catStat>23</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_7">
+        <catValu>7</catValu>
+        <labl>Central Finland</labl>
+        <catStat>66</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_8">
+        <catValu>8</catValu>
+        <labl>Kymenlaakso</labl>
+        <catStat>24</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_9">
+        <catValu>9</catValu>
+        <labl>Lapland</labl>
+        <catStat>48</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_10">
+        <catValu>10</catValu>
+        <labl>Pirkanmaa</labl>
+        <catStat>125</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_11">
+        <catValu>11</catValu>
+        <labl>Ostrobothnia</labl>
+        <catStat>38</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_12">
+        <catValu>12</catValu>
+        <labl>North Karelia</labl>
+        <catStat>43</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_13">
+        <catValu>13</catValu>
+        <labl>North Ostrobothnia</labl>
+        <catStat>83</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_14">
+        <catValu>14</catValu>
+        <labl>North Savo</labl>
+        <catStat>50</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_15">
+        <catValu>15</catValu>
+        <labl>Päijät-Häme</labl>
+        <catStat>35</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_16">
+        <catValu>16</catValu>
+        <labl>Satakunta</labl>
+        <catStat>53</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_17">
+        <catValu>17</catValu>
+        <labl>Uusimaa</labl>
+        <catStat>435</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_18">
+        <catValu>18</catValu>
+        <labl>Southwest Finland</labl>
+        <catStat>126</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T3_catgry_19" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>6</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q1_var" dcml="0" intrvl="discrete" name="Q1">
+      <labl>[q1] In your opinion, how fair or unfair is Finnish society at present?</labl>
+      <qstn ID="FSD3562_Q1_qstn">
+        <qstnLit>In your opinion, how fair or unfair is Finnish society at present?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="10" min="1" />
+      </valrng>
+      <sumStat type="vald">1277</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">10</sumStat>
+      <sumStat type="mean">7.40</sumStat>
+      <sumStat type="stdev">1.545</sumStat>
+      <catgry ID="FSD3562_Q1_catgry_1">
+        <catValu>1</catValu>
+        <labl>Very unfair</labl>
+        <catStat>11</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q1_catgry_2">
+        <catValu>2</catValu>
+        <catStat>8</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q1_catgry_3">
+        <catValu>3</catValu>
+        <catStat>18</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q1_catgry_4">
+        <catValu>4</catValu>
+        <catStat>44</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q1_catgry_5">
+        <catValu>5</catValu>
+        <catStat>48</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q1_catgry_6">
+        <catValu>6</catValu>
+        <catStat>106</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q1_catgry_7">
+        <catValu>7</catValu>
+        <catStat>309</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q1_catgry_8">
+        <catValu>8</catValu>
+        <catStat>483</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q1_catgry_9">
+        <catValu>9</catValu>
+        <catStat>213</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q1_catgry_10">
+        <catValu>10</catValu>
+        <labl>Very fair</labl>
+        <catStat>37</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q1_catgry_11" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>11</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q2_var" dcml="0" intrvl="discrete" name="Q2">
+      <labl>[q2] In this survey, 'authorities' refers to the Finnish Government, Ministries, and other authorities. In your opinion, how well prepared were the authorities in Finland for epidemic outbreaks such as COVID-19 (coronavirus)?</labl>
+      <qstn ID="FSD3562_Q2_qstn">
+        <qstnLit>In this survey, 'authorities' refers to the Finnish Government, Ministries, and other authorities. In your opinion, how well prepared were the authorities in Finland for epidemic outbreaks such as COVID-19 (coronavirus)?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="10" min="1" />
+      </valrng>
+      <sumStat type="vald">1271</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">10</sumStat>
+      <sumStat type="mean">6.69</sumStat>
+      <sumStat type="stdev">1.889</sumStat>
+      <catgry ID="FSD3562_Q2_catgry_1">
+        <catValu>1</catValu>
+        <labl>Very poorly prepared</labl>
+        <catStat>27</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q2_catgry_2">
+        <catValu>2</catValu>
+        <catStat>25</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q2_catgry_3">
+        <catValu>3</catValu>
+        <catStat>42</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q2_catgry_4">
+        <catValu>4</catValu>
+        <catStat>74</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q2_catgry_5">
+        <catValu>5</catValu>
+        <catStat>97</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q2_catgry_6">
+        <catValu>6</catValu>
+        <catStat>196</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q2_catgry_7">
+        <catValu>7</catValu>
+        <catStat>328</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q2_catgry_8">
+        <catValu>8</catValu>
+        <catStat>318</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q2_catgry_9">
+        <catValu>9</catValu>
+        <catStat>132</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q2_catgry_10">
+        <catValu>10</catValu>
+        <labl>Very well prepared</labl>
+        <catStat>32</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q2_catgry_11" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>17</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_var" dcml="0" intrvl="discrete" name="Q4">
+      <labl>[q4] How concerned are you at present about the COVID-19 epidemic and its effects?</labl>
+      <qstn ID="FSD3562_Q4_qstn">
+        <qstnLit>How concerned are you at present about the COVID-19 epidemic and its effects?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="10" min="1" />
+      </valrng>
+      <sumStat type="vald">1285</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">10</sumStat>
+      <sumStat type="mean">5.94</sumStat>
+      <sumStat type="stdev">2.276</sumStat>
+      <catgry ID="FSD3562_Q4_catgry_1">
+        <catValu>1</catValu>
+        <labl>Very concerned</labl>
+        <catStat>58</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_catgry_2">
+        <catValu>2</catValu>
+        <catStat>40</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_catgry_3">
+        <catValu>3</catValu>
+        <catStat>109</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_catgry_4">
+        <catValu>4</catValu>
+        <catStat>160</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_catgry_5">
+        <catValu>5</catValu>
+        <catStat>172</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_catgry_6">
+        <catValu>6</catValu>
+        <catStat>121</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_catgry_7">
+        <catValu>7</catValu>
+        <catStat>231</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_catgry_8">
+        <catValu>8</catValu>
+        <catStat>257</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_catgry_9">
+        <catValu>9</catValu>
+        <catStat>97</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_catgry_10">
+        <catValu>10</catValu>
+        <labl>Not at all concerned</labl>
+        <catStat>40</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_catgry_11" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>3</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B1_var" dcml="0" intrvl="discrete" name="Q4_B1">
+      <labl>[q4_b1] Are you concerned at present about the following issues related to health and well-being? The risk of contracting COVID-19 myself</labl>
+      <qstn ID="FSD3562_Q4_B1_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? The risk of contracting COVID-19 myself</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.37</sumStat>
+      <sumStat type="stdev">.482</sumStat>
+      <catgry ID="FSD3562_Q4_B1_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>817</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B1_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>471</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B2_var" dcml="0" intrvl="discrete" name="Q4_B2">
+      <labl>[q4_b2] Are you concerned at present about the following issues related to health and well-being? The risk of people close to me contracting COVID-19</labl>
+      <qstn ID="FSD3562_Q4_B2_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? The risk of people close to me contracting COVID-19</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.62</sumStat>
+      <sumStat type="stdev">.485</sumStat>
+      <catgry ID="FSD3562_Q4_B2_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>486</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B2_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>802</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B3_var" dcml="0" intrvl="discrete" name="Q4_B3">
+      <labl>[q4_b3] Are you concerned at present about the following issues related to health and well-being? The risk of transmitting COVID-19 to other people as an asymptomatic carrier</labl>
+      <qstn ID="FSD3562_Q4_B3_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? The risk of transmitting COVID-19 to other people as an asymptomatic carrier</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.39</sumStat>
+      <sumStat type="stdev">.488</sumStat>
+      <catgry ID="FSD3562_Q4_B3_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>784</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B3_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>504</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B4_var" dcml="0" intrvl="discrete" name="Q4_B4">
+      <labl>[q4_b4] Are you concerned at present about the following issues related to health and well-being? The capacity of the health care system to provide medical care for those who need it</labl>
+      <qstn ID="FSD3562_Q4_B4_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? The capacity of the health care system to provide medical care for those who need it</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.38</sumStat>
+      <sumStat type="stdev">.484</sumStat>
+      <catgry ID="FSD3562_Q4_B4_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>805</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B4_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>483</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B5_var" dcml="0" intrvl="discrete" name="Q4_B5">
+      <labl>[q4_b5] Are you concerned at present about the following issues related to health and well-being? The insufficient precautions against the virus taken by my parents who belong to a higher-risk group for COVID-19</labl>
+      <qstn ID="FSD3562_Q4_B5_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? The insufficient precautions against the virus taken by my parents who belong to a higher-risk group for COVID-19</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.04</sumStat>
+      <sumStat type="stdev">.204</sumStat>
+      <catgry ID="FSD3562_Q4_B5_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1232</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B5_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>56</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B6_var" dcml="0" intrvl="discrete" name="Q4_B6">
+      <labl>[q4_b6] Are you concerned at present about the following issues related to health and well-being? Whether I will receive treatment I need for a health condition unrelated to COVID-19</labl>
+      <qstn ID="FSD3562_Q4_B6_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? Whether I will receive treatment I need for a health condition unrelated to COVID-19</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.22</sumStat>
+      <sumStat type="stdev">.414</sumStat>
+      <catgry ID="FSD3562_Q4_B6_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1006</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B6_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>282</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B7_var" dcml="0" intrvl="discrete" name="Q4_B7">
+      <labl>[q4_b7] Are you concerned at present about the following issues related to health and well-being? Whether people close to me will receive treatment they need for a health condition unrelated to COVID-19</labl>
+      <qstn ID="FSD3562_Q4_B7_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? Whether people close to me will receive treatment they need for a health condition unrelated to COVID-19</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.24</sumStat>
+      <sumStat type="stdev">.424</sumStat>
+      <catgry ID="FSD3562_Q4_B7_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>985</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B7_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>303</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B8_var" dcml="0" intrvl="discrete" name="Q4_B8">
+      <labl>[q4_b8] Are you concerned at present about the following issues related to health and well-being? My mental well-being</labl>
+      <qstn ID="FSD3562_Q4_B8_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? My mental well-being</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.19</sumStat>
+      <sumStat type="stdev">.394</sumStat>
+      <catgry ID="FSD3562_Q4_B8_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1041</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B8_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>247</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B9_var" dcml="0" intrvl="discrete" name="Q4_B9">
+      <labl>[q4_b9] Are you concerned at present about the following issues related to health and well-being? Controlling my alcohol consumption</labl>
+      <qstn ID="FSD3562_Q4_B9_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? Controlling my alcohol consumption</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.03</sumStat>
+      <sumStat type="stdev">.163</sumStat>
+      <catgry ID="FSD3562_Q4_B9_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1253</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B9_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>35</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B10_var" dcml="0" intrvl="discrete" name="Q4_B10">
+      <labl>[q4_b10] Are you concerned at present about the following issues related to health and well-being? People close to me controlling their alcohol consumption</labl>
+      <qstn ID="FSD3562_Q4_B10_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? People close to me controlling their alcohol consumption</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.03</sumStat>
+      <sumStat type="stdev">.174</sumStat>
+      <catgry ID="FSD3562_Q4_B10_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1248</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B10_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>40</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B11_var" dcml="0" intrvl="discrete" name="Q4_B11">
+      <labl>[q4_b11] Are you concerned at present about the following issues related to health and well-being? Violence or threat of violence in my family</labl>
+      <qstn ID="FSD3562_Q4_B11_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? Violence or threat of violence in my family</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.01</sumStat>
+      <sumStat type="stdev">.074</sumStat>
+      <catgry ID="FSD3562_Q4_B11_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1281</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B11_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>7</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B12_var" dcml="0" intrvl="discrete" name="Q4_B12">
+      <labl>[q4_b12] Are you concerned at present about the following issues related to health and well-being? The mental well-being of my children</labl>
+      <qstn ID="FSD3562_Q4_B12_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? The mental well-being of my children</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.16</sumStat>
+      <sumStat type="stdev">.367</sumStat>
+      <catgry ID="FSD3562_Q4_B12_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1081</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B12_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>207</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B13_var" dcml="0" intrvl="discrete" name="Q4_B13">
+      <labl>[q4_b13] Are you concerned at present about the following issues related to health and well-being? Some other issue related to health or well-being</labl>
+      <qstn ID="FSD3562_Q4_B13_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? Some other issue related to health or well-being</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.04</sumStat>
+      <sumStat type="stdev">.200</sumStat>
+      <catgry ID="FSD3562_Q4_B13_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1234</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B13_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>54</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B14_var" dcml="0" intrvl="discrete" name="Q4_B14">
+      <labl>[q4_b14] Are you concerned at present about the following issues related to health and well-being? None of the above</labl>
+      <qstn ID="FSD3562_Q4_B14_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? None of the above</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.06</sumStat>
+      <sumStat type="stdev">.246</sumStat>
+      <catgry ID="FSD3562_Q4_B14_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1205</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B14_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>83</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_B15_var" dcml="0" intrvl="discrete" name="Q4_B15">
+      <labl>[q4_b15] Are you concerned at present about the following issues related to health and well-being? Can't say</labl>
+      <qstn ID="FSD3562_Q4_B15_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to health and well-being? Can't say</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.02</sumStat>
+      <sumStat type="stdev">.132</sumStat>
+      <catgry ID="FSD3562_Q4_B15_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1265</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_B15_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>23</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_C1_var" dcml="0" intrvl="discrete" name="Q4_C1">
+      <labl>[q4_c1] Are you concerned at present about the following issues related to livelihood and everyday life? My own livelihood</labl>
+      <qstn ID="FSD3562_Q4_C1_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to livelihood and everyday life? My own livelihood</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.21</sumStat>
+      <sumStat type="stdev">.404</sumStat>
+      <catgry ID="FSD3562_Q4_C1_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1023</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_C1_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>265</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_C2_var" dcml="0" intrvl="discrete" name="Q4_C2">
+      <labl>[q4_c2] Are you concerned at present about the following issues related to livelihood and everyday life? The livelihood of people close to me</labl>
+      <qstn ID="FSD3562_Q4_C2_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to livelihood and everyday life? The livelihood of people close to me</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.20</sumStat>
+      <sumStat type="stdev">.403</sumStat>
+      <catgry ID="FSD3562_Q4_C2_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1025</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_C2_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>263</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_C3_var" dcml="0" intrvl="discrete" name="Q4_C3">
+      <labl>[q4_c3] Are you concerned at present about the following issues related to livelihood and everyday life? The risk of becoming unemployed</labl>
+      <qstn ID="FSD3562_Q4_C3_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to livelihood and everyday life? The risk of becoming unemployed</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.07</sumStat>
+      <sumStat type="stdev">.250</sumStat>
+      <catgry ID="FSD3562_Q4_C3_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1202</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_C3_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>86</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_C4_var" dcml="0" intrvl="discrete" name="Q4_C4">
+      <labl>[q4_c4] Are you concerned at present about the following issues related to livelihood and everyday life? The risk of being temporarily laid off</labl>
+      <qstn ID="FSD3562_Q4_C4_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to livelihood and everyday life? The risk of being temporarily laid off</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.04</sumStat>
+      <sumStat type="stdev">.200</sumStat>
+      <catgry ID="FSD3562_Q4_C4_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1234</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_C4_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>54</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_C5_var" dcml="0" intrvl="discrete" name="Q4_C5">
+      <labl>[q4_c5] Are you concerned at present about the following issues related to livelihood and everyday life? The risk of a forthcoming economic depression</labl>
+      <qstn ID="FSD3562_Q4_C5_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to livelihood and everyday life? The risk of a forthcoming economic depression</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.48</sumStat>
+      <sumStat type="stdev">.500</sumStat>
+      <catgry ID="FSD3562_Q4_C5_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>672</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_C5_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>616</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_C6_var" dcml="0" intrvl="discrete" name="Q4_C6">
+      <labl>[q4_c6] Are you concerned at present about the following issues related to livelihood and everyday life? Uncertainty about how long the exceptional circumstances will last</labl>
+      <qstn ID="FSD3562_Q4_C6_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to livelihood and everyday life? Uncertainty about how long the exceptional circumstances will last</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.56</sumStat>
+      <sumStat type="stdev">.497</sumStat>
+      <catgry ID="FSD3562_Q4_C6_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>569</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_C6_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>719</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_C7_var" dcml="0" intrvl="discrete" name="Q4_C7">
+      <labl>[q4_c7] Are you concerned at present about the following issues related to livelihood and everyday life? The potential tightening of restrictions</labl>
+      <qstn ID="FSD3562_Q4_C7_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to livelihood and everyday life? The potential tightening of restrictions</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.25</sumStat>
+      <sumStat type="stdev">.431</sumStat>
+      <catgry ID="FSD3562_Q4_C7_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>970</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_C7_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>318</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_C8_var" dcml="0" intrvl="discrete" name="Q4_C8">
+      <labl>[q4_c8] Are you concerned at present about the following issues related to livelihood and everyday life? My children's schooling</labl>
+      <qstn ID="FSD3562_Q4_C8_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to livelihood and everyday life? My children's schooling</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.14</sumStat>
+      <sumStat type="stdev">.344</sumStat>
+      <catgry ID="FSD3562_Q4_C8_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1112</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_C8_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>176</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_C9_var" dcml="0" intrvl="discrete" name="Q4_C9">
+      <labl>[q4_c9] Are you concerned at present about the following issues related to livelihood and everyday life? Balancing work and child care</labl>
+      <qstn ID="FSD3562_Q4_C9_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to livelihood and everyday life? Balancing work and child care</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.06</sumStat>
+      <sumStat type="stdev">.230</sumStat>
+      <catgry ID="FSD3562_Q4_C9_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1216</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_C9_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>72</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_C10_var" dcml="0" intrvl="discrete" name="Q4_C10">
+      <labl>[q4_c10] Are you concerned at present about the following issues related to livelihood and everyday life? Some other issue related to livelihood and everyday life</labl>
+      <qstn ID="FSD3562_Q4_C10_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to livelihood and everyday life? Some other issue related to livelihood and everyday life</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.04</sumStat>
+      <sumStat type="stdev">.195</sumStat>
+      <catgry ID="FSD3562_Q4_C10_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1237</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_C10_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>51</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_C11_var" dcml="0" intrvl="discrete" name="Q4_C11">
+      <labl>[q4_c11] Are you concerned at present about the following issues related to livelihood and everyday life? None of the above</labl>
+      <qstn ID="FSD3562_Q4_C11_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to livelihood and everyday life? None of the above</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.11</sumStat>
+      <sumStat type="stdev">.313</sumStat>
+      <catgry ID="FSD3562_Q4_C11_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1146</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_C11_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>142</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q4_C12_var" dcml="0" intrvl="discrete" name="Q4_C12">
+      <labl>[q4_c12] Are you concerned at present about the following issues related to livelihood and everyday life? Can't say</labl>
+      <qstn ID="FSD3562_Q4_C12_qstn">
+        <qstnLit>Are you concerned at present about the following issues related to livelihood and everyday life? Can't say</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="1" min="0" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">0</sumStat>
+      <sumStat type="max">1</sumStat>
+      <sumStat type="mean">.02</sumStat>
+      <sumStat type="stdev">.148</sumStat>
+      <catgry ID="FSD3562_Q4_C12_catgry_1">
+        <catValu>0</catValu>
+        <labl>Not mentioned</labl>
+        <catStat>1259</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q4_C12_catgry_2">
+        <catValu>1</catValu>
+        <labl>Mentioned</labl>
+        <catStat>29</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q5_var" dcml="0" intrvl="discrete" name="Q5">
+      <labl>[q5] How confident are you at present about your future?</labl>
+      <qstn ID="FSD3562_Q5_qstn">
+        <qstnLit>How confident are you at present about your future?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="10" min="1" />
+      </valrng>
+      <sumStat type="vald">1282</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">10</sumStat>
+      <sumStat type="mean">7.67</sumStat>
+      <sumStat type="stdev">1.534</sumStat>
+      <catgry ID="FSD3562_Q5_catgry_1">
+        <catValu>1</catValu>
+        <labl>Not at all confident</labl>
+        <catStat>9</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q5_catgry_2">
+        <catValu>2</catValu>
+        <catStat>6</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q5_catgry_3">
+        <catValu>3</catValu>
+        <catStat>12</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q5_catgry_4">
+        <catValu>4</catValu>
+        <catStat>27</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q5_catgry_5">
+        <catValu>5</catValu>
+        <catStat>49</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q5_catgry_6">
+        <catValu>6</catValu>
+        <catStat>94</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q5_catgry_7">
+        <catValu>7</catValu>
+        <catStat>285</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q5_catgry_8">
+        <catValu>8</catValu>
+        <catStat>440</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q5_catgry_9">
+        <catValu>9</catValu>
+        <catStat>259</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q5_catgry_10">
+        <catValu>10</catValu>
+        <labl>Very confident</labl>
+        <catStat>101</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q5_catgry_11" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>6</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q6_var" dcml="0" intrvl="discrete" name="Q6">
+      <labl>[q6] How concerned are you about the livelihood of your household during the following month?</labl>
+      <qstn ID="FSD3562_Q6_qstn">
+        <qstnLit>How concerned are you about the livelihood of your household during the following month?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1278</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.31</sumStat>
+      <sumStat type="stdev">.960</sumStat>
+      <catgry ID="FSD3562_Q6_catgry_1">
+        <catValu>1</catValu>
+        <labl>Very concerned</labl>
+        <catStat>26</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q6_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly concerned</labl>
+        <catStat>45</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q6_catgry_3">
+        <catValu>3</catValu>
+        <labl>Somewhat concerned</labl>
+        <catStat>161</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q6_catgry_4">
+        <catValu>4</catValu>
+        <labl>Only a little concerned</labl>
+        <catStat>322</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q6_catgry_5">
+        <catValu>5</catValu>
+        <labl>Not at all concerned</labl>
+        <catStat>724</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q6_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>10</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q7_var" dcml="0" intrvl="discrete" name="Q7">
+      <labl>[q7] Stress means a situation where an individual feels tense, restless, nervous or anxious, or has trouble sleeping because of issues troubling his or her mind. To what extent are you currently feeling this kind of stress?</labl>
+      <qstn ID="FSD3562_Q7_qstn">
+        <qstnLit>Stress means a situation where an individual feels tense, restless, nervous or anxious, or has trouble sleeping because of issues troubling his or her mind. To what extent are you currently feeling this kind of stress?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1284</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.50</sumStat>
+      <sumStat type="stdev">1.058</sumStat>
+      <catgry ID="FSD3562_Q7_catgry_1">
+        <catValu>1</catValu>
+        <labl>To a great extent</labl>
+        <catStat>52</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q7_catgry_2">
+        <catValu>2</catValu>
+        <labl>To a fair extent</labl>
+        <catStat>170</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q7_catgry_3">
+        <catValu>3</catValu>
+        <labl>To some extent</labl>
+        <catStat>373</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q7_catgry_4">
+        <catValu>4</catValu>
+        <labl>To a small extent</labl>
+        <catStat>457</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q7_catgry_5">
+        <catValu>5</catValu>
+        <labl>Not at all</labl>
+        <catStat>232</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q7_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>4</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q8_var" dcml="0" intrvl="discrete" name="Q8">
+      <labl>[q8] How would you describe the atmosphere amongst Finns at present?</labl>
+      <qstn ID="FSD3562_Q8_qstn">
+        <qstnLit>How would you describe the atmosphere amongst Finns at present?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="10" min="1" />
+      </valrng>
+      <sumStat type="vald">1211</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">10</sumStat>
+      <sumStat type="mean">6.24</sumStat>
+      <sumStat type="stdev">1.612</sumStat>
+      <catgry ID="FSD3562_Q8_catgry_1">
+        <catValu>1</catValu>
+        <labl>An atmosphere of crisis prevails</labl>
+        <catStat>10</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q8_catgry_2">
+        <catValu>2</catValu>
+        <catStat>13</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q8_catgry_3">
+        <catValu>3</catValu>
+        <catStat>28</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q8_catgry_4">
+        <catValu>4</catValu>
+        <catStat>118</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q8_catgry_5">
+        <catValu>5</catValu>
+        <catStat>228</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q8_catgry_6">
+        <catValu>6</catValu>
+        <catStat>217</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q8_catgry_7">
+        <catValu>7</catValu>
+        <catStat>330</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q8_catgry_8">
+        <catValu>8</catValu>
+        <catStat>207</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q8_catgry_9">
+        <catValu>9</catValu>
+        <catStat>45</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q8_catgry_10">
+        <catValu>10</catValu>
+        <labl>There is no sign of an atmosphere of crisis</labl>
+        <catStat>15</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q8_catgry_11" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>77</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q9A_var" dcml="0" intrvl="discrete" name="Q9A">
+      <labl>[q9a] How well has information on the effects of the COVID-19 crisis on your everyday life been made available to you?</labl>
+      <qstn ID="FSD3562_Q9A_qstn">
+        <qstnLit>How well has information on the effects of the COVID-19 crisis on your everyday life been made available to you?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1265</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.08</sumStat>
+      <sumStat type="stdev">.884</sumStat>
+      <catgry ID="FSD3562_Q9A_catgry_1">
+        <catValu>1</catValu>
+        <labl>Poorly</labl>
+        <catStat>23</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q9A_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly poorly</labl>
+        <catStat>61</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q9A_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither well nor poorly</labl>
+        <catStat>127</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q9A_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly well</labl>
+        <catStat>636</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q9A_catgry_5">
+        <catValu>5</catValu>
+        <labl>Well</labl>
+        <catStat>418</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q9A_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>23</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q11A_var" dcml="0" intrvl="discrete" name="Q11A">
+      <labl>[q11a] In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Political leaders (e.g. cabinet ministers)</labl>
+      <qstn ID="FSD3562_Q11A_qstn">
+        <qstnLit>In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Political leaders (e.g. cabinet ministers)</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1267</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.58</sumStat>
+      <sumStat type="stdev">1.087</sumStat>
+      <catgry ID="FSD3562_Q11A_catgry_1">
+        <catValu>1</catValu>
+        <labl>Unreliable</labl>
+        <catStat>85</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11A_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly unreliable</labl>
+        <catStat>133</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11A_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither reliable nor unreliable</labl>
+        <catStat>218</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11A_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly reliable</labl>
+        <catStat>625</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11A_catgry_5">
+        <catValu>5</catValu>
+        <labl>Reliable</labl>
+        <catStat>206</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11A_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>21</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q11B_var" dcml="0" intrvl="discrete" name="Q11B">
+      <labl>[q11b] In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Leading experts in the health care sector (e.g. THL)</labl>
+      <qstn ID="FSD3562_Q11B_qstn">
+        <qstnLit>In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Leading experts in the health care sector (e.g. THL)</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1275</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.14</sumStat>
+      <sumStat type="stdev">.937</sumStat>
+      <catgry ID="FSD3562_Q11B_catgry_1">
+        <catValu>1</catValu>
+        <labl>Unreliable</labl>
+        <catStat>34</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11B_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly unreliable</labl>
+        <catStat>60</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11B_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither reliable nor unreliable</labl>
+        <catStat>99</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11B_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly reliable</labl>
+        <catStat>583</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11B_catgry_5">
+        <catValu>5</catValu>
+        <labl>Reliable</labl>
+        <catStat>499</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11B_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>13</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q11C_var" dcml="0" intrvl="discrete" name="Q11C">
+      <labl>[q11c] In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Health care workers (e.g. doctors and nurses)</labl>
+      <qstn ID="FSD3562_Q11C_qstn">
+        <qstnLit>In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Health care workers (e.g. doctors and nurses)</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1247</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.27</sumStat>
+      <sumStat type="stdev">.732</sumStat>
+      <catgry ID="FSD3562_Q11C_catgry_1">
+        <catValu>1</catValu>
+        <labl>Unreliable</labl>
+        <catStat>9</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11C_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly unreliable</labl>
+        <catStat>24</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11C_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither reliable nor unreliable</labl>
+        <catStat>85</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11C_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly reliable</labl>
+        <catStat>634</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11C_catgry_5">
+        <catValu>5</catValu>
+        <labl>Reliable</labl>
+        <catStat>495</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11C_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>41</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q11D_var" dcml="0" intrvl="discrete" name="Q11D">
+      <labl>[q11d] In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? The police, Finnish Border Guard, Finnish Defence Forces, and other safety and security officials</labl>
+      <qstn ID="FSD3562_Q11D_qstn">
+        <qstnLit>In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? The police, Finnish Border Guard, Finnish Defence Forces, and other safety and security officials</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1180</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.11</sumStat>
+      <sumStat type="stdev">.832</sumStat>
+      <catgry ID="FSD3562_Q11D_catgry_1">
+        <catValu>1</catValu>
+        <labl>Unreliable</labl>
+        <catStat>14</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11D_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly unreliable</labl>
+        <catStat>37</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11D_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither reliable nor unreliable</labl>
+        <catStat>156</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11D_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly reliable</labl>
+        <catStat>574</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11D_catgry_5">
+        <catValu>5</catValu>
+        <labl>Reliable</labl>
+        <catStat>399</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11D_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>108</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q11E_var" dcml="0" intrvl="discrete" name="Q11E">
+      <labl>[q11e] In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Other officials</labl>
+      <qstn ID="FSD3562_Q11E_qstn">
+        <qstnLit>In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Other officials</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1125</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.63</sumStat>
+      <sumStat type="stdev">.898</sumStat>
+      <catgry ID="FSD3562_Q11E_catgry_1">
+        <catValu>1</catValu>
+        <labl>Unreliable</labl>
+        <catStat>32</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11E_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly unreliable</labl>
+        <catStat>77</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11E_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither reliable nor unreliable</labl>
+        <catStat>319</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11E_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly reliable</labl>
+        <catStat>549</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11E_catgry_5">
+        <catValu>5</catValu>
+        <labl>Reliable</labl>
+        <catStat>148</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11E_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>163</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q11F_var" dcml="0" intrvl="discrete" name="Q11F">
+      <labl>[q11f] In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Researchers</labl>
+      <qstn ID="FSD3562_Q11F_qstn">
+        <qstnLit>In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Researchers</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1234</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.09</sumStat>
+      <sumStat type="stdev">.827</sumStat>
+      <catgry ID="FSD3562_Q11F_catgry_1">
+        <catValu>1</catValu>
+        <labl>Unreliable</labl>
+        <catStat>16</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11F_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly unreliable</labl>
+        <catStat>36</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11F_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither reliable nor unreliable</labl>
+        <catStat>166</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11F_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly reliable</labl>
+        <catStat>617</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11F_catgry_5">
+        <catValu>5</catValu>
+        <labl>Reliable</labl>
+        <catStat>399</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11F_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>54</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q11G_var" dcml="0" intrvl="discrete" name="Q11G">
+      <labl>[q11g] In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Representatives of non-governmental organisations</labl>
+      <qstn ID="FSD3562_Q11G_qstn">
+        <qstnLit>In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Representatives of non-governmental organisations</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1103</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.18</sumStat>
+      <sumStat type="stdev">.921</sumStat>
+      <catgry ID="FSD3562_Q11G_catgry_1">
+        <catValu>1</catValu>
+        <labl>Unreliable</labl>
+        <catStat>49</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11G_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly unreliable</labl>
+        <catStat>179</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11G_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither reliable nor unreliable</labl>
+        <catStat>459</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11G_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly reliable</labl>
+        <catStat>356</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11G_catgry_5">
+        <catValu>5</catValu>
+        <labl>Reliable</labl>
+        <catStat>60</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11G_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>185</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q11H_var" dcml="0" intrvl="discrete" name="Q11H">
+      <labl>[q11h] In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Journalists</labl>
+      <qstn ID="FSD3562_Q11H_qstn">
+        <qstnLit>In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Journalists</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1219</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.10</sumStat>
+      <sumStat type="stdev">1.022</sumStat>
+      <catgry ID="FSD3562_Q11H_catgry_1">
+        <catValu>1</catValu>
+        <labl>Unreliable</labl>
+        <catStat>109</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11H_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly unreliable</labl>
+        <catStat>202</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11H_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither reliable nor unreliable</labl>
+        <catStat>422</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11H_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly reliable</labl>
+        <catStat>433</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11H_catgry_5">
+        <catValu>5</catValu>
+        <labl>Reliable</labl>
+        <catStat>53</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11H_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>69</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q11I_var" dcml="0" intrvl="discrete" name="Q11I">
+      <labl>[q11i] In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Social media influencers (bloggers, YouTubers, etc.)</labl>
+      <qstn ID="FSD3562_Q11I_qstn">
+        <qstnLit>In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Social media influencers (bloggers, YouTubers, etc.)</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1108</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">1.99</sumStat>
+      <sumStat type="stdev">.942</sumStat>
+      <catgry ID="FSD3562_Q11I_catgry_1">
+        <catValu>1</catValu>
+        <labl>Unreliable</labl>
+        <catStat>417</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11I_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly unreliable</labl>
+        <catStat>358</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11I_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither reliable nor unreliable</labl>
+        <catStat>264</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11I_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly reliable</labl>
+        <catStat>64</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11I_catgry_5">
+        <catValu>5</catValu>
+        <labl>Reliable</labl>
+        <catStat>5</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11I_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>180</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q11J_var" dcml="0" intrvl="discrete" name="Q11J">
+      <labl>[q11j] In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Trade unions and employers' organisations (e.g. SAK, OAJ, EK, Federation of Finnish Enterprises)</labl>
+      <qstn ID="FSD3562_Q11J_qstn">
+        <qstnLit>In your opinion, how reliable is the information given on the COVID-19 crisis in public by representatives of the following groups? Trade unions and employers' organisations (e.g. SAK, OAJ, EK, Federation of Finnish Enterprises)</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1067</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.15</sumStat>
+      <sumStat type="stdev">.920</sumStat>
+      <catgry ID="FSD3562_Q11J_catgry_1">
+        <catValu>1</catValu>
+        <labl>Unreliable</labl>
+        <catStat>52</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11J_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly unreliable</labl>
+        <catStat>169</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11J_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither reliable nor unreliable</labl>
+        <catStat>474</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11J_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly reliable</labl>
+        <catStat>313</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11J_catgry_5">
+        <catValu>5</catValu>
+        <labl>Reliable</labl>
+        <catStat>59</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q11J_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>221</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q12A_var" dcml="0" intrvl="discrete" name="Q12A">
+      <labl>[q12a] In your opinion, how well does the following describe the communication of authorities on the COVID-19 crisis? Impartiality</labl>
+      <qstn ID="FSD3562_Q12A_qstn">
+        <qstnLit>In your opinion, how well does the following describe the communication of authorities on the COVID-19 crisis? Impartiality</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1213</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.36</sumStat>
+      <sumStat type="stdev">1.067</sumStat>
+      <catgry ID="FSD3562_Q12A_catgry_1">
+        <catValu>1</catValu>
+        <labl>Poorly</labl>
+        <catStat>95</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12A_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly poorly</labl>
+        <catStat>147</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12A_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither well nor poorly</labl>
+        <catStat>314</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12A_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly well</labl>
+        <catStat>539</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12A_catgry_5">
+        <catValu>5</catValu>
+        <labl>Well</labl>
+        <catStat>118</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12A_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>75</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q12B_var" dcml="0" intrvl="discrete" name="Q12B">
+      <labl>[q12b] In your opinion, how well does the following describe the communication of authorities on the COVID-19 crisis? Reliability</labl>
+      <qstn ID="FSD3562_Q12B_qstn">
+        <qstnLit>In your opinion, how well does the following describe the communication of authorities on the COVID-19 crisis? Reliability</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1255</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.55</sumStat>
+      <sumStat type="stdev">1.053</sumStat>
+      <catgry ID="FSD3562_Q12B_catgry_1">
+        <catValu>1</catValu>
+        <labl>Poorly</labl>
+        <catStat>74</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12B_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly poorly</labl>
+        <catStat>136</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12B_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither well nor poorly</labl>
+        <catStat>251</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12B_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly well</labl>
+        <catStat>612</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12B_catgry_5">
+        <catValu>5</catValu>
+        <labl>Well</labl>
+        <catStat>182</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12B_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>33</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q12C_var" dcml="0" intrvl="discrete" name="Q12C">
+      <labl>[q12c] In your opinion, how well does the following describe the communication of authorities on the COVID-19 crisis? Correctness/accuracy</labl>
+      <qstn ID="FSD3562_Q12C_qstn">
+        <qstnLit>In your opinion, how well does the following describe the communication of authorities on the COVID-19 crisis? Correctness/accuracy</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1225</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.49</sumStat>
+      <sumStat type="stdev">1.003</sumStat>
+      <catgry ID="FSD3562_Q12C_catgry_1">
+        <catValu>1</catValu>
+        <labl>Poorly</labl>
+        <catStat>66</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12C_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly poorly</labl>
+        <catStat>139</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12C_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither well nor poorly</labl>
+        <catStat>272</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12C_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly well</labl>
+        <catStat>623</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12C_catgry_5">
+        <catValu>5</catValu>
+        <labl>Well</labl>
+        <catStat>125</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12C_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>63</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q12D_var" dcml="0" intrvl="discrete" name="Q12D">
+      <labl>[q12d] In your opinion, how well does the following describe the communication of authorities on the COVID-19 crisis? Clarity</labl>
+      <qstn ID="FSD3562_Q12D_qstn">
+        <qstnLit>In your opinion, how well does the following describe the communication of authorities on the COVID-19 crisis? Clarity</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1263</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.12</sumStat>
+      <sumStat type="stdev">1.159</sumStat>
+      <catgry ID="FSD3562_Q12D_catgry_1">
+        <catValu>1</catValu>
+        <labl>Poorly</labl>
+        <catStat>142</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12D_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly poorly</labl>
+        <catStat>250</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12D_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither well nor poorly</labl>
+        <catStat>288</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12D_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly well</labl>
+        <catStat>479</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12D_catgry_5">
+        <catValu>5</catValu>
+        <labl>Well</labl>
+        <catStat>104</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12D_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>25</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q12E_var" dcml="0" intrvl="discrete" name="Q12E">
+      <labl>[q12e] In your opinion, how well does the following describe the communication of authorities on the COVID-19 crisis? Swift in reaction</labl>
+      <qstn ID="FSD3562_Q12E_qstn">
+        <qstnLit>In your opinion, how well does the following describe the communication of authorities on the COVID-19 crisis? Swift in reaction</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1251</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">2.98</sumStat>
+      <sumStat type="stdev">1.153</sumStat>
+      <catgry ID="FSD3562_Q12E_catgry_1">
+        <catValu>1</catValu>
+        <labl>Poorly</labl>
+        <catStat>160</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12E_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly poorly</labl>
+        <catStat>288</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12E_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither well nor poorly</labl>
+        <catStat>290</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12E_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly well</labl>
+        <catStat>439</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12E_catgry_5">
+        <catValu>5</catValu>
+        <labl>Well</labl>
+        <catStat>74</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12E_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>37</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q12F_var" dcml="0" intrvl="discrete" name="Q12F">
+      <labl>[q12f] In your opinion, how well does the following describe the communication of authorities on the COVID-19 crisis? Openness</labl>
+      <qstn ID="FSD3562_Q12F_qstn">
+        <qstnLit>In your opinion, how well does the following describe the communication of authorities on the COVID-19 crisis? Openness</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1256</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.31</sumStat>
+      <sumStat type="stdev">1.099</sumStat>
+      <catgry ID="FSD3562_Q12F_catgry_1">
+        <catValu>1</catValu>
+        <labl>Poorly</labl>
+        <catStat>111</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12F_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly poorly</labl>
+        <catStat>174</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12F_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither well nor poorly</labl>
+        <catStat>302</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12F_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly well</labl>
+        <catStat>552</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12F_catgry_5">
+        <catValu>5</catValu>
+        <labl>Well</labl>
+        <catStat>117</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q12F_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>32</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q13_var" dcml="0" intrvl="discrete" name="Q13">
+      <labl>[q13] How well have you followed the instructions given by authorities during the COVID-19 crisis?</labl>
+      <qstn ID="FSD3562_Q13_qstn">
+        <qstnLit>How well have you followed the instructions given by authorities during the COVID-19 crisis?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1277</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.49</sumStat>
+      <sumStat type="stdev">.681</sumStat>
+      <catgry ID="FSD3562_Q13_catgry_1">
+        <catValu>1</catValu>
+        <labl>Poorly</labl>
+        <catStat>10</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q13_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly poorly</labl>
+        <catStat>13</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q13_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither well nor poorly</labl>
+        <catStat>37</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q13_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly well</labl>
+        <catStat>492</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q13_catgry_5">
+        <catValu>5</catValu>
+        <labl>Well</labl>
+        <catStat>725</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q13_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>11</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q17A_var" dcml="0" intrvl="discrete" name="Q17A">
+      <labl>[q17a] How well does the following statement describe your behaviour in the past week: I keep a distance of over 2 metres to others</labl>
+      <qstn ID="FSD3562_Q17A_qstn">
+        <qstnLit>How well does the following statement describe your behaviour in the past week: I keep a distance of over 2 metres to others</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1278</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.19</sumStat>
+      <sumStat type="stdev">.896</sumStat>
+      <catgry ID="FSD3562_Q17A_catgry_1">
+        <catValu>1</catValu>
+        <labl>Describes poorly</labl>
+        <catStat>24</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17A_catgry_2">
+        <catValu>2</catValu>
+        <labl>Describes fairly poorly</labl>
+        <catStat>63</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17A_catgry_3">
+        <catValu>3</catValu>
+        <labl>Describes neither well nor poorly</labl>
+        <catStat>79</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17A_catgry_4">
+        <catValu>4</catValu>
+        <labl>Describes fairly well</labl>
+        <catStat>586</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17A_catgry_5">
+        <catValu>5</catValu>
+        <labl>Describes well</labl>
+        <catStat>526</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17A_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>10</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q17B_var" dcml="0" intrvl="discrete" name="Q17B">
+      <labl>[q17b] How well does the following statement describe your behaviour in the past week: I regularly wash my hands with soap for 20 seconds</labl>
+      <qstn ID="FSD3562_Q17B_qstn">
+        <qstnLit>How well does the following statement describe your behaviour in the past week: I regularly wash my hands with soap for 20 seconds</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1280</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.22</sumStat>
+      <sumStat type="stdev">.971</sumStat>
+      <catgry ID="FSD3562_Q17B_catgry_1">
+        <catValu>1</catValu>
+        <labl>Describes poorly</labl>
+        <catStat>30</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17B_catgry_2">
+        <catValu>2</catValu>
+        <labl>Describes fairly poorly</labl>
+        <catStat>63</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17B_catgry_3">
+        <catValu>3</catValu>
+        <labl>Describes neither well nor poorly</labl>
+        <catStat>123</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17B_catgry_4">
+        <catValu>4</catValu>
+        <labl>Describes fairly well</labl>
+        <catStat>440</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17B_catgry_5">
+        <catValu>5</catValu>
+        <labl>Describes well</labl>
+        <catStat>624</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17B_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>8</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q17C_var" dcml="0" intrvl="discrete" name="Q17C">
+      <labl>[q17c] How well does the following statement describe your behaviour in the past week: I wear a face mask when I cannot keep a safe distance from other people</labl>
+      <qstn ID="FSD3562_Q17C_qstn">
+        <qstnLit>How well does the following statement describe your behaviour in the past week: I wear a face mask when I cannot keep a safe distance from other people</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1281</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.62</sumStat>
+      <sumStat type="stdev">.831</sumStat>
+      <catgry ID="FSD3562_Q17C_catgry_1">
+        <catValu>1</catValu>
+        <labl>Describes poorly</labl>
+        <catStat>31</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17C_catgry_2">
+        <catValu>2</catValu>
+        <labl>Describes fairly poorly</labl>
+        <catStat>22</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17C_catgry_3">
+        <catValu>3</catValu>
+        <labl>Describes neither well nor poorly</labl>
+        <catStat>39</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17C_catgry_4">
+        <catValu>4</catValu>
+        <labl>Describes fairly well</labl>
+        <catStat>221</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17C_catgry_5">
+        <catValu>5</catValu>
+        <labl>Describes well</labl>
+        <catStat>968</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17C_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>7</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q17D_var" dcml="0" intrvl="discrete" name="Q17D">
+      <labl>[q17d] How well does the following statement describe your behaviour in the past week: I avoid touching my eyes, nose, and face with unwashed hands</labl>
+      <qstn ID="FSD3562_Q17D_qstn">
+        <qstnLit>How well does the following statement describe your behaviour in the past week: I avoid touching my eyes, nose, and face with unwashed hands</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1271</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.06</sumStat>
+      <sumStat type="stdev">1.027</sumStat>
+      <catgry ID="FSD3562_Q17D_catgry_1">
+        <catValu>1</catValu>
+        <labl>Describes poorly</labl>
+        <catStat>39</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17D_catgry_2">
+        <catValu>2</catValu>
+        <labl>Describes fairly poorly</labl>
+        <catStat>90</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17D_catgry_3">
+        <catValu>3</catValu>
+        <labl>Describes neither well nor poorly</labl>
+        <catStat>131</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17D_catgry_4">
+        <catValu>4</catValu>
+        <labl>Describes fairly well</labl>
+        <catStat>509</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17D_catgry_5">
+        <catValu>5</catValu>
+        <labl>Describes well</labl>
+        <catStat>502</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17D_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>17</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q17E_var" dcml="0" intrvl="discrete" name="Q17E">
+      <labl>[q17e] How well does the following statement describe your behaviour in the past week: I always use hand sanitiser when it is available in public places</labl>
+      <qstn ID="FSD3562_Q17E_qstn">
+        <qstnLit>How well does the following statement describe your behaviour in the past week: I always use hand sanitiser when it is available in public places</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1282</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.41</sumStat>
+      <sumStat type="stdev">.962</sumStat>
+      <catgry ID="FSD3562_Q17E_catgry_1">
+        <catValu>1</catValu>
+        <labl>Describes poorly</labl>
+        <catStat>40</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17E_catgry_2">
+        <catValu>2</catValu>
+        <labl>Describes fairly poorly</labl>
+        <catStat>50</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17E_catgry_3">
+        <catValu>3</catValu>
+        <labl>Describes neither well nor poorly</labl>
+        <catStat>48</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17E_catgry_4">
+        <catValu>4</catValu>
+        <labl>Describes fairly well</labl>
+        <catStat>351</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17E_catgry_5">
+        <catValu>5</catValu>
+        <labl>Describes well</labl>
+        <catStat>793</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17E_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>6</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q17F_var" dcml="0" intrvl="discrete" name="Q17F">
+      <labl>[q17f] How well does the following statement describe your behaviour in the past week: I avoid meeting other people</labl>
+      <qstn ID="FSD3562_Q17F_qstn">
+        <qstnLit>How well does the following statement describe your behaviour in the past week: I avoid meeting other people</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1278</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.54</sumStat>
+      <sumStat type="stdev">1.157</sumStat>
+      <catgry ID="FSD3562_Q17F_catgry_1">
+        <catValu>1</catValu>
+        <labl>Describes poorly</labl>
+        <catStat>96</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17F_catgry_2">
+        <catValu>2</catValu>
+        <labl>Describes fairly poorly</labl>
+        <catStat>156</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17F_catgry_3">
+        <catValu>3</catValu>
+        <labl>Describes neither well nor poorly</labl>
+        <catStat>239</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17F_catgry_4">
+        <catValu>4</catValu>
+        <labl>Describes fairly well</labl>
+        <catStat>535</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17F_catgry_5">
+        <catValu>5</catValu>
+        <labl>Describes well</labl>
+        <catStat>252</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q17F_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>10</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q15_var" dcml="0" intrvl="discrete" name="Q15">
+      <labl>[q15] In your opinion, how well have other people followed the instructions given by authorities during the COVID-19 crisis?</labl>
+      <qstn ID="FSD3562_Q15_qstn">
+        <qstnLit>In your opinion, how well have other people followed the instructions given by authorities during the COVID-19 crisis?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1249</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">3.36</sumStat>
+      <sumStat type="stdev">.870</sumStat>
+      <catgry ID="FSD3562_Q15_catgry_1">
+        <catValu>1</catValu>
+        <labl>Poorly</labl>
+        <catStat>26</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q15_catgry_2">
+        <catValu>2</catValu>
+        <labl>Fairly poorly</labl>
+        <catStat>214</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q15_catgry_3">
+        <catValu>3</catValu>
+        <labl>Neither well nor poorly</labl>
+        <catStat>334</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q15_catgry_4">
+        <catValu>4</catValu>
+        <labl>Fairly well</labl>
+        <catStat>638</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q15_catgry_5">
+        <catValu>5</catValu>
+        <labl>Well</labl>
+        <catStat>37</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q15_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>39</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q18A_var" dcml="0" intrvl="discrete" name="Q18A">
+      <labl>[q18a] To what extent do you agree or disagree: When a COVID-19 vaccine becomes available and it is recommended to me, I will get vaccinated (or I have already been vaccinated)</labl>
+      <qstn ID="FSD3562_Q18A_qstn">
+        <qstnLit>To what extent do you agree or disagree: When a COVID-19 vaccine becomes available and it is recommended to me, I will get vaccinated (or I have already been vaccinated)</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="0" />
+      </valrng>
+      <sumStat type="vald">1278</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.76</sumStat>
+      <sumStat type="stdev">.814</sumStat>
+      <catgry ID="FSD3562_Q18A_catgry_1">
+        <catValu>0</catValu>
+        <labl>Can't say</labl>
+        <catStat>0</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18A_catgry_2">
+        <catValu>1</catValu>
+        <labl>Strongly disagree</labl>
+        <catStat>38</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18A_catgry_3">
+        <catValu>2</catValu>
+        <labl>Disagree to some extent</labl>
+        <catStat>19</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18A_catgry_4">
+        <catValu>3</catValu>
+        <labl>Neither agree nor disagree</labl>
+        <catStat>21</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18A_catgry_5">
+        <catValu>4</catValu>
+        <labl>Agree to some extent</labl>
+        <catStat>59</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18A_catgry_6">
+        <catValu>5</catValu>
+        <labl>Strongly agree</labl>
+        <catStat>1141</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18A_catgry_7" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>10</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q18B_var" dcml="0" intrvl="discrete" name="Q18B">
+      <labl>[q18b] To what extent do you agree or disagree: Getting vaccinated is a good way of protecting yourself against diseases</labl>
+      <qstn ID="FSD3562_Q18B_qstn">
+        <qstnLit>To what extent do you agree or disagree: Getting vaccinated is a good way of protecting yourself against diseases</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="0" />
+      </valrng>
+      <sumStat type="vald">1271</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.78</sumStat>
+      <sumStat type="stdev">.595</sumStat>
+      <catgry ID="FSD3562_Q18B_catgry_1">
+        <catValu>0</catValu>
+        <labl>Can't say</labl>
+        <catStat>0</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18B_catgry_2">
+        <catValu>1</catValu>
+        <labl>Strongly disagree</labl>
+        <catStat>8</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18B_catgry_3">
+        <catValu>2</catValu>
+        <labl>Disagree to some extent</labl>
+        <catStat>14</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18B_catgry_4">
+        <catValu>3</catValu>
+        <labl>Neither agree nor disagree</labl>
+        <catStat>25</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18B_catgry_5">
+        <catValu>4</catValu>
+        <labl>Agree to some extent</labl>
+        <catStat>159</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18B_catgry_6">
+        <catValu>5</catValu>
+        <labl>Strongly agree</labl>
+        <catStat>1065</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18B_catgry_7" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>17</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_Q18E_var" dcml="0" intrvl="discrete" name="Q18E">
+      <labl>[q18e] (IF T6=1) To what extent do you agree or disagree: If a COVID-19 vaccine becomes available for children and young people and it is recommended to them, I would want my children to get the vaccine</labl>
+      <qstn ID="FSD3562_Q18E_qstn">
+        <qstnLit>(IF T6=1) To what extent do you agree or disagree: If a COVID-19 vaccine becomes available for children and young people and it is recommended to them, I would want my children to get the vaccine</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="0" />
+      </valrng>
+      <sumStat type="vald">291</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">4.21</sumStat>
+      <sumStat type="stdev">1.294</sumStat>
+      <catgry ID="FSD3562_Q18E_catgry_1">
+        <catValu>0</catValu>
+        <labl>Can't say</labl>
+        <catStat>0</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18E_catgry_2">
+        <catValu>1</catValu>
+        <labl>Strongly disagree</labl>
+        <catStat>27</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18E_catgry_3">
+        <catValu>2</catValu>
+        <labl>Disagree to some extent</labl>
+        <catStat>12</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18E_catgry_4">
+        <catValu>3</catValu>
+        <labl>Neither agree nor disagree</labl>
+        <catStat>21</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18E_catgry_5">
+        <catValu>4</catValu>
+        <labl>Agree to some extent</labl>
+        <catStat>45</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18E_catgry_6">
+        <catValu>5</catValu>
+        <labl>Strongly agree</labl>
+        <catStat>186</catStat>
+      </catgry>
+      <catgry ID="FSD3562_Q18E_catgry_7" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>997</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_T4_var" dcml="0" intrvl="discrete" name="T4">
+      <labl>[t4] What is the highest level of education you have attained?</labl>
+      <qstn ID="FSD3562_T4_qstn">
+        <qstnLit>What is the highest level of education you have attained?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1284</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">2.72</sumStat>
+      <sumStat type="stdev">.968</sumStat>
+      <catgry ID="FSD3562_T4_catgry_1">
+        <catValu>1</catValu>
+        <labl>Primary and lower secondary education or equivalent</labl>
+        <catStat>109</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T4_catgry_2">
+        <catValu>2</catValu>
+        <labl>Upper secondary education (general or vocational)</labl>
+        <catStat>494</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T4_catgry_3">
+        <catValu>3</catValu>
+        <labl>First cycle higher education (University of Applied Sciences or other)</labl>
+        <catStat>345</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T4_catgry_4">
+        <catValu>4</catValu>
+        <labl>Second cycle higher education</labl>
+        <catStat>323</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T4_catgry_5">
+        <catValu>5</catValu>
+        <labl>Some other education</labl>
+        <catStat>13</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T4_catgry_6" missing="Y">
+        <catValu>SYSMISS</catValu>
+        <catStat>4</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_T7_var" dcml="0" intrvl="discrete" name="T7">
+      <labl>[t7] How would you describe the financial circumstances of your household?</labl>
+      <qstn ID="FSD3562_T7_qstn">
+        <qstnLit>How would you describe the financial circumstances of your household?</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="5" min="1" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">1</sumStat>
+      <sumStat type="max">5</sumStat>
+      <sumStat type="mean">2.91</sumStat>
+      <sumStat type="stdev">.806</sumStat>
+      <catgry ID="FSD3562_T7_catgry_1">
+        <catValu>1</catValu>
+        <labl>Wealthy</labl>
+        <catStat>37</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T7_catgry_2">
+        <catValu>2</catValu>
+        <labl>High income</labl>
+        <catStat>347</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T7_catgry_3">
+        <catValu>3</catValu>
+        <labl>Middle income</labl>
+        <catStat>614</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T7_catgry_4">
+        <catValu>4</catValu>
+        <labl>Low income</labl>
+        <catStat>270</catStat>
+      </catgry>
+      <catgry ID="FSD3562_T7_catgry_5">
+        <catValu>5</catValu>
+        <labl>Can't say</labl>
+        <catStat>20</catStat>
+      </catgry>
+    </var>
+    <var ID="FSD3562_PAINO_var" dcml="13" intrvl="contin" name="PAINO">
+      <labl>[paino] Weight variable</labl>
+      <qstn ID="FSD3562_PAINO_qstn">
+        <qstnLit>Weight variable</qstnLit>
+      </qstn>
+      <valrng>
+        <range max="10429.9088998140000" min="594.4224978853733" />
+      </valrng>
+      <sumStat type="vald">1288</sumStat>
+      <sumStat type="min">594.4224978853733</sumStat>
+      <sumStat type="max">10429.9088998140000</sumStat>
+      <sumStat type="mean">3163.096273291941000</sumStat>
+      <sumStat type="stdev">2081.167667704416000</sumStat>
+    </var>
+  </dataDscr>
+  <otherMat level="study" URI="https://www.stat.fi/tup/htpalvelut/tutkimukset/kansalaispulssi_en.html">
+    <labl>More information can be found on the Citizens' Pulse webpage of Statistics Finland.</labl>
+  </otherMat>
+</codeBook>

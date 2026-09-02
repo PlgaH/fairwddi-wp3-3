@@ -1,0 +1,12 @@
+name: "all_ddi"
+description: "Full DDI import preserving all identifiable resources without exclusion"
+include_types: []
+exclude_types: []
+
+# Retain all referenced resources
+include_referenced_resources: true
+
+strategies:
+  on_duplicate_file: "skip"
+  on_existing_resource: "insert_new_only"
+  on_content_drift: "quarantine"

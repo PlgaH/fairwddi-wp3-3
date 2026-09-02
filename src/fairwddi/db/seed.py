@@ -398,7 +398,7 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
     staged_import, _ = StagedImport.objects.get_or_create(
         file_name="ddi_l_4_closer_sample.json",
         defaults={
-            "source_format": "ddi_l_4_json",
+            "source_format": "ddi-l:4.0:json",
             "status": "staged",
             "import_options": {
                 "source_system": "CLOSER",

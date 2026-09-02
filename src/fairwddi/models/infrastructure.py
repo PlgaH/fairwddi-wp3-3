@@ -126,7 +126,9 @@ class StagedImport(models.Model):
 
     source_format = models.CharField(
         max_length=64,
-        help_text="Source format: 'ddi_l_3.3', 'ddi_l_4_json', 'ddi_c_2.5', 'croissant', 'csv'.",
+        help_text=(
+            "Source format: 'ddi-l:3.3:xml', 'ddi-l:4.0:json', 'ddi-c:2.5:xml', 'croissant', 'csv'."
+        ),
     )
     file_name = models.CharField(
         max_length=512,
@@ -154,7 +156,7 @@ class StagedImport(models.Model):
     status = models.CharField(
         max_length=32,
         default="staged",
-        help_text="Status: 'staged', 'harmonized', 'quarantined', 'failed'.",
+        help_text="Status: 'staged', 'normalized', 'quarantined', 'failed'.",
     )
     import_task_id = models.CharField(
         max_length=255,
@@ -177,7 +179,7 @@ class StagedImport(models.Model):
 class StagedResourceNode(models.Model):
     """Stores individual broken-down raw element resources from Stage 1 parsing.
 
-    Enables granular resource-level harmonization, selective re-harmonization,
+    Enables granular resource-level normalization, selective re-normalization,
     and native DDI-L 4 JSON / COGS model object ingestion.
     """
 
@@ -198,7 +200,7 @@ class StagedResourceNode(models.Model):
         help_text="Raw external URN or local identifier from the source file.",
     )
     raw_value = models.JSONField(
-        help_text="Un-harmonized raw JSON dictionary of fields/attributes.",
+        help_text="Pre-normalized raw JSON dictionary of fields/attributes.",
     )
     canonical_urn = models.CharField(
         max_length=512,
@@ -210,7 +212,7 @@ class StagedResourceNode(models.Model):
     status = models.CharField(
         max_length=32,
         default="staged",
-        help_text="Status: 'staged', 'harmonized', 'quarantined', 'failed'.",
+        help_text="Status: 'staged', 'normalized', 'quarantined', 'failed'.",
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
