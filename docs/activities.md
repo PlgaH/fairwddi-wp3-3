@@ -8,7 +8,8 @@
 
 ## 🔄 Ongoing Activities
 
-- [ ] **DDI-L 4 Ingester Implementation:** Implement Stage 1 streaming XML/JSON parser and staging queue populating `StagedImport` and `StagedResourceNode` tables.
+- [ ] **DDI Element Relationship Exploration:** Analyzing DDI element relationships in Colectica DDI and reference examples (CLOSER, CSO, MIDUS) to refine representation-to-variable cascade extraction.
+- [ ] **DDI-L Ingester Pipeline:** Advancing the Stage 1 streaming XML/JSON parser and staging queue populating `StagedImport` and `StagedResourceNode` tables.
 - [ ] **Harmonization & Mapping Workflows:** Implement Stage 2 normalization pipeline mapping staged resource graphs to the canonical variable cascade (`ConceptualVariable` → `RepresentedVariable` → `InstanceVariable`).
 - [ ] **Elasticsearch Multilingual Search Sync:** Wire Django signals / Pydantic schemas to Elasticsearch 9.x multilingual index templates.
 
@@ -31,25 +32,46 @@
 ## ✅ Completed Activities
 
 - **Standard-Agnostic DDI Database Architecture & Implementation:**
-  - Designed and implemented the complete 15-table relational data model in Django, fully aligned with **DDI 4.0 (COGS model)**, **DDI-CDI (Cross-Domain Integration)**, and **DDI-Lifecycle 3.3**.
+  - Generated first version of the standard-agnostic relational database model (15 tables) and underlying Django packages/scripts, fully aligned with **DDI 4.0 (COGS model)**, **DDI-CDI (Cross-Domain Integration)**, and **DDI-Lifecycle 3.3**.
   - Implemented the three-tier DDI variable cascade: `ConceptualVariable → RepresentedVariable → InstanceVariable`.
   - Configured PostgreSQL binary `JSONB` array of objects format `[{"lang": "fr", "value": "..."}]` across all multilingual text fields.
+  - Implemented and tweaked staging tables (`StagedImport`, `StagedResourceNode`) to support high-throughput, raw payload capture during multi-standard ingestion.
   - Established abstract `DDIIdentifiable` base model providing persistent URN resolution (`urn:ddi:{agency}:{identifier}:{version}`) and SHA-256 content fingerprinting.
   - Delivered standalone PostgreSQL ≥ 17 SQL DDL export generator (`src/fairwddi/db/ddl.py`, `fairwddi db export-ddl`).
-  - Documented dual-engine architecture: sub-second SQLite for unit testing (<0.3s) and PostgreSQL 17+ with GIN indexing and `COPY` streaming for production.
+  - Configured automatic dual-engine database fallback: automatically uses SQLite3 for local development, CI, and unit testing if PostgreSQL is not available/configured.
 
 - **Generic SKOS / XKOS Controlled Vocabulary Ingestion Engine:**
-  - Developed standard-agnostic RDF vocabulary loader (`fairwddi.db.vocab`, `fairwddi db load-vocab`) using `rdflib`.
+  - Implemented helper and CLI command (`fairwddi db load-vocab`) to parse and load SKOS-based Controlled Vocabularies (CVs) directly into hierarchical `Concept` models using `rdflib`.
+  - Added **CESSDA ELSST Release 6** (`vocab/ELSST_R6.ttl`, 3,470 concepts across 8 hierarchical levels) to the repository and loaded it into the database.
   - Multi-format RDF parsing: Turtle (`.ttl`), RDF/XML (`.rdf`, `.xml`), JSON-LD (`.jsonld`), N-Triples (`.nt`), Notation3 (`.n3`).
   - Hierarchy depth control (`--levels 1`, `--levels 2`, `--levels 3`, `all`) with bidirectional parent/child traversal (`skos:broader` / `skos:narrower`) directly into `Concept.parent`.
-  - Integrated **CESSDA ELSST Release 6** vocabulary (`vocab/ELSST_R6.ttl`, 3,470 concepts across 8 hierarchical levels).
   - Built pre-flight "already loaded" detection and global vocabulary inventory reporting (`fairwddi db check-vocab`).
 
-- **Database Management & Seeding CLI Tools:**
-  - Implemented complete database seeder (`fairwddi.db.seed`, `fairwddi db seed`) populating demonstration entities across all 6 architectural layers (Organizational, Concept, Representation, Dataset, Grouping, Staging).
-  - Built safe database wipe engine (`fairwddi.db.wipe`, `fairwddi db wipe`) with reverse topological deletion ordering and explicit string confirmation (`WIPE`).
-  - Implemented environment & connection config resolver (`fairwddi.db.config`) supporting `.env` files, `DATABASE_URL`, discrete PostgreSQL variables, and SQLite fallbacks.
-  - Developed full Typer & Rich CLI application (`fairwddi info`, `db init`, `db seed`, `db wipe`, `db status`, `db export-ddl`, `db load-vocab`, `db check-vocab`).
+- **CLI Tools & Database Utilities:**
+  - Integrated full database lifecycle, vocabulary loaders, staging, seeding, and export utilities into the unified Typer & Rich CLI (`fairwddi info`, `db init`, `db seed`, `db wipe`, `db status`, `db export-ddl`, `db load-vocab`, `db check-vocab`).
+  - Implemented complete database seeder (`fairwddi.db.seed`, `fairwddi db seed`) populating demonstration entities across all architectural layers.
+  - Built safe database wipe engine (`fairwddi.db.wipe`, `fairwddi db wipe`) with reverse topological deletion ordering and explicit confirmation (`WIPE`).
+  - Implemented environment & connection config resolver (`fairwddi.db.config`) supporting `.env` files, `DATABASE_URL`, discrete PostgreSQL variables, and automatic SQLite fallback.
+
+- **Corpus Analysis & Sample DDI Collection:**
+  - Documented resource type counts by source from BaseX XML database ([Google Sheets reference](https://docs.google.com/spreadsheets/d/12TlvcKtK6Wk2aCRLbDyJ8uSOU0VRxGs1TPAklzkVAyA/edit?gid=2126802340#gid=2126802340)).
+  - Collected DDI-L metadata packages from [MIDUS](https://midus.colectica.org/).
+  - Collected DDI-L metadata from [Ireland Central Statistics Office (CSO)](https://metadataddi.cso.ie/) (5 projects, 23 series, 67 studies, 210 instruments, 6,044 questions).
+  - Collected DDI-L from the [CLOSER](https://discovery.closer.ac.uk/) repository (12 longitudinal projects, 2+ GB of XML, 50M+ resources).
+  - Ingested CLOSER DDI-L into BaseX XML database for high-volume exploratory querying and reporting.
+
+- **Tooling, DDI-L Import & Library Development:**
+  - Initial implementation of import utility for DDI-L (streaming XML parser using `lxml.etree.iterparse` and staging payload ingestion).
+  - Implemented various enhancements to DDI-L tools and integration into Data Artifex DDI-Toolkit (`dartfx-ddi`):
+    - Pydantic models generated from COGS.
+    - High-performance streaming parser (`lxml.etree.iterparse`).
+  - Added Python Pydantic serializer to Colectica COGS.
+  - Implemented DDI 3.3 to 4.0 parser.
+  - Automated test suite running in <0.5s with full `ruff` linting and formatting compliance.
+
+- **Community, Stakeholder & Expert Engagement:**
+  - Added Discussion feature on GitHub repository and seeded initial technical threads covering multilingual metadata representations, database relational model design, metadata compilation pipelines, and migration paths from DDI-Codebook (DDI-C) to DDI-Lifecycle (DDI-L).
+  - Technical consultation with Jon Johnson (CLOSER / DDI Alliance) on question-bank architectures, cross-study harmonization, and operational lessons.
 
 - **Early R&D & Specification Modeling:**
   - Deep research on metadata normalization challenges, canonical JSON serialization, and deterministic hashing algorithms.
@@ -62,21 +84,3 @@
     - [`deliverables/glossary.md`](../deliverables/glossary.md) (Canonical DDI Terminology & Entity Mappings)
     - [`deliverables/summary.md`](../deliverables/summary.md) (Executive Architecture Summary)
     - [`docs/cli_user_guide.md`](cli_user_guide.md) (CLI Manual & Configuration Guide)
-
-- **Corpus & Sample DDI Collection:**
-  *(Note: Harvested DDI corpus files are maintained locally under `ddi/` and excluded from the public git repository due to file size constraints and licensing)*
-  - Collected DDI-L metadata packages from [MIDUS](https://midus.colectica.org/).
-  - Collected DDI-L metadata from [Ireland Central Statistics Office (CSO)](https://metadataddi.cso.ie/) (5 projects, 23 series, 67 studies, 210 instruments, 6,044 questions).
-  - Collected DDI-L from the [CLOSER](https://discovery.closer.ac.uk/) repository (12 longitudinal projects, 2+ GB of XML, 50M+ resources).
-  - Ingested CLOSER DDI-L into BaseX XML database for high-volume exploratory querying and reporting.
-
-- **Tooling & Library Development:**
-  - Added Python Pydantic serializer to Colectica COGS.
-  - Integrated DDI-Lifecycle into Data Artifex DDI-Toolkit (`dartfx-ddi`):
-    - Pydantic models generated from COGS.
-    - High-performance streaming parser (`lxml.etree.iterparse`).
-  - Implemented DDI 3.3 to 4.0 parser.
-  - Automated test suite with 32 unit/integration tests running in <0.5s with full `ruff` linting and formatting compliance.
-
-- **Stakeholder & Expert Engagement:**
-  - Technical consultation with Jon Johnson (CLOSER / DDI Alliance) on question-bank architectures, cross-study harmonization, and operational lessons.
