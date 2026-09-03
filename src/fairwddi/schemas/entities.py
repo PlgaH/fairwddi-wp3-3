@@ -337,3 +337,27 @@ class StagedResourceNodeSchema(BaseModel):
     canonical_urn: str | None = None
     status: str = Field(default="staged", description="staged, normalized, quarantined, failed.")
     created_at: datetime | None = None
+
+
+class RawResourceNode(BaseModel):
+    """Individual extracted metadata element prior to database staging."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
+
+    resource_type: str = Field(
+        ..., description="DDI resource class name (e.g. QuestionItem, Variable)."
+    )
+    raw_urn: str = Field(..., description="Raw incoming URN or deterministic ID.")
+    raw_value: dict[str, Any] = Field(..., description="Pre-normalized raw JSON dictionary.")
+    referenced_urns: set[str] = Field(default_factory=set, description="Referenced resource URNs.")
+    content_fingerprint: str = Field(
+        default="", description="Deterministic SHA-256 content fingerprint."
+    )
+
+    def to_json(self) -> str:
+        """Return canonical JSON representation of the resource payload."""
+        import json
+
+        return json.dumps(self.raw_value, sort_keys=True, ensure_ascii=False)
+
+

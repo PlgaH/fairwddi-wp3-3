@@ -413,10 +413,10 @@ def import_file_cmd(
         help="Path to metadata document file to import (e.g. .ddi33.xml, .ddi40.json, .ddic.xml).",
     ),
     profile: str = typer.Option(
-        "request_core",
+        "request",
         "--profile",
         "-p",
-        help="Profile preset name (request_core, all_ddi) or path to custom YAML/JSON profile.",
+        help="Profile preset name (request, all_ddi) or path to custom YAML/JSON profile.",
     ),
     format_override: str | None = typer.Option(
         None,
@@ -440,8 +440,24 @@ def import_file_cmd(
         "--batch-size",
         help="Database bulk insertion batch size.",
     ),
+    show_progress: bool = typer.Option(
+        True,
+        "--progress/--no-progress",
+        help="Show real-time progress bar during extraction and database staging.",
+    ),
 ) -> None:
     """Import and stage a metadata document into StagedImport and StagedResourceNode."""
+    from rich.progress import (
+        BarColumn,
+        MofNCompleteColumn,
+        Progress,
+        SpinnerColumn,
+        TaskProgressColumn,
+        TextColumn,
+        TimeElapsedColumn,
+        TimeRemainingColumn,
+    )
+
     from fairwddi.importer import import_metadata_file
 
     configure_django_for_cli()
@@ -456,18 +472,73 @@ def import_file_cmd(
         f"with profile [yellow]{profile}[/yellow]...[/dim]"
     )
 
-    try:
-        summary = import_metadata_file(
-            file_path=path,
-            profile=profile,
-            source_format=format_override,
-            batch_size=batch_size,
-            dry_run=dry_run,
-            force_reload=force_reload,
-        )
-    except Exception as exc:
-        console.print(f"[bold red]Import Error:[/bold red] {exc}")
-        raise typer.Exit(code=1) from exc
+    if show_progress:
+        with Progress(
+            SpinnerColumn(style="bold cyan"),
+            TextColumn("[bold cyan]{task.description}[/bold cyan]"),
+            BarColumn(bar_width=35, complete_style="green", finished_style="bold green"),
+            TaskProgressColumn(),
+            MofNCompleteColumn(),
+            TimeElapsedColumn(),
+            TimeRemainingColumn(),
+            console=console,
+            transient=False,
+        ) as progress:
+            parse_task = progress.add_task("[cyan]Streaming & parsing document...", total=None)
+            stage_task = progress.add_task(
+                "[yellow]Staging resources to database...", total=None, visible=False
+            )
+
+            def on_progress(
+                stage: str, current: int, total: int | None, message: str | None
+            ) -> None:
+                if stage == "parse":
+                    desc = f"[cyan]Parsing fragments...[/cyan] [dim]({current:,} items)[/dim]"
+                    progress.update(parse_task, completed=current, description=desc)
+                elif stage == "parse_done":
+                    desc = f"[bold green]Parsed {current:,} resource fragments[/bold green]"
+                    progress.update(parse_task, total=current, completed=current, description=desc)
+                    progress.update(
+                        stage_task,
+                        visible=True,
+                        total=current,
+                        completed=0,
+                        description="[yellow]Filtering & staging to database...[/yellow]",
+                    )
+                elif stage == "stage":
+                    desc = f"[yellow]Staging...[/yellow] [dim]({message or ''})[/dim]"
+                    progress.update(stage_task, completed=current, total=total, description=desc)
+                elif stage == "stage_done":
+                    desc = f"[bold green]Staged {current:,} resources into db[/bold green]"
+                    progress.update(stage_task, completed=current, total=total, description=desc)
+
+            try:
+                summary = import_metadata_file(
+                    file_path=path,
+                    profile=profile,
+                    source_format=format_override,
+                    batch_size=batch_size,
+                    dry_run=dry_run,
+                    force_reload=force_reload,
+                    progress_callback=on_progress,
+                )
+            except Exception as exc:
+                console.print(f"[bold red]Import Error:[/bold red] {exc}")
+                raise typer.Exit(code=1) from exc
+    else:
+        try:
+            summary = import_metadata_file(
+                file_path=path,
+                profile=profile,
+                source_format=format_override,
+                batch_size=batch_size,
+                dry_run=dry_run,
+                force_reload=force_reload,
+            )
+        except Exception as exc:
+            console.print(f"[bold red]Import Error:[/bold red] {exc}")
+            raise typer.Exit(code=1) from exc
+
 
     if summary.get("status") == "already_staged":
         console.print(f"[bold yellow]Notice:[/bold yellow] {summary.get('message')}")
@@ -810,6 +881,12 @@ def import_log_cmd(
 @import_app.command("delete")
 def import_delete_cmd(
     import_id: int = typer.Argument(..., help="StagedImport primary key ID to delete."),
+    yes: bool = typer.Option(
+        False,
+        "--yes",
+        "-y",
+        help="Skip confirmation prompt and proceed with deletion.",
+    ),
     force: bool = typer.Option(
         False,
         "--force",
@@ -822,10 +899,24 @@ def import_delete_cmd(
         help="Also delete the session audit log file from disk.",
     ),
 ) -> None:
-    """Delete a staged import and its resource nodes with downstream dependency safety."""
-    from fairwddi.importer import ProtectedImportError, delete_staged_import
-
     configure_django_for_cli()
+    from fairwddi.importer import ProtectedImportError, delete_staged_import
+    from fairwddi.models import StagedImport
+
+    staged_import = StagedImport.objects.filter(id=import_id).first()
+    if not staged_import:
+        console.print(f"[bold red]Error:[/bold red] StagedImport #{import_id} not found.")
+        raise typer.Exit(code=1)
+
+    if not yes:
+        confirmed = typer.confirm(
+            f"Are you sure you want to delete StagedImport #{import_id} "
+            f"('{staged_import.file_name}', {staged_import.total_resources:,} nodes)?",
+            default=False,
+        )
+        if not confirmed:
+            console.print("[dim]Deletion cancelled.[/dim]")
+            raise typer.Exit()
 
     try:
         res = delete_staged_import(import_id=import_id, force=force, delete_log_file=delete_log)
@@ -848,6 +939,7 @@ def import_delete_cmd(
     )
     if res["log_file_deleted"]:
         console.print("[dim]Session audit log file removed from disk.[/dim]")
+
 
 
 if __name__ == "__main__":

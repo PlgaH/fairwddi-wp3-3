@@ -18,6 +18,7 @@ from fairwddi.schemas.entities import (
     InstanceVariableSchema,
     MetadataQuarantineSchema,
     QuestionItemSchema,
+    RawResourceNode,
     RepresentedVariableSchema,
     StagedImportSchema,
     StagedResourceNodeSchema,
@@ -52,4 +53,6 @@ __all__ = [
     "MetadataQuarantineSchema",
     "StagedImportSchema",
     "StagedResourceNodeSchema",
+    "RawResourceNode",
 ]
+

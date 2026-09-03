@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -36,12 +37,13 @@ def import_metadata_file(
     force_reload: bool = False,
     import_task_id: str | None = None,
     log_dir: str | Path | None = None,
+    progress_callback: Callable[[str, int, int | None, str | None], None] | None = None,
 ) -> dict[str, Any]:
     """Import and stage a metadata document (DDI-L, DDI-C, DDI-CDI, etc.) into the database.
 
     Args:
         file_path: Path to the metadata document on disk.
-        profile: Profile name, path, or ImportProfile instance (defaults to 'request_core').
+        profile: Profile name, path, or ImportProfile instance (defaults to 'request').
         import_options: Optional dictionary of options and configuration metadata.
         source_format: Optional explicit format override.
         batch_size: Number of resource nodes to bulk insert in each database transaction.
@@ -49,10 +51,12 @@ def import_metadata_file(
         force_reload: If True, replaces previous staged records if this file was already imported.
         import_task_id: Optional background task identifier (e.g. from django-tasks-db).
         log_dir: Optional custom directory for session log files.
+        progress_callback: Optional callback receiving (stage, current, total, message).
 
     Returns:
         Comprehensive execution summary dictionary.
     """
+
     path = Path(file_path)
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
@@ -166,6 +170,21 @@ def import_metadata_file(
     for raw_node in stream_resources(path, active_profile, format_info):
         node_buffer.append(raw_node)
         referenced_urn_pool.update(raw_node.referenced_urns)
+        if progress_callback and (len(node_buffer) % 100 == 0 or len(node_buffer) < 50):
+            progress_callback(
+                "parse",
+                len(node_buffer),
+                None,
+                f"Extracting {raw_node.resource_type} ({len(node_buffer):,} items)",
+            )
+
+    if progress_callback:
+        progress_callback(
+            "parse_done",
+            len(node_buffer),
+            len(node_buffer),
+            f"Extracted {len(node_buffer):,} resource fragments",
+        )
 
     # 6. Second pass: Filter, Deduplicate, Check Drift & Stage Nodes
     total_staged = 0
@@ -174,23 +193,31 @@ def import_metadata_file(
     counts_by_type: dict[str, int] = {}
     db_batch: list[StagedResourceNode] = []
     batch_index = 0
+    total_nodes = len(node_buffer)
 
-    existing_nodes_map = (
-        {
-            node.raw_urn: (node.id, node.canonical_urn, node.raw_value)
-            for node in StagedResourceNode.objects.all().only(
+    raw_urns_in_import = [n.raw_urn for n in node_buffer if n.raw_urn]
+    existing_nodes_map: dict[str, tuple[int, str, dict[str, Any]]] = {}
+    if not dry_run and raw_urns_in_import:
+        chunk_size = 900
+        for i in range(0, len(raw_urns_in_import), chunk_size):
+            chunk = raw_urns_in_import[i : i + chunk_size]
+            for node in StagedResourceNode.objects.filter(raw_urn__in=chunk).only(
                 "id", "raw_urn", "canonical_urn", "raw_value"
-            )
-        }
-        if not dry_run
-        else {}
-    )
+            ):
+                existing_nodes_map[node.raw_urn] = (node.id, node.canonical_urn, node.raw_value)
 
     with transaction.atomic():
-        for raw_node in node_buffer:
+        for idx, raw_node in enumerate(node_buffer, 1):
             is_ref = raw_node.raw_urn in referenced_urn_pool
 
             if not active_profile.should_include(raw_node.resource_type, is_referenced=is_ref):
+                if progress_callback and (idx % 200 == 0 or idx == total_nodes):
+                    progress_callback(
+                        "stage",
+                        idx,
+                        total_nodes,
+                        f"{total_staged:,} staged, {skipped_duplicates:,} skipped",
+                    )
                 continue
 
             if raw_node.raw_urn in existing_nodes_map:
@@ -204,6 +231,13 @@ def import_metadata_file(
                     if exist_strat == "insert_new_only":
                         skipped_duplicates += 1
                         logger.log_duplicate_skip(raw_node.raw_urn, raw_node.resource_type)
+                        if progress_callback and (idx % 200 == 0 or idx == total_nodes):
+                            progress_callback(
+                                "stage",
+                                idx,
+                                total_nodes,
+                                f"{total_staged:,} staged, {skipped_duplicates:,} skipped",
+                            )
                         continue
                     elif exist_strat == "fail":
                         logger.close()
@@ -247,6 +281,13 @@ def import_metadata_file(
                                     status="quarantined",
                                 )
                             )
+                        if progress_callback and (idx % 200 == 0 or idx == total_nodes):
+                            progress_callback(
+                                "stage",
+                                idx,
+                                total_nodes,
+                                f"{total_staged:,} staged, {quarantined_count:,} quarantined",
+                            )
                         continue
                     elif drift_strat == "reject":
                         logger.close()
@@ -284,6 +325,14 @@ def import_metadata_file(
                 logger.log_batch_commit(batch_index, len(db_batch), total_staged)
                 db_batch.clear()
 
+            if progress_callback and (idx % 200 == 0 or idx == total_nodes):
+                progress_callback(
+                    "stage",
+                    idx,
+                    total_nodes,
+                    f"{total_staged:,} staged, {skipped_duplicates:,} skipped",
+                )
+
         if not dry_run and db_batch:
             batch_index += 1
             StagedResourceNode.objects.bulk_create(db_batch, batch_size=batch_size)
@@ -294,6 +343,10 @@ def import_metadata_file(
             staged_import.total_resources = total_staged
             staged_import.processed_resources = 0
             staged_import.save(update_fields=["total_resources", "processed_resources"])
+
+    if progress_callback:
+        progress_callback("stage_done", total_staged, total_nodes, "Staging completed")
+
 
     elapsed = time.time() - start_time
     throughput = total_staged / elapsed if elapsed > 0 else float(total_staged)

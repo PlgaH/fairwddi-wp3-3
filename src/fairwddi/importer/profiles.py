@@ -104,13 +104,13 @@ def load_profile(name_or_path: str | Path | None = None) -> ImportProfile:
     """Load an ImportProfile from a YAML/JSON file or preset name.
 
     Args:
-        name_or_path: Profile preset name (e.g. 'request_core', 'all_ddi') or file path.
-                      Defaults to 'request_core'.
+        name_or_path: Profile preset name (e.g. 'request', 'all_ddi') or file path.
+                      Defaults to 'request'.
 
     Returns:
         Configured ImportProfile instance.
     """
-    target = name_or_path or "request_core"
+    target = name_or_path or "request"
     profile_path = _find_profile_file(target)
 
     if profile_path and profile_path.exists():
@@ -121,23 +121,18 @@ def load_profile(name_or_path: str | Path | None = None) -> ImportProfile:
             data = yaml.safe_load(text) or {}
         return ImportProfile(**data)
 
-    if str(target).lower() in ("request_core", "default"):
+    if str(target).lower() in ("request", "request_core", "default"):
         return ImportProfile(
-            name="request_core",
-            description="Core ReQuest question bank profile (built-in default)",
+            name="request",
+            description="CDSP ReQuest question-bank profile (built-in default)",
             include_types=[
                 "QuestionItem",
                 "QuestionGrid",
                 "QuestionConstruct",
+                "QuestionGroup",
                 "QuestionScheme",
                 "StatementItem",
-                "Sequence",
-                "IfThenElse",
-                "ComputationItem",
-                "Loop",
-                "ControlConstructScheme",
-                "Instrument",
-                "InstrumentScheme",
+                "Instruction",
                 "InterviewerInstruction",
                 "InterviewerInstructionScheme",
                 "Category",
@@ -147,6 +142,13 @@ def load_profile(name_or_path: str | Path | None = None) -> ImportProfile:
                 "CodeList",
                 "CodeListScheme",
                 "CodeItem",
+                "ManagedMissingValuesRepresentation",
+                "ManagedRepresentationScheme",
+                "StatisticalClassification",
+                "ClassificationFamily",
+                "ClassificationSeries",
+                "ClassificationLevel",
+                "ClassificationItem",
                 "Variable",
                 "InstanceVariable",
                 "RepresentedVariable",
@@ -160,23 +162,36 @@ def load_profile(name_or_path: str | Path | None = None) -> ImportProfile:
                 "Concept",
                 "ConceptGroup",
                 "ConceptScheme",
+                "ConceptualComponent",
                 "Universe",
                 "UniverseScheme",
                 "StudyUnit",
                 "Group",
                 "DataCollection",
+                "DataRelationship",
                 "Organization",
+                "OrganizationScheme",
             ],
             exclude_types=[
-                "VariableStatistics",
+                "Instrument",
+                "InstrumentScheme",
+                "ControlConstructScheme",
+                "Sequence",
+                "IfThenElse",
+                "Loop",
+                "ComputationItem",
+                "Archive",
+                "DDIInstance",
+                "ResourcePackage",
                 "PhysicalInstance",
                 "PhysicalDataSet",
+                "Methodology",
+                "ProcessingEvent",
+                "ProcessingEventScheme",
                 "OtherMaterial",
                 "QualityStandard",
                 "QualityStatement",
-                "Methodology",
-                "DDIInstance",
-                "ResourcePackage",
+                "VariableStatistics",
             ],
             include_referenced_resources=True,
             strategies=ImportStrategies(),

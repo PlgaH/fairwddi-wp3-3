@@ -90,18 +90,27 @@ def test_detect_metadata_format_nonexistent() -> None:
 # -----------------------------------------------------------------------------
 
 
-def test_load_profile_request_core() -> None:
-    profile = load_profile("request_core")
-    assert profile.name == "request_core"
+def test_load_profile_request() -> None:
+    profile = load_profile("request")
+    assert profile.name == "request"
     assert "QuestionItem" in profile.include_types
+    assert "Instruction" in profile.include_types
+    assert "Instrument" in profile.include_types
+    assert "Sequence" in profile.include_types
+    assert "ControlConstructScheme" in profile.include_types
     assert "VariableStatistics" in profile.exclude_types
+    assert "Archive" in profile.exclude_types
     assert profile.include_referenced_resources is True
 
     assert profile.should_include("VariableStatistics") is False
+    assert profile.should_include("Archive") is False
+    assert profile.should_include("Instrument") is True
+    assert profile.should_include("Sequence") is True
     assert profile.should_include("QuestionItem") is True
     assert profile.should_include("UnlistedResource", is_referenced=False) is False
     assert profile.should_include("UnlistedResource", is_referenced=True) is True
     assert profile.should_include("VariableStatistics", is_referenced=True) is False
+
 
 
 def test_load_profile_all_ddi() -> None:
@@ -114,7 +123,7 @@ def test_load_profile_all_ddi() -> None:
 def test_list_available_profiles() -> None:
     profiles = list_available_profiles()
     names = [p["name"] for p in profiles]
-    assert "request_core" in names
+    assert "request" in names
     assert "all_ddi" in names
 
 
@@ -124,7 +133,7 @@ def test_list_available_profiles() -> None:
 
 
 def test_stream_resources_ddi33_xml(sample_cso_xml: Path) -> None:
-    profile = load_profile("request_core")
+    profile = load_profile("request")
     nodes = list(stream_resources(sample_cso_xml, profile))
     assert len(nodes) > 100
     types = {n.resource_type for n in nodes}
@@ -136,7 +145,7 @@ def test_stream_resources_ddi33_xml(sample_cso_xml: Path) -> None:
 
 
 def test_stream_resources_ddi40_json(sample_ddi40_json: Path) -> None:
-    profile = load_profile("request_core")
+    profile = load_profile("request")
     nodes = list(stream_resources(sample_ddi40_json, profile))
     assert len(nodes) > 50
     types = {n.resource_type for n in nodes}
@@ -145,7 +154,7 @@ def test_stream_resources_ddi40_json(sample_ddi40_json: Path) -> None:
 
 
 def test_stream_resources_ddic_xml(sample_fsd_ddic: Path) -> None:
-    profile = load_profile("request_core")
+    profile = load_profile("request")
     nodes = list(stream_resources(sample_fsd_ddic, profile))
     assert len(nodes) > 100
     types = {n.resource_type for n in nodes}
@@ -166,7 +175,7 @@ def test_import_metadata_file_dry_run(sample_fsd_ddic: Path) -> None:
 
     summary = import_metadata_file(
         file_path=sample_fsd_ddic,
-        profile="request_core",
+        profile="request",
         dry_run=True,
     )
 
@@ -178,6 +187,27 @@ def test_import_metadata_file_dry_run(sample_fsd_ddic: Path) -> None:
 
 
 @pytest.mark.django_db
+def test_import_metadata_file_with_progress_callback(sample_fsd_ddic: Path) -> None:
+    events: list[tuple[str, int, int | None, str | None]] = []
+
+    def callback(stage: str, current: int, total: int | None, msg: str | None) -> None:
+        events.append((stage, current, total, msg))
+
+    summary = import_metadata_file(
+        file_path=sample_fsd_ddic,
+        profile="request",
+        dry_run=True,
+        progress_callback=callback,
+    )
+
+    assert summary["status"] == "dry_run_success"
+    stages = [e[0] for e in events]
+    assert "parse" in stages or "parse_done" in stages
+    assert "stage_done" in stages
+
+
+
+@pytest.mark.django_db
 def test_import_metadata_file_live_and_duplicate_skip(
     sample_fsd_ddic: Path, tmp_path: Path
 ) -> None:
@@ -186,7 +216,7 @@ def test_import_metadata_file_live_and_duplicate_skip(
     # 1. First live import
     summary1 = import_metadata_file(
         file_path=sample_fsd_ddic,
-        profile="request_core",
+        profile="request",
         log_dir=log_dir,
     )
 
@@ -207,7 +237,7 @@ def test_import_metadata_file_live_and_duplicate_skip(
     # 2. Re-importing same file triggers duplicate skip
     summary2 = import_metadata_file(
         file_path=sample_fsd_ddic,
-        profile="request_core",
+        profile="request",
         log_dir=log_dir,
     )
     assert summary2["status"] == "already_staged"
@@ -216,7 +246,7 @@ def test_import_metadata_file_live_and_duplicate_skip(
     # 3. Force reload replaces staged import
     summary3 = import_metadata_file(
         file_path=sample_fsd_ddic,
-        profile="request_core",
+        profile="request",
         force_reload=True,
         log_dir=log_dir,
     )
@@ -273,7 +303,7 @@ def test_cli_import_list_profiles(runner: CliRunner) -> None:
     result = runner.invoke(app, ["import", "list-profiles"])
     assert result.exit_code == 0
     assert "Available Import Profiles" in result.stdout
-    assert "request_core" in result.stdout
+    assert "request" in result.stdout
 
 
 @pytest.mark.django_db
@@ -307,7 +337,7 @@ def test_delete_staged_import_unharmonized(sample_fsd_ddic: Path, tmp_path: Path
 
     summary = import_metadata_file(
         file_path=sample_fsd_ddic,
-        profile="request_core",
+        profile="request",
         log_dir=tmp_path / "del_logs",
     )
     import_id = summary["staged_import_id"]
@@ -391,15 +421,23 @@ def test_delete_staged_import_protected_urnalias() -> None:
 def test_cli_import_delete(runner: CliRunner, sample_fsd_ddic: Path) -> None:
     import_metadata_file(
         file_path=sample_fsd_ddic,
-        profile="request_core",
+        profile="request",
         force_reload=True,
     )
     staged = StagedImport.objects.latest("id")
 
-    result = runner.invoke(app, ["import", "delete", str(staged.id)])
-    assert result.exit_code == 0
-    assert f"Deleted StagedImport #{staged.id}" in result.stdout
+    # 1. Cancelled deletion
+    result_cancel = runner.invoke(app, ["import", "delete", str(staged.id)], input="n\n")
+    assert result_cancel.exit_code == 0
+    assert "Deletion cancelled" in result_cancel.stdout
+    assert StagedImport.objects.filter(id=staged.id).exists()
+
+    # 2. Confirmed deletion via interactive input
+    result_confirm = runner.invoke(app, ["import", "delete", str(staged.id)], input="y\n")
+    assert result_confirm.exit_code == 0
+    assert f"Deleted StagedImport #{staged.id}" in result_confirm.stdout
     assert not StagedImport.objects.filter(id=staged.id).exists()
+
 
 
 @pytest.mark.django_db
@@ -412,7 +450,7 @@ def test_import_statistics_and_query_helpers(sample_fsd_ddic: Path) -> None:
 
     summary = import_metadata_file(
         file_path=sample_fsd_ddic,
-        profile="request_core",
+        profile="request",
         force_reload=True,
     )
     import_id = summary["staged_import_id"]
@@ -453,7 +491,7 @@ def test_import_statistics_and_query_helpers(sample_fsd_ddic: Path) -> None:
 def test_cli_import_list_stats_query(runner: CliRunner, sample_fsd_ddic: Path) -> None:
     import_metadata_file(
         file_path=sample_fsd_ddic,
-        profile="request_core",
+        profile="request",
         force_reload=True,
     )
     staged = StagedImport.objects.latest("id")
@@ -500,7 +538,7 @@ def test_import_statistics_json_and_markdown_rendering(sample_fsd_ddic: Path) ->
 
     summary = import_metadata_file(
         file_path=sample_fsd_ddic,
-        profile="request_core",
+        profile="request",
         force_reload=True,
     )
     import_id = summary["staged_import_id"]

@@ -1,0 +1,101 @@
+name: "request"
+description: "CDSP ReQuest question-bank profile for DDI-Lifecycle and DDI-Codebook"
+
+include_types:
+  # ===========================================================================
+  # Question & Representation Layer (Question Bank Core)
+  # ===========================================================================
+  - QuestionItem
+  - QuestionGrid
+  - QuestionConstruct
+  - QuestionGroup
+  - QuestionScheme
+  - StatementItem
+  - Instruction
+  - InterviewerInstruction
+  - InterviewerInstructionScheme
+
+  # ===========================================================================
+  # Representation, Code List & Classification Layer
+  # ===========================================================================
+  - Category
+  - CategorySet
+  - CategoryGroup
+  - CategoryScheme
+  - CodeList
+  - CodeListScheme
+  - CodeItem
+  - ManagedMissingValuesRepresentation
+  - ManagedRepresentationScheme
+  - StatisticalClassification
+  - ClassificationFamily
+  - ClassificationSeries
+  - ClassificationLevel
+  - ClassificationItem
+
+  # ===========================================================================
+  # Variable Cascade Layer
+  # ===========================================================================
+  - Variable
+  - InstanceVariable
+  - RepresentedVariable
+  - RepresentedVariableGroup
+  - RepresentedVariableScheme
+  - ConceptualVariable
+  - ConceptualVariableGroup
+  - ConceptualVariableScheme
+  - VariableGroup
+  - VariableScheme
+
+  # ===========================================================================
+  # Instrument & Questionnaire Routing Flow Layer (Path 2: Instrument & Sequencing)
+  # ===========================================================================
+  - Instrument
+  - InstrumentScheme
+  - ControlConstructScheme
+  - Sequence
+  - IfThenElse
+  - Loop
+  - ComputationItem
+
+  # ===========================================================================
+  # Concept, Universe & Study Structure
+  # ===========================================================================
+  - Concept
+  - ConceptGroup
+  - ConceptScheme
+  - ConceptualComponent
+  - Universe
+  - UniverseScheme
+  - StudyUnit
+  - Group
+  - DataCollection
+  - DataRelationship
+  - Organization
+  - OrganizationScheme
+
+exclude_types:
+  # ===========================================================================
+  # Physical, Archival, Methodological & Statistical Overhead
+  # ===========================================================================
+  - Archive
+  - DDIInstance
+  - ResourcePackage
+  - PhysicalInstance
+  - PhysicalDataSet
+  - Methodology
+  - ProcessingEvent
+  - ProcessingEventScheme
+  - OtherMaterial
+  - QualityStandard
+  - QualityStatement
+  - VariableStatistics
+
+# Retain any referenced resources if needed to maintain question-variable relationships
+include_referenced_resources: true
+
+strategies:
+  on_duplicate_file: "skip"
+  on_existing_resource: "insert_new_only"
+  on_content_drift: "quarantine"
+

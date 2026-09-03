@@ -6,56 +6,122 @@ in constant O(1) memory, extracting structured JSON dictionary payloads.
 
 from __future__ import annotations
 
-import dataclasses
 import hashlib
 import json
 from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 from lxml import etree
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from fairwddi.importer.detector import MetadataFormatInfo, detect_metadata_format
 from fairwddi.importer.profiles import ImportProfile
 
 
-@dataclasses.dataclass
-class RawResourceNode:
+class RawResourceNode(BaseModel):
     """Individual extracted metadata element prior to database staging."""
 
-    resource_type: str
-    raw_urn: str
-    raw_value: dict[str, Any]
-    referenced_urns: set[str] = dataclasses.field(default_factory=set)
-    content_fingerprint: str = ""
+    model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
 
-    def __post_init__(self) -> None:
+    resource_type: str = Field(
+        ..., description="DDI resource class name (e.g. QuestionItem, Variable)."
+    )
+    raw_urn: str = Field(..., description="Raw incoming URN or deterministic ID.")
+    raw_value: dict[str, Any] = Field(..., description="Pre-normalized raw JSON dictionary.")
+    referenced_urns: set[str] = Field(default_factory=set, description="Referenced resource URNs.")
+    content_fingerprint: str = Field(
+        default="", description="Deterministic SHA-256 content fingerprint."
+    )
+
+    @model_validator(mode="after")
+    def compute_content_fingerprint(self) -> Self:
         if not self.content_fingerprint:
             canonical_json = json.dumps(self.raw_value, sort_keys=True, ensure_ascii=False)
             self.content_fingerprint = hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
+        return self
+
+    def to_json(self) -> str:
+        """Return canonical JSON representation of the resource payload."""
+        return json.dumps(self.raw_value, sort_keys=True, ensure_ascii=False)
 
 
-def xml_elem_to_dict(elem: Any) -> dict[str, Any]:
-    """Recursively convert an lxml XML element to a structured JSON-compatible dictionary."""
-    tag = etree.QName(elem).localname
-    d: dict[str, Any] = {"@tag": tag}
+def xml_to_json_dict(elem: Any) -> Any:
+    """Recursively convert an lxml XML element to a clean structured JSON dict or scalar.
+
+    Strips XML namespaces, extracts attributes prefixed with '@', collapses single-item
+    children while maintaining arrays for repeated tags, and simplifies text leaves.
+    """
+    result: dict[str, Any] = {}
 
     # Extract attributes
     for k, v in elem.attrib.items():
         attr_name = etree.QName(k).localname if "}" in k else k
-        d[f"@{attr_name}"] = v
+        if "lang" in k.lower():
+            attr_name = "xml:lang"
+        result[f"@{attr_name}"] = v
 
     # Extract text content
     text = elem.text.strip() if elem.text and elem.text.strip() else None
-    if text:
-        d["#text"] = text
 
-    # Extract child elements
-    children = [xml_elem_to_dict(c) for c in elem]
-    if children:
-        d["children"] = children
+    # Group child elements by tag name to support single items vs. lists
+    children_by_tag: dict[str, list[Any]] = {}
+    for child in elem:
+        c_tag = etree.QName(child).localname
+        c_dict = xml_to_json_dict(child)
+        if c_tag not in children_by_tag:
+            children_by_tag[c_tag] = []
+        children_by_tag[c_tag].append(c_dict)
 
-    return d
+    for c_tag, items in children_by_tag.items():
+        if len(items) == 1:
+            result[c_tag] = items[0]
+        else:
+            result[c_tag] = items
+
+    # Simplify leaf nodes with only text and no attributes/children
+    if not elem.attrib and not children_by_tag:
+        return text or ""
+
+    if text is not None and "#text" not in result:
+        result["#text"] = text
+
+    return result
+
+
+def resource_to_json(resource: Any) -> dict[str, Any]:
+    """Serialize any metadata resource (model instance, XML element, or dict) to a clean JSON dict.
+
+    Priority:
+    1. If object provides a .to_json() method, invoke it.
+    2. If object provides a .model_dump() method (Pydantic v2), invoke it.
+    3. If object provides a .dict() method (Pydantic v1), invoke it.
+    4. If object is already a dict, return as-is.
+    5. If object is an lxml XML Element, convert via xml_to_json_dict.
+    """
+    if hasattr(resource, "to_json") and callable(resource.to_json):
+        res = resource.to_json()
+        if isinstance(res, str):
+            return json.loads(res)
+        if isinstance(res, dict):
+            return res
+    if hasattr(resource, "model_dump") and callable(resource.model_dump):
+        return resource.model_dump(by_alias=True, exclude_none=True)
+    if hasattr(resource, "dict") and callable(resource.dict):
+        return resource.dict()
+    if isinstance(resource, dict):
+        return resource
+    if etree.iselement(resource):
+        converted = xml_to_json_dict(resource)
+        if isinstance(converted, dict):
+            return converted
+        return {"#text": converted}
+    return {"value": str(resource)}
+
+
+def xml_elem_to_dict(elem: Any) -> dict[str, Any]:
+    """Alias for backwards compatibility: converts XML element to JSON dictionary."""
+    return resource_to_json(elem)
 
 
 REFERENCE_TAG_PREFIXES = (
@@ -108,23 +174,91 @@ def extract_referenced_urns_from_json(obj: Any) -> set[str]:
     return refs
 
 
+DDI_IDENTIFIABLE_RESOURCE_TAGS = {
+    "QuestionItem",
+    "QuestionGrid",
+    "QuestionConstruct",
+    "QuestionGroup",
+    "QuestionScheme",
+    "StatementItem",
+    "Instruction",
+    "InterviewerInstruction",
+    "InterviewerInstructionScheme",
+    "Category",
+    "CategorySet",
+    "CategoryGroup",
+    "CategoryScheme",
+    "CodeList",
+    "CodeListScheme",
+    "CodeItem",
+    "ManagedMissingValuesRepresentation",
+    "ManagedRepresentationScheme",
+    "StatisticalClassification",
+    "ClassificationFamily",
+    "ClassificationSeries",
+    "ClassificationLevel",
+    "ClassificationItem",
+    "Variable",
+    "InstanceVariable",
+    "RepresentedVariable",
+    "RepresentedVariableGroup",
+    "RepresentedVariableScheme",
+    "ConceptualVariable",
+    "ConceptualVariableGroup",
+    "ConceptualVariableScheme",
+    "VariableGroup",
+    "VariableScheme",
+    "Instrument",
+    "InstrumentScheme",
+    "ControlConstructScheme",
+    "Sequence",
+    "IfThenElse",
+    "Loop",
+    "ComputationItem",
+    "Concept",
+    "ConceptGroup",
+    "ConceptScheme",
+    "ConceptualComponent",
+    "Universe",
+    "UniverseScheme",
+    "StudyUnit",
+    "Group",
+    "DataCollection",
+    "DataRelationship",
+    "Organization",
+    "OrganizationScheme",
+}
+
+
 def stream_ddi_l_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawResourceNode]:
     """Stream DDI-Lifecycle 3.x XML files element-by-element using iterparse."""
+    # Detect if document uses <Fragment> container architecture
+    has_fragments = False
+    for _event, elem in etree.iterparse(file_path, events=("start",)):
+        tag = etree.QName(elem).localname
+        if tag in ("FragmentInstance", "Fragment"):
+            has_fragments = True
+        break
+
     context = etree.iterparse(file_path, events=("end",))
 
     for _event, elem in context:
         tag = etree.QName(elem).localname
 
-        target_elem = elem
-        if tag == "Fragment":
-            children = list(elem)
-            if children:
-                target_elem = children[0]
-            else:
+        if has_fragments:
+            if tag != "Fragment":
+                continue
+            if len(elem) == 0:
                 elem.clear()
                 continue
+            target_elem = elem[0]
+            r_type = etree.QName(target_elem).localname
+        else:
+            if tag not in DDI_IDENTIFIABLE_RESOURCE_TAGS:
+                continue
+            target_elem = elem
+            r_type = tag
 
-        r_type = etree.QName(target_elem).localname
         if r_type in ("Fragment", "FragmentInstance", "DDIInstance", "TopLevelReference"):
             elem.clear()
             continue
@@ -161,7 +295,7 @@ def stream_ddi_l_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawRes
                 urn = f"urn:ddi:anonymous:{r_type.lower()}-{id(target_elem)}:1.0.0"
 
         refs = extract_referenced_urns_from_xml(target_elem)
-        raw_dict = xml_elem_to_dict(target_elem)
+        raw_dict = resource_to_json(target_elem)
 
         yield RawResourceNode(
             resource_type=r_type,
@@ -173,6 +307,7 @@ def stream_ddi_l_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawRes
         elem.clear()
         while elem.getprevious() is not None:
             del elem.getparent()[0]
+
 
 
 def stream_ddi_l_json(file_path: Path, profile: ImportProfile) -> Iterator[RawResourceNode]:
@@ -203,13 +338,15 @@ def stream_ddi_l_json(file_path: Path, profile: ImportProfile) -> Iterator[RawRe
                 urn = f"urn:ddi:anonymous:{r_type.lower()}-{id(item)}:1.0.0"
 
         refs = extract_referenced_urns_from_json(item)
+        raw_dict = resource_to_json(item)
 
         yield RawResourceNode(
             resource_type=r_type,
             raw_urn=urn.strip(),
-            raw_value=item,
+            raw_value=raw_dict,
             referenced_urns=refs,
         )
+
 
 
 def stream_ddi_c_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawResourceNode]:
