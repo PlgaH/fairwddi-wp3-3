@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 480" width="100%" height="100%">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+    <marker id="pipeArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7"/>
+    </marker>
+  </defs>
+
+  <rect width="620" height="480" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <!-- Col 1: Sources -->
+  <rect x="20" y="25" width="150" height="430" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" filter="url(#shadow)"/>
+  <rect x="30" y="35" width="130" height="24" rx="12" fill="#334155"/>
+  <text x="95" y="51" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">1. INPUT SOURCES</text>
+
+  <g transform="translate(30, 75)">
+    <rect width="130" height="58" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="10" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#0f172a">DDI-L 3.3 XML</text>
+    <text x="10" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#64748b">CLOSER / CSO Ireland</text>
+  </g>
+
+  <g transform="translate(30, 145)">
+    <rect width="130" height="58" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="10" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#0f172a">DDI 4.0 JSON</text>
+    <text x="10" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#64748b">Colectica COGS models</text>
+  </g>
+
+  <g transform="translate(30, 215)">
+    <rect width="130" height="58" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="10" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#0f172a">DDI-C 2.5 XML</text>
+    <text x="10" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#64748b">Legacy ReQuest exports</text>
+  </g>
+
+  <g transform="translate(30, 285)">
+    <rect width="130" height="58" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-dasharray="3 2"/>
+    <text x="10" y="22" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="600" fill="#64748b">Future Standards</text>
+    <text x="10" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#64748b">DDI-CDI &amp; New Specs</text>
+    <text x="10" y="50" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8" fill="#94a3b8">Extensible Adapter Core</text>
+  </g>
+
+  <g transform="translate(30, 355)">
+    <rect width="130" height="85" rx="6" fill="#f1f5f9" stroke="#cbd5e1"/>
+    <text x="10" y="20" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#475569">Streaming Mode</text>
+    <text x="10" y="38" font-family="JetBrains Mono, monospace" font-size="9" fill="#0f766e">lxml.iterparse</text>
+    <text x="10" y="54" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#64748b">Memory bounded</text>
+    <text x="10" y="70" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="600" fill="#0f766e">&lt;50 MB RAM for 2GB</text>
+  </g>
+
+  <!-- Arrow 1 to 2 -->
+  <line x1="170" y1="175" x2="195" y2="175" stroke="#0284c7" stroke-width="2.5" marker-end="url(#pipeArrow)"/>
+
+  <!-- Col 2: Stage 1 Staging -->
+  <rect x="200" y="25" width="195" height="195" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.2" filter="url(#shadow)"/>
+  <rect x="210" y="35" width="175" height="24" rx="12" fill="#0284c7"/>
+  <text x="297" y="51" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">2. STAGE 1: RAW STAGING</text>
+
+  <rect x="212" y="72" width="170" height="50" rx="6" fill="#ffffff" stroke="#7dd3fc"/>
+  <text x="220" y="92" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#0369a1">StagedImport</text>
+  <text x="220" y="108" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#475569">File bundle record &amp; checksum</text>
+
+  <rect x="212" y="130" width="170" height="55" rx="6" fill="#ffffff" stroke="#7dd3fc"/>
+  <text x="220" y="148" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#0369a1">StagedResourceNode</text>
+  <text x="220" y="164" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" fill="#475569">raw_urn | raw_value JSONB</text>
+  <text x="220" y="177" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="600" fill="#0284c7">⚡ Instant HTTP 200 Return</text>
+
+  <!-- Arrow down to Stage 2 -->
+  <line x1="297" y1="220" x2="297" y2="255" stroke="#0284c7" stroke-width="2.5" marker-end="url(#pipeArrow)"/>
+
+  <!-- Col 2: Stage 2 Normalization -->
+  <rect x="200" y="260" width="195" height="195" rx="10" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.2" filter="url(#shadow)"/>
+  <rect x="210" y="270" width="175" height="24" rx="12" fill="#6d28d9"/>
+  <text x="297" y="286" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">3. STAGE 2: ASYNC WORKER</text>
+
+  <rect x="212" y="304" width="170" height="60" rx="6" fill="#ffffff" stroke="#c4b5fd"/>
+  <text x="220" y="322" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#5b21b6">Format Adapters</text>
+  <text x="220" y="338" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" fill="#475569">• DDILifecycleAdapter (3.2/3.3)</text>
+  <text x="220" y="352" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" fill="#475569">• DDIL4JSONAdapter / DDI-CDI</text>
+
+  <rect x="212" y="372" width="170" height="70" rx="6" fill="#ffffff" stroke="#c4b5fd"/>
+  <text x="220" y="390" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#5b21b6">Normalization Engine</text>
+  <text x="220" y="406" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" fill="#475569">• Compute SHA-256 Hashes</text>
+  <text x="220" y="420" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" fill="#475569">• Shortened 16-char Hex URNs</text>
+  <text x="220" y="434" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" fill="#475569">• Background django-tasks-db</text>
+
+  <!-- Arrow to Destination -->
+  <line x1="395" y1="360" x2="420" y2="360" stroke="#0284c7" stroke-width="2.5" marker-end="url(#pipeArrow)"/>
+
+  <!-- Col 3: Destination -->
+  <rect x="425" y="25" width="175" height="430" rx="10" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.2" filter="url(#shadow)"/>
+  <rect x="435" y="35" width="155" height="24" rx="12" fill="#15803d"/>
+  <text x="512" y="51" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">4. CORE DATABASE</text>
+
+  <g transform="translate(435, 75)">
+    <rect width="155" height="175" rx="6" fill="#ffffff" stroke="#86efac"/>
+    <text x="10" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11.5" font-weight="700" fill="#14532d">PostgreSQL 17 Core</text>
+    <text x="10" y="46" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#475569">• ConceptualVariable</text>
+    <text x="10" y="62" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#475569">• QuestionItem</text>
+    <text x="10" y="78" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#475569">• CodeList &amp; Category</text>
+    <text x="10" y="94" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#475569">• RepresentedVariable</text>
+    <text x="10" y="110" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#475569">• InstanceVariable</text>
+    <text x="10" y="126" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#475569">• StudyUnit</text>
+    <text x="10" y="146" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="600" fill="#15803d">✓ Zero duplicate drift</text>
+    <text x="10" y="160" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="600" fill="#15803d">✓ URNAlias audit registry</text>
+  </g>
+
+  <g transform="translate(435, 265)">
+    <rect width="155" height="175" rx="6" fill="#ffffff" stroke="#86efac"/>
+    <text x="10" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11.5" font-weight="700" fill="#14532d">Django Ninja REST API</text>
+    <text x="10" y="46" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#475569">• OpenAPI Schemas</text>
+    <text x="10" y="62" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#475569">• Multilingual JSONB</text>
+    <text x="10" y="78" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#475569">• Concept traversal</text>
+    <text x="10" y="94" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#475569">• Variable cascade endpoints</text>
+    <text x="10" y="110" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#475569">• DDI-L / DDI 4 export</text>
+    <text x="10" y="136" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="600" fill="#15803d">⚡ ReQuest Service Layer</text>
+  </g>
+</svg>

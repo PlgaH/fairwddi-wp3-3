@@ -166,7 +166,7 @@ uv run fairwddi db check-vocab
 uv run fairwddi db wipe
 ```
 
-> 📖 **Full CLI Documentation:** See the **[CLI User Guide](docs/cli_user_guide.md)** for complete command options, environment variables, and programmatic Python examples.
+> 📖 **Full CLI Documentation:** See the **[CLI User Guide](deliverables/cli_user_guide.md)** for complete command options, environment variables, and programmatic Python examples.
 
 ### 3. Running Tests
 
@@ -193,18 +193,18 @@ uv run pyrefly check
 
 ---
 
-## 📚 Key References & Documentation
+## 📚 Deliverables & References
 
 - **Project Activities & Progress Log:** [docs/activities.md](docs/activities.md) — Live log of completed tasks, ongoing work, planned milestones, and pending items.
+- **Team Presentation Deck (Marp):** [docs/20260909_meeting.md](docs/20260909_meeting.md) — 20–25 minute project overview, architecture breakdown, and roadmap slides.
 - **ReQuest Platform Overview:** [docs/request_overview.md](docs/request_overview.md) — Architecture, ETL mechanics, and search design of the current `request-ddi` codebase.
 - **Migration & Upgrade Specification:** [docs/request_upgrade.md](docs/request_upgrade.md) — Comprehensive technical roadmap, Pydantic schemas, and Elasticsearch indexing.
-- **Statement of Work (SOW):** [docs/sow.md](docs/sow.md) — Task breakdown, deliverables matrix, and risk mitigation plan.
-- **Architecture Deliverables:**
-  - Database target model: [deliverables/database.md](deliverables/database.md)
-  - Metadata normalization & deduplication: [deliverables/normalization.md](deliverables/normalization.md)
-  - Hashing algorithms & drift quarantine: [deliverables/hashing_algorithms.md](deliverables/hashing_algorithms.md)
-  - Terminology glossary: [deliverables/glossary.md](deliverables/glossary.md)
-- **CLI User Guide:** [docs/cli_user_guide.md](docs/cli_user_guide.md) — Comprehensive guide to the `fairwddi` command-line tools, database management, seeding, and DDL export.
+- **Target Database Schema:** [deliverables/database.md](deliverables/database.md) — Complete 15-table PostgreSQL schema documentation, primary keys, foreign keys, and indexes.
+- **DDI Model Glossary:** [deliverables/glossary.md](deliverables/glossary.md) — Canonical terminology and cross-model entity mappings across DDI 4, DDI-CDI, DDI-Lifecycle, and ReQuest.
+- **Hashing & Fingerprinting:** [deliverables/hashing_algorithms.md](deliverables/hashing_algorithms.md) — Two-tier content fingerprinting, canonical JSON hashing, and drift detection.
+- **Normalization Strategy:** [deliverables/normalization.md](deliverables/normalization.md) — Multilingual string cleaning rules and format adapters.
+- **Variable-Question Relationships:** [deliverables/variable_question_relationships.md](deliverables/variable_question_relationships.md) — 6 canonical DDI-L relationship paths.
+- **CLI User Guide:** [deliverables/cli_user_guide.md](deliverables/cli_user_guide.md) — Comprehensive guide to the `fairwddi` command-line tools, database management, seeding, and DDL export.
 - **Official Specification:** [DDI-Lifecycle 3.3 Technical Guide](https://ddi-lifecycle-technical-guide.readthedocs.io/en/latest/)
 
 ---

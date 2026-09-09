@@ -51,8 +51,7 @@ Agents **must** use canonical DDI terminology (aligned with DDI 4 / DDI-CDI / DD
 - **CLI:** Typer & Rich (`fairwddi = "fairwddi.cli:app"`)
 - **DDI Integration:** `dartfx-ddi` (Data Artifex DDI Toolkit)
 - **Database:** PostgreSQL 17 with ICU collations (via `psycopg` v3 driver)
-- **Search:** Elasticsearch 9.4.x, `django-elasticsearch-dsl` 9.0.0
-- **Validation & Serialization:** Pydantic v2 (shared across import, API, and ES indexing)
+- **Validation & Serialization:** Pydantic v2 (shared across import, API, and serialization)
 - **XML Parsing (target):** `lxml.etree.iterparse` (streaming; replaces BeautifulSoup)
 - **Task Queue:** `django-tasks-db` ≥ 0.12.0 (background ETL)
 - **Testing:** Pytest, `pytest-django`, `pytest-cov`; SQLite in-memory for unit tests

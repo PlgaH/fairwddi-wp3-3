@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 480" width="100%" height="100%">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.07"/>
+    </filter>
+  </defs>
+
+  <rect width="620" height="480" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <!-- Top Banner -->
+  <rect x="25" y="15" width="570" height="42" rx="8" fill="#1e293b" filter="url(#shadow)"/>
+  <text x="40" y="41" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#f8fafc">UPSTREAM DDI TOOLCHAIN &amp; OPEN-SOURCE ECOSYSTEM</text>
+  <rect x="460" y="24" width="120" height="24" rx="12" fill="#0f766e"/>
+  <text x="520" y="40" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle">FAIRwDDI / CDSP</text>
+
+  <!-- Left Col: Colectica COGS -->
+  <g transform="translate(25, 70)">
+    <rect width="275" height="385" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" filter="url(#shadow)"/>
+    <rect x="15" y="12" width="185" height="22" rx="4" fill="#0284c7"/>
+    <text x="107" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">1. COLECTICA COGS COMPILER</text>
+
+    <text x="15" y="56" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#0f172a">Python Pydantic Generator</text>
+    <text x="15" y="72" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#475569">Repo: <tspan font-family="JetBrains Mono, monospace">colectica-cogs</tspan></text>
+
+    <!-- Visual compiler flow -->
+    <rect x="15" y="85" width="245" height="40" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="25" y="102" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#0f172a">DDI 4.0 UML / CETS Model</text>
+    <text x="25" y="116" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" fill="#64748b">Canonical canonical metamodel</text>
+
+    <text x="137" y="142" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" fill="#0284c7" text-anchor="middle">⬇ COGS Compiler</text>
+
+    <rect x="15" y="152" width="245" height="60" rx="4" fill="#0f172a"/>
+    <text x="25" y="172" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#38bdf8">Pydantic v2 Models (Python)</text>
+    <text x="25" y="188" font-family="JetBrains Mono, monospace" font-size="8" fill="#94a3b8">• Type hints &amp; strict validation</text>
+    <text x="25" y="200" font-family="JetBrains Mono, monospace" font-size="8" fill="#94a3b8">• Fast JSON serialization</text>
+
+    <text x="15" y="235" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#0f172a">Key Innovations</text>
+    <text x="15" y="255" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#475569">• Bridges DDI 4 models to modern Python</text>
+    <text x="15" y="271" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#475569">• Used for Django Ninja REST APIs</text>
+    <text x="15" y="287" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#475569">• DDI serialization &amp; API validation</text>
+
+    <rect x="15" y="305" width="245" height="65" rx="6" fill="#f0f9ff" stroke="#bae6fd"/>
+    <text x="25" y="325" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="700" fill="#0369a1">Upstream Benefit:</text>
+    <text x="25" y="342" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#0369a1">Enables any research institute to generate</text>
+    <text x="25" y="356" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#0369a1">Python bindings from official DDI models.</text>
+  </g>
+
+  <!-- Right Col: DDI Toolkit -->
+  <g transform="translate(320, 70)">
+    <rect width="275" height="385" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" filter="url(#shadow)"/>
+    <rect x="15" y="12" width="200" height="22" rx="4" fill="#0f766e"/>
+    <text x="115" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">2. DATA ARTIFEX DDI-TOOLKIT</text>
+
+    <text x="15" y="56" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#0f172a">DDI-L Streaming Parser &amp; CLI</text>
+    <text x="15" y="72" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#475569">Repo: <tspan font-family="JetBrains Mono, monospace">dartfx-ddi / ddi-toolkit</tspan></text>
+
+    <!-- CLI block -->
+    <rect x="15" y="85" width="245" height="85" rx="6" fill="#0f172a"/>
+    <text x="25" y="103" font-family="JetBrains Mono, monospace" font-size="8.5" fill="#94a3b8"># Standalone CLI tools</text>
+    <text x="25" y="120" font-family="JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#2dd4bf">ddi parse closer_study.xml</text>
+    <text x="25" y="137" font-family="JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#2dd4bf">ddi validate --schema 3.3</text>
+    <text x="25" y="154" font-family="JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#2dd4bf">ddi convert --to-ddi4</text>
+
+    <text x="15" y="195" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#0f172a">Streaming Architecture</text>
+    <text x="15" y="215" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#475569">• High-speed <tspan font-family="JetBrains Mono, monospace">lxml.iterparse</tspan> streaming</text>
+    <text x="15" y="231" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#475569">• Low-memory: processes 2GB XML in 45MB</text>
+    <text x="15" y="247" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#475569">• DDI 3.3 ➔ DDI 4.0 translation bridge</text>
+
+    <rect x="15" y="270" width="245" height="100" rx="6" fill="#f0fdfa" stroke="#99f6e4"/>
+    <text x="25" y="290" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="700" fill="#0f766e">Integration into ReQuest:</text>
+    <text x="25" y="308" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#0f766e">Included as direct dependency in</text>
+    <text x="25" y="322" font-family="JetBrains Mono, monospace" font-size="8.5" fill="#134e4a">fairwddi (pyproject.toml)</text>
+    <text x="25" y="338" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="#0f766e">Decouples core parsing from web app.</text>
+    <text x="25" y="354" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="#0f766e">⚡ 100% pure Python + C-speed lxml</text>
+  </g>
+</svg>

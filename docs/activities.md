@@ -11,7 +11,7 @@
 - [ ] **DDI Element Relationship Exploration:** Analyzing DDI element relationships in Colectica DDI and reference examples (CLOSER, CSO, MIDUS) to refine representation-to-variable cascade extraction.
 - [ ] **DDI-L Ingester Pipeline:** Advancing the Stage 1 streaming XML/JSON parser and staging queue populating `StagedImport` and `StagedResourceNode` tables.
 - [ ] **Harmonization & Mapping Workflows:** Implement Stage 2 normalization pipeline mapping staged resource graphs to the canonical variable cascade (`ConceptualVariable` → `RepresentedVariable` → `InstanceVariable`).
-- [ ] **Elasticsearch Multilingual Search Sync:** Wire Django signals / Pydantic schemas to Elasticsearch 9.x multilingual index templates.
+- [ ] **Django Ninja REST API & Schemas:** Wire Pydantic v2 schemas to Django Ninja endpoints for concept browsing, variable cascade queries, and DDI serialization.
 
 ---
 
@@ -82,5 +82,6 @@
     - [`deliverables/normalization.md`](../deliverables/normalization.md) (Technical Normalization Specification)
     - [`deliverables/hashing_algorithms.md`](../deliverables/hashing_algorithms.md) (Cryptographic Content Fingerprinting)
     - [`deliverables/glossary.md`](../deliverables/glossary.md) (Canonical DDI Terminology & Entity Mappings)
+    - [`deliverables/variable_question_relationships.md`](../deliverables/variable_question_relationships.md) (6 Canonical DDI-L Traversal Paths)
     - [`deliverables/summary.md`](../deliverables/summary.md) (Executive Architecture Summary)
-    - [`docs/cli_user_guide.md`](cli_user_guide.md) (CLI Manual & Configuration Guide)
+    - [`deliverables/cli_user_guide.md`](../deliverables/cli_user_guide.md) (CLI Manual & Configuration Guide)

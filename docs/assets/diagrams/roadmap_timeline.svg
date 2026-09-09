@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 470" width="100%" height="100%">
+  <defs>
+    <filter id="shadow" x="-3%" y="-3%" width="106%" height="108%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1140" height="470" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <!-- Top Title Banner -->
+  <rect x="20" y="14" width="1100" height="34" rx="6" fill="#0f172a" filter="url(#shadow)"/>
+  <text x="570" y="36" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13.5" font-weight="700" fill="#f8fafc" text-anchor="middle" letter-spacing="0.5">FAIRwDDI WP3 ST3 — IMPLEMENTATION ROADMAP &amp; DELIVERABLES</text>
+
+  <!-- 3 Side-by-Side Phase Cards (RFP-Aligned) -->
+  
+  <!-- Column 1: Phase I (Audit & Modeling) -->
+  <g transform="translate(20, 58)">
+    <rect width="350" height="315" rx="8" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5" filter="url(#shadow)"/>
+    
+    <!-- Header -->
+    <rect x="12" y="12" width="170" height="22" rx="11" fill="#d97706"/>
+    <text x="97" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle">PHASE I: AUDIT &amp; MODELING</text>
+    
+    <rect x="190" y="12" width="148" height="22" rx="11" fill="#fef3c7"/>
+    <text x="264" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="700" fill="#92400e" text-anchor="middle">💬 DRAFT FOR DISCUSSION</text>
+
+    <text x="14" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" fill="#92400e">July 20 – Sept 30, 2026</text>
+
+    <line x1="12" y1="62" x2="338" y2="62" stroke="#fde68a" stroke-width="1"/>
+
+    <!-- Bullets strictly aligned to RFP -->
+    <text x="14" y="84" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#166534" font-weight="700">✓ Database Audit &amp; Gap Analysis</text>
+    <text x="26" y="100" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">Audited current ReQuest pseudo-DDI schema</text>
+    <text x="26" y="115" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">against DDI-Lifecycle 3.3 standard specifications.</text>
+
+    <text x="14" y="142" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#d97706" font-weight="700">💬 Target PostgreSQL Schema Design</text>
+    <text x="26" y="158" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">Decoupled reusable QuestionItem entity,</text>
+    <text x="26" y="173" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">multilingual JSONB, and DDI variable cascade.</text>
+
+    <text x="14" y="200" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#0f766e" font-weight="700">✓ Ingestion &amp; Staging Validation</text>
+    <text x="26" y="216" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">Stage 1 streaming XML parser and raw graph</text>
+    <text x="26" y="231" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">staging validated on test survey datasets.</text>
+
+    <text x="14" y="258" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#4338ca" font-weight="700">✓ Thesaurus &amp; SKOS Integration</text>
+    <text x="26" y="274" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">Automated loader for CESSDA ELSST concepts.</text>
+
+    <!-- Bottom Milestone Tag -->
+    <rect x="12" y="286" width="326" height="20" rx="4" fill="#fef3c7"/>
+    <text x="175" y="300" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="#92400e" text-anchor="middle">Livrable 1: Rapport d'audit &amp; Schéma cible (Oct 1)</text>
+  </g>
+
+  <!-- Column 2: Phase II (Python Library) -->
+  <g transform="translate(395, 58)">
+    <rect width="350" height="315" rx="8" fill="#f0f9ff" stroke="#7dd3fc" stroke-width="1.5" filter="url(#shadow)"/>
+    
+    <!-- Header -->
+    <rect x="12" y="12" width="170" height="22" rx="11" fill="#0284c7"/>
+    <text x="97" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle">PHASE II: PYTHON LIBRARY</text>
+    
+    <rect x="220" y="12" width="118" height="22" rx="11" fill="#e0f2fe"/>
+    <text x="279" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="700" fill="#0369a1" text-anchor="middle">⚡ IN PROGRESS</text>
+
+    <text x="14" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" fill="#0369a1">Aug 17 – Oct 31, 2026</text>
+
+    <line x1="12" y1="62" x2="338" y2="62" stroke="#bae6fd" stroke-width="1"/>
+
+    <!-- Bullets strictly aligned to RFP -->
+    <text x="14" y="84" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#0369a1" font-weight="700">⚡ Python Package (`fairwddi`)</text>
+    <text x="26" y="100" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">Django &amp; Pydantic v2 data structures providing</text>
+    <text x="26" y="115" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">the core programmatic interface for new schema.</text>
+
+    <text x="14" y="142" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#0369a1" font-weight="700">⚡ DDI-L Export Implementation</text>
+    <text x="26" y="158" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">Export metadata files strictly compliant with</text>
+    <text x="26" y="173" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">official DDI-Lifecycle 3.3 XSD schemas.</text>
+
+    <text x="14" y="200" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#0369a1" font-weight="700">⚡ DDI-L Import &amp; Mapping Functions</text>
+    <text x="26" y="216" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">Streaming ingestion mapping DDI-L metadata</text>
+    <text x="26" y="231" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">into reusable question &amp; variable cascade entities.</text>
+
+    <text x="14" y="258" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#0369a1" font-weight="700">⚡ Automated Testing &amp; Documentation</text>
+    <text x="26" y="274" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">Pytest test suite (&lt;0.5s) &amp; technical documentation.</text>
+
+    <!-- Bottom Milestone Tag -->
+    <rect x="12" y="286" width="326" height="20" rx="4" fill="#e0f2fe"/>
+    <text x="175" y="300" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="#0369a1" text-anchor="middle">Livrable 2: Bibliothèque Python &amp; Export DDI-L (Nov 1)</text>
+  </g>
+
+  <!-- Column 3: Phase III (Finalization & Support) -->
+  <g transform="translate(770, 58)">
+    <rect width="350" height="315" rx="8" fill="#fdf4ff" stroke="#f0abfc" stroke-width="1.5" filter="url(#shadow)"/>
+    
+    <!-- Header -->
+    <rect x="12" y="12" width="170" height="22" rx="11" fill="#7c3aed"/>
+    <text x="97" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle">PHASE III: FINALIZATION</text>
+    
+    <rect x="225" y="12" width="113" height="22" rx="11" fill="#f3e8ff"/>
+    <text x="281" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="700" fill="#6b21a8" text-anchor="middle">📅 UPCOMING</text>
+
+    <text x="14" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" fill="#6b21a8">Oct 19 – Dec 18, 2026</text>
+
+    <line x1="12" y1="62" x2="338" y2="62" stroke="#e9d5ff" stroke-width="1"/>
+
+    <!-- Bullets strictly aligned to RFP -->
+    <text x="14" y="84" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#6b21a8" font-weight="700">📅 Delivery &amp; Coordination</text>
+    <text x="26" y="100" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">Deliver DDI-L export scripts and coordinate</text>
+    <text x="26" y="115" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">migration and integration strategy with CDSP.</text>
+
+    <text x="14" y="142" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#6b21a8" font-weight="700">📅 Technical Support &amp; Guidance</text>
+    <text x="26" y="158" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">Provide advice on schema refactoring and tool</text>
+    <text x="26" y="173" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">adaptation; assist with pre-production testing.</text>
+
+    <text x="14" y="200" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#6b21a8" font-weight="700">📅 Pre-Production Validation</text>
+    <text x="26" y="216" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">Test scalability and performance on large</text>
+    <text x="26" y="231" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">multi-survey dataset in pre-production env.</text>
+
+    <text x="14" y="258" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#6b21a8" font-weight="700">📅 Project Closure &amp; Dossier</text>
+    <text x="26" y="274" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" fill="#334155">Wrap-up meeting and delivery of Closure Dossier.</text>
+
+    <!-- Bottom Milestone Tag -->
+    <rect x="12" y="286" width="326" height="20" rx="4" fill="#f3e8ff"/>
+    <text x="175" y="300" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="#6b21a8" text-anchor="middle">Livrable 3: Dossier de clôture &amp; Bilan (Dec 18)</text>
+  </g>
+
+  <!-- Bottom Timeline Gantt Tracker -->
+  <g transform="translate(20, 386)">
+    <rect width="1100" height="70" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+    
+    <!-- Timeline Month Labels (176px per month) -->
+    <text x="108" y="20" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#64748b" text-anchor="middle">JULY 2026</text>
+    <text x="284" y="20" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#64748b" text-anchor="middle">AUG 2026</text>
+    <text x="460" y="20" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#64748b" text-anchor="middle">SEPT 2026</text>
+    <text x="636" y="20" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#64748b" text-anchor="middle">OCT 2026</text>
+    <text x="812" y="20" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#64748b" text-anchor="middle">NOV 2026</text>
+    <text x="988" y="20" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#64748b" text-anchor="middle">DEC 2026</text>
+
+    <!-- Month Boundary Grid lines -->
+    <line x1="196" y1="8" x2="196" y2="64" stroke="#e2e8f0" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <line x1="372" y1="8" x2="372" y2="64" stroke="#e2e8f0" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <line x1="548" y1="8" x2="548" y2="64" stroke="#e2e8f0" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <line x1="724" y1="8" x2="724" y2="64" stroke="#e2e8f0" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <line x1="900" y1="8" x2="900" y2="64" stroke="#e2e8f0" stroke-width="1.2" stroke-dasharray="3 3"/>
+
+    <!-- Phase 1 Bar (July 20 – Sept 30) -->
+    <rect x="133" y="27" width="415" height="15" rx="7.5" fill="#d97706" opacity="0.9"/>
+    <text x="340" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">Phase I: Audit &amp; Modélisation (July 20 – Sept 30) — Livrable 1: Oct 1</text>
+
+    <!-- Phase 2 Bar (Aug 17 – Oct 31) -->
+    <rect x="292" y="47" width="432" height="15" rx="7.5" fill="#0284c7" opacity="0.9"/>
+    <text x="508" y="58" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">Phase II: Bibliothèque Python &amp; Export DDI-L (Aug 17 – Oct 31) — Livrable 2: Nov 1</text>
+
+    <!-- Phase 3 Bar (Oct 19 – Dec 18) -->
+    <rect x="656" y="27" width="346" height="15" rx="7.5" fill="#7c3aed" opacity="0.9"/>
+    <text x="829" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">Phase III: Accompagnement &amp; Clôture (Oct 19 – Dec 18) — Livrable 3: Dec 18</text>
+
+    <!-- Current Date Marker (Sept 9) -->
+    <line x1="425" y1="4" x2="425" y2="66" stroke="#ef4444" stroke-width="2"/>
+    <polygon points="420,4 430,4 425,10" fill="#ef4444"/>
+    <text x="425" y="-3" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8" font-weight="800" fill="#ef4444" text-anchor="middle">NOW (Sept 9)</text>
+  </g>
+</svg>
