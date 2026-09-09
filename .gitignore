@@ -76,6 +76,11 @@ $RECYCLE.BIN/
 *.swo
 *~
 
+# Microsoft Office & PowerPoint Temporary Files
+~$*
+~$*.pptx
+*.tmp
+
 # Antigravity AI Assistant Files
 .gemini/
 .antigravity/
