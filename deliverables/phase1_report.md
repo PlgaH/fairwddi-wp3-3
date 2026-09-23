@@ -215,11 +215,33 @@ Note that, technically, a string could be stored without a "lang" attribute.
   - Maintaining multiple databases, which is common in a enterprise grade envrionment (e.g. staging and production), will translate into inconsistent identifiers, which can complicate scirpts or worflows
 - In DDI-L
   - Different [identification](https://ddi-lifecycle-technical-guide.readthedocs.io/en/latest/General%20Structures/Identification.html) and referencing mechanisms are available:
-    - Identification Sequence: composed of agency id, maintainable id, object id (), and version
+    - Identification Sequence: composed of agency id, maintainable id, object id (if not a maintainable), and version
     - URNs: a canonical repsentation of the identification sequence
   - A legacy deprecate URN format is also documented but should be avoided
   - All variations must be converted to the canonical URN format
-- Using URNs as primary identifiers also caters for non-DDI resources (e.g controlled vocabularies)
+  - We do not currently store the identification sequence in the tables (only URNs). We leave to the code the responsabilty of properly reflect this in DDI URNs.
+- Using standard URNs as primary identifiers also caters for non-DDI resources (e.g controlled vocabularies)
+  - DDI-L resources should carry a valid and properly formatted DDI URNs
+  - A ELLST concept is not boud to this requirement
+  - :question:Maybe this only applies to specific tables?
+- :question: ​Do we want the database to enforced proper URN formatting (table constraint or code level check)
+
+### Redesign principles
+
+- The new model design is based on the Variable Cascade which as defined in the context of GSIM and DDI-CDI
+  - :question: Confirm the this is the case
+  - Conceptual Variable (`Concept` + `Universe`): What is being observed, independent of representation (e.g., *Age of person*).
+  - Represented Variable** (`Conceptual Variable` + `Representation` / `ValueDomain`): How it is structured/categorized, independent of a specific study or dataset (e.g., *Age of person measured in integer years*, or *Age grouped into 5-year cohorts*).
+  - Instance Variable (`Represented Variable` + actual population/dataset context): A variable applied to a specific unit type within a specific population/data collection instance (e.g., *Age in completed years of survey respondents in the 2021 Canadian Census*).Conceptual Variable
+- In DDI-Lifecycle (specifically 3.2 and 3.3):
+  - ConceptualVariable: sits in the `ConceptualComponent`.
+  - RepresentedVariable: was formally introduced in `LogicalProduct` (or `ResourcePackage`) to capture reusable representations across studies.
+  - Variable: in `VariableScheme` binds that represented variable to the study's substantive context: a specific `UniverseReference`, `QuestionReference` (source question), and actual `Representation` used in the study product.
+- In the context of the GSIM Variable Cascade and DDI-CDI, a DDI-Lifecycle Variable (l:Variable) is most closely aligned with an InstanceVariable
+- From the DDI-Codebook perpective:
+  - The variable `<var>` element is functionally an Instance Variable, but it actually collapses the entire lower half of the variable cascade and the physical data store into a single monolithic element.
+  - It can be broken down decomposed into a Instance, represented, and conceptual variable (based on avaulabe content)
+- 
 
 ### Extended Attributes
 
@@ -278,6 +300,10 @@ Note that, technically, a string could be stored without a "lang" attribute.
 - 1 layer is a helper to stage incoming metadata prior to ingestion (normalization, harmonization)
 
 ### DDI-L Tables
+
+
+
+
 
 
 

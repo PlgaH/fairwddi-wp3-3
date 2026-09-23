@@ -25,32 +25,24 @@ class DistributorSchema(BaseModel):
     updated_at: datetime | None = None
 
 
-class CollectionSchema(BaseModel):
+class CollectionSchema(DDIIdentifiableSchema):
     """Schema for Collection (Series / Group)."""
 
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int | None = None
     distributor_id: int
     name: str = Field(..., description="Series / Collection title.")
     description: MultilingualText | None = Field(
         default=None,
         description="Multilingual collection abstract/description.",
     )
-    urn: str | None = Field(default=None, description="DDI-L Group URN.")
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
 
-class SubcollectionSchema(BaseModel):
+class SubcollectionSchema(DDIIdentifiableSchema):
     """Schema for Subcollection (Sub-Series / SubGroup)."""
 
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int | None = None
-    collection_id: int
+    collection_urn: str = Field(..., description="Parent Collection URN.")
     name: str = Field(..., description="Subcollection title.")
-    urn: str | None = Field(default=None, description="DDI-L SubGroup URN.")
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -85,7 +77,6 @@ class ConceptSchema(BaseModel):
 class ConceptualVariableSchema(DDIIdentifiableSchema):
     """Schema for abstract ConceptualVariable."""
 
-    id: int | None = None
     concept_id: int | None = None
     label: MultilingualText = Field(..., description="Multilingual concept label.")
     description: MultilingualText | None = Field(
@@ -103,7 +94,6 @@ class ConceptualVariableSchema(DDIIdentifiableSchema):
 class QuestionItemSchema(DDIIdentifiableSchema):
     """Schema for standalone reusable QuestionItem."""
 
-    id: int | None = None
     question_text: MultilingualText = Field(..., description="Multilingual literal question text.")
     pre_question_text: MultilingualText | None = Field(
         default=None,
@@ -121,47 +111,69 @@ class QuestionItemSchema(DDIIdentifiableSchema):
     updated_at: datetime | None = None
 
 
+class QuestionGroupItemSchema(BaseModel):
+    """Schema for QuestionGroupItem junction."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int | None = None
+    question_group_urn: str | None = None
+    question_item_urn: str
+    order: int = 0
+
+
+class QuestionGroupSchema(DDIIdentifiableSchema):
+    """Schema for QuestionGroup."""
+
+    label: MultilingualText = Field(..., description="Multilingual group title.")
+    description: MultilingualText | None = Field(
+        default=None, description="Multilingual description."
+    )
+    parent_group_urn: str | None = None
+    items: list[QuestionGroupItemSchema] = Field(default_factory=list)
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
 class CategorySchema(DDIIdentifiableSchema):
     """Schema for Category (response label)."""
 
-    id: int | None = None
     label: MultilingualText = Field(..., description="Multilingual response category label.")
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
 
-class CategorySetItemSchema(BaseModel):
-    """Schema for member item inside a CategorySet."""
+class CategorySchemeItemSchema(BaseModel):
+    """Schema for member item inside a CategoryScheme."""
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int | None = None
-    category_set_id: int | None = None
-    category_id: int
+    category_scheme_urn: str | None = None
+    category_urn: str
     order: int = 0
 
 
-class CategorySetSchema(DDIIdentifiableSchema):
-    """Schema for CategorySet (CategoryScheme)."""
+class CategorySchemeSchema(DDIIdentifiableSchema):
+    """Schema for CategoryScheme."""
 
-    id: int | None = None
-    name: MultilingualText = Field(..., description="Multilingual name for the category set.")
+    name: MultilingualText = Field(..., description="Multilingual name for the category scheme.")
     description: MultilingualText | None = Field(
         default=None, description="Multilingual description."
     )
-    items: list[CategorySetItemSchema] = Field(default_factory=list)
+    items: list[CategorySchemeItemSchema] = Field(default_factory=list)
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
 
-class CodeItemSchema(BaseModel):
-    """Schema for individual CodeItem inside a CodeList."""
+class CodeSchema(BaseModel):
+    """Schema for individual Code inside a CodeList."""
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int | None = None
-    code_list_id: int | None = None
-    category_id: int
+    code_list_urn: str | None = None
+    category_urn: str
     code_value: str = Field(..., description="Numerical or text code string.")
     order: int = 0
     created_at: datetime | None = None
@@ -171,13 +183,12 @@ class CodeItemSchema(BaseModel):
 class CodeListSchema(DDIIdentifiableSchema):
     """Schema for CodeList entity."""
 
-    id: int | None = None
     name: MultilingualText | None = Field(default=None, description="Multilingual title.")
     description: MultilingualText | None = Field(
         default=None, description="Multilingual description."
     )
-    category_set_id: int | None = None
-    items: list[CodeItemSchema] = Field(default_factory=list)
+    category_scheme_urn: str | None = None
+    codes: list[CodeSchema] = Field(default_factory=list)
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -185,10 +196,9 @@ class CodeListSchema(DDIIdentifiableSchema):
 class RepresentedVariableSchema(DDIIdentifiableSchema):
     """Schema for RepresentedVariable."""
 
-    id: int | None = None
-    conceptual_variable_id: int
-    question_item_id: int
-    code_list_id: int | None = None
+    conceptual_variable_urn: str
+    question_item_urn: str
+    code_list_urn: str | None = None
     label: MultilingualText | None = Field(default=None, description="Multilingual short label.")
     created_at: datetime | None = None
     updated_at: datetime | None = None
@@ -202,8 +212,7 @@ class RepresentedVariableSchema(DDIIdentifiableSchema):
 class StudyUnitSchema(DDIIdentifiableSchema):
     """Schema for StudyUnit (survey wave dataset)."""
 
-    id: int | None = None
-    subcollection_id: int
+    subcollection_urn: str
     title: MultilingualText = Field(..., description="Multilingual study title.")
     external_ref: str | None = Field(default=None, description="External reference or DOI.")
     year: int | None = Field(default=None, description="Survey year.")
@@ -215,9 +224,8 @@ class StudyUnitSchema(DDIIdentifiableSchema):
 class InstanceVariableSchema(DDIIdentifiableSchema):
     """Schema for InstanceVariable (column realization in a study dataset)."""
 
-    id: int | None = None
-    study_unit_id: int
-    represented_variable_id: int
+    study_unit_urn: str
+    represented_variable_urn: str
     variable_name: str = Field(..., description="Dataset column name (e.g. q01a).")
     universe: MultilingualText | None = Field(
         default=None, description="Target population universe."
@@ -228,63 +236,38 @@ class InstanceVariableSchema(DDIIdentifiableSchema):
     updated_at: datetime | None = None
 
 
-# ============================================================================
-# Grouping / Organization Layer
-# ============================================================================
-
-
-class VariableGroupMembershipSchema(BaseModel):
-    """Schema for VariableGroup membership junction."""
+class StudyUnitVariableSchema(BaseModel):
+    """Schema for StudyUnit to Variable relationship junction."""
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int | None = None
-    variable_group_id: int | None = None
-    instance_variable_id: int
+    study_unit_urn: str
+    instance_variable_urn: str
     order: int = 0
 
 
-class VariableGroupSchema(DDIIdentifiableSchema):
-    """Schema for DDI VariableGroup."""
-
-    id: int | None = None
-    study_unit_id: int | None = None
-    collection_id: int | None = None
-    parent_group_id: int | None = None
-    label: MultilingualText = Field(..., description="Multilingual group title/label.")
-    description: MultilingualText | None = Field(
-        default=None, description="Multilingual description."
-    )
-    type_of_group: str = Field(default="Thematic", description="DDI-L typeOfVariableGroup.")
-    concept_id: int | None = None
-    memberships: list[VariableGroupMembershipSchema] = Field(default_factory=list)
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
-
-
 # ============================================================================
-# Infrastructure & Staging Layer
+# Infrastructure, Provenance & Quarantine
 # ============================================================================
 
 
 class URNAliasSchema(BaseModel):
-    """Schema for URNAlias mapping."""
+    """Schema for external URN alias mapping."""
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int | None = None
-    alias_urn: str = Field(..., description="External or random URN.")
+    alias_urn: str = Field(..., description="External or random source URN.")
     canonical_urn: str = Field(..., description="Canonical database URN.")
-    entity_type: str = Field(..., description="Target DDI entity type name.")
-    hash_strategy: str = Field(
-        default="v1_strict_sha256", description="Strategy used for alias link."
-    )
-    source_file: str | None = Field(default=None, description="Originating filename.")
+    entity_type: str = Field(..., description="DDI entity type name.")
+    hash_strategy: str = Field(default="v1_strict_sha256")
+    source_file: str | None = None
     created_at: datetime | None = None
 
 
 class MetadataQuarantineSchema(BaseModel):
-    """Schema for MetadataQuarantine records."""
+    """Schema for quarantined metadata elements."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -292,11 +275,11 @@ class MetadataQuarantineSchema(BaseModel):
     incoming_urn: str
     existing_urn: str | None = None
     entity_type: str
-    incoming_content: dict[str, Any] | list[Any]
+    incoming_content: dict[str, Any]
     existing_content_hash: str | None = None
     incoming_content_hash: str
-    conflict_type: str = Field(..., description="hash_mismatch, fuzzy_match, version_conflict.")
-    resolution: str | None = Field(default=None, description="approved, forked, rejected, null.")
+    conflict_type: str
+    resolution: str | None = None
     resolved_by: str | None = None
     resolved_at: datetime | None = None
     source_file: str | None = None
@@ -304,60 +287,35 @@ class MetadataQuarantineSchema(BaseModel):
     created_at: datetime | None = None
 
 
-class StagedImportSchema(BaseModel):
-    """Schema for raw StagedImport record."""
-
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int | None = None
-    source_format: str = Field(
-        ..., description="ddi-l:3.3:xml, ddi-l:4.0:json, ddi-c:2.5:xml, croissant, csv."
-    )
-    file_name: str
-    file_path: str | None = None
-    import_options: dict[str, Any] = Field(default_factory=dict)
-    total_resources: int = 0
-    processed_resources: int = 0
-    status: str = Field(default="staged", description="staged, normalized, quarantined, failed.")
-    import_task_id: str | None = None
-    created_at: datetime | None = None
-    processed_at: datetime | None = None
-
-
 class StagedResourceNodeSchema(BaseModel):
-    """Schema for decomposed StagedResourceNode."""
+    """Schema for Stage 1 broken-down raw element node."""
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int | None = None
     staged_import_id: int
-    resource_type: str = Field(..., description="QuestionItem, CodeList, Category, etc.")
-    raw_urn: str = Field(..., description="Incoming raw URN or element identifier.")
-    raw_value: dict[str, Any] = Field(..., description="Pre-normalized raw JSON dictionary.")
+    resource_type: str
+    raw_urn: str
+    raw_value: dict[str, Any]
     canonical_urn: str | None = None
-    status: str = Field(default="staged", description="staged, normalized, quarantined, failed.")
+    status: str = "staged"
     created_at: datetime | None = None
 
 
-class RawResourceNode(BaseModel):
-    """Individual extracted metadata element prior to database staging."""
+class StagedImportSchema(BaseModel):
+    """Schema for file upload and batch import job."""
 
-    model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
+    model_config = ConfigDict(from_attributes=True)
 
-    resource_type: str = Field(
-        ..., description="DDI resource class name (e.g. QuestionItem, Variable)."
-    )
-    raw_urn: str = Field(..., description="Raw incoming URN or deterministic ID.")
-    raw_value: dict[str, Any] = Field(..., description="Pre-normalized raw JSON dictionary.")
-    referenced_urns: set[str] = Field(default_factory=set, description="Referenced resource URNs.")
-    content_fingerprint: str = Field(
-        default="", description="Deterministic SHA-256 content fingerprint."
-    )
-
-    def to_json(self) -> str:
-        """Return canonical JSON representation of the resource payload."""
-        import json
-
-        return json.dumps(self.raw_value, sort_keys=True, ensure_ascii=False)
-
-
+    id: int | None = None
+    source_format: str
+    file_name: str
+    file_path: str | None = None
+    import_options: dict[str, Any] = Field(default_factory=dict)
+    total_resources: int = 0
+    processed_resources: int = 0
+    status: str = "staged"
+    import_task_id: str | None = None
+    created_at: datetime | None = None
+    processed_at: datetime | None = None
+    nodes: list[StagedResourceNodeSchema] = Field(default_factory=list)

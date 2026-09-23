@@ -2,9 +2,11 @@
 
 from django.db import models
 
+from fairwddi.models.base import DDIIdentifiable
+
 
 class Distributor(models.Model):
-    """Top-level organization distributing datasets (e.g. CDSP)."""
+    """Top-level organization distributing datasets (e.g. CDSP, CESSDA)."""
 
     name = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -19,13 +21,14 @@ class Distributor(models.Model):
         return self.name
 
 
-class Collection(models.Model):
+class Collection(DDIIdentifiable):
     """Logical grouping of survey series (maps to DDI-L Group)."""
 
     distributor = models.ForeignKey(
         Distributor,
         on_delete=models.CASCADE,
         related_name="collections",
+        db_column="distributor_id",
     )
     name = models.CharField(max_length=255)
     description = models.JSONField(
@@ -33,15 +36,6 @@ class Collection(models.Model):
         blank=True,
         help_text="Multilingual collection description stored as an array of objects.",
     )
-    urn = models.CharField(
-        max_length=512,
-        unique=True,
-        null=True,
-        blank=True,
-        help_text="DDI-L Group URN.",
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "request_ddi_collection"
@@ -52,24 +46,16 @@ class Collection(models.Model):
         return self.name
 
 
-class Subcollection(models.Model):
+class Subcollection(DDIIdentifiable):
     """Sub-series grouping (maps to DDI-L SubGroup)."""
 
     collection = models.ForeignKey(
         Collection,
         on_delete=models.CASCADE,
         related_name="subcollections",
+        db_column="collection_urn",
     )
     name = models.CharField(max_length=255)
-    urn = models.CharField(
-        max_length=512,
-        unique=True,
-        null=True,
-        blank=True,
-        help_text="DDI-L SubGroup URN.",
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "request_ddi_subcollection"

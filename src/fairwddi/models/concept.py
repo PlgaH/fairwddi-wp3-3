@@ -59,6 +59,7 @@ class Concept(models.Model):
         null=True,
         blank=True,
         related_name="narrower_concepts",
+        db_column="parent_id",
         help_text="Parent concept representing skos:broader hierarchical relationship.",
     )
     concept_type = models.CharField(
@@ -77,6 +78,7 @@ class Concept(models.Model):
     def __str__(self) -> str:
         if isinstance(self.label, list) and self.label:
             return self.label[0].get("value", str(self.pk))
+        return str(self.pk)
 
 
 class ConceptualVariable(DDIIdentifiable):
@@ -92,6 +94,7 @@ class ConceptualVariable(DDIIdentifiable):
         null=True,
         blank=True,
         related_name="conceptual_variables",
+        db_column="concept_id",
         help_text="Optional parent concept anchor in a controlled vocabulary.",
     )
     label = models.JSONField(
@@ -111,5 +114,5 @@ class ConceptualVariable(DDIIdentifiable):
 
     def __str__(self) -> str:
         if isinstance(self.label, list) and self.label:
-            return self.label[0].get("value", self.urn or str(self.pk))
-        return self.urn or str(self.pk)
+            return self.label[0].get("value", self.urn)
+        return self.urn

@@ -1,7 +1,7 @@
 -- ============================================================================
 -- FAIRwDDI DDI Model Database Schema (PostgreSQL >= 17)
--- Aligned with DDI 4.0 / DDI-CDI / DDI-Lifecycle
--- Standalone DDL Initialization Script
+-- Aligned with DDI 4.0 / DDI-CDI / DDI-Lifecycle 3.3
+-- Canonical URN Primary Keys & Foreign Key Relationships
 -- ============================================================================
 
 BEGIN;
@@ -18,23 +18,29 @@ CREATE TABLE IF NOT EXISTS request_ddi_distributor (
 );
 
 CREATE TABLE IF NOT EXISTS request_ddi_collection (
-    id BIGSERIAL PRIMARY KEY,
+    urn VARCHAR(512) PRIMARY KEY,
     distributor_id BIGINT NOT NULL REFERENCES request_ddi_distributor(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     description JSONB NOT NULL DEFAULT '[]'::jsonb,
-    urn VARCHAR(512) UNIQUE,
+    content_hash VARCHAR(64) NOT NULL DEFAULT '',
+    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE INDEX IF NOT EXISTS req_ddi_coll_content_hash_idx ON request_ddi_collection (content_hash);
+
 CREATE TABLE IF NOT EXISTS request_ddi_subcollection (
-    id BIGSERIAL PRIMARY KEY,
-    collection_id BIGINT NOT NULL REFERENCES request_ddi_collection(id) ON DELETE CASCADE,
+    urn VARCHAR(512) PRIMARY KEY,
+    collection_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_collection(urn) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    urn VARCHAR(512) UNIQUE,
+    content_hash VARCHAR(64) NOT NULL DEFAULT '',
+    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS req_ddi_subcoll_content_hash_idx ON request_ddi_subcollection (content_hash);
 
 -- ----------------------------------------------------------------------------
 -- 2. Concept Layer (Controlled Vocabularies & Thesauri)
@@ -59,21 +65,16 @@ CREATE INDEX IF NOT EXISTS req_ddi_concept_vocab_idx ON request_ddi_concept (voc
 CREATE INDEX IF NOT EXISTS req_ddi_concept_notation_idx ON request_ddi_concept (notation);
 
 CREATE TABLE IF NOT EXISTS request_ddi_conceptualvariable (
-    id BIGSERIAL PRIMARY KEY,
-    urn VARCHAR(512) UNIQUE,
-    agency VARCHAR(255) NOT NULL DEFAULT 'fr.cdsp',
-    ddi_identifier VARCHAR(255),
-    version VARCHAR(64) NOT NULL DEFAULT '1.0.0',
-    content_hash VARCHAR(64) NOT NULL DEFAULT '',
-    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
+    urn VARCHAR(512) PRIMARY KEY,
     concept_id BIGINT REFERENCES request_ddi_concept(id) ON DELETE SET NULL,
     label JSONB NOT NULL DEFAULT '[]'::jsonb,
     description JSONB NOT NULL DEFAULT '[]'::jsonb,
+    content_hash VARCHAR(64) NOT NULL DEFAULT '',
+    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS req_ddi_cv_ddi_id_idx ON request_ddi_conceptualvariable (ddi_identifier);
 CREATE INDEX IF NOT EXISTS req_ddi_cv_content_hash_idx ON request_ddi_conceptualvariable (content_hash);
 
 -- ----------------------------------------------------------------------------
@@ -81,108 +82,107 @@ CREATE INDEX IF NOT EXISTS req_ddi_cv_content_hash_idx ON request_ddi_conceptual
 -- ----------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS request_ddi_questionitem (
-    id BIGSERIAL PRIMARY KEY,
-    urn VARCHAR(512) UNIQUE,
-    agency VARCHAR(255) NOT NULL DEFAULT 'fr.cdsp',
-    ddi_identifier VARCHAR(255),
-    version VARCHAR(64) NOT NULL DEFAULT '1.0.0',
-    content_hash VARCHAR(64) NOT NULL DEFAULT '',
-    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
+    urn VARCHAR(512) PRIMARY KEY,
     question_text JSONB NOT NULL DEFAULT '[]'::jsonb,
     pre_question_text JSONB NOT NULL DEFAULT '[]'::jsonb,
     post_question_text JSONB NOT NULL DEFAULT '[]'::jsonb,
     interviewer_instructions JSONB NOT NULL DEFAULT '[]'::jsonb,
+    content_hash VARCHAR(64) NOT NULL DEFAULT '',
+    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS req_ddi_qi_ddi_id_idx ON request_ddi_questionitem (ddi_identifier);
 CREATE INDEX IF NOT EXISTS req_ddi_qi_content_hash_idx ON request_ddi_questionitem (content_hash);
 
-CREATE TABLE IF NOT EXISTS request_ddi_category (
-    id BIGSERIAL PRIMARY KEY,
-    urn VARCHAR(512) UNIQUE,
-    agency VARCHAR(255) NOT NULL DEFAULT 'fr.cdsp',
-    ddi_identifier VARCHAR(255),
-    version VARCHAR(64) NOT NULL DEFAULT '1.0.0',
+CREATE TABLE IF NOT EXISTS request_ddi_questiongroup (
+    urn VARCHAR(512) PRIMARY KEY,
+    label JSONB NOT NULL DEFAULT '[]'::jsonb,
+    description JSONB NOT NULL DEFAULT '[]'::jsonb,
+    parent_group_urn VARCHAR(512) REFERENCES request_ddi_questiongroup(urn) ON DELETE SET NULL,
     content_hash VARCHAR(64) NOT NULL DEFAULT '',
     content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
-    label JSONB NOT NULL DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS req_ddi_cat_ddi_id_idx ON request_ddi_category (ddi_identifier);
+CREATE INDEX IF NOT EXISTS req_ddi_qg_content_hash_idx ON request_ddi_questiongroup (content_hash);
+
+CREATE TABLE IF NOT EXISTS request_ddi_questiongroupitem (
+    id BIGSERIAL PRIMARY KEY,
+    question_group_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_questiongroup(urn) ON DELETE CASCADE,
+    question_item_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_questionitem(urn) ON DELETE CASCADE,
+    "order" INTEGER NOT NULL DEFAULT 0,
+    CONSTRAINT req_ddi_qg_item_unique UNIQUE (question_group_urn, question_item_urn)
+);
+
+CREATE TABLE IF NOT EXISTS request_ddi_category (
+    urn VARCHAR(512) PRIMARY KEY,
+    label JSONB NOT NULL DEFAULT '[]'::jsonb,
+    content_hash VARCHAR(64) NOT NULL DEFAULT '',
+    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS req_ddi_cat_content_hash_idx ON request_ddi_category (content_hash);
 
-CREATE TABLE IF NOT EXISTS request_ddi_categoryset (
-    id BIGSERIAL PRIMARY KEY,
-    urn VARCHAR(512) UNIQUE,
-    agency VARCHAR(255) NOT NULL DEFAULT 'fr.cdsp',
-    ddi_identifier VARCHAR(255),
-    version VARCHAR(64) NOT NULL DEFAULT '1.0.0',
-    content_hash VARCHAR(64) NOT NULL DEFAULT '',
-    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
+CREATE TABLE IF NOT EXISTS request_ddi_categoryscheme (
+    urn VARCHAR(512) PRIMARY KEY,
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
     description JSONB NOT NULL DEFAULT '[]'::jsonb,
+    content_hash VARCHAR(64) NOT NULL DEFAULT '',
+    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS request_ddi_categorysetitem (
+CREATE INDEX IF NOT EXISTS req_ddi_cs_content_hash_idx ON request_ddi_categoryscheme (content_hash);
+
+CREATE TABLE IF NOT EXISTS request_ddi_categoryschemeitem (
     id BIGSERIAL PRIMARY KEY,
-    category_set_id BIGINT NOT NULL REFERENCES request_ddi_categoryset(id) ON DELETE CASCADE,
-    category_id BIGINT NOT NULL REFERENCES request_ddi_category(id) ON DELETE CASCADE,
+    category_scheme_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_categoryscheme(urn) ON DELETE CASCADE,
+    category_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_category(urn) ON DELETE CASCADE,
     "order" INTEGER NOT NULL DEFAULT 0,
-    CONSTRAINT req_ddi_cs_item_unique UNIQUE (category_set_id, category_id)
+    CONSTRAINT req_ddi_cs_item_unique UNIQUE (category_scheme_urn, category_urn)
 );
 
 CREATE TABLE IF NOT EXISTS request_ddi_codelist (
-    id BIGSERIAL PRIMARY KEY,
-    urn VARCHAR(512) UNIQUE,
-    agency VARCHAR(255) NOT NULL DEFAULT 'fr.cdsp',
-    ddi_identifier VARCHAR(255),
-    version VARCHAR(64) NOT NULL DEFAULT '1.0.0',
-    content_hash VARCHAR(64) NOT NULL DEFAULT '',
-    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
+    urn VARCHAR(512) PRIMARY KEY,
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
     description JSONB NOT NULL DEFAULT '[]'::jsonb,
-    category_set_id BIGINT REFERENCES request_ddi_categoryset(id) ON DELETE SET NULL,
+    category_scheme_urn VARCHAR(512) REFERENCES request_ddi_categoryscheme(urn) ON DELETE SET NULL,
+    content_hash VARCHAR(64) NOT NULL DEFAULT '',
+    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS req_ddi_cl_ddi_id_idx ON request_ddi_codelist (ddi_identifier);
 CREATE INDEX IF NOT EXISTS req_ddi_cl_content_hash_idx ON request_ddi_codelist (content_hash);
 
-CREATE TABLE IF NOT EXISTS request_ddi_codeitem (
+CREATE TABLE IF NOT EXISTS request_ddi_code (
     id BIGSERIAL PRIMARY KEY,
-    code_list_id BIGINT NOT NULL REFERENCES request_ddi_codelist(id) ON DELETE CASCADE,
-    category_id BIGINT NOT NULL REFERENCES request_ddi_category(id) ON DELETE CASCADE,
+    code_list_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_codelist(urn) ON DELETE CASCADE,
+    category_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_category(urn) ON DELETE CASCADE,
     code_value VARCHAR(64) NOT NULL,
     "order" INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT req_ddi_code_item_unique UNIQUE (code_list_id, code_value)
+    CONSTRAINT req_ddi_code_unique UNIQUE (code_list_urn, code_value)
 );
 
 CREATE TABLE IF NOT EXISTS request_ddi_representedvariable (
-    id BIGSERIAL PRIMARY KEY,
-    urn VARCHAR(512) UNIQUE,
-    agency VARCHAR(255) NOT NULL DEFAULT 'fr.cdsp',
-    ddi_identifier VARCHAR(255),
-    version VARCHAR(64) NOT NULL DEFAULT '1.0.0',
+    urn VARCHAR(512) PRIMARY KEY,
+    conceptual_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_conceptualvariable(urn) ON DELETE CASCADE,
+    question_item_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_questionitem(urn) ON DELETE CASCADE,
+    code_list_urn VARCHAR(512) REFERENCES request_ddi_codelist(urn) ON DELETE SET NULL,
+    label JSONB NOT NULL DEFAULT '[]'::jsonb,
     content_hash VARCHAR(64) NOT NULL DEFAULT '',
     content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
-    conceptual_variable_id BIGINT NOT NULL REFERENCES request_ddi_conceptualvariable(id) ON DELETE CASCADE,
-    question_item_id BIGINT NOT NULL REFERENCES request_ddi_questionitem(id) ON DELETE CASCADE,
-    code_list_id BIGINT REFERENCES request_ddi_codelist(id) ON DELETE SET NULL,
-    label JSONB NOT NULL DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS req_ddi_rv_ddi_id_idx ON request_ddi_representedvariable (ddi_identifier);
 CREATE INDEX IF NOT EXISTS req_ddi_rv_content_hash_idx ON request_ddi_representedvariable (content_hash);
 
 -- ----------------------------------------------------------------------------
@@ -190,78 +190,48 @@ CREATE INDEX IF NOT EXISTS req_ddi_rv_content_hash_idx ON request_ddi_represente
 -- ----------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS request_ddi_studyunit (
-    id BIGSERIAL PRIMARY KEY,
-    urn VARCHAR(512) UNIQUE,
-    agency VARCHAR(255) NOT NULL DEFAULT 'fr.cdsp',
-    ddi_identifier VARCHAR(255),
-    version VARCHAR(64) NOT NULL DEFAULT '1.0.0',
-    content_hash VARCHAR(64) NOT NULL DEFAULT '',
-    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
-    subcollection_id BIGINT NOT NULL REFERENCES request_ddi_subcollection(id) ON DELETE CASCADE,
+    urn VARCHAR(512) PRIMARY KEY,
+    subcollection_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_subcollection(urn) ON DELETE CASCADE,
     title JSONB NOT NULL DEFAULT '[]'::jsonb,
     external_ref VARCHAR(512) UNIQUE,
     year INTEGER,
     description JSONB NOT NULL DEFAULT '[]'::jsonb,
+    content_hash VARCHAR(64) NOT NULL DEFAULT '',
+    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS req_ddi_su_ddi_id_idx ON request_ddi_studyunit (ddi_identifier);
+CREATE INDEX IF NOT EXISTS req_ddi_su_content_hash_idx ON request_ddi_studyunit (content_hash);
 
 CREATE TABLE IF NOT EXISTS request_ddi_instancevariable (
-    id BIGSERIAL PRIMARY KEY,
-    urn VARCHAR(512) UNIQUE,
-    agency VARCHAR(255) NOT NULL DEFAULT 'fr.cdsp',
-    ddi_identifier VARCHAR(255),
-    version VARCHAR(64) NOT NULL DEFAULT '1.0.0',
-    content_hash VARCHAR(64) NOT NULL DEFAULT '',
-    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
-    study_unit_id BIGINT NOT NULL REFERENCES request_ddi_studyunit(id) ON DELETE CASCADE,
-    represented_variable_id BIGINT NOT NULL REFERENCES request_ddi_representedvariable(id) ON DELETE CASCADE,
+    urn VARCHAR(512) PRIMARY KEY,
+    study_unit_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_studyunit(urn) ON DELETE CASCADE,
+    represented_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_representedvariable(urn) ON DELETE CASCADE,
     variable_name VARCHAR(255) NOT NULL,
     universe JSONB NOT NULL DEFAULT '[]'::jsonb,
     notes JSONB NOT NULL DEFAULT '[]'::jsonb,
     is_indexed BOOLEAN NOT NULL DEFAULT FALSE,
+    content_hash VARCHAR(64) NOT NULL DEFAULT '',
+    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT req_ddi_iv_study_var_unique UNIQUE (study_unit_id, variable_name)
+    CONSTRAINT req_ddi_iv_study_var_unique UNIQUE (study_unit_urn, variable_name)
 );
 
 CREATE INDEX IF NOT EXISTS req_ddi_iv_is_indexed_idx ON request_ddi_instancevariable (is_indexed);
+CREATE INDEX IF NOT EXISTS req_ddi_iv_content_hash_idx ON request_ddi_instancevariable (content_hash);
 
--- ----------------------------------------------------------------------------
--- 5. Grouping / Organization Layer
--- ----------------------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS request_ddi_variablegroup (
+CREATE TABLE IF NOT EXISTS request_ddi_studyunitvariable (
     id BIGSERIAL PRIMARY KEY,
-    urn VARCHAR(512) UNIQUE,
-    agency VARCHAR(255) NOT NULL DEFAULT 'fr.cdsp',
-    ddi_identifier VARCHAR(255),
-    version VARCHAR(64) NOT NULL DEFAULT '1.0.0',
-    content_hash VARCHAR(64) NOT NULL DEFAULT '',
-    content_hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
-    study_unit_id BIGINT REFERENCES request_ddi_studyunit(id) ON DELETE CASCADE,
-    collection_id BIGINT REFERENCES request_ddi_collection(id) ON DELETE CASCADE,
-    parent_group_id BIGINT REFERENCES request_ddi_variablegroup(id) ON DELETE SET NULL,
-    label JSONB NOT NULL DEFAULT '[]'::jsonb,
-    description JSONB NOT NULL DEFAULT '[]'::jsonb,
-    type_of_group VARCHAR(64) NOT NULL DEFAULT 'Thematic',
-    concept_id BIGINT REFERENCES request_ddi_concept(id) ON DELETE SET NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS request_ddi_variablegroupmembership (
-    id BIGSERIAL PRIMARY KEY,
-    variable_group_id BIGINT NOT NULL REFERENCES request_ddi_variablegroup(id) ON DELETE CASCADE,
-    instance_variable_id BIGINT NOT NULL REFERENCES request_ddi_instancevariable(id) ON DELETE CASCADE,
+    study_unit_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_studyunit(urn) ON DELETE CASCADE,
+    instance_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instancevariable(urn) ON DELETE CASCADE,
     "order" INTEGER NOT NULL DEFAULT 0,
-    CONSTRAINT req_ddi_vgm_unique UNIQUE (variable_group_id, instance_variable_id)
+    CONSTRAINT req_ddi_suv_unique UNIQUE (study_unit_urn, instance_variable_urn)
 );
 
 -- ----------------------------------------------------------------------------
--- 6. Infrastructure, Provenance, Quarantine, and Staging Layer
+-- 5. Infrastructure, Provenance, Quarantine, and Staging Layer
 -- ----------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS request_ddi_urnalias (

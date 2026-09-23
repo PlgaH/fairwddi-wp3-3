@@ -8,10 +8,7 @@ from fairwddi.models.concept import (
 from fairwddi.models.dataset import (
     InstanceVariable,
     StudyUnit,
-)
-from fairwddi.models.grouping import (
-    VariableGroup,
-    VariableGroupMembership,
+    StudyUnitVariable,
 )
 from fairwddi.models.infrastructure import (
     MetadataQuarantine,
@@ -26,10 +23,12 @@ from fairwddi.models.organization import (
 )
 from fairwddi.models.representation import (
     Category,
-    CategorySet,
-    CategorySetItem,
-    CodeItem,
+    CategoryScheme,
+    CategorySchemeItem,
+    Code,
     CodeList,
+    QuestionGroup,
+    QuestionGroupItem,
     QuestionItem,
     RepresentedVariable,
 )
@@ -42,16 +41,17 @@ __all__ = [
     "Concept",
     "ConceptualVariable",
     "QuestionItem",
+    "QuestionGroup",
+    "QuestionGroupItem",
     "Category",
-    "CategorySet",
-    "CategorySetItem",
+    "CategoryScheme",
+    "CategorySchemeItem",
     "CodeList",
-    "CodeItem",
+    "Code",
     "RepresentedVariable",
     "StudyUnit",
     "InstanceVariable",
-    "VariableGroup",
-    "VariableGroupMembership",
+    "StudyUnitVariable",
     "URNAlias",
     "MetadataQuarantine",
     "StagedImport",

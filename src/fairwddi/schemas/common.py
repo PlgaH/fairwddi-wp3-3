@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, RootModel
@@ -113,11 +114,8 @@ class DDIIdentifiableSchema(BaseModel):
 
     urn: str | None = Field(
         default=None,
-        description="Persistent canonical URN: urn:ddi:{agency}:{identifier}:{version}",
+        description="Persistent canonical URN: urn:ddi:{agency}:{ID}:{version}",
     )
-    agency: str = Field(default="fr.cdsp", description="DDI maintenance agency identifier.")
-    ddi_identifier: str | None = Field(default=None, description="Local or canonical identifier.")
-    version: str = Field(default="1.0.0", description="Entity version string.")
     content_hash: str = Field(
         default="",
         description="Primary SHA-256 content digest (64 hex characters).",
@@ -126,3 +124,30 @@ class DDIIdentifiableSchema(BaseModel):
         default_factory=dict,
         description="Multi-algorithm auxiliary content digests.",
     )
+
+    @property
+    def agency(self) -> str:
+        """Parse agency from URN."""
+        if self.urn and self.urn.startswith("urn:ddi:"):
+            parts = self.urn.split(":")
+            if len(parts) >= 3:
+                return parts[2]
+        return os.getenv("DDI_AGENCY", "fr.sciencespo")
+
+    @property
+    def identifier(self) -> str:
+        """Parse identifier from URN."""
+        if self.urn and self.urn.startswith("urn:ddi:"):
+            parts = self.urn.split(":")
+            if len(parts) >= 4:
+                return parts[3]
+        return self.urn or ""
+
+    @property
+    def version(self) -> str:
+        """Parse version from URN."""
+        if self.urn and self.urn.startswith("urn:ddi:"):
+            parts = self.urn.split(":")
+            if len(parts) >= 5:
+                return parts[4]
+        return "1.0.0"

@@ -1,6 +1,7 @@
 """Dataset Layer models for FAIRwDDI.
 
-Includes StudyUnit (survey wave dataset) and InstanceVariable (dataset column realization).
+Includes StudyUnit (survey wave dataset), InstanceVariable (dataset column realization),
+and StudyUnitVariable (study to variable mapping).
 """
 
 from django.db import models
@@ -17,6 +18,7 @@ class StudyUnit(DDIIdentifiable):
         Subcollection,
         on_delete=models.CASCADE,
         related_name="study_units",
+        db_column="subcollection_urn",
     )
     title = models.JSONField(
         default=list,
@@ -47,8 +49,8 @@ class StudyUnit(DDIIdentifiable):
 
     def __str__(self) -> str:
         if isinstance(self.title, list) and self.title:
-            return self.title[0].get("value", self.urn or str(self.pk))
-        return self.urn or str(self.pk)
+            return self.title[0].get("value", self.urn)
+        return self.urn
 
 
 class InstanceVariable(DDIIdentifiable):
@@ -62,11 +64,13 @@ class InstanceVariable(DDIIdentifiable):
         StudyUnit,
         on_delete=models.CASCADE,
         related_name="instance_variables",
+        db_column="study_unit_urn",
     )
     represented_variable = models.ForeignKey(
         RepresentedVariable,
         on_delete=models.CASCADE,
         related_name="instance_variables",
+        db_column="represented_variable_urn",
     )
     variable_name = models.CharField(
         max_length=255,
@@ -98,3 +102,34 @@ class InstanceVariable(DDIIdentifiable):
 
     def __str__(self) -> str:
         return f"{self.study_unit_id}:{self.variable_name}"
+
+
+class StudyUnitVariable(models.Model):
+    """Junction capturing the direct relationship between a StudyUnit and its variables."""
+
+    study_unit = models.ForeignKey(
+        StudyUnit,
+        on_delete=models.CASCADE,
+        related_name="study_unit_variables",
+        db_column="study_unit_urn",
+    )
+    instance_variable = models.ForeignKey(
+        InstanceVariable,
+        on_delete=models.CASCADE,
+        related_name="study_unit_links",
+        db_column="instance_variable_urn",
+    )
+    order = models.PositiveIntegerField(
+        default=0,
+        help_text="Display order of the variable within the study unit.",
+    )
+
+    class Meta:
+        db_table = "request_ddi_studyunitvariable"
+        unique_together = ("study_unit", "instance_variable")
+        ordering = ["order", "id"]
+        verbose_name = "Study Unit Variable"
+        verbose_name_plural = "Study Unit Variables"
+
+    def __str__(self) -> str:
+        return f"{self.study_unit_id} -> {self.instance_variable_id} (order={self.order})"

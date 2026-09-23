@@ -1,38 +1,25 @@
 """Abstract base models and mixins for FAIRwDDI."""
 
+from __future__ import annotations
+
+import os
+import uuid
+
 from django.db import models
 
 
 class DDIIdentifiable(models.Model):
     """Abstract mixin for DDI-Lifecycle URN identification and multi-algorithm fingerprinting.
 
-    Decoupled from specific hashing implementations, this base model stores
-    persistent URN identifiers, versioning, and hash fingerprints.
+    Canonical DDI 3.3 / 4.0 URN format:
+    urn:ddi:{agency[.sub-agency]}:{ID}:{version}
+    e.g. urn:ddi:fr.sciencespo:Category.cat-fr-yes:1.0.0
     """
 
     urn = models.CharField(
         max_length=512,
-        unique=True,
-        null=True,
-        blank=True,
-        help_text="Full persistent URN: urn:ddi:{agency}:{identifier}:{version}",
-    )
-    agency = models.CharField(
-        max_length=255,
-        default="fr.cdsp",
-        help_text="DDI maintenance agency identifier.",
-    )
-    ddi_identifier = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        db_index=True,
-        help_text="Local or canonical identifier string within the agency scope.",
-    )
-    version = models.CharField(
-        max_length=64,
-        default="1.0.0",
-        help_text="Entity version string.",
+        primary_key=True,
+        help_text="Persistent canonical URN: urn:ddi:{agency}:{ID}:{version}",
     )
 
     # Primary content hash digest (e.g. SHA-256)
@@ -56,3 +43,42 @@ class DDIIdentifiable(models.Model):
 
     class Meta:
         abstract = True
+
+    @property
+    def agency(self) -> str:
+        """Parse the maintenance agency identifier from the canonical URN."""
+        if self.urn and self.urn.startswith("urn:ddi:"):
+            parts = self.urn.split(":")
+            if len(parts) >= 3:
+                return parts[2]
+        return os.getenv("DDI_AGENCY", "fr.sciencespo")
+
+    @property
+    def identifier(self) -> str:
+        """Parse the object/maintainable ID component from the canonical URN."""
+        if self.urn and self.urn.startswith("urn:ddi:"):
+            parts = self.urn.split(":")
+            if len(parts) >= 4:
+                return parts[3]
+        return self.urn or ""
+
+    @property
+    def version(self) -> str:
+        """Parse the version component from the canonical URN."""
+        if self.urn and self.urn.startswith("urn:ddi:"):
+            parts = self.urn.split(":")
+            if len(parts) >= 5:
+                return parts[4]
+        return "1.0.0"
+
+    def save(self, *args, **kwargs) -> None:
+        """Ensure a canonical URN is present before saving."""
+        if not self.urn:
+            agency = os.getenv("DDI_AGENCY", "fr.sciencespo")
+            object_id = (
+                self.content_hash[:16]
+                if self.content_hash
+                else f"{self.__class__.__name__}-{uuid.uuid4().hex[:12]}"
+            )
+            self.urn = f"urn:ddi:{agency}:{object_id}:1.0.0"
+        super().save(*args, **kwargs)

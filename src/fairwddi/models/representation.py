@@ -1,7 +1,7 @@
 """Representation Layer models for FAIRwDDI.
 
-Includes QuestionItem, Category, CategorySet, CategorySetItem, CodeList, CodeItem,
-and RepresentedVariable.
+Includes QuestionItem, QuestionGroup, QuestionGroupItem, Category, CategoryScheme,
+CategorySchemeItem, CodeList, Code, and RepresentedVariable.
 """
 
 from django.db import models
@@ -40,8 +40,72 @@ class QuestionItem(DDIIdentifiable):
 
     def __str__(self) -> str:
         if isinstance(self.question_text, list) and self.question_text:
-            return self.question_text[0].get("value", self.urn or str(self.pk))
-        return self.urn or str(self.pk)
+            return self.question_text[0].get("value", self.urn)
+        return self.urn
+
+
+class QuestionGroup(DDIIdentifiable):
+    """Grouping of related QuestionItem entities."""
+
+    label = models.JSONField(
+        default=list,
+        help_text="Multilingual group title/label stored as an array of objects.",
+    )
+    description = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Multilingual group description as an array of objects.",
+    )
+    parent_group = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="subgroups",
+        db_column="parent_group_urn",
+        help_text="Optional parent group for hierarchical question groups.",
+    )
+
+    class Meta:
+        db_table = "request_ddi_questiongroup"
+        verbose_name = "Question Group"
+        verbose_name_plural = "Question Groups"
+
+    def __str__(self) -> str:
+        if isinstance(self.label, list) and self.label:
+            return self.label[0].get("value", self.urn)
+        return self.urn
+
+
+class QuestionGroupItem(models.Model):
+    """Junction connecting QuestionGroup to member QuestionItem entities with explicit ordering."""
+
+    question_group = models.ForeignKey(
+        QuestionGroup,
+        on_delete=models.CASCADE,
+        related_name="items",
+        db_column="question_group_urn",
+    )
+    question_item = models.ForeignKey(
+        QuestionItem,
+        on_delete=models.CASCADE,
+        related_name="group_memberships",
+        db_column="question_item_urn",
+    )
+    order = models.PositiveIntegerField(
+        default=0,
+        help_text="Display order within the question group.",
+    )
+
+    class Meta:
+        db_table = "request_ddi_questiongroupitem"
+        unique_together = ("question_group", "question_item")
+        ordering = ["order", "id"]
+        verbose_name = "Question Group Item"
+        verbose_name_plural = "Question Group Items"
+
+    def __str__(self) -> str:
+        return f"{self.question_group_id} -> {self.question_item_id} (order={self.order})"
 
 
 class Category(DDIIdentifiable):
@@ -59,16 +123,16 @@ class Category(DDIIdentifiable):
 
     def __str__(self) -> str:
         if isinstance(self.label, list) and self.label:
-            return self.label[0].get("value", self.urn or str(self.pk))
-        return self.urn or str(self.pk)
+            return self.label[0].get("value", self.urn)
+        return self.urn
 
 
-class CategorySet(DDIIdentifiable):
+class CategoryScheme(DDIIdentifiable):
     """Named collection of reusable categories (maps to DDI-L CategoryScheme)."""
 
     name = models.JSONField(
         default=list,
-        help_text="Multilingual name for the category set.",
+        help_text="Multilingual name for the category scheme.",
     )
     description = models.JSONField(
         default=list,
@@ -77,43 +141,45 @@ class CategorySet(DDIIdentifiable):
     )
 
     class Meta:
-        db_table = "request_ddi_categoryset"
-        verbose_name = "Category Set"
-        verbose_name_plural = "Category Sets"
+        db_table = "request_ddi_categoryscheme"
+        verbose_name = "Category Scheme"
+        verbose_name_plural = "Category Schemes"
 
     def __str__(self) -> str:
         if isinstance(self.name, list) and self.name:
-            return self.name[0].get("value", self.urn or str(self.pk))
-        return self.urn or str(self.pk)
+            return self.name[0].get("value", self.urn)
+        return self.urn
 
 
-class CategorySetItem(models.Model):
-    """Junction connecting a CategorySet to member Category entities with explicit ordering."""
+class CategorySchemeItem(models.Model):
+    """Junction connecting a CategoryScheme to member Category entities with explicit ordering."""
 
-    category_set = models.ForeignKey(
-        CategorySet,
+    category_scheme = models.ForeignKey(
+        CategoryScheme,
         on_delete=models.CASCADE,
         related_name="items",
+        db_column="category_scheme_urn",
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
-        related_name="category_set_memberships",
+        related_name="category_scheme_memberships",
+        db_column="category_urn",
     )
     order = models.PositiveIntegerField(
         default=0,
-        help_text="Display order within the category set.",
+        help_text="Display order within the category scheme.",
     )
 
     class Meta:
-        db_table = "request_ddi_categorysetitem"
-        unique_together = ("category_set", "category")
+        db_table = "request_ddi_categoryschemeitem"
+        unique_together = ("category_scheme", "category")
         ordering = ["order", "id"]
-        verbose_name = "Category Set Item"
-        verbose_name_plural = "Category Set Items"
+        verbose_name = "Category Scheme Item"
+        verbose_name_plural = "Category Scheme Items"
 
     def __str__(self) -> str:
-        return f"{self.category_set_id} -> {self.category_id} (order={self.order})"
+        return f"{self.category_scheme_id} -> {self.category_id} (order={self.order})"
 
 
 class CodeList(DDIIdentifiable):
@@ -129,13 +195,14 @@ class CodeList(DDIIdentifiable):
         blank=True,
         help_text="Multilingual description.",
     )
-    category_set = models.ForeignKey(
-        CategorySet,
+    category_scheme = models.ForeignKey(
+        CategoryScheme,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="code_lists",
-        help_text="Optional link to parent CategorySet scheme.",
+        db_column="category_scheme_urn",
+        help_text="Optional link to parent CategoryScheme.",
     )
 
     class Meta:
@@ -145,22 +212,24 @@ class CodeList(DDIIdentifiable):
 
     def __str__(self) -> str:
         if isinstance(self.name, list) and self.name:
-            return self.name[0].get("value", self.urn or str(self.pk))
-        return self.urn or str(self.pk)
+            return self.name[0].get("value", self.urn)
+        return self.urn
 
 
-class CodeItem(models.Model):
-    """Junction connecting a CodeList to a Category with a specific numerical code value."""
+class Code(models.Model):
+    """Junction connecting a CodeList to a Category with a code value (DDI Code)."""
 
     code_list = models.ForeignKey(
         CodeList,
         on_delete=models.CASCADE,
-        related_name="items",
+        related_name="codes",
+        db_column="code_list_urn",
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
         related_name="code_memberships",
+        db_column="category_urn",
     )
     code_value = models.CharField(
         max_length=64,
@@ -174,11 +243,11 @@ class CodeItem(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "request_ddi_codeitem"
+        db_table = "request_ddi_code"
         unique_together = ("code_list", "code_value")
         ordering = ["order", "id"]
-        verbose_name = "Code Item"
-        verbose_name_plural = "Code Items"
+        verbose_name = "Code"
+        verbose_name_plural = "Codes"
 
     def __str__(self) -> str:
         return f"{self.code_value}: {self.category_id}"
@@ -195,12 +264,14 @@ class RepresentedVariable(DDIIdentifiable):
         ConceptualVariable,
         on_delete=models.CASCADE,
         related_name="represented_variables",
+        db_column="conceptual_variable_urn",
         help_text="Parent conceptual variable.",
     )
     question_item = models.ForeignKey(
         QuestionItem,
         on_delete=models.CASCADE,
         related_name="represented_variables",
+        db_column="question_item_urn",
         help_text="Reusable question text component.",
     )
     code_list = models.ForeignKey(
@@ -209,6 +280,7 @@ class RepresentedVariable(DDIIdentifiable):
         null=True,
         blank=True,
         related_name="represented_variables",
+        db_column="code_list_urn",
         help_text="Response code structure (null for open-ended questions).",
     )
     label = models.JSONField(
@@ -224,5 +296,5 @@ class RepresentedVariable(DDIIdentifiable):
 
     def __str__(self) -> str:
         if isinstance(self.label, list) and self.label:
-            return self.label[0].get("value", self.urn or str(self.pk))
-        return self.urn or str(self.pk)
+            return self.label[0].get("value", self.urn)
+        return self.urn

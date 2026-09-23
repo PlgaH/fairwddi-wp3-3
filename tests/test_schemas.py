@@ -5,18 +5,24 @@ from pydantic import ValidationError
 
 from fairwddi.schemas import (
     CategorySchema,
+    CategorySchemeSchema,
+    CodeListSchema,
+    CodeSchema,
+    CollectionSchema,
     ConceptSchema,
     ConceptualVariableSchema,
     DistributorSchema,
     InstanceVariableSchema,
     MultilingualItem,
     MultilingualText,
+    QuestionGroupSchema,
     QuestionItemSchema,
     RepresentedVariableSchema,
     StagedImportSchema,
     StagedResourceNodeSchema,
     StudyUnitSchema,
-    VariableGroupSchema,
+    StudyUnitVariableSchema,
+    SubcollectionSchema,
 )
 
 
@@ -99,24 +105,68 @@ def test_multilingual_text_container() -> None:
 
 
 def test_domain_entity_schemas() -> None:
-    """Test validation of entity schemas with MultilingualText."""
+    """Test validation of entity schemas with canonical URNs and MultilingualText."""
     dist_schema = DistributorSchema(name="Centre de Données Socio-Politiques (CDSP)")
     assert dist_schema.name == "Centre de Données Socio-Politiques (CDSP)"
 
+    coll_schema = CollectionSchema(
+        urn="urn:ddi:fr.sciencespo:BPF:1.0.0",
+        distributor_id=1,
+        name="Baromètre Politique Français",
+    )
+    assert coll_schema.urn == "urn:ddi:fr.sciencespo:BPF:1.0.0"
+    assert coll_schema.agency == "fr.sciencespo"
+    assert coll_schema.identifier == "BPF"
+
+    subcoll_schema = SubcollectionSchema(
+        urn="urn:ddi:fr.sciencespo:BPF_2007:1.0.0",
+        collection_urn="urn:ddi:fr.sciencespo:BPF:1.0.0",
+        name="BPF 2007",
+    )
+    assert subcoll_schema.collection_urn == "urn:ddi:fr.sciencespo:BPF:1.0.0"
+
     q_schema = QuestionItemSchema(
-        urn="urn:ddi:fr.cdsp:QuestionItem:qi-fr-001:1.0.0",
-        agency="fr.cdsp",
+        urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
         question_text=MultilingualText.from_dict({"fr": "Êtes-vous intéressé par la politique ?"}),
         pre_question_text=MultilingualText.from_single("Veuillez répondre honnêtement.", lang="fr"),
         content_hash="abc1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         content_hashes={"v1_strict_sha256": "abc1234", "v2_unordered_set": "xyz9876"},
     )
-    assert q_schema.urn == "urn:ddi:fr.cdsp:QuestionItem:qi-fr-001:1.0.0"
+    assert q_schema.urn == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"
+    assert q_schema.agency == "fr.sciencespo"
     assert q_schema.question_text.get("fr") == "Êtes-vous intéressé par la politique ?"
     assert q_schema.content_hashes["v2_unordered_set"] == "xyz9876"
 
-    cat_schema = CategorySchema(label=MultilingualText.from_single("D'accord", lang="fr"))
+    qg_schema = QuestionGroupSchema(
+        urn="urn:ddi:fr.sciencespo:qg-pol:1.0.0",
+        label=MultilingualText.from_single("Module Politique", lang="fr"),
+    )
+    assert qg_schema.urn == "urn:ddi:fr.sciencespo:qg-pol:1.0.0"
+
+    cat_schema = CategorySchema(
+        urn="urn:ddi:fr.sciencespo:cat-accord:1.0.0",
+        label=MultilingualText.from_single("D'accord", lang="fr"),
+    )
     assert cat_schema.label.get("fr") == "D'accord"
+
+    cs_schema = CategorySchemeSchema(
+        urn="urn:ddi:fr.sciencespo:cs-interest:1.0.0",
+        name=MultilingualText.from_single("Échelle d'intérêt", lang="fr"),
+    )
+    assert cs_schema.name.get("fr") == "Échelle d'intérêt"
+
+    cl_schema = CodeListSchema(
+        urn="urn:ddi:fr.sciencespo:cl-interest:1.0.0",
+        category_scheme_urn="urn:ddi:fr.sciencespo:cs-interest:1.0.0",
+    )
+    assert cl_schema.category_scheme_urn == "urn:ddi:fr.sciencespo:cs-interest:1.0.0"
+
+    code_schema = CodeSchema(
+        code_list_urn="urn:ddi:fr.sciencespo:cl-interest:1.0.0",
+        category_urn="urn:ddi:fr.sciencespo:cat-accord:1.0.0",
+        code_value="1",
+    )
+    assert code_schema.code_value == "1"
 
     concept_schema = ConceptSchema(
         uri="https://elsst.cessda.eu/id/4/Politics",
@@ -128,41 +178,48 @@ def test_domain_entity_schemas() -> None:
     assert concept_schema.vocabulary == "ELSST"
     assert concept_schema.label.get("fr") == "Politique"
 
-    cv_schema = ConceptualVariableSchema(label=MultilingualText.from_single("Concept", lang="fr"))
+    cv_schema = ConceptualVariableSchema(
+        urn="urn:ddi:fr.sciencespo:cv-interest:1.0.0",
+        label=MultilingualText.from_single("Concept", lang="fr"),
+    )
     assert cv_schema.label.get("fr") == "Concept"
 
     rv_schema = RepresentedVariableSchema(
-        conceptual_variable_id=1,
-        question_item_id=1,
+        urn="urn:ddi:fr.sciencespo:rv-interest:1.0.0",
+        conceptual_variable_urn="urn:ddi:fr.sciencespo:cv-interest:1.0.0",
+        question_item_urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
     )
-    assert rv_schema.conceptual_variable_id == 1
+    assert rv_schema.conceptual_variable_urn == "urn:ddi:fr.sciencespo:cv-interest:1.0.0"
 
     su_schema = StudyUnitSchema(
-        subcollection_id=1,
+        urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
+        subcollection_urn="urn:ddi:fr.sciencespo:BPF_2007:1.0.0",
         title=MultilingualText.from_single("Study 2007", lang="fr"),
     )
     assert su_schema.title.get("fr") == "Study 2007"
 
     iv_schema = InstanceVariableSchema(
-        study_unit_id=1,
-        represented_variable_id=1,
+        urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
+        study_unit_urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
+        represented_variable_urn="urn:ddi:fr.sciencespo:rv-interest:1.0.0",
         variable_name="q01a",
     )
     assert iv_schema.variable_name == "q01a"
 
-    vg_schema = VariableGroupSchema(
-        label=MultilingualText.from_single("Démographie", lang="fr"),
+    suv_schema = StudyUnitVariableSchema(
+        study_unit_urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
+        instance_variable_urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
     )
-    assert vg_schema.label.get("fr") == "Démographie"
+    assert suv_schema.study_unit_urn == "urn:ddi:fr.sciencespo:su-2007:1.0.0"
 
     import_schema = StagedImportSchema(
         source_format="ddi_l_3.3",
         file_name="sample.xml",
-        import_options={"agency": "fr.cdsp"},
+        import_options={"agency": "fr.sciencespo"},
         total_resources=5,
     )
     assert import_schema.source_format == "ddi_l_3.3"
-    assert import_schema.import_options["agency"] == "fr.cdsp"
+    assert import_schema.import_options["agency"] == "fr.sciencespo"
     assert import_schema.total_resources == 5
 
     staged_node = StagedResourceNodeSchema(
