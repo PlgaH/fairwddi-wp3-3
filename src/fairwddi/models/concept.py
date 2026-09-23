@@ -126,3 +126,73 @@ class ConceptualVariable(DDIIdentifiable):
         if isinstance(self.label, list) and self.label:
             return self.label[0].get("value", self.urn)
         return self.urn
+
+
+class SemanticRelationship(models.Model):
+    """RDF triple-like semantic relationship between resources.
+
+    Captures SKOS mappings (skos:exactMatch, skos:broadMatch, skos:closeMatch,
+    skos:relatedMatch), provenance/lineage relationships (prov:wasDerivedFrom),
+    cross-vocabulary alignments, and domain-specific semantic graph links.
+    """
+
+    subject_type = models.CharField(
+        max_length=128,
+        help_text=(
+            "Resource type of the subject (e.g. 'Concept', 'ConceptualVariable', 'QuestionItem')."
+        ),
+    )
+    subject_urn = models.CharField(
+        max_length=512,
+        db_index=True,
+        help_text="Canonical URN or URI of the subject resource.",
+    )
+    predicate = models.CharField(
+        max_length=256,
+        db_index=True,
+        help_text=(
+            "Relationship predicate (e.g. 'skos:exactMatch', 'skos:broadMatch', "
+            "'skos:closeMatch', 'skos:relatedMatch')."
+        ),
+    )
+    object_type = models.CharField(
+        max_length=128,
+        help_text=(
+            "Resource type of the object (e.g. 'Concept', 'ConceptualVariable', "
+            "'ExternalResource')."
+        ),
+    )
+    object_urn = models.CharField(
+        max_length=512,
+        db_index=True,
+        help_text="Canonical URN or URI of the object resource.",
+    )
+    extended_attributes = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Extended attributes stored as an array of objects.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "request_ddi_semanticrelationship"
+        verbose_name = "Semantic Relationship"
+        verbose_name_plural = "Semantic Relationships"
+        ordering = ["subject_urn", "predicate", "object_urn"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subject_urn", "predicate", "object_urn"],
+                name="uq_semrel_triple",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["subject_urn", "predicate"], name="idx_semrel_sub_pred"),
+            models.Index(fields=["object_urn", "predicate"], name="idx_semrel_obj_pred"),
+            models.Index(fields=["predicate"], name="idx_semrel_predicate"),
+            models.Index(fields=["subject_type"], name="idx_semrel_sub_type"),
+            models.Index(fields=["object_type"], name="idx_semrel_obj_type"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.subject_urn} --[{self.predicate}]--> {self.object_urn}"

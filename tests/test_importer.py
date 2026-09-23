@@ -112,7 +112,6 @@ def test_load_profile_request() -> None:
     assert profile.should_include("VariableStatistics", is_referenced=True) is False
 
 
-
 def test_load_profile_all_ddi() -> None:
     profile = load_profile("all_ddi")
     assert profile.name == "all_ddi"
@@ -204,7 +203,6 @@ def test_import_metadata_file_with_progress_callback(sample_fsd_ddic: Path) -> N
     stages = [e[0] for e in events]
     assert "parse" in stages or "parse_done" in stages
     assert "stage_done" in stages
-
 
 
 @pytest.mark.django_db
@@ -437,7 +435,6 @@ def test_cli_import_delete(runner: CliRunner, sample_fsd_ddic: Path) -> None:
     assert result_confirm.exit_code == 0
     assert f"Deleted StagedImport #{staged.id}" in result_confirm.stdout
     assert not StagedImport.objects.filter(id=staged.id).exists()
-
 
 
 @pytest.mark.django_db

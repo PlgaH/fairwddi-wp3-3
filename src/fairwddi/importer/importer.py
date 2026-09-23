@@ -347,7 +347,6 @@ def import_metadata_file(
     if progress_callback:
         progress_callback("stage_done", total_staged, total_nodes, "Staging completed")
 
-
     elapsed = time.time() - start_time
     throughput = total_staged / elapsed if elapsed > 0 else float(total_staged)
 

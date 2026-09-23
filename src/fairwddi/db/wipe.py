@@ -30,6 +30,7 @@ def wipe_database() -> dict[str, int]:
         QuestionItem,
         QuestionVariable,
         RepresentedVariable,
+        SemanticRelationship,
         StagedImport,
         StagedResourceNode,
         StudyUnit,
@@ -40,6 +41,7 @@ def wipe_database() -> dict[str, int]:
 
     models_in_delete_order = [
         ("event_logs", EventLog),
+        ("semantic_relationships", SemanticRelationship),
         ("instrument_questions", InstrumentQuestion),
         ("instruments", Instrument),
         ("study_unit_variables", StudyUnitVariable),

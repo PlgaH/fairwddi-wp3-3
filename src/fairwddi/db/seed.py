@@ -34,6 +34,7 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         QuestionItem,
         QuestionVariable,
         RepresentedVariable,
+        SemanticRelationship,
         StagedImport,
         StagedResourceNode,
         StudyUnit,
@@ -223,12 +224,48 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
 
     # Categories belonging directly to CategoryScheme
     cat_defs: list[dict[str, Any]] = [
-        {"id_str": "cat-pol-beaucoup", "fr": "Beaucoup", "en": "A lot", "order": 1},
-        {"id_str": "cat-pol-assez", "fr": "Assez", "en": "Somewhat", "order": 2},
-        {"id_str": "cat-pol-un-peu", "fr": "Un peu", "en": "A little", "order": 3},
-        {"id_str": "cat-pol-pas-du-tout", "fr": "Pas du tout", "en": "Not at all", "order": 4},
-        {"id_str": "cat-nsp", "fr": "Ne sait pas (NSP)", "en": "Don't know", "order": 5},
-        {"id_str": "cat-refus", "fr": "Refus de répondre", "en": "Refused", "order": 6},
+        {
+            "id_str": "cat-pol-beaucoup",
+            "fr": "Beaucoup",
+            "en": "A lot",
+            "order": 1,
+            "is_missing": False,
+        },
+        {
+            "id_str": "cat-pol-assez",
+            "fr": "Assez",
+            "en": "Somewhat",
+            "order": 2,
+            "is_missing": False,
+        },
+        {
+            "id_str": "cat-pol-un-peu",
+            "fr": "Un peu",
+            "en": "A little",
+            "order": 3,
+            "is_missing": False,
+        },
+        {
+            "id_str": "cat-pol-pas-du-tout",
+            "fr": "Pas du tout",
+            "en": "Not at all",
+            "order": 4,
+            "is_missing": False,
+        },
+        {
+            "id_str": "cat-nsp",
+            "fr": "Ne sait pas (NSP)",
+            "en": "Don't know",
+            "order": 5,
+            "is_missing": True,
+        },
+        {
+            "id_str": "cat-refus",
+            "fr": "Refus de répondre",
+            "en": "Refused",
+            "order": 6,
+            "is_missing": True,
+        },
     ]
 
     categories: dict[str, Category] = {}
@@ -238,6 +275,7 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
             defaults={
                 "category_scheme": cat_scheme,
                 "order": cat_def["order"],
+                "is_missing": cat_def["is_missing"],
                 "label": [
                     {"lang": "fr", "value": cat_def["fr"]},
                     {"lang": "en", "value": cat_def["en"]},
@@ -443,6 +481,50 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         },
     )
 
+    # -------------------------------------------------------------------------
+    # 6. Semantic Graph (RDF Triple-like Relationships)
+    # -------------------------------------------------------------------------
+    SemanticRelationship.objects.get_or_create(
+        subject_urn=sub_concept.uri,
+        predicate="skos:exactMatch",
+        object_urn="https://elsst.cessda.eu/id/4/PoliticalAttitudes",
+        defaults={
+            "subject_type": "Concept",
+            "object_type": "Concept",
+            "extended_attributes": [
+                {"type": "thesaurus", "value": "ELSST"},
+                {"type": "mapping_source", "value": "CESSDA ELSST v4"},
+            ],
+        },
+    )
+
+    SemanticRelationship.objects.get_or_create(
+        subject_urn=cv_interest.urn,
+        predicate="skos:relatedMatch",
+        object_urn=sub_concept.uri,
+        defaults={
+            "subject_type": "ConceptualVariable",
+            "object_type": "Concept",
+            "extended_attributes": [
+                {"type": "alignment_method", "value": "curated"},
+                {"type": "confidence", "value": 0.98},
+            ],
+        },
+    )
+
+    SemanticRelationship.objects.get_or_create(
+        subject_urn=qi_interest.urn,
+        predicate="skos:narrowMatch",
+        object_urn=cv_interest.urn,
+        defaults={
+            "subject_type": "QuestionItem",
+            "object_type": "ConceptualVariable",
+            "extended_attributes": [
+                {"type": "alignment_type", "value": "indicator_measure"},
+            ],
+        },
+    )
+
     return {
         "distributors": Distributor.objects.count(),
         "collections": Collection.objects.count(),
@@ -466,4 +548,5 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         "urn_aliases": URNAlias.objects.count(),
         "staged_nodes": StagedResourceNode.objects.count(),
         "event_logs": EventLog.objects.count(),
+        "semantic_relationships": SemanticRelationship.objects.count(),
     }

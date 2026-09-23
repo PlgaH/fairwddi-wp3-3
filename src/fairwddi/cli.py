@@ -632,7 +632,6 @@ def import_file_cmd(
             console.print(f"[bold red]Import Error:[/bold red] {exc}")
             raise typer.Exit(code=1) from exc
 
-
     if summary.get("status") == "already_staged":
         console.print(f"[bold yellow]Notice:[/bold yellow] {summary.get('message')}")
         console.print(
@@ -1032,7 +1031,6 @@ def import_delete_cmd(
     )
     if res["log_file_deleted"]:
         console.print("[dim]Session audit log file removed from disk.[/dim]")
-
 
 
 if __name__ == "__main__":

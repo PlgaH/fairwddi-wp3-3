@@ -287,9 +287,37 @@ Note that, technically, a string could be stored without a "lang" attribute.
 ]
 ```
 
+### Association Shortcuts
+
+- In DDI, relationship between resource can involved different paths
+  - See for example [variable_question_relationships.md](research/variable_question_relationships.md)
+- This level of details in not needed for ReQuest,  and we therefore can use 'shortcuts' to capture relevant associations
+- Tables have been include to relate the following resources:
+  - QuestionItem with InstanceVariable
+  - Instrument with QuestionItem
+  - StudyUnit with InstanceVariable
+- These tables hold the the source and target URNs along with a 'path' expression to document the referencing chain as needed
+
+### Semantic Relationhips
+
+- In the context of ReQuest, we may need to capture relationship that are more semantic in nature, not supported by DDI-L (e.g. SKOS, XKOS, PROV-O, and the likes)
+- A generic table has been include to support this and includes:
+  - Sure
+
+Some examples:
+
+| Predicate           | Source Type          | Target Type          | Example Scenario                                             |
+| ------------------- | -------------------- | -------------------- | ------------------------------------------------------------ |
+| skos:exactMatch     | `QuestionItem`       | `QuestionItem`       | Bilingual questionnaire translation equivalence.             |
+| skos:closeMatch     | `QuestionItem`       | `QuestionItem`       | Aligning minor wording changes across survey waves.          |
+| skos:broadMatch     | `Category`           | `Category`           | Collapsing a detailed 4-digit ISCO job code into a 1-digit major group. |
+| prov:wasDerivedFrom | `HarmonizedVariable` | `SourceVariable`     | Tracking source variables rolled into a synthetic composite index. |
+| prov:wasDerivedFrom | `HarmonizedQuestion` | `SourceQuestion`     | Synthesizing a single canonical national question from three regional variants. |
+| ddi:measures        | `QuestionItem`       | `ConceptualVariable` | Linking an elicitation prompt to the abstract concept it quantifies. |
 
 
-## Revised Database Model
+
+## Database Model
 
 ***See the [database.md ](research/database.md) document for detailed information on the database model and table definitions.***
 

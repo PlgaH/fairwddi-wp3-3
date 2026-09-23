@@ -4,6 +4,7 @@ from fairwddi.models.base import DDIIdentifiable
 from fairwddi.models.concept import (
     Concept,
     ConceptualVariable,
+    SemanticRelationship,
 )
 from fairwddi.models.dataset import (
     InstanceVariable,
@@ -47,6 +48,7 @@ __all__ = [
     "Subcollection",
     "Concept",
     "ConceptualVariable",
+    "SemanticRelationship",
     "QuestionItem",
     "QuestionGroup",
     "QuestionGroupItem",

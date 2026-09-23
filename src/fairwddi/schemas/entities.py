@@ -94,6 +94,24 @@ class ConceptualVariableSchema(DDIIdentifiableSchema):
     updated_at: datetime | None = None
 
 
+class SemanticRelationshipSchema(BaseModel):
+    """Schema for SemanticRelationship capturing RDF triple-like links between resources."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int | None = None
+    subject_type: str = Field(..., description="Subject resource classification type.")
+    subject_urn: str = Field(..., description="Subject canonical URN or URI.")
+    predicate: str = Field(..., description="Semantic predicate (e.g. 'skos:exactMatch').")
+    object_type: str = Field(..., description="Target/object resource classification type.")
+    object_urn: str = Field(..., description="Target/object canonical URN or URI.")
+    extended_attributes: list[dict[str, Any]] = Field(
+        default_factory=list, description="Extensible attributes list of objects."
+    )
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
 # ============================================================================
 # Representation Layer
 # ============================================================================
@@ -140,14 +158,15 @@ class QuestionGroupSchema(DDIIdentifiableSchema):
 class CategorySchema(DDIIdentifiableSchema):
     """Schema for Category (response label)."""
 
-    category_scheme_urn: str | None = Field(
-        default=None, description="Parent CategoryScheme URN."
-    )
+    category_scheme_urn: str | None = Field(default=None, description="Parent CategoryScheme URN.")
     label: MultilingualText = Field(..., description="Multilingual response category label.")
     parent_urn: str | None = Field(
         default=None, description="Parent Category URN for hierarchical schemes."
     )
     order: int = Field(default=0, description="Display order within category scheme.")
+    is_missing: bool = Field(
+        default=False, description="Whether this category represents a missing value."
+    )
     extended_attributes: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensible attributes list of objects."
     )

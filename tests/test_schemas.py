@@ -22,6 +22,7 @@ from fairwddi.schemas import (
     QuestionItemSchema,
     QuestionVariableSchema,
     RepresentedVariableSchema,
+    SemanticRelationshipSchema,
     StagedImportSchema,
     StagedResourceNodeSchema,
     StudyUnitSchema,
@@ -153,6 +154,7 @@ def test_domain_entity_schemas() -> None:
         urn="urn:ddi:fr.sciencespo:cat-accord:1.0.0",
         category_scheme_urn="urn:ddi:fr.sciencespo:cs-interest:1.0.0",
         order=1,
+        is_missing=False,
         label=MultilingualText.from_single("D'accord", lang="fr"),
         parent_urn="urn:ddi:fr.sciencespo:cat-parent:1.0.0",
     )
@@ -160,6 +162,14 @@ def test_domain_entity_schemas() -> None:
     assert cat_schema.parent_urn == "urn:ddi:fr.sciencespo:cat-parent:1.0.0"
     assert cat_schema.category_scheme_urn == "urn:ddi:fr.sciencespo:cs-interest:1.0.0"
     assert cat_schema.order == 1
+    assert cat_schema.is_missing is False
+
+    cat_missing_schema = CategorySchema(
+        urn="urn:ddi:fr.sciencespo:cat-nsp:1.0.0",
+        label=MultilingualText.from_single("NSP", lang="fr"),
+        is_missing=True,
+    )
+    assert cat_missing_schema.is_missing is True
 
     cs_schema = CategorySchemeSchema(
         urn="urn:ddi:fr.sciencespo:cs-interest:1.0.0",
@@ -329,3 +339,30 @@ def test_schema_urn_helpers() -> None:
     assert s3.maintainable_id is None
     assert s3.object_id == "doi:10.7303/item99"
     assert s3.version == "1.0.0"
+
+
+def test_semantic_relationship_schema() -> None:
+    """Test SemanticRelationshipSchema validation, attributes, and serialization."""
+    schema = SemanticRelationshipSchema(
+        subject_type="ConceptualVariable",
+        subject_urn="urn:ddi:fr.sciencespo:cv-fr-001:1.0.0",
+        predicate="skos:exactMatch",
+        object_type="Concept",
+        object_urn="https://elsst.cessda.eu/id/4/Politics",
+        extended_attributes=[
+            {"type": "confidence", "value": 0.95},
+            {"type": "alignment_tool", "value": "ELSST Mapper"},
+        ],
+    )
+
+    assert schema.subject_type == "ConceptualVariable"
+    assert schema.subject_urn == "urn:ddi:fr.sciencespo:cv-fr-001:1.0.0"
+    assert schema.predicate == "skos:exactMatch"
+    assert schema.object_type == "Concept"
+    assert schema.object_urn == "https://elsst.cessda.eu/id/4/Politics"
+    assert len(schema.extended_attributes) == 2
+
+    # Serialization roundtrip
+    dumped = schema.model_dump()
+    assert dumped["predicate"] == "skos:exactMatch"
+    assert dumped["extended_attributes"][0]["value"] == 0.95

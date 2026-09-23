@@ -165,6 +165,10 @@ class Category(DDIIdentifiable):
         default=0,
         help_text="Display order within the category scheme.",
     )
+    is_missing = models.BooleanField(
+        default=False,
+        help_text="Indicates whether this category represents a missing or non-response value.",
+    )
     extended_attributes = models.JSONField(
         default=list,
         blank=True,

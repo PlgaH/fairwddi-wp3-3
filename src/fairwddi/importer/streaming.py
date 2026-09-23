@@ -309,7 +309,6 @@ def stream_ddi_l_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawRes
             del elem.getparent()[0]
 
 
-
 def stream_ddi_l_json(file_path: Path, profile: ImportProfile) -> Iterator[RawResourceNode]:
     """Stream DDI-Lifecycle 4.0 / Colectica JSON files item by item."""
     with open(file_path, encoding="utf-8", errors="ignore") as f:
@@ -346,7 +345,6 @@ def stream_ddi_l_json(file_path: Path, profile: ImportProfile) -> Iterator[RawRe
             raw_value=raw_dict,
             referenced_urns=refs,
         )
-
 
 
 def stream_ddi_c_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawResourceNode]:

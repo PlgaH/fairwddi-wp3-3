@@ -41,16 +41,15 @@ CREATE TABLE IF NOT EXISTS request_ddi_subcollection (
 -- ----------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS request_ddi_concept (
-    urn VARCHAR(512) PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     uri VARCHAR(512) UNIQUE,
     vocabulary VARCHAR(128) NOT NULL DEFAULT '',
     notation VARCHAR(128),
     label JSONB NOT NULL DEFAULT '[]'::jsonb,
     description JSONB NOT NULL DEFAULT '[]'::jsonb,
     definition JSONB NOT NULL DEFAULT '[]'::jsonb,
-    parent_urn VARCHAR(512) REFERENCES request_ddi_concept(urn) ON DELETE SET NULL,
+    parent_urn BIGINT REFERENCES request_ddi_concept(id) ON DELETE SET NULL,
     concept_type VARCHAR(64) NOT NULL DEFAULT 'concept',
-    hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
     extended_attributes JSONB NOT NULL DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -62,7 +61,7 @@ CREATE INDEX IF NOT EXISTS req_ddi_concept_notation_idx ON request_ddi_concept (
 
 CREATE TABLE IF NOT EXISTS request_ddi_conceptualvariable (
     urn VARCHAR(512) PRIMARY KEY,
-    concept_urn VARCHAR(512) REFERENCES request_ddi_concept(urn) ON DELETE SET NULL,
+    concept_urn BIGINT REFERENCES request_ddi_concept(id) ON DELETE SET NULL,
     label JSONB NOT NULL DEFAULT '[]'::jsonb,
     description JSONB NOT NULL DEFAULT '[]'::jsonb,
     hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
@@ -70,6 +69,26 @@ CREATE TABLE IF NOT EXISTS request_ddi_conceptualvariable (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS request_ddi_semanticrelationship (
+    id BIGSERIAL PRIMARY KEY,
+    subject_type VARCHAR(128) NOT NULL,
+    subject_urn VARCHAR(512) NOT NULL,
+    predicate VARCHAR(256) NOT NULL,
+    object_type VARCHAR(128) NOT NULL,
+    object_urn VARCHAR(512) NOT NULL,
+    extended_attributes JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT uq_semrel_triple UNIQUE (subject_urn, predicate, object_urn)
+);
+
+CREATE INDEX IF NOT EXISTS idx_semrel_sub_pred ON request_ddi_semanticrelationship (subject_urn, predicate);
+CREATE INDEX IF NOT EXISTS idx_semrel_obj_pred ON request_ddi_semanticrelationship (object_urn, predicate);
+CREATE INDEX IF NOT EXISTS idx_semrel_predicate ON request_ddi_semanticrelationship (predicate);
+CREATE INDEX IF NOT EXISTS idx_semrel_sub_type ON request_ddi_semanticrelationship (subject_type);
+CREATE INDEX IF NOT EXISTS idx_semrel_obj_type ON request_ddi_semanticrelationship (object_type);
+
 
 -- ----------------------------------------------------------------------------
 -- 3. Representation Layer & Instruments
@@ -119,6 +138,7 @@ CREATE TABLE IF NOT EXISTS request_ddi_category (
     label JSONB NOT NULL DEFAULT '[]'::jsonb,
     parent_urn VARCHAR(512) REFERENCES request_ddi_category(urn) ON DELETE SET NULL,
     "order" INTEGER NOT NULL DEFAULT 0,
+    is_missing BOOLEAN NOT NULL DEFAULT FALSE,
     hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
     extended_attributes JSONB NOT NULL DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

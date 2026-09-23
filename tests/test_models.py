@@ -22,6 +22,7 @@ from fairwddi.models import (
     QuestionItem,
     QuestionVariable,
     RepresentedVariable,
+    SemanticRelationship,
     StagedImport,
     StagedResourceNode,
     StudyUnit,
@@ -159,6 +160,7 @@ class TestFairwDDIModels(TestCase):
             urn="urn:ddi:fr.sciencespo:cat-fr-no:1.0.0",
             category_scheme=cat_scheme,
             order=2,
+            is_missing=False,
             label=[
                 {"lang": "fr", "value": "Non, pas du tout"},
                 {"lang": "en", "value": "No, not at all"},
@@ -166,10 +168,20 @@ class TestFairwDDIModels(TestCase):
             parent=cat_parent,
             hashes={"sha256": "cat_no_hash"},
         )
+        cat_nsp = Category.objects.create(
+            urn="urn:ddi:fr.sciencespo:cat-fr-nsp:1.0.0",
+            category_scheme=cat_scheme,
+            order=3,
+            is_missing=True,
+            label=[{"lang": "fr", "value": "Ne sait pas"}],
+            hashes={"sha256": "cat_nsp_hash"},
+        )
         assert cat_yes.parent == cat_parent
         assert cat_parent.children.count() == 2
-        assert cat_scheme.categories.count() == 3
+        assert cat_scheme.categories.count() == 4
         assert cat_yes.category_scheme == cat_scheme
+        assert cat_yes.is_missing is False
+        assert cat_nsp.is_missing is True
 
         # CodeList & Codes with parent hierarchy
         code_list = CodeList.objects.create(
@@ -409,3 +421,48 @@ class TestFairwDDIModels(TestCase):
         )
         assert staged_import.nodes.count() == 1
         assert node.staged_import == staged_import
+
+    def test_semantic_relationship_triple(self) -> None:
+        """Test SemanticRelationship model, RDF triple structure, constraints, and queries."""
+        from django.db import IntegrityError
+
+        rel = SemanticRelationship.objects.create(
+            subject_type="ConceptualVariable",
+            subject_urn="urn:ddi:fr.sciencespo:cv-fr-001:1.0.0",
+            predicate="skos:exactMatch",
+            object_type="Concept",
+            object_urn="https://elsst.cessda.eu/id/4/Politics",
+            extended_attributes=[
+                {"type": "confidence", "value": 0.99},
+                {"type": "curator", "value": "CDSP"},
+            ],
+        )
+
+        assert rel.id is not None
+        assert rel.subject_type == "ConceptualVariable"
+        assert rel.predicate == "skos:exactMatch"
+        assert rel.object_urn == "https://elsst.cessda.eu/id/4/Politics"
+        assert len(rel.extended_attributes) == 2
+        assert rel.extended_attributes[0]["value"] == 0.99
+        assert str(rel) == (
+            "urn:ddi:fr.sciencespo:cv-fr-001:1.0.0 "
+            "--[skos:exactMatch]--> "
+            "https://elsst.cessda.eu/id/4/Politics"
+        )
+
+        # Query filtering by subject_urn & predicate
+        matched = SemanticRelationship.objects.filter(
+            subject_urn="urn:ddi:fr.sciencespo:cv-fr-001:1.0.0",
+            predicate="skos:exactMatch",
+        )
+        assert matched.count() == 1
+
+        # Test duplicate triple uniqueness constraint
+        with pytest.raises(IntegrityError):
+            SemanticRelationship.objects.create(
+                subject_type="ConceptualVariable",
+                subject_urn="urn:ddi:fr.sciencespo:cv-fr-001:1.0.0",
+                predicate="skos:exactMatch",
+                object_type="Concept",
+                object_urn="https://elsst.cessda.eu/id/4/Politics",
+            )

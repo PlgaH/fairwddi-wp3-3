@@ -19,6 +19,7 @@ erDiagram
     Concept ||--o{ Concept : "parent (broader/narrower)"
     Concept ||--o{ ConceptualVariable : categorizes
     ConceptualVariable ||--o{ RepresentedVariable : represents
+    SemanticRelationship }o--|| Concept : "links resources (RDF triple)"
 
     %% ── Representation & Instrument layer ──
     QuestionGroup ||--o{ QuestionGroupItem : groups
@@ -178,6 +179,27 @@ Abstract measurement concept (e.g., "Left-Right Political Placement"). Inherits 
 
 ---
 
+#### SemanticRelationship
+Captures RDF triple-like relationships between resources across any layer (e.g. SKOS mappings `skos:exactMatch`, `skos:broadMatch`, `skos:relatedMatch`, lineage links `prov:wasDerivedFrom`, cross-vocabulary thesaurus anchors).
+
+| Column | Type | Constraints | Notes |
+| :--- | :--- | :--- | :--- |
+| `id` | `BigAutoField` | PK | Auto-incrementing identifier |
+| `subject_type` | `CharField(128)` | indexed | Subject entity type (`'Concept'`, `'ConceptualVariable'`, etc.) |
+| `subject_urn` | `CharField(512)` | indexed | Canonical URN or URI of the subject resource |
+| `predicate` | `CharField(256)` | indexed | Semantic predicate (e.g. `'skos:exactMatch'`, `'skos:broadMatch'`) |
+| `object_type` | `CharField(128)` | indexed | Target entity type (`'Concept'`, `'ConceptualVariable'`, etc.) |
+| `object_urn` | `CharField(512)` | indexed | Canonical URN or URI of the target resource |
+| `extended_attributes` | `JSONField` | default `[]` | Extensible attributes array of objects (confidence, tool, notes) |
+| `created_at` | `DateTimeField` | auto | |
+| `updated_at` | `DateTimeField` | auto | |
+
+*Constraints & Indexes:*
+- Unique constraint: `(subject_urn, predicate, object_urn)`
+- Indexes: `(subject_urn, predicate)`, `(object_urn, predicate)`, `(predicate)`, `(subject_type)`, `(object_type)`
+
+---
+
 ### 3.3 Representation & Instrument Layer
 
 #### QuestionItem
@@ -232,6 +254,7 @@ Response category text label (decoupled from numerical code values). Belongs to 
 | `label` | `JSONField` | | Multilingual category label |
 | `parent_urn` | `CharField(512)` | FK → Category(urn), nullable | Parent category for hierarchical schemes |
 | `order` | `PositiveIntegerField` | default 0 | Display order within scheme |
+| `is_missing` | `BooleanField` | default `False` | Missing / non-response indicator |
 | `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
 | `extended_attributes` | `JSONField` | default `[]` | Category definitions, inclusions/exclusions |
 | `created_at` | `DateTimeField` | auto | |
