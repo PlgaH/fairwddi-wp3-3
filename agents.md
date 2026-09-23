@@ -128,7 +128,7 @@ _Goal: Integrate the solution into CDSP infrastructure and close the project._
 5. **Multilingual JSONB:** All text fields support multiple languages via JSONB with sorted-key canonical hashing for deterministic fingerprints.
 6. **Streaming XML Parsing:** `lxml.etree.iterparse` replaces BeautifulSoup for DDI-Lifecycle XML to minimize memory footprint on large files.
 7. **Pydantic v2 Unified Schemas:** Single schema layer shared across file import validation, `django-ninja` API serialization, and Elasticsearch bulk indexing.
-8. **Controlled Vocabulary & Thesaurus Anchoring:** The `Concept` entity is vocabulary-agnostic (`uri`, `vocabulary`, `notation`, `parent_id`, `concept_type`) and supports arbitrary controlled vocabularies and classifications (e.g. CESSDA ELSST, CESSDA Topics, DDI-CV, or custom schemes). Sciences Po can use ELSST or other selected thesauri to establish a controlled, multilingual concept hierarchy for clustering `RepresentedVariable` entities across surveys.
+8. **Controlled Vocabulary & Thesaurus Anchoring:** The `Concept` entity is vocabulary-agnostic (`uri`, `vocabulary`, `notation`, `parent_urn`, `concept_type`) and supports arbitrary controlled vocabularies and classifications (e.g. CESSDA ELSST, CESSDA Topics, DDI-CV, or custom schemes). Sciences Po can use ELSST or other selected thesauri to establish a controlled, multilingual concept hierarchy for clustering `RepresentedVariable` entities across surveys.
 
 ---
 

@@ -123,7 +123,10 @@ class DDIIdentifiableSchema(BaseModel):
 
     @property
     def is_canonical_ddi(self) -> bool:
-        """Check if URN strictly matches canonical DDI 3.3 / 4.0 format (urn:ddi:agency:ID:version)."""
+        """Check if URN strictly matches canonical DDI 3.3 / 4.0 format.
+
+        Canonical format: urn:ddi:agency:ID:version.
+        """
         if not self.urn or not self.urn.startswith("urn:ddi:"):
             return False
         parts = self.urn.split(":")
@@ -132,6 +135,11 @@ class DDIIdentifiableSchema(BaseModel):
     @property
     def is_maintainable_scoped(self) -> bool:
         """Check if the ID section represents a nested MaintainableID.ObjectID."""
+        if not self.urn or not self.urn.startswith("urn:ddi:"):
+            return False
+        parts = self.urn.split(":")
+        if len(parts) >= 6:
+            return True
         id_sec = self.identifier
         return "." in id_sec
 

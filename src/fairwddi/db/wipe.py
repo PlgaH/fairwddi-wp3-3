@@ -14,7 +14,6 @@ def wipe_database() -> dict[str, int]:
     from fairwddi.models import (
         Category,
         CategoryScheme,
-        CategorySchemeItem,
         Code,
         CodeList,
         Collection,
@@ -50,9 +49,8 @@ def wipe_database() -> dict[str, int]:
         ("represented_variables", RepresentedVariable),
         ("codes", Code),
         ("code_lists", CodeList),
-        ("category_scheme_items", CategorySchemeItem),
-        ("category_schemes", CategoryScheme),
         ("categories", Category),
+        ("category_schemes", CategoryScheme),
         ("question_group_items", QuestionGroupItem),
         ("question_groups", QuestionGroup),
         ("question_items", QuestionItem),

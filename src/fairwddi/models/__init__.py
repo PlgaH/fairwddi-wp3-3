@@ -31,7 +31,6 @@ from fairwddi.models.organization import (
 from fairwddi.models.representation import (
     Category,
     CategoryScheme,
-    CategorySchemeItem,
     Code,
     CodeList,
     QuestionGroup,
@@ -56,7 +55,6 @@ __all__ = [
     "InstrumentQuestion",
     "Category",
     "CategoryScheme",
-    "CategorySchemeItem",
     "CodeList",
     "Code",
     "RepresentedVariable",

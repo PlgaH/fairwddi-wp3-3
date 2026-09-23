@@ -68,7 +68,7 @@ class ConceptSchema(BaseModel):
     definition: MultilingualText | None = Field(
         default=None, description="Multilingual definition."
     )
-    parent_id: int | None = Field(default=None, description="Parent concept for hierarchy.")
+    parent_urn: str | None = Field(default=None, description="Parent concept URN for hierarchy.")
     concept_type: str = Field(default="concept", description="Type (domain, concept, etc.).")
     extended_attributes: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensible attributes list of objects."
@@ -80,7 +80,9 @@ class ConceptSchema(BaseModel):
 class ConceptualVariableSchema(DDIIdentifiableSchema):
     """Schema for abstract ConceptualVariable."""
 
-    concept_id: int | None = None
+    concept_urn: str | None = Field(
+        default=None, description="Parent Concept URN in controlled vocabulary."
+    )
     label: MultilingualText = Field(..., description="Multilingual concept label.")
     description: MultilingualText | None = Field(
         default=None, description="Multilingual description."
@@ -138,26 +140,19 @@ class QuestionGroupSchema(DDIIdentifiableSchema):
 class CategorySchema(DDIIdentifiableSchema):
     """Schema for Category (response label)."""
 
+    category_scheme_urn: str | None = Field(
+        default=None, description="Parent CategoryScheme URN."
+    )
     label: MultilingualText = Field(..., description="Multilingual response category label.")
     parent_urn: str | None = Field(
         default=None, description="Parent Category URN for hierarchical schemes."
     )
+    order: int = Field(default=0, description="Display order within category scheme.")
     extended_attributes: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensible attributes list of objects."
     )
     created_at: datetime | None = None
     updated_at: datetime | None = None
-
-
-class CategorySchemeItemSchema(BaseModel):
-    """Schema for member item inside a CategoryScheme."""
-
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int | None = None
-    category_scheme_urn: str | None = None
-    category_urn: str
-    order: int = 0
 
 
 class CategorySchemeSchema(DDIIdentifiableSchema):
@@ -167,7 +162,7 @@ class CategorySchemeSchema(DDIIdentifiableSchema):
     description: MultilingualText | None = Field(
         default=None, description="Multilingual description."
     )
-    items: list[CategorySchemeItemSchema] = Field(default_factory=list)
+    categories: list[CategorySchema] = Field(default_factory=list)
     extended_attributes: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensible attributes list of objects."
     )
@@ -175,19 +170,19 @@ class CategorySchemeSchema(DDIIdentifiableSchema):
     updated_at: datetime | None = None
 
 
-class CodeSchema(BaseModel):
+class CodeSchema(DDIIdentifiableSchema):
     """Schema for individual Code inside a CodeList."""
 
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int | None = None
     code_list_urn: str | None = None
     category_urn: str
     code_value: str = Field(..., description="Numerical or text code string.")
-    parent_id: int | None = Field(
-        default=None, description="Parent Code ID for hierarchical code schemes."
+    parent_urn: str | None = Field(
+        default=None, description="Parent Code URN for hierarchical code schemes."
     )
     order: int = 0
+    is_missing: bool = Field(
+        default=False, description="Whether this code represents a missing / non-response value."
+    )
     extended_attributes: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensible attributes list of objects."
     )

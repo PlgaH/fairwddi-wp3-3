@@ -6,7 +6,6 @@ from django.test import TestCase
 from fairwddi.models import (
     Category,
     CategoryScheme,
-    CategorySchemeItem,
     Code,
     CodeList,
     Collection,
@@ -134,19 +133,32 @@ class TestFairwDDIModels(TestCase):
         assert qg.items.count() == 1
         assert qg_item.question_item == qi
 
-        # Categories with parent hierarchy
+        # CategoryScheme
+        cat_scheme = CategoryScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:cs-fr-interest:1.0.0",
+            name=[{"lang": "fr", "value": "Échelle d'intérêt politique"}],
+            hashes={"sha256": "cs_hash_001"},
+        )
+
+        # Categories with parent hierarchy belonging to CategoryScheme
         cat_parent = Category.objects.create(
             urn="urn:ddi:fr.sciencespo:cat-pol-general:1.0.0",
+            category_scheme=cat_scheme,
+            order=0,
             label=[{"lang": "fr", "value": "Échelle d'accord général"}],
         )
         cat_yes = Category.objects.create(
             urn="urn:ddi:fr.sciencespo:cat-fr-yes:1.0.0",
+            category_scheme=cat_scheme,
+            order=1,
             label=[{"lang": "fr", "value": "Oui, beaucoup"}, {"lang": "en", "value": "Yes, a lot"}],
             parent=cat_parent,
             hashes={"sha256": "cat_yes_hash"},
         )
         cat_no = Category.objects.create(
             urn="urn:ddi:fr.sciencespo:cat-fr-no:1.0.0",
+            category_scheme=cat_scheme,
+            order=2,
             label=[
                 {"lang": "fr", "value": "Non, pas du tout"},
                 {"lang": "en", "value": "No, not at all"},
@@ -156,16 +168,8 @@ class TestFairwDDIModels(TestCase):
         )
         assert cat_yes.parent == cat_parent
         assert cat_parent.children.count() == 2
-
-        # CategoryScheme & Items
-        cat_scheme = CategoryScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:cs-fr-interest:1.0.0",
-            name=[{"lang": "fr", "value": "Échelle d'intérêt politique"}],
-            hashes={"sha256": "cs_hash_001"},
-        )
-        CategorySchemeItem.objects.create(category_scheme=cat_scheme, category=cat_yes, order=1)
-        CategorySchemeItem.objects.create(category_scheme=cat_scheme, category=cat_no, order=2)
-        assert cat_scheme.items.count() == 2
+        assert cat_scheme.categories.count() == 3
+        assert cat_yes.category_scheme == cat_scheme
 
         # CodeList & Codes with parent hierarchy
         code_list = CodeList.objects.create(
@@ -186,6 +190,7 @@ class TestFairwDDIModels(TestCase):
             code_value="1",
             parent=parent_code,
             order=1,
+            is_missing=False,
         )
         Code.objects.create(
             code_list=code_list,
@@ -193,10 +198,20 @@ class TestFairwDDIModels(TestCase):
             code_value="2",
             parent=parent_code,
             order=2,
+            is_missing=False,
         )
-        assert code_list.codes.count() == 3
+        code_missing = Code.objects.create(
+            code_list=code_list,
+            category=cat_no,
+            code_value="99",
+            order=3,
+            is_missing=True,
+        )
+        assert code_list.codes.count() == 4
         assert code1.parent == parent_code
         assert parent_code.children.count() == 2
+        assert code1.is_missing is False
+        assert code_missing.is_missing is True
 
         # ConceptualVariable
         cv = ConceptualVariable.objects.create(

@@ -156,6 +156,15 @@ def test_cli_db_wipe_force() -> None:
     assert "Database wiped successfully" in result.stdout
 
 
+@pytest.mark.django_db(transaction=True)
+def test_cli_db_recreate_force() -> None:
+    """Test fairwddi db recreate --force drops, migrates, and recreates tables."""
+    result = runner.invoke(app, ["db", "recreate", "--force", "--seed"])
+    assert result.exit_code == 0
+    assert "Database schema recreated successfully" in result.stdout
+    assert "Database seeded successfully" in result.stdout
+
+
 @pytest.mark.django_db
 def test_cli_db_check_vocab() -> None:
     """Test fairwddi db check-vocab command."""

@@ -7,7 +7,6 @@ from fairwddi.schemas.common import (
 )
 from fairwddi.schemas.entities import (
     CategorySchema,
-    CategorySchemeItemSchema,
     CategorySchemeSchema,
     CodeListSchema,
     CodeSchema,
@@ -50,7 +49,6 @@ __all__ = [
     "InstrumentQuestionSchema",
     "CategorySchema",
     "CategorySchemeSchema",
-    "CategorySchemeItemSchema",
     "CodeListSchema",
     "CodeSchema",
     "RepresentedVariableSchema",

@@ -27,10 +27,8 @@ erDiagram
     QuestionItem ||--o{ QuestionVariable : "associated via path"
     RepresentedVariable ||--o{ QuestionVariable : "references"
     Instrument ||--o{ InstrumentQuestion : "orders via path"
-    QuestionItem ||--o{ InstrumentQuestion : "used in"
     Category ||--o{ Category : "parent hierarchy"
-    CategoryScheme ||--o{ CategorySchemeItem : defines
-    Category ||--o{ CategorySchemeItem : contains
+    CategoryScheme ||--o{ Category : contains
     CategoryScheme ||--o{ CodeList : schemes
     CodeList ||--o{ Code : contains
     Code ||--o{ Code : "parent hierarchy"
@@ -144,19 +142,20 @@ Sub-series grouping. Maps to DDI-L `<SubGroup>`.
 ### 3.2 Concept Layer
 
 #### Concept
-High-level thematic domain concept from any controlled vocabulary or thesaurus (e.g. CESSDA ELSST, CESSDA Topics, DDI-CV).
+High-level thematic domain concept from any controlled vocabulary or thesaurus (e.g. CESSDA ELSST, CESSDA Topics, DDI-CV). Inherits `DDIIdentifiable`.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
-| `id` | `BigAutoField` | PK | Auto-incrementing identifier |
+| `urn` | `CharField(512)` | PK | Persistent canonical URN: `urn:ddi:{agency}:{ID}:{version}` |
 | `uri` | `CharField(512)` | unique, nullable | Controlled vocabulary concept URI |
 | `vocabulary` | `CharField(128)` | default `""` | Controlled vocabulary name |
 | `notation` | `CharField(128)` | nullable | Standard thesaurus notation code |
 | `label` | `JSONField` | | Multilingual label |
 | `description` | `JSONField` | default `[]` | Multilingual description |
 | `definition` | `JSONField` | default `[]` | Multilingual skos:definition |
-| `parent_id` | `BigInt` | FK → Concept, nullable | Parent concept for hierarchical trees |
+| `parent_urn` | `CharField(512)` | FK → Concept(urn), nullable | Parent concept for hierarchical trees |
 | `concept_type` | `CharField(64)` | default `'concept'` | Classification type (`'domain'`, `'concept'`) |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm content digests |
 | `extended_attributes` | `JSONField` | default `[]` | Extensible attributes array of objects |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
@@ -169,7 +168,7 @@ Abstract measurement concept (e.g., "Left-Right Political Placement"). Inherits 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `urn` | `CharField(512)` | PK | Canonical URN (`urn:ddi:agency:cv-...:1.0.0`) |
-| `concept_id` | `BigInt` | FK → Concept, nullable | Controlled vocabulary concept anchor |
+| `concept_urn` | `CharField(512)` | FK → Concept(urn), nullable | Controlled vocabulary concept anchor |
 | `label` | `JSONField` | | Multilingual label |
 | `description` | `JSONField` | nullable | Multilingual description |
 | `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
@@ -224,13 +223,15 @@ Junction connecting a `QuestionGroup` to member `QuestionItem` entities with exp
 ---
 
 #### Category
-Response category text label (decoupled from numerical code values). Supports self-referential hierarchy. Inherits `DDIIdentifiable`.
+Response category text label (decoupled from numerical code values). Belongs to a single CategoryScheme and supports self-referential hierarchy. Inherits `DDIIdentifiable`.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `urn` | `CharField(512)` | PK | Canonical Category URN |
+| `category_scheme_urn` | `CharField(512)` | FK → CategoryScheme(urn), nullable | Parent CategoryScheme defining this category |
 | `label` | `JSONField` | | Multilingual category label |
 | `parent_urn` | `CharField(512)` | FK → Category(urn), nullable | Parent category for hierarchical schemes |
+| `order` | `PositiveIntegerField` | default 0 | Display order within scheme |
 | `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
 | `extended_attributes` | `JSONField` | default `[]` | Category definitions, inclusions/exclusions |
 | `created_at` | `DateTimeField` | auto | |
@@ -253,18 +254,6 @@ Named collection of reusable categories (maps to DDI-L `CategoryScheme`). Inheri
 
 ---
 
-#### CategorySchemeItem
-Junction connecting a `CategoryScheme` to member `Category` entities with explicit ordering.
-
-| Column | Type | Constraints | Notes |
-| :--- | :--- | :--- | :--- |
-| `id` | `BigAutoField` | PK | Auto-incrementing junction ID |
-| `category_scheme_urn` | `CharField(512)` | FK → CategoryScheme(urn) | Parent category scheme |
-| `category_urn` | `CharField(512)` | FK → Category(urn) | Member category |
-| `order` | `PositiveIntegerField` | default 0 | Display sequence |
-
----
-
 #### CodeList
 Structural set of response codes linked to categories. Inherits `DDIIdentifiable`.
 
@@ -282,16 +271,18 @@ Structural set of response codes linked to categories. Inherits `DDIIdentifiable
 ---
 
 #### Code
-Junction connecting a `CodeList` to a `Category` with a code value. Supports self-referential hierarchy (`parent_id`).
+Junction connecting a `CodeList` to a `Category` with a code value. Inherits `DDIIdentifiable`. Supports self-referential hierarchy (`parent_urn`).
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
-| `id` | `BigAutoField` | PK | Auto-incrementing junction ID |
+| `urn` | `CharField(512)` | PK | Persistent canonical URN: `urn:ddi:{agency}:{ID}:{version}` |
 | `code_list_urn` | `CharField(512)` | FK → CodeList(urn) | Parent code list |
 | `category_urn` | `CharField(512)` | FK → Category(urn) | Referenced category label |
 | `code_value` | `CharField(64)` | | Numerical/string code (e.g. `"1"`, `"98"`) |
-| `parent_id` | `BigInt` | FK → Code(id), nullable | Parent code for hierarchical code lists |
+| `parent_urn` | `CharField(512)` | FK → Code(urn), nullable | Parent code for hierarchical code lists |
 | `order` | `PositiveIntegerField` | default 0 | Display order within list |
+| `is_missing` | `BooleanField` | default `False` | True if code represents missing/non-response (DK, Refusal, NA) |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm content digests |
 | `extended_attributes` | `JSONField` | default `[]` | Extensible attributes array of objects |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
@@ -510,7 +501,6 @@ Stores individual broken-down raw element resources extracted during Stage 1 par
 | `QuestionGroupItem` | `(question_group_urn, question_item_urn)`| UNIQUE composite | Question grouping membership uniqueness |
 | `QuestionVariable` | `(question_item_urn, represented_variable_urn)`| UNIQUE composite | Question to variable association uniqueness |
 | `InstrumentQuestion`| `(instrument_urn, question_item_urn, path)` | UNIQUE composite | Instrument question sequencing uniqueness |
-| `CategorySchemeItem`| `(category_scheme_urn, category_urn)` | UNIQUE composite | Scheme membership uniqueness |
 | `StudyUnitVariable` | `(study_unit_urn, instance_variable_urn)`| UNIQUE composite | Variable-to-study mapping uniqueness |
 | `EventLog` | `(urn, timestamp)` | Composite B-tree | Chronological audit log lookups by resource URN |
 | `EventLog` | `event_type` | B-tree | Filter audit events by classification |

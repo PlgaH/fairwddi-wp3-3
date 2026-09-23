@@ -19,7 +19,6 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
     from fairwddi.models import (
         Category,
         CategoryScheme,
-        CategorySchemeItem,
         Code,
         CodeList,
         Collection,
@@ -212,30 +211,6 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         defaults={"order": 1},
     )
 
-    # Categories
-    cat_defs: list[dict[str, Any]] = [
-        {"id_str": "cat-pol-beaucoup", "fr": "Beaucoup", "en": "A lot"},
-        {"id_str": "cat-pol-assez", "fr": "Assez", "en": "Somewhat"},
-        {"id_str": "cat-pol-un-peu", "fr": "Un peu", "en": "A little"},
-        {"id_str": "cat-pol-pas-du-tout", "fr": "Pas du tout", "en": "Not at all"},
-        {"id_str": "cat-nsp", "fr": "Ne sait pas (NSP)", "en": "Don't know"},
-        {"id_str": "cat-refus", "fr": "Refus de répondre", "en": "Refused"},
-    ]
-
-    categories: dict[str, Category] = {}
-    for cat_def in cat_defs:
-        cat, _ = Category.objects.get_or_create(
-            urn=f"urn:ddi:{agency}:{cat_def['id_str']}:1.0.0",
-            defaults={
-                "label": [
-                    {"lang": "fr", "value": cat_def["fr"]},
-                    {"lang": "en", "value": cat_def["en"]},
-                ],
-                "hashes": {"sha256": f"hash_{cat_def['id_str']}"},
-            },
-        )
-        categories[cat_def["id_str"]] = cat
-
     # CategoryScheme
     cat_scheme, _ = CategoryScheme.objects.get_or_create(
         urn=f"urn:ddi:{agency}:cs-interest-4pt:1.0.0",
@@ -245,14 +220,32 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
             "hashes": {"sha256": "cs_hash_interest_4pt"},
         },
     )
-    for idx, key in enumerate(
-        ["cat-pol-beaucoup", "cat-pol-assez", "cat-pol-un-peu", "cat-pol-pas-du-tout"], start=1
-    ):
-        CategorySchemeItem.objects.get_or_create(
-            category_scheme=cat_scheme,
-            category=categories[key],
-            defaults={"order": idx},
+
+    # Categories belonging directly to CategoryScheme
+    cat_defs: list[dict[str, Any]] = [
+        {"id_str": "cat-pol-beaucoup", "fr": "Beaucoup", "en": "A lot", "order": 1},
+        {"id_str": "cat-pol-assez", "fr": "Assez", "en": "Somewhat", "order": 2},
+        {"id_str": "cat-pol-un-peu", "fr": "Un peu", "en": "A little", "order": 3},
+        {"id_str": "cat-pol-pas-du-tout", "fr": "Pas du tout", "en": "Not at all", "order": 4},
+        {"id_str": "cat-nsp", "fr": "Ne sait pas (NSP)", "en": "Don't know", "order": 5},
+        {"id_str": "cat-refus", "fr": "Refus de répondre", "en": "Refused", "order": 6},
+    ]
+
+    categories: dict[str, Category] = {}
+    for cat_def in cat_defs:
+        cat, _ = Category.objects.get_or_create(
+            urn=f"urn:ddi:{agency}:{cat_def['id_str']}:1.0.0",
+            defaults={
+                "category_scheme": cat_scheme,
+                "order": cat_def["order"],
+                "label": [
+                    {"lang": "fr", "value": cat_def["fr"]},
+                    {"lang": "en", "value": cat_def["en"]},
+                ],
+                "hashes": {"sha256": f"hash_{cat_def['id_str']}"},
+            },
         )
+        categories[cat_def["id_str"]] = cat
 
     # CodeList & Codes
     code_list, _ = CodeList.objects.get_or_create(
@@ -265,18 +258,22 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
     )
 
     code_mappings = [
-        ("1", "cat-pol-beaucoup", 1),
-        ("2", "cat-pol-assez", 2),
-        ("3", "cat-pol-un-peu", 3),
-        ("4", "cat-pol-pas-du-tout", 4),
-        ("88", "cat-nsp", 5),
-        ("99", "cat-refus", 6),
+        ("1", "cat-pol-beaucoup", 1, False),
+        ("2", "cat-pol-assez", 2, False),
+        ("3", "cat-pol-un-peu", 3, False),
+        ("4", "cat-pol-pas-du-tout", 4, False),
+        ("88", "cat-nsp", 5, True),
+        ("99", "cat-refus", 6, True),
     ]
-    for val, cat_key, ord_val in code_mappings:
+    for val, cat_key, ord_val, is_miss in code_mappings:
         Code.objects.get_or_create(
             code_list=code_list,
             code_value=val,
-            defaults={"category": categories[cat_key], "order": ord_val},
+            defaults={
+                "category": categories[cat_key],
+                "order": ord_val,
+                "is_missing": is_miss,
+            },
         )
 
     # RepresentedVariable
@@ -460,7 +457,6 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         "instrument_questions": InstrumentQuestion.objects.count(),
         "categories": Category.objects.count(),
         "category_schemes": CategoryScheme.objects.count(),
-        "category_scheme_items": CategorySchemeItem.objects.count(),
         "code_lists": CodeList.objects.count(),
         "codes": Code.objects.count(),
         "represented_variables": RepresentedVariable.objects.count(),

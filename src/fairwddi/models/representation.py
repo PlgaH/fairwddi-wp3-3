@@ -4,6 +4,10 @@ Includes QuestionItem, QuestionGroup, QuestionGroupItem, Category, CategorySchem
 CategorySchemeItem, CodeList, Code, RepresentedVariable, and QuestionVariable.
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 from django.db import models
 
 from fairwddi.models.base import DDIIdentifiable
@@ -103,39 +107,6 @@ class QuestionGroupItem(models.Model):
         return f"{self.question_group_id} -> {self.question_item_id} (order={self.order})"
 
 
-class Category(DDIIdentifiable):
-    """Response category text label (decoupled from numerical code values)."""
-
-    label = models.JSONField(
-        default=list,
-        help_text="Multilingual category label: [{'lang': 'fr', 'value': '...' }].",
-    )
-    parent = models.ForeignKey(
-        "self",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="children",
-        db_column="parent_urn",
-        help_text="Parent category for hierarchical category schemes.",
-    )
-    extended_attributes = models.JSONField(
-        default=list,
-        blank=True,
-        help_text="Extended attributes stored as an array of objects.",
-    )
-
-    class Meta:
-        db_table = "request_ddi_category"
-        verbose_name = "Category"
-        verbose_name_plural = "Categories"
-
-    def __str__(self) -> str:
-        if isinstance(self.label, list) and self.label:
-            return self.label[0].get("value", self.urn)
-        return self.urn
-
-
 class CategoryScheme(DDIIdentifiable):
     """Named collection of reusable categories (maps to DDI-L CategoryScheme)."""
 
@@ -165,35 +136,51 @@ class CategoryScheme(DDIIdentifiable):
         return self.urn
 
 
-class CategorySchemeItem(models.Model):
-    """Junction connecting a CategoryScheme to member Category entities with explicit ordering."""
+class Category(DDIIdentifiable):
+    """Response category text label (decoupled from numerical code values)."""
 
     category_scheme = models.ForeignKey(
         CategoryScheme,
         on_delete=models.CASCADE,
-        related_name="items",
+        null=True,
+        blank=True,
+        related_name="categories",
         db_column="category_scheme_urn",
+        help_text="Parent CategoryScheme defining this category.",
     )
-    category = models.ForeignKey(
-        Category,
-        on_delete=models.CASCADE,
-        related_name="category_scheme_memberships",
-        db_column="category_urn",
+    label = models.JSONField(
+        default=list,
+        help_text="Multilingual category label: [{'lang': 'fr', 'value': '...' }].",
+    )
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="children",
+        db_column="parent_urn",
+        help_text="Parent category for hierarchical category schemes.",
     )
     order = models.PositiveIntegerField(
         default=0,
         help_text="Display order within the category scheme.",
     )
+    extended_attributes = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Extended attributes stored as an array of objects.",
+    )
 
     class Meta:
-        db_table = "request_ddi_categoryschemeitem"
-        unique_together = ("category_scheme", "category")
-        ordering = ["order", "id"]
-        verbose_name = "Category Scheme Item"
-        verbose_name_plural = "Category Scheme Items"
+        db_table = "request_ddi_category"
+        ordering = ["order", "urn"]
+        verbose_name = "Category"
+        verbose_name_plural = "Categories"
 
     def __str__(self) -> str:
-        return f"{self.category_scheme_id} -> {self.category_id} (order={self.order})"
+        if isinstance(self.label, list) and self.label:
+            return self.label[0].get("value", self.urn)
+        return self.urn
 
 
 class CodeList(DDIIdentifiable):
@@ -235,7 +222,7 @@ class CodeList(DDIIdentifiable):
         return self.urn
 
 
-class Code(models.Model):
+class Code(DDIIdentifiable):
     """Junction connecting a CodeList to a Category with a code value (DDI Code)."""
 
     code_list = models.ForeignKey(
@@ -260,27 +247,40 @@ class Code(models.Model):
         null=True,
         blank=True,
         related_name="children",
-        db_column="parent_id",
+        db_column="parent_urn",
         help_text="Parent code for hierarchical code schemes.",
     )
     order = models.PositiveIntegerField(
         default=0,
         help_text="Display order within the code list.",
     )
+    is_missing = models.BooleanField(
+        default=False,
+        help_text="Indicates whether this code represents a missing or non-response value.",
+    )
     extended_attributes = models.JSONField(
         default=list,
         blank=True,
         help_text="Extended attributes stored as an array of objects.",
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "request_ddi_code"
         unique_together = ("code_list", "code_value")
-        ordering = ["order", "id"]
+        ordering = ["order", "urn"]
         verbose_name = "Code"
         verbose_name_plural = "Codes"
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        if not self.urn and self.code_list_id:
+            # Generate maintainable-scoped URN based on code_list and code_value
+            parts = self.code_list_id.split(":")
+            if len(parts) in (4, 5):
+                agency = parts[2]
+                cl_id = parts[3]
+                ver = parts[4] if len(parts) == 5 else "1.0.0"
+                self.urn = f"urn:ddi:{agency}:{cl_id}.{self.code_value}:{ver}"
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f"{self.code_value}: {self.category_id}"

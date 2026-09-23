@@ -59,7 +59,7 @@ class Concept(models.Model):
         null=True,
         blank=True,
         related_name="narrower_concepts",
-        db_column="parent_id",
+        db_column="parent_urn",
         help_text="Parent concept representing skos:broader hierarchical relationship.",
     )
     concept_type = models.CharField(
@@ -99,7 +99,7 @@ class ConceptualVariable(DDIIdentifiable):
         null=True,
         blank=True,
         related_name="conceptual_variables",
-        db_column="concept_id",
+        db_column="concept_urn",
         help_text="Optional parent concept anchor in a controlled vocabulary.",
     )
     label = models.JSONField(

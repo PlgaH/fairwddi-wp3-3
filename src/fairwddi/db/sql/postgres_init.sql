@@ -41,15 +41,16 @@ CREATE TABLE IF NOT EXISTS request_ddi_subcollection (
 -- ----------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS request_ddi_concept (
-    id BIGSERIAL PRIMARY KEY,
+    urn VARCHAR(512) PRIMARY KEY,
     uri VARCHAR(512) UNIQUE,
     vocabulary VARCHAR(128) NOT NULL DEFAULT '',
     notation VARCHAR(128),
     label JSONB NOT NULL DEFAULT '[]'::jsonb,
     description JSONB NOT NULL DEFAULT '[]'::jsonb,
     definition JSONB NOT NULL DEFAULT '[]'::jsonb,
-    parent_id BIGINT REFERENCES request_ddi_concept(id) ON DELETE SET NULL,
+    parent_urn VARCHAR(512) REFERENCES request_ddi_concept(urn) ON DELETE SET NULL,
     concept_type VARCHAR(64) NOT NULL DEFAULT 'concept',
+    hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
     extended_attributes JSONB NOT NULL DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -61,7 +62,7 @@ CREATE INDEX IF NOT EXISTS req_ddi_concept_notation_idx ON request_ddi_concept (
 
 CREATE TABLE IF NOT EXISTS request_ddi_conceptualvariable (
     urn VARCHAR(512) PRIMARY KEY,
-    concept_id BIGINT REFERENCES request_ddi_concept(id) ON DELETE SET NULL,
+    concept_urn VARCHAR(512) REFERENCES request_ddi_concept(urn) ON DELETE SET NULL,
     label JSONB NOT NULL DEFAULT '[]'::jsonb,
     description JSONB NOT NULL DEFAULT '[]'::jsonb,
     hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
@@ -102,16 +103,6 @@ CREATE TABLE IF NOT EXISTS request_ddi_questiongroupitem (
     CONSTRAINT req_ddi_qg_item_unique UNIQUE (question_group_urn, question_item_urn)
 );
 
-CREATE TABLE IF NOT EXISTS request_ddi_category (
-    urn VARCHAR(512) PRIMARY KEY,
-    label JSONB NOT NULL DEFAULT '[]'::jsonb,
-    parent_urn VARCHAR(512) REFERENCES request_ddi_category(urn) ON DELETE SET NULL,
-    hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
-    extended_attributes JSONB NOT NULL DEFAULT '[]'::jsonb,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
 CREATE TABLE IF NOT EXISTS request_ddi_categoryscheme (
     urn VARCHAR(512) PRIMARY KEY,
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
@@ -122,12 +113,16 @@ CREATE TABLE IF NOT EXISTS request_ddi_categoryscheme (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS request_ddi_categoryschemeitem (
-    id BIGSERIAL PRIMARY KEY,
-    category_scheme_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_categoryscheme(urn) ON DELETE CASCADE,
-    category_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_category(urn) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS request_ddi_category (
+    urn VARCHAR(512) PRIMARY KEY,
+    category_scheme_urn VARCHAR(512) REFERENCES request_ddi_categoryscheme(urn) ON DELETE CASCADE,
+    label JSONB NOT NULL DEFAULT '[]'::jsonb,
+    parent_urn VARCHAR(512) REFERENCES request_ddi_category(urn) ON DELETE SET NULL,
     "order" INTEGER NOT NULL DEFAULT 0,
-    CONSTRAINT req_ddi_cs_item_unique UNIQUE (category_scheme_urn, category_urn)
+    hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
+    extended_attributes JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS request_ddi_codelist (
@@ -142,12 +137,14 @@ CREATE TABLE IF NOT EXISTS request_ddi_codelist (
 );
 
 CREATE TABLE IF NOT EXISTS request_ddi_code (
-    id BIGSERIAL PRIMARY KEY,
+    urn VARCHAR(512) PRIMARY KEY,
     code_list_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_codelist(urn) ON DELETE CASCADE,
     category_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_category(urn) ON DELETE CASCADE,
     code_value VARCHAR(64) NOT NULL,
-    parent_id BIGINT REFERENCES request_ddi_code(id) ON DELETE SET NULL,
+    parent_urn VARCHAR(512) REFERENCES request_ddi_code(urn) ON DELETE SET NULL,
     "order" INTEGER NOT NULL DEFAULT 0,
+    is_missing BOOLEAN NOT NULL DEFAULT FALSE,
+    hashes JSONB NOT NULL DEFAULT '{}'::jsonb,
     extended_attributes JSONB NOT NULL DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

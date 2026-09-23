@@ -151,17 +151,23 @@ def test_domain_entity_schemas() -> None:
 
     cat_schema = CategorySchema(
         urn="urn:ddi:fr.sciencespo:cat-accord:1.0.0",
+        category_scheme_urn="urn:ddi:fr.sciencespo:cs-interest:1.0.0",
+        order=1,
         label=MultilingualText.from_single("D'accord", lang="fr"),
         parent_urn="urn:ddi:fr.sciencespo:cat-parent:1.0.0",
     )
     assert cat_schema.label.get("fr") == "D'accord"
     assert cat_schema.parent_urn == "urn:ddi:fr.sciencespo:cat-parent:1.0.0"
+    assert cat_schema.category_scheme_urn == "urn:ddi:fr.sciencespo:cs-interest:1.0.0"
+    assert cat_schema.order == 1
 
     cs_schema = CategorySchemeSchema(
         urn="urn:ddi:fr.sciencespo:cs-interest:1.0.0",
         name=MultilingualText.from_single("Échelle d'intérêt", lang="fr"),
+        categories=[cat_schema],
     )
     assert cs_schema.name.get("fr") == "Échelle d'intérêt"
+    assert len(cs_schema.categories) == 1
 
     cl_schema = CodeListSchema(
         urn="urn:ddi:fr.sciencespo:cl-interest:1.0.0",
@@ -170,13 +176,24 @@ def test_domain_entity_schemas() -> None:
     assert cl_schema.category_scheme_urn == "urn:ddi:fr.sciencespo:cs-interest:1.0.0"
 
     code_schema = CodeSchema(
+        urn="urn:ddi:fr.sciencespo:cl-interest.1:1.0.0",
         code_list_urn="urn:ddi:fr.sciencespo:cl-interest:1.0.0",
         category_urn="urn:ddi:fr.sciencespo:cat-accord:1.0.0",
         code_value="1",
-        parent_id=10,
+        parent_urn="urn:ddi:fr.sciencespo:cl-interest.0:1.0.0",
+        is_missing=False,
     )
     assert code_schema.code_value == "1"
-    assert code_schema.parent_id == 10
+    assert code_schema.parent_urn == "urn:ddi:fr.sciencespo:cl-interest.0:1.0.0"
+    assert code_schema.is_missing is False
+
+    code_missing = CodeSchema(
+        code_list_urn="urn:ddi:fr.sciencespo:cl-interest:1.0.0",
+        category_urn="urn:ddi:fr.sciencespo:cat-nsp:1.0.0",
+        code_value="88",
+        is_missing=True,
+    )
+    assert code_missing.is_missing is True
 
     concept_schema = ConceptSchema(
         uri="https://elsst.cessda.eu/id/4/Politics",

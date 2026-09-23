@@ -253,6 +253,99 @@ def db_wipe(
         console.print("[green]Database was already empty (0 records removed).[/green]")
 
 
+@db_app.command("recreate")
+def db_recreate(
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Bypass confirmation prompt (for automated scripts).",
+    ),
+    seed: bool = typer.Option(
+        False,
+        "--seed",
+        "-s",
+        help="Seed demonstration data after recreating tables.",
+    ),
+    load_vocab: bool = typer.Option(
+        False,
+        "--load-vocab",
+        "-v",
+        help="Load top ELSST concepts into Concept table after recreation.",
+    ),
+) -> None:
+    """Drop and recreate all database tables from scratch, re-applying all migrations."""
+    import secrets
+    from pathlib import Path
+
+    from django.core.management import call_command
+    from django.db import connection
+
+    from fairwddi.db.seed import seed_sample_data
+    from fairwddi.db.vocab import load_skos_vocabulary
+
+    configure_django_for_cli()
+    db_config = get_database_config()
+    db_engine = db_config.get("ENGINE", "").split(".")[-1]
+    db_name = db_config.get("NAME", "")
+
+    if not force:
+        expected_code = str(secrets.randbelow(9000) + 1000)
+        console.print(
+            f"[bold red]⚠️  WARNING:[/bold red] You are about to DROP and RECREATE "
+            f"all tables in [cyan]{db_engine}[/cyan] database [yellow]{db_name}[/yellow]!"
+        )
+        confirmation_input = typer.prompt(
+            f"Type confirmation code '{expected_code}' to confirm database recreation",
+            type=str,
+        )
+        if confirmation_input.strip() != expected_code:
+            console.print(
+                f"[yellow]Aborted. Confirmation code did not match '{expected_code}'. "
+                "Database was not modified.[/yellow]"
+            )
+            raise typer.Abort()
+
+    console.print(f"[dim]Dropping existing schema in {db_engine} database {db_name}...[/dim]")
+    if connection.vendor == "postgresql":
+        with connection.cursor() as cursor:
+            cursor.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
+    elif connection.vendor == "sqlite":
+        with connection.cursor() as cursor:
+            tables = connection.introspection.table_names()
+            cursor.execute("PRAGMA foreign_keys = OFF;")
+            for table in tables:
+                cursor.execute(f'DROP TABLE IF EXISTS "{table}";')
+            cursor.execute("PRAGMA foreign_keys = ON;")
+        if db_name != ":memory:":
+            db_path = Path(db_name)
+            if db_path.exists():
+                db_path.unlink(missing_ok=True)
+
+    console.print("[dim]Applying migrations from scratch...[/dim]")
+    call_command("migrate", interactive=False, verbosity=1)
+    console.print("[bold green]Database schema recreated successfully.[/bold green]")
+
+    if seed:
+        console.print("[dim]Seeding demonstration data...[/dim]")
+        summary = seed_sample_data(reset=False)
+        table = Table(title="Demonstration Data Seed Summary", border_style="green")
+        table.add_column("Entity / Layer", style="bold cyan")
+        table.add_column("Count", justify="right", style="yellow")
+        for key, count in summary.items():
+            table.add_row(key.replace("_", " ").title(), str(count))
+        console.print(table)
+        console.print("[bold green]Database seeded successfully.[/bold green]")
+
+    if load_vocab:
+        vocab_file = Path("vocab/ELSST_R6.ttl")
+        if vocab_file.exists():
+            console.print("[dim]Loading standard ELSST vocabulary...[/dim]")
+            stats = load_skos_vocabulary(str(vocab_file), max_levels=1)
+            loaded_count = stats.get("concepts_loaded", 0)
+            console.print(f"[bold green]Loaded {loaded_count} top ELSST concepts.[/bold green]")
+
+
 @db_app.command("load-vocab")
 def db_load_vocab(
     file_path: str = typer.Argument(
