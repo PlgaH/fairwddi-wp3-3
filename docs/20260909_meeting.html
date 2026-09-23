@@ -2059,7 +2059,7 @@ section.lead h1, section.lead h2, section.lead h3 {
 <li><strong>Colectica Tooling Context:</strong> Colectica is the primary toolsuite generally used across archives to manage DDI-Lifecycle metadata.</li>
 <li><strong>Corpus Storage Notice:</strong> Harvested raw XML files are excluded from GitHub due to size (multi-GB) and licensing (available on request).</li>
 <li><strong>Steward Profiles:</strong> Different data stewards and projects use distinct DDI profiles / resource subsets (statistics compiled across corpora).</li>
-<li><strong>Resource Relationships:</strong> DDI-L provides multiple ways to link resources (documented 6 question ↔ variable paths in <code>deliverables/variable_question_relationships.md</code>).</li>
+<li><strong>Resource Relationships:</strong> DDI-L provides multiple ways to link resources (documented 6 question ↔ variable paths in <code>deliverables/research/variable_question_relationships.md</code>).</li>
 <li><strong>BaseX Research DB:</strong> Used high-speed XQuery to analyze structural schemas across millions of real-world DDI nodes.</li>
 </ul>
 </div>
@@ -2624,12 +2624,12 @@ section.lead h1, section.lead h2, section.lead h3 {
 <div>
 <ul>
 <li><strong>Database Management CLI:</strong> Complete <code>fairwddi db</code> subcommands for schema export, initialization, status, and vocabulary loading.</li>
-<li><strong>CLI User Guide:</strong> Detailed command reference in <code>deliverables/cli_user_guide.md</code>.</li>
+<li><strong>CLI User Guide:</strong> Detailed command reference in <code>deliverables/research/cli_user_guide.md</code>.</li>
 <li><strong>Auto-Fallback Engine:</strong> Automatically uses SQLite3 if PostgreSQL is not configured in <code>.env</code>.</li>
 <li><strong>Database Structure Inspection:</strong>
 <ul>
 <li>Open live tables in <strong>DBeaver</strong>.</li>
-<li>Review entity specifications in <code>deliverables/database.md</code>.</li>
+<li>Review entity specifications in <code>deliverables/research/database.md</code>.</li>
 </ul>
 </li>
 </ul>
@@ -3811,7 +3811,7 @@ section.lead h1, section.lead h2, section.lead h3 {
     </div>
   </div>
   <div class="card">
-    <div class="card-title">📑 <code>deliverables/</code> (7 Specs)</div>
+    <div class="card-title">📑 <code>deliverables/research/</code> (7 Specs)</div>
     <div class="card-body">
       • <strong>summary.md:</strong> Executive synthesis.<br />
       • <strong>database.md:</strong> 15-table SQL schema.<br />
@@ -4468,7 +4468,7 @@ section.lead h1, section.lead h2, section.lead h3 {
 - Profiling: Explain how profiles/request.yaml extracts only question items and representations while ignoring unneeded administrative headers.
 - Safety: Show that fairwddi import delete protects data integrity by checking relational foreign keys.</p></div><div class="bespoke-marp-note" data-index="12" tabindex="0"><p>Speaker Talking Cues:
 - Repo completeness: Give an overview of the codebase organization for CDSP developers and reviewers.
-- Deliverables (7 specs): Highlight that all 7 Phase I specifications are fully written in deliverables/ (summary.md, database.md, glossary.md, cli_user_guide.md, hashing_algorithms.md, normalization.md, variable_question_relationships.md).
+- Deliverables (7 specs): Highlight that all 7 Phase I specifications are fully written in deliverables/research/ (summary.md, database.md, glossary.md, cli_user_guide.md, hashing_algorithms.md, normalization.md, variable_question_relationships.md).
 - Tooling: Point out that the repository includes automated testing, YAML profiles, ELSST vocabularies, and full documentation.</p></div><div class="bespoke-marp-note" data-index="13" tabindex="0"><p>Speaker Talking Cues:
 - Phase I (Audit &amp; Modeling | July 20 – Sept 30): Focuses on Livrable 1 (Rapport d'audit &amp; Schéma cible, due Oct 1). Initial schema draft and Stage 1 streaming staging ready for CDSP review.
 - Phase II (Python Library &amp; DDI-L Export | Aug 17 – Oct 31): Focuses on Livrable 2 (Bibliothèque Python reQuest &amp; scripts for DDI-L import/export, strictly XSD compliant, due Nov 1).

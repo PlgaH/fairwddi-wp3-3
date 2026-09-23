@@ -78,10 +78,10 @@
   - Designed generic normalization and harmonization strategies decoupled from database storage.
   - Formalized URN categorization and resolution strategies (Curated, Canonical, Random, Alias).
   - Authored comprehensive project deliverables:
-    - [`deliverables/database.md`](../deliverables/database.md) (Database Schema & Table Definitions)
-    - [`deliverables/normalization.md`](../deliverables/normalization.md) (Technical Normalization Specification)
-    - [`deliverables/hashing_algorithms.md`](../deliverables/hashing_algorithms.md) (Cryptographic Content Fingerprinting)
-    - [`deliverables/glossary.md`](../deliverables/glossary.md) (Canonical DDI Terminology & Entity Mappings)
-    - [`deliverables/variable_question_relationships.md`](../deliverables/variable_question_relationships.md) (6 Canonical DDI-L Traversal Paths)
-    - [`deliverables/summary.md`](../deliverables/summary.md) (Executive Architecture Summary)
-    - [`deliverables/cli_user_guide.md`](../deliverables/cli_user_guide.md) (CLI Manual & Configuration Guide)
+    - [`deliverables/research/database.md`](../deliverables/research/database.md) (Database Schema & Table Definitions)
+    - [`deliverables/research/normalization.md`](../deliverables/research/normalization.md) (Technical Normalization Specification)
+    - [`deliverables/research/hashing_algorithms.md`](../deliverables/research/hashing_algorithms.md) (Cryptographic Content Fingerprinting)
+    - [`deliverables/research/glossary.md`](../deliverables/research/glossary.md) (Canonical DDI Terminology & Entity Mappings)
+    - [`deliverables/research/variable_question_relationships.md`](../deliverables/research/variable_question_relationships.md) (6 Canonical DDI-L Traversal Paths)
+    - [`deliverables/research/summary.md`](../deliverables/research/summary.md) (Executive Architecture Summary)
+    - [`deliverables/research/cli_user_guide.md`](../deliverables/research/cli_user_guide.md) (CLI Manual & Configuration Guide)

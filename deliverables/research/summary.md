@@ -58,7 +58,7 @@ flowchart TD
 
 ---
 
-### A. Database Schema & Domain Model ([`deliverables/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/database.md))
+### A. Database Schema & Domain Model ([`deliverables/research/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md))
 
 1. **15-Table Standard-Agnostic PostgreSQL Core (with SQLite Dev/Test Parity):**
    - **Concept Layer:** `Concept` (generic vocabulary URI anchor, parent hierarchy, notations), `ConceptualVariable`.
@@ -74,7 +74,7 @@ flowchart TD
 
 ---
 
-### B. Ingestion & Multi-Standard Staging Architecture ([`deliverables/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/normalization.md))
+### B. Ingestion & Multi-Standard Staging Architecture ([`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md))
 
 1. **Standard-Agnostic Core:** Core database tables represent pure domain entities independent of input metadata standards.
 2. **Two-Stage Decoupled Ingestion Pipeline:**
@@ -85,7 +85,7 @@ flowchart TD
 
 ---
 
-### C. Content Fingerprinting & Hashing Algorithms ([`deliverables/hashing_algorithms.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/hashing_algorithms.md))
+### C. Content Fingerprinting & Hashing Algorithms ([`deliverables/research/hashing_algorithms.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/hashing_algorithms.md))
 
 1. **Two-Tier Language-Level Hashing:**
    - **Tier 1: Simple Text Hashing (Atomic Level):** `SHA256(canonical_text(label[lang]))` for base text (`Category`, `ConceptualVariable`, `VariableGroup`).
@@ -106,7 +106,7 @@ flowchart TD
 
 ---
 
-### D. Multilingual Architecture & Normalization Cascade ([`deliverables/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/normalization.md) & [`deliverables/glossary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/glossary.md))
+### D. Multilingual Architecture & Normalization Cascade ([`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md) & [`deliverables/research/glossary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/glossary.md))
 
 1. **4-Phase Normalization Cascade:**
    $$\text{Exact URN Match} \longrightarrow \text{Content Hash Match} \longrightarrow \text{Heuristic ICU Collation Match} \longrightarrow \text{MetadataQuarantine}$$
@@ -122,9 +122,10 @@ flowchart TD
 
 | Deliverable File | Path | Key Contents |
 | :--- | :--- | :--- |
-| **Database Schema** | [`deliverables/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/database.md) | 15-table PostgreSQL 17 schema, ER diagram, `DDIIdentifiable` mixin, `StagedImport` & `StagedResourceNode`, index strategy, zero-data-loss migration path. |
-| **Normalization Engine** | [`deliverables/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/normalization.md) | 4-phase cascade, standard-agnostic core, 2-stage ingestion pipeline, multi-standard format adapters, multilingual 3-tier strategy, architectural complexity evaluation (§5). |
-| **Hashing Specification** | [`deliverables/hashing_algorithms.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/hashing_algorithms.md) | Master resource-algorithm table, Simple vs. Compound hashing, shortened hash URN strategy, `CategorySet` / `CodeList` set hashing, Preferred Algorithm pattern, worked examples, BLAKE3 benchmark. |
-| **Glossary & Terminology** | [`deliverables/glossary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/glossary.md) | Authoritative domain reference mapping DDI-L entities, URN classifications (Authoritative vs. Random vs. Canonical vs. Alias), hashing terminology, ELSST thesaurus, and staging concepts. |
-| **Executive Summary** | [`deliverables/summary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/summary.md) | Master executive overview capturing all architectural decisions, design patterns, database schemas, and ingestion workflows. |
-| **Variable & Question Relationships** | [`deliverables/variable_question_relationships.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/variable_question_relationships.md) | Architectural analysis of the 6 canonical relationship paths between variables and questions in DDI-Lifecycle 3.3, DDI-CDI, and ReQuest. |
+| **Database Schema** | [`deliverables/research/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md) | 15-table PostgreSQL 17 schema, ER diagram, `DDIIdentifiable` mixin, `StagedImport` & `StagedResourceNode`, index strategy, zero-data-loss migration path. |
+| **Normalization Engine** | [`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md) | 4-phase cascade, standard-agnostic core, 2-stage ingestion pipeline, multi-standard format adapters, multilingual 3-tier strategy, architectural complexity evaluation (§5). |
+| **Hashing Specification** | [`deliverables/research/hashing_algorithms.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/hashing_algorithms.md) | Master resource-algorithm table, Simple vs. Compound hashing, shortened hash URN strategy, `CategorySet` / `CodeList` set hashing, Preferred Algorithm pattern, worked examples, BLAKE3 benchmark. |
+| **Glossary & Terminology** | [`deliverables/research/glossary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/glossary.md) | Authoritative domain reference mapping DDI-L entities, URN classifications (Authoritative vs. Random vs. Canonical vs. Alias), hashing terminology, ELSST thesaurus, and staging concepts. |
+| **Executive Summary** | [`deliverables/research/summary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/summary.md) | Master executive overview capturing all architectural decisions, design patterns, database schemas, and ingestion workflows. |
+| **Variable & Question Relationships** | [`deliverables/research/variable_question_relationships.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/variable_question_relationships.md) | Architectural analysis of the 6 canonical relationship paths between variables and questions in DDI-Lifecycle 3.3, DDI-CDI, and ReQuest. |
+| **PostgreSQL & Django JSONB Support** | [`deliverables/research/postgres_django_json.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/postgres_django_json.md) | In-depth research report on PostgreSQL JSONB architecture, JSONPath/JSON_TABLE expressions, Django ORM lookups & key transforms (`KT`), subtable unnesting patterns, GIN/B-Tree indexing, and TOAST storage. |

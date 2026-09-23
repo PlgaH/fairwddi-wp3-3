@@ -40,7 +40,7 @@
 
 | Term | Definition | Context & Implementation |
 | :--- | :--- | :--- |
-| **Technical Metadata Normalization** | The automated data engineering pipeline that standardizes raw text (NFKC, typography), parses multi-standard schemas, computes SHA-256 digests, and generates canonical URNs. | Implemented in `request_ddi.normalization` ([`deliverables/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/normalization.md)). |
+| **Technical Metadata Normalization** | The automated data engineering pipeline that standardizes raw text (NFKC, typography), parses multi-standard schemas, computes SHA-256 digests, and generates canonical URNs. | Implemented in `request_ddi.normalization` ([`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md)). |
 | **Semantic Metadata Harmonization** | The archivist domain workflow that links survey variables across waves via `ConceptualVariable` entities and CESSDA ELSST thesaurus URIs. | Governed by the Concept Layer to enable cross-survey scientific comparison over time. |
 | **Simple Text Hashing** | SHA-256 hashing computed directly on a single normalized text string in a specific language `lang`. | Used for base atomic entities (`Category` label, `ConceptualVariable` label, `VariableGroup` label). |
 | **Compound URN Hashing** | SHA-256 hashing computed on the **canonical URNs** of an entity's constituent child base components. | Used for structural entities (`QuestionItem`, `CodeList`, `RepresentedVariable`, `InstanceVariable`). Decouples text re-normalization from structure. |

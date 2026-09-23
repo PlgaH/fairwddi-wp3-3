@@ -385,7 +385,7 @@ erDiagram
 
 ## 5. Database Model Support & Unsupported Paths Analysis
 
-The standard-agnostic core schema for **ReQuest** ([`deliverables/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/database.md) and [`src/fairwddi/models/`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/models/)) is intentionally architected as a **Lightweight Question-Bank Profile** ([`profiles/request.yaml`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/profiles/request.yaml)). It prioritizes searchability, multilingual harmonization, and question reuse over the complete, monolithic DDI-Lifecycle specification.
+The standard-agnostic core schema for **ReQuest** ([`deliverables/research/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md) and [`src/fairwddi/models/`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/models/)) is intentionally architected as a **Lightweight Question-Bank Profile** ([`profiles/request.yaml`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/profiles/request.yaml)). It prioritizes searchability, multilingual harmonization, and question reuse over the complete, monolithic DDI-Lifecycle specification.
 
 The matrix below documents the exact support status, architectural rationale, and ingestion handling for each path in the current database schema:
 
@@ -442,9 +442,9 @@ flowchart TD
 
 ## 6. Cross-References & Related Deliverables
 
-* [`deliverables/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/database.md) — Relational PostgreSQL DDL and entity models.
-* [`deliverables/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/normalization.md) — Technical normalization pipeline and adapter architecture.
-* [`deliverables/hashing_algorithms.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/hashing_algorithms.md) — Multi-algorithm fingerprinting and URN derivation.
-* [`deliverables/glossary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/glossary.md) — DDI canonical vocabulary and entity definitions.
-* [`deliverables/summary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/summary.md) — Executive architecture summary and deliverable catalog.
+* [`deliverables/research/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md) — Relational PostgreSQL DDL and entity models.
+* [`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md) — Technical normalization pipeline and adapter architecture.
+* [`deliverables/research/hashing_algorithms.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/hashing_algorithms.md) — Multi-algorithm fingerprinting and URN derivation.
+* [`deliverables/research/glossary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/glossary.md) — DDI canonical vocabulary and entity definitions.
+* [`deliverables/research/summary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/summary.md) — Executive architecture summary and deliverable catalog.
 

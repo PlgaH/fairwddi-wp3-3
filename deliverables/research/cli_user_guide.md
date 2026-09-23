@@ -424,7 +424,7 @@ DJANGO_SETTINGS_MODULE=request_service.settings
 | `DJANGO_SECRET_KEY` | `fairwddi-cli-default-secret-key` | Secret key used for cryptographic signing. |
 
 > ℹ️ **PostgreSQL `JSONB` vs. SQLite `JSON` Note:**  
-> For technical details on the underlying differences between SQLite JSON text storage and PostgreSQL binary `JSONB` (including GIN inverted indexing and query execution), see [Database Schema Specification §2.2.1](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/database.md#221-in-depth-comparison-postgresql-jsonb-vs-sqlite-json).
+> For technical details on the underlying differences between SQLite JSON text storage and PostgreSQL binary `JSONB` (including GIN inverted indexing and query execution), see [Database Schema Specification §2.2.1](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md#221-in-depth-comparison-postgresql-jsonb-vs-sqlite-json).
 
 ---
 
