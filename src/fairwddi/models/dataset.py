@@ -41,6 +41,11 @@ class StudyUnit(DDIIdentifiable):
         blank=True,
         help_text="Multilingual study abstract/description as an array of objects.",
     )
+    extended_attributes = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Extended attributes stored as an array of objects.",
+    )
 
     class Meta:
         db_table = "request_ddi_studyunit"
@@ -54,58 +59,45 @@ class StudyUnit(DDIIdentifiable):
 
 
 class InstanceVariable(DDIIdentifiable):
-    """Physical realization of a variable in a specific study column.
+    """Physical realization of a variable in a specific dataset.
 
     Represents the bottom tier of the DDI variable cascade:
     ConceptualVariable -> RepresentedVariable -> InstanceVariable.
+    Linked to StudyUnit datasets via StudyUnitVariable.
     """
 
-    study_unit = models.ForeignKey(
-        StudyUnit,
-        on_delete=models.CASCADE,
-        related_name="instance_variables",
-        db_column="study_unit_urn",
-    )
     represented_variable = models.ForeignKey(
         RepresentedVariable,
         on_delete=models.CASCADE,
         related_name="instance_variables",
         db_column="represented_variable_urn",
     )
-    variable_name = models.CharField(
+    name = models.CharField(
         max_length=255,
-        help_text="Column name in the dataset (e.g. 'q01a', 'age_r').",
+        help_text="Physical variable name in the dataset (e.g. 'q01a', 'age_r').",
     )
-    universe = models.JSONField(
+    label = models.JSONField(
         default=list,
         blank=True,
-        help_text="Multilingual target population/universe description as an array of objects.",
+        help_text="Multilingual variable label as an array of objects.",
     )
-    notes = models.JSONField(
+    extended_attributes = models.JSONField(
         default=list,
         blank=True,
-        help_text="Multilingual variable notes as an array of objects.",
-    )
-    is_indexed = models.BooleanField(
-        default=False,
-        help_text="Whether this variable is synchronized in Elasticsearch.",
+        help_text="Extended attributes stored as an array of objects.",
     )
 
     class Meta:
         db_table = "request_ddi_instancevariable"
-        unique_together = ("study_unit", "variable_name")
-        indexes = [
-            models.Index(fields=["is_indexed"], name="req_ddi_iv_is_indexed_idx"),
-        ]
         verbose_name = "Instance Variable"
         verbose_name_plural = "Instance Variables"
 
     def __str__(self) -> str:
-        return f"{self.study_unit_id}:{self.variable_name}"
+        return self.name or self.urn
 
 
 class StudyUnitVariable(models.Model):
-    """Junction capturing the direct relationship between a StudyUnit and its variables."""
+    """Junction linking a StudyUnit to its InstanceVariables with path."""
 
     study_unit = models.ForeignKey(
         StudyUnit,
@@ -118,6 +110,12 @@ class StudyUnitVariable(models.Model):
         on_delete=models.CASCADE,
         related_name="study_unit_links",
         db_column="instance_variable_urn",
+    )
+    path = models.CharField(
+        max_length=512,
+        blank=True,
+        default="",
+        help_text="Referencing path from study unit to instance variable.",
     )
     order = models.PositiveIntegerField(
         default=0,

@@ -291,6 +291,35 @@ Note that, technically, a string could be stored without a "lang" attribute.
 
 ## Revised Database Model
 
+***See the [database.md ](research/database.md) document for detailed information on the database model and table definitions.***
+
+### Layers
+
+
+
+### Common fields
+
+Tables representing DDI resources conatin the following fields:
+
+- `urn`: the primary key and identifiers. Typically a well formed DDI-L URN, but not always the case (e.g. ELLST concept)
+  - Django models (DDIIdentifiable) and Pydantic schemas (DDIIdentifiableSchema) provide property helpers to parse and decompose URNs.
+- 
+
+
+
+### QuestionItem
+
+- As this core focus of Request, this is the heart of model
+- It represents a normalize/harmonized ReQuest question 
+- It can be related to:
+  - an Instrument through the 
+
+
+
+
+
+
+
 ### Model layers
 
 - The proposed model is composed on 16 tables organized in 7 layers

@@ -116,14 +116,24 @@ class DDIIdentifiableSchema(BaseModel):
         default=None,
         description="Persistent canonical URN: urn:ddi:{agency}:{ID}:{version}",
     )
-    content_hash: str = Field(
-        default="",
-        description="Primary SHA-256 content digest (64 hex characters).",
-    )
-    content_hashes: dict[str, str] = Field(
+    hashes: dict[str, str] = Field(
         default_factory=dict,
-        description="Multi-algorithm auxiliary content digests.",
+        description="Unified key-value hash digests dictionary (e.g. {'sha256': '...'}).",
     )
+
+    @property
+    def is_canonical_ddi(self) -> bool:
+        """Check if URN strictly matches canonical DDI 3.3 / 4.0 format (urn:ddi:agency:ID:version)."""
+        if not self.urn or not self.urn.startswith("urn:ddi:"):
+            return False
+        parts = self.urn.split(":")
+        return len(parts) in (4, 5)
+
+    @property
+    def is_maintainable_scoped(self) -> bool:
+        """Check if the ID section represents a nested MaintainableID.ObjectID."""
+        id_sec = self.identifier
+        return "." in id_sec
 
     @property
     def agency(self) -> str:
@@ -139,15 +149,47 @@ class DDIIdentifiableSchema(BaseModel):
         """Parse identifier from URN."""
         if self.urn and self.urn.startswith("urn:ddi:"):
             parts = self.urn.split(":")
-            if len(parts) >= 4:
+            if len(parts) in (4, 5):
                 return parts[3]
+            if len(parts) >= 6:
+                return f"{parts[3]}.{parts[4]}"
         return self.urn or ""
+
+    @property
+    def maintainable_id(self) -> str | None:
+        """Extract MaintainableID portion if maintainable-scoped, or ID if agency-scoped."""
+        if self.urn and self.urn.startswith("urn:ddi:"):
+            parts = self.urn.split(":")
+            if len(parts) >= 6:
+                return parts[3]
+            if len(parts) in (4, 5):
+                id_part = parts[3]
+                if "." in id_part:
+                    return id_part.split(".", 1)[0]
+                return id_part
+        return None
+
+    @property
+    def object_id(self) -> str | None:
+        """Extract specific ObjectID portion if maintainable-scoped."""
+        if self.urn and self.urn.startswith("urn:ddi:"):
+            parts = self.urn.split(":")
+            if len(parts) >= 6:
+                return parts[4]
+            if len(parts) in (4, 5):
+                id_part = parts[3]
+                if "." in id_part:
+                    return id_part.split(".", 1)[1]
+                return id_part
+        return self.urn or None
 
     @property
     def version(self) -> str:
         """Parse version from URN."""
         if self.urn and self.urn.startswith("urn:ddi:"):
             parts = self.urn.split(":")
-            if len(parts) >= 5:
+            if len(parts) == 5:
                 return parts[4]
+            if len(parts) >= 6:
+                return parts[5]
         return "1.0.0"

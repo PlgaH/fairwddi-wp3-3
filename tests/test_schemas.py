@@ -12,11 +12,15 @@ from fairwddi.schemas import (
     ConceptSchema,
     ConceptualVariableSchema,
     DistributorSchema,
+    EventLogSchema,
     InstanceVariableSchema,
+    InstrumentQuestionSchema,
+    InstrumentSchema,
     MultilingualItem,
     MultilingualText,
     QuestionGroupSchema,
     QuestionItemSchema,
+    QuestionVariableSchema,
     RepresentedVariableSchema,
     StagedImportSchema,
     StagedResourceNodeSchema,
@@ -113,10 +117,12 @@ def test_domain_entity_schemas() -> None:
         urn="urn:ddi:fr.sciencespo:BPF:1.0.0",
         distributor_id=1,
         name="Baromètre Politique Français",
+        hashes={"sha256": "coll_hash"},
     )
     assert coll_schema.urn == "urn:ddi:fr.sciencespo:BPF:1.0.0"
     assert coll_schema.agency == "fr.sciencespo"
     assert coll_schema.identifier == "BPF"
+    assert coll_schema.hashes["sha256"] == "coll_hash"
 
     subcoll_schema = SubcollectionSchema(
         urn="urn:ddi:fr.sciencespo:BPF_2007:1.0.0",
@@ -128,14 +134,14 @@ def test_domain_entity_schemas() -> None:
     q_schema = QuestionItemSchema(
         urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
         question_text=MultilingualText.from_dict({"fr": "Êtes-vous intéressé par la politique ?"}),
-        pre_question_text=MultilingualText.from_single("Veuillez répondre honnêtement.", lang="fr"),
-        content_hash="abc1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-        content_hashes={"v1_strict_sha256": "abc1234", "v2_unordered_set": "xyz9876"},
+        hashes={"sha256": "abc1234", "v2_unordered": "xyz9876"},
+        extended_attributes=[{"type": "scope", "value": "core"}],
     )
     assert q_schema.urn == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"
     assert q_schema.agency == "fr.sciencespo"
     assert q_schema.question_text.get("fr") == "Êtes-vous intéressé par la politique ?"
-    assert q_schema.content_hashes["v2_unordered_set"] == "xyz9876"
+    assert q_schema.hashes["v2_unordered"] == "xyz9876"
+    assert q_schema.extended_attributes[0]["value"] == "core"
 
     qg_schema = QuestionGroupSchema(
         urn="urn:ddi:fr.sciencespo:qg-pol:1.0.0",
@@ -146,8 +152,10 @@ def test_domain_entity_schemas() -> None:
     cat_schema = CategorySchema(
         urn="urn:ddi:fr.sciencespo:cat-accord:1.0.0",
         label=MultilingualText.from_single("D'accord", lang="fr"),
+        parent_urn="urn:ddi:fr.sciencespo:cat-parent:1.0.0",
     )
     assert cat_schema.label.get("fr") == "D'accord"
+    assert cat_schema.parent_urn == "urn:ddi:fr.sciencespo:cat-parent:1.0.0"
 
     cs_schema = CategorySchemeSchema(
         urn="urn:ddi:fr.sciencespo:cs-interest:1.0.0",
@@ -165,8 +173,10 @@ def test_domain_entity_schemas() -> None:
         code_list_urn="urn:ddi:fr.sciencespo:cl-interest:1.0.0",
         category_urn="urn:ddi:fr.sciencespo:cat-accord:1.0.0",
         code_value="1",
+        parent_id=10,
     )
     assert code_schema.code_value == "1"
+    assert code_schema.parent_id == 10
 
     concept_schema = ConceptSchema(
         uri="https://elsst.cessda.eu/id/4/Politics",
@@ -187,9 +197,28 @@ def test_domain_entity_schemas() -> None:
     rv_schema = RepresentedVariableSchema(
         urn="urn:ddi:fr.sciencespo:rv-interest:1.0.0",
         conceptual_variable_urn="urn:ddi:fr.sciencespo:cv-interest:1.0.0",
-        question_item_urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
     )
     assert rv_schema.conceptual_variable_urn == "urn:ddi:fr.sciencespo:cv-interest:1.0.0"
+
+    qv_schema = QuestionVariableSchema(
+        question_item_urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
+        represented_variable_urn="urn:ddi:fr.sciencespo:rv-interest:1.0.0",
+        path="/RepresentedVariable/QuestionItem[1]",
+    )
+    assert qv_schema.path == "/RepresentedVariable/QuestionItem[1]"
+
+    inst_schema = InstrumentSchema(
+        urn="urn:ddi:fr.sciencespo:inst-001:1.0.0",
+        label=MultilingualText.from_single("Questionnaire 2007", lang="fr"),
+    )
+    assert inst_schema.urn == "urn:ddi:fr.sciencespo:inst-001:1.0.0"
+
+    iq_schema = InstrumentQuestionSchema(
+        instrument_urn="urn:ddi:fr.sciencespo:inst-001:1.0.0",
+        question_item_urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
+        path="/Instrument/Sequence/Q1",
+    )
+    assert iq_schema.path == "/Instrument/Sequence/Q1"
 
     su_schema = StudyUnitSchema(
         urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
@@ -200,17 +229,27 @@ def test_domain_entity_schemas() -> None:
 
     iv_schema = InstanceVariableSchema(
         urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
-        study_unit_urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
         represented_variable_urn="urn:ddi:fr.sciencespo:rv-interest:1.0.0",
-        variable_name="q01a",
+        name="q01a",
+        label=MultilingualText.from_single("Intérêt politique Q1", lang="fr"),
     )
-    assert iv_schema.variable_name == "q01a"
+    assert iv_schema.name == "q01a"
 
     suv_schema = StudyUnitVariableSchema(
         study_unit_urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
         instance_variable_urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
+        path="/StudyUnit/DataPipeline/q01a",
     )
     assert suv_schema.study_unit_urn == "urn:ddi:fr.sciencespo:su-2007:1.0.0"
+    assert suv_schema.path == "/StudyUnit/DataPipeline/q01a"
+
+    event_schema = EventLogSchema(
+        urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
+        event_type="indexed",
+        event_data={"cluster": "node-1"},
+    )
+    assert event_schema.event_type == "indexed"
+    assert event_schema.event_data["cluster"] == "node-1"
 
     import_schema = StagedImportSchema(
         source_format="ddi_l_3.3",
@@ -231,3 +270,45 @@ def test_domain_entity_schemas() -> None:
     assert staged_node.raw_urn == "raw:qstn:001"
     assert staged_node.staged_import_id == 1
     assert staged_node.status == "staged"
+
+
+def test_schema_urn_helpers() -> None:
+    """Test schema URN properties on agency-scoped, maintainable-scoped, and raw URNs."""
+    # Agency scoped
+    s1 = QuestionItemSchema(
+        urn="urn:ddi:us.mpc:V321:2",
+        question_text=MultilingualText.from_single("Q text", lang="en"),
+    )
+    assert s1.is_canonical_ddi is True
+    assert s1.is_maintainable_scoped is False
+    assert s1.agency == "us.mpc"
+    assert s1.identifier == "V321"
+    assert s1.maintainable_id == "V321"
+    assert s1.object_id == "V321"
+    assert s1.version == "2"
+
+    # Maintainable scoped
+    s2 = QuestionItemSchema(
+        urn="urn:ddi:us.mpc.ipums:Instrument01.Q1:1.0.0",
+        question_text=MultilingualText.from_single("Q text", lang="en"),
+    )
+    assert s2.is_canonical_ddi is True
+    assert s2.is_maintainable_scoped is True
+    assert s2.agency == "us.mpc.ipums"
+    assert s2.identifier == "Instrument01.Q1"
+    assert s2.maintainable_id == "Instrument01"
+    assert s2.object_id == "Q1"
+    assert s2.version == "1.0.0"
+
+    # Non-canonical raw URN
+    s3 = QuestionItemSchema(
+        urn="doi:10.7303/item99",
+        question_text=MultilingualText.from_single("Q text", lang="en"),
+    )
+    assert s3.is_canonical_ddi is False
+    assert s3.is_maintainable_scoped is False
+    assert s3.agency == "fr.sciencespo"  # default
+    assert s3.identifier == "doi:10.7303/item99"
+    assert s3.maintainable_id is None
+    assert s3.object_id == "doi:10.7303/item99"
+    assert s3.version == "1.0.0"

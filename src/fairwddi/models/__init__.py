@@ -10,11 +10,18 @@ from fairwddi.models.dataset import (
     StudyUnit,
     StudyUnitVariable,
 )
+from fairwddi.models.event import (
+    EventLog,
+)
 from fairwddi.models.infrastructure import (
     MetadataQuarantine,
     StagedImport,
     StagedResourceNode,
     URNAlias,
+)
+from fairwddi.models.instrument import (
+    Instrument,
+    InstrumentQuestion,
 )
 from fairwddi.models.organization import (
     Collection,
@@ -30,6 +37,7 @@ from fairwddi.models.representation import (
     QuestionGroup,
     QuestionGroupItem,
     QuestionItem,
+    QuestionVariable,
     RepresentedVariable,
 )
 
@@ -43,6 +51,9 @@ __all__ = [
     "QuestionItem",
     "QuestionGroup",
     "QuestionGroupItem",
+    "QuestionVariable",
+    "Instrument",
+    "InstrumentQuestion",
     "Category",
     "CategoryScheme",
     "CategorySchemeItem",
@@ -52,6 +63,7 @@ __all__ = [
     "StudyUnit",
     "InstanceVariable",
     "StudyUnitVariable",
+    "EventLog",
     "URNAlias",
     "MetadataQuarantine",
     "StagedImport",

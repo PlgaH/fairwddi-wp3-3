@@ -20,25 +20,30 @@ erDiagram
     Concept ||--o{ ConceptualVariable : categorizes
     ConceptualVariable ||--o{ RepresentedVariable : represents
 
-    %% ── Representation layer ──
-    QuestionItem ||--o{ RepresentedVariable : "worded by"
+    %% ── Representation & Instrument layer ──
     QuestionGroup ||--o{ QuestionGroupItem : groups
     QuestionItem ||--o{ QuestionGroupItem : "member of"
     QuestionGroup ||--o{ QuestionGroup : "parent subgroup"
+    QuestionItem ||--o{ QuestionVariable : "associated via path"
+    RepresentedVariable ||--o{ QuestionVariable : "references"
+    Instrument ||--o{ InstrumentQuestion : "orders via path"
+    QuestionItem ||--o{ InstrumentQuestion : "used in"
+    Category ||--o{ Category : "parent hierarchy"
     CategoryScheme ||--o{ CategorySchemeItem : defines
     Category ||--o{ CategorySchemeItem : contains
     CategoryScheme ||--o{ CodeList : schemes
     CodeList ||--o{ Code : contains
+    Code ||--o{ Code : "parent hierarchy"
     Category ||--o{ Code : "labeled by"
     CodeList ||--o{ RepresentedVariable : uses
 
     %% ── Dataset layer ──
-    StudyUnit ||--o{ InstanceVariable : contains
     RepresentedVariable ||--o{ InstanceVariable : "instantiated in"
-    StudyUnit ||--o{ StudyUnitVariable : links
+    StudyUnit ||--o{ StudyUnitVariable : "links via path"
     InstanceVariable ||--o{ StudyUnitVariable : "variable of"
 
-    %% ── Normalization & Harmonization infrastructure ──
+    %% ── Infrastructure, Staging & Event Logging ──
+    EventLog }o--|| QuestionItem : "logs lifecycle (polymorphic URN)"
     URNAlias }o--|| QuestionItem : "aliases (polymorphic)"
     URNAlias }o--|| CodeList : "aliases (polymorphic)"
     URNAlias }o--|| RepresentedVariable : "aliases (polymorphic)"
@@ -56,16 +61,17 @@ All tables in this schema follow these conventions unless stated otherwise:
 | :--- | :--- |
 | **Primary key (DDI Resources)** | `urn` — `VARCHAR(512) PRIMARY KEY` (Canonical DDI 3.3 / 4.0 URN format). |
 | **Primary key (Junction & Non-DDI)** | `id` — `BigAutoField` / `BIGSERIAL PRIMARY KEY`. |
-| **Foreign Keys to DDI Resources** | `*_urn` — `VARCHAR(512) REFERENCES ...(urn)` (e.g. `study_unit_urn`, `represented_variable_urn`, `conceptual_variable_urn`, `question_item_urn`, `code_list_urn`, `category_scheme_urn`, `category_urn`, `collection_urn`, `subcollection_urn`). |
+| **Foreign Keys to DDI Resources** | `*_urn` — `VARCHAR(512) REFERENCES ...(urn)` (e.g. `study_unit_urn`, `represented_variable_urn`, `conceptual_variable_urn`, `question_item_urn`, `code_list_urn`, `category_scheme_urn`, `category_urn`, `instrument_urn`, `collection_urn`, `subcollection_urn`). |
 | **Canonical URN Format** | Colon-separated: `urn:ddi:agency[.sub-agency]:ID:Version`.<br>• Agency-scoped: `urn:ddi:fr.sciencespo:V321:1.0.0`<br>• Maintainable-scoped: `urn:ddi:fr.sciencespo:MaintainableID.ObjectID:1.0.0` |
-| **Content Hash** | `content_hash` (`CharField(64)`) & `content_hashes` (`JSONB`) — multi-algorithm digests for drift detection and deduplication. |
+| **Unified Hashes** | `hashes` (`JSONB`) — unified key-value mapping of hash algorithm types to digests (e.g. `{"sha256": "...", "canonical_nfkc": "..."}`). |
+| **Extended Attributes** | `extended_attributes` (`JSONB`) — array of objects capturing flexible provider/specification attributes (intent, interviewer guidance, notes, value domains, inclusion/exclusion) without SQL schema bloat. |
 | **Multilingual text** | `JSONB` array of objects: `[{"lang": "fr", "value": "...", "type": "literal"}]`. Extensible attributes supported. |
 | **Timestamps** | `created_at` (`auto_now_add`), `updated_at` (`auto_now`) on tables. |
 | **Naming** | Table names use canonical DDI model terminology (`request_ddi_{snake_case}`). |
 
 ### 2.1 DDI Identification Mixin
 
-Every DDI entity inherits from an abstract base providing persistent canonical URN identification:
+Every DDI entity inherits from an abstract base providing persistent canonical URN identification and unified multi-algorithm hashing:
 
 ```python
 class DDIIdentifiable(models.Model):
@@ -76,17 +82,10 @@ class DDIIdentifiable(models.Model):
         primary_key=True,
         help_text="Persistent canonical URN: urn:ddi:{agency}:{ID}:{version}",
     )
-    content_hash = models.CharField(
-        max_length=64,
-        blank=True,
-        default="",
-        db_index=True,
-        help_text="SHA-256 hex digest of primary canonical content",
-    )
-    content_hashes = models.JSONField(
+    hashes = models.JSONField(
         default=dict,
         blank=True,
-        help_text="Multi-algorithm strategy hash digests",
+        help_text="Unified key-value hash digests dictionary (e.g. {'sha256': '...'}).",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -122,8 +121,7 @@ Logical grouping of survey series. Maps to DDI-L `<Group>`.
 | `distributor_id` | `BigInt` | FK → Distributor | Institutional distributor |
 | `name` | `CharField(255)` | | Series title |
 | `description` | `JSONField` | nullable | Multilingual `[{"lang": "fr", "value": "..."}]` |
-| `content_hash` | `CharField(64)` | indexed | Drift detection digest |
-| `content_hashes`| `JSONField` | default `{}` | Multi-algorithm digests |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
 
@@ -137,8 +135,7 @@ Sub-series grouping. Maps to DDI-L `<SubGroup>`.
 | `urn` | `CharField(512)` | PK | Canonical DDI-L SubGroup URN |
 | `collection_urn` | `CharField(512)` | FK → Collection(urn) | Parent series |
 | `name` | `CharField(255)` | | Sub-series title |
-| `content_hash` | `CharField(64)` | indexed | Drift detection digest |
-| `content_hashes`| `JSONField` | default `{}` | Multi-algorithm digests |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
 
@@ -152,14 +149,15 @@ High-level thematic domain concept from any controlled vocabulary or thesaurus (
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `id` | `BigAutoField` | PK | Auto-incrementing identifier |
-| `uri` | `CharField(512)` | unique, nullable | Controlled vocabulary concept URI (e.g. ELSST, SKOS) |
-| `vocabulary` | `CharField(128)` | default `""` | Controlled vocabulary name (e.g. `'ELSST'`, `'CESSDA'`) |
-| `notation` | `CharField(128)` | nullable | Standard thesaurus classification/notation code |
-| `label` | `JSONField` | | Multilingual label `[{"lang": "fr", "value": "..."}]` |
+| `uri` | `CharField(512)` | unique, nullable | Controlled vocabulary concept URI |
+| `vocabulary` | `CharField(128)` | default `""` | Controlled vocabulary name |
+| `notation` | `CharField(128)` | nullable | Standard thesaurus notation code |
+| `label` | `JSONField` | | Multilingual label |
 | `description` | `JSONField` | default `[]` | Multilingual description |
 | `definition` | `JSONField` | default `[]` | Multilingual skos:definition |
-| `parent_id` | `BigInt` | FK → Concept, nullable | Parent concept for `skos:broader` hierarchical trees |
+| `parent_id` | `BigInt` | FK → Concept, nullable | Parent concept for hierarchical trees |
 | `concept_type` | `CharField(64)` | default `'concept'` | Classification type (`'domain'`, `'concept'`) |
+| `extended_attributes` | `JSONField` | default `[]` | Extensible attributes array of objects |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
 
@@ -171,30 +169,27 @@ Abstract measurement concept (e.g., "Left-Right Political Placement"). Inherits 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `urn` | `CharField(512)` | PK | Canonical URN (`urn:ddi:agency:cv-...:1.0.0`) |
-| `concept_id` | `BigInt` | FK → Concept, nullable | Controlled vocabulary parent concept anchor |
+| `concept_id` | `BigInt` | FK → Concept, nullable | Controlled vocabulary concept anchor |
 | `label` | `JSONField` | | Multilingual label |
 | `description` | `JSONField` | nullable | Multilingual description |
-| `content_hash` | `CharField(64)` | indexed | SHA-256 digest |
-| `content_hashes`| `JSONField` | default `{}` | Auxiliary digests |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
+| `extended_attributes` | `JSONField` | default `[]` | Extensible attributes array of objects |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
 
 ---
 
-### 3.3 Representation Layer
+### 3.3 Representation & Instrument Layer
 
 #### QuestionItem
-Standalone reusable question text with interviewer instructions. Inherits `DDIIdentifiable`.
+Standalone reusable question text. Inherits `DDIIdentifiable`.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `urn` | `CharField(512)` | PK | Canonical QuestionItem URN |
 | `question_text` | `JSONField` | | Multilingual literal question text |
-| `pre_question_text` | `JSONField` | nullable | Multilingual preamble text |
-| `post_question_text`| `JSONField` | nullable | Multilingual post-question transition text |
-| `interviewer_instructions` | `JSONField` | nullable | Multilingual interviewer guidance |
-| `content_hash` | `CharField(64)` | indexed | SHA-256 digest |
-| `content_hashes`| `JSONField` | default `{}` | Auxiliary digests |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
+| `extended_attributes` | `JSONField` | default `[]` | Preamble, interviewer instructions, intent |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
 
@@ -209,15 +204,15 @@ Grouping of related QuestionItem entities. Inherits `DDIIdentifiable`.
 | `label` | `JSONField` | | Multilingual group label |
 | `description` | `JSONField` | nullable | Multilingual group description |
 | `parent_group_urn` | `CharField(512)` | FK → QuestionGroup(urn), nullable | Hierarchical subgroup nesting |
-| `content_hash` | `CharField(64)` | indexed | SHA-256 digest |
-| `content_hashes`| `JSONField` | default `{}` | Auxiliary digests |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
+| `extended_attributes` | `JSONField` | default `[]` | Extensible attributes array of objects |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
 
 ---
 
 #### QuestionGroupItem
-Junction connecting a `QuestionGroup` to member `QuestionItem` entities with explicit display ordering.
+Junction connecting a `QuestionGroup` to member `QuestionItem` entities with explicit ordering.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
@@ -226,19 +221,18 @@ Junction connecting a `QuestionGroup` to member `QuestionItem` entities with exp
 | `question_item_urn` | `CharField(512)` | FK → QuestionItem(urn) | Member question |
 | `order` | `PositiveIntegerField` | default 0 | Display sequence |
 
-**Unique constraint:** `(question_group_urn, question_item_urn)`
-
 ---
 
 #### Category
-Response text label (decoupled from numerical code values). Inherits `DDIIdentifiable`.
+Response category text label (decoupled from numerical code values). Supports self-referential hierarchy. Inherits `DDIIdentifiable`.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `urn` | `CharField(512)` | PK | Canonical Category URN |
 | `label` | `JSONField` | | Multilingual category label |
-| `content_hash` | `CharField(64)` | indexed | SHA-256 digest |
-| `content_hashes`| `JSONField` | default `{}` | Auxiliary digests |
+| `parent_urn` | `CharField(512)` | FK → Category(urn), nullable | Parent category for hierarchical schemes |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
+| `extended_attributes` | `JSONField` | default `[]` | Category definitions, inclusions/exclusions |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
 
@@ -252,15 +246,15 @@ Named collection of reusable categories (maps to DDI-L `CategoryScheme`). Inheri
 | `urn` | `CharField(512)` | PK | Canonical CategoryScheme URN |
 | `name` | `JSONField` | | Multilingual scheme name |
 | `description` | `JSONField` | nullable | Multilingual description |
-| `content_hash` | `CharField(64)` | indexed | SHA-256 digest |
-| `content_hashes`| `JSONField` | default `{}` | Auxiliary digests |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
+| `extended_attributes` | `JSONField` | default `[]` | Extensible attributes array of objects |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
 
 ---
 
 #### CategorySchemeItem
-Junction connecting a `CategoryScheme` to member `Category` entities with explicit display ordering.
+Junction connecting a `CategoryScheme` to member `Category` entities with explicit ordering.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
@@ -268,8 +262,6 @@ Junction connecting a `CategoryScheme` to member `Category` entities with explic
 | `category_scheme_urn` | `CharField(512)` | FK → CategoryScheme(urn) | Parent category scheme |
 | `category_urn` | `CharField(512)` | FK → Category(urn) | Member category |
 | `order` | `PositiveIntegerField` | default 0 | Display sequence |
-
-**Unique constraint:** `(category_scheme_urn, category_urn)`
 
 ---
 
@@ -282,42 +274,87 @@ Structural set of response codes linked to categories. Inherits `DDIIdentifiable
 | `name` | `JSONField` | nullable | Multilingual human title |
 | `description` | `JSONField` | nullable | Multilingual description |
 | `category_scheme_urn`| `CharField(512)` | FK → CategoryScheme(urn), nullable | Optional link to parent CategoryScheme |
-| `content_hash` | `CharField(64)` | indexed | Structural SHA-256 digest |
-| `content_hashes`| `JSONField` | default `{}` | Auxiliary digests |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
+| `extended_attributes` | `JSONField` | default `[]` | Extensible attributes array of objects |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
 
 ---
 
 #### Code
-Junction connecting a `CodeList` to a `Category` with a specific numerical code value (DDI Code resource).
+Junction connecting a `CodeList` to a `Category` with a code value. Supports self-referential hierarchy (`parent_id`).
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `id` | `BigAutoField` | PK | Auto-incrementing junction ID |
 | `code_list_urn` | `CharField(512)` | FK → CodeList(urn) | Parent code list |
 | `category_urn` | `CharField(512)` | FK → Category(urn) | Referenced category label |
-| `code_value` | `CharField(64)` | | The numerical/string code (e.g. `"1"`, `"98"`) |
+| `code_value` | `CharField(64)` | | Numerical/string code (e.g. `"1"`, `"98"`) |
+| `parent_id` | `BigInt` | FK → Code(id), nullable | Parent code for hierarchical code lists |
 | `order` | `PositiveIntegerField` | default 0 | Display order within list |
+| `extended_attributes` | `JSONField` | default `[]` | Extensible attributes array of objects |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
-
-**Unique constraint:** `(code_list_urn, code_value)`
 
 ---
 
 #### RepresentedVariable
-Combination of a question wording and a response code list, linked to a conceptual variable. Inherits `DDIIdentifiable`.
+Combination of conceptual variable and response code list representation. Inherits `DDIIdentifiable`.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `urn` | `CharField(512)` | PK | Canonical RepresentedVariable URN |
 | `conceptual_variable_urn` | `CharField(512)` | FK → ConceptualVariable(urn) | Parent concept |
-| `question_item_urn` | `CharField(512)` | FK → QuestionItem(urn) | Reusable question text |
 | `code_list_urn` | `CharField(512)` | FK → CodeList(urn), nullable | Response code structure |
 | `label` | `JSONField` | nullable | Multilingual short label |
-| `content_hash` | `CharField(64)` | indexed | SHA-256 compound digest |
-| `content_hashes`| `JSONField` | default `{}` | Auxiliary digests |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
+| `extended_attributes` | `JSONField` | default `[]` | Value domain, data type, variable characteristics |
+| `created_at` | `DateTimeField` | auto | |
+| `updated_at` | `DateTimeField` | auto | |
+
+---
+
+#### QuestionVariable
+Junction connecting a `QuestionItem` to a `RepresentedVariable` with referencing path.
+
+| Column | Type | Constraints | Notes |
+| :--- | :--- | :--- | :--- |
+| `id` | `BigAutoField` | PK | Auto-incrementing junction ID |
+| `question_item_urn` | `CharField(512)` | FK → QuestionItem(urn) | Associated question |
+| `represented_variable_urn` | `CharField(512)` | FK → RepresentedVariable(urn) | Associated variable |
+| `path` | `CharField(512)` | default `""` | Referencing path (e.g. XPath/DDI reference path) |
+| `order` | `PositiveIntegerField` | default 0 | Association order |
+| `created_at` | `DateTimeField` | auto | |
+| `updated_at` | `DateTimeField` | auto | |
+
+---
+
+#### Instrument
+Data collection instrument / questionnaire in DDI-Lifecycle. Inherits `DDIIdentifiable`.
+
+| Column | Type | Constraints | Notes |
+| :--- | :--- | :--- | :--- |
+| `urn` | `CharField(512)` | PK | Canonical Instrument URN |
+| `name` | `JSONField` | nullable | Multilingual technical name |
+| `label` | `JSONField` | nullable | Multilingual human title |
+| `description` | `JSONField` | nullable | Multilingual description |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
+| `extended_attributes` | `JSONField` | default `[]` | Mode of collection, administration notes |
+| `created_at` | `DateTimeField` | auto | |
+| `updated_at` | `DateTimeField` | auto | |
+
+---
+
+#### InstrumentQuestion
+Junction connecting an `Instrument` to member `QuestionItem` entities with sequence/flow path.
+
+| Column | Type | Constraints | Notes |
+| :--- | :--- | :--- | :--- |
+| `id` | `BigAutoField` | PK | Auto-incrementing junction ID |
+| `instrument_urn` | `CharField(512)` | FK → Instrument(urn) | Parent instrument |
+| `question_item_urn` | `CharField(512)` | FK → QuestionItem(urn) | Associated question |
+| `path` | `CharField(512)` | default `""` | Sequencing/flow path (e.g. `/Instrument/Sequence/Q01`) |
+| `order` | `PositiveIntegerField` | default 0 | Sequence display order |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
 
@@ -336,49 +373,58 @@ A specific survey wave or dataset (renamed from `Survey`). Inherits `DDIIdentifi
 | `external_ref` | `CharField(512)` | unique, nullable | DOI or external identifier |
 | `year` | `PositiveIntegerField` | nullable | Survey reference year |
 | `description` | `JSONField` | nullable | Multilingual abstract |
-| `content_hash` | `CharField(64)` | indexed | SHA-256 digest |
-| `content_hashes`| `JSONField` | default `{}` | Auxiliary digests |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
+| `extended_attributes` | `JSONField` | default `[]` | Methodological metadata |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
 
 ---
 
 #### InstanceVariable
-Physical realization of a variable in a specific study column (renamed from `BindingSurveyRepresentedVariable`). Inherits `DDIIdentifiable`.
+Physical realization of a variable in a specific dataset. Inherits `DDIIdentifiable`.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `urn` | `CharField(512)` | PK | Canonical InstanceVariable URN |
-| `study_unit_urn` | `CharField(512)` | FK → StudyUnit(urn) | Parent study wave |
 | `represented_variable_urn` | `CharField(512)` | FK → RepresentedVariable(urn) | Harmonized variable instantiated |
-| `variable_name` | `CharField(255)` | | Dataset column name (e.g., `q01a`) |
-| `universe` | `JSONField` | nullable | Target population description |
-| `notes` | `JSONField` | nullable | Variable notes |
-| `is_indexed` | `BooleanField` | default False | Elasticsearch indexing status |
-| `content_hash` | `CharField(64)` | indexed | SHA-256 digest |
-| `content_hashes`| `JSONField` | default `{}` | Auxiliary digests |
+| `name` | `CharField(255)` | | Physical dataset column name (e.g., `q01a`) |
+| `label` | `JSONField` | nullable | Multilingual variable label |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
+| `extended_attributes` | `JSONField` | default `[]` | Universe, variable notes, storage format |
 | `created_at` | `DateTimeField` | auto | |
 | `updated_at` | `DateTimeField` | auto | |
-
-**Unique constraint:** `(study_unit_urn, variable_name)`
 
 ---
 
 #### StudyUnitVariable
-Junction capturing the direct relationship between a `StudyUnit` and its member `InstanceVariable` entries.
+Junction capturing the direct relationship between a `StudyUnit` and its member `InstanceVariable` entries with path.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `id` | `BigAutoField` | PK | Auto-incrementing junction ID |
 | `study_unit_urn` | `CharField(512)` | FK → StudyUnit(urn) | Parent study wave |
 | `instance_variable_urn` | `CharField(512)` | FK → InstanceVariable(urn) | Member variable |
+| `path` | `CharField(512)` | default `""` | Referencing path |
 | `order` | `PositiveIntegerField` | default 0 | Display order |
-
-**Unique constraint:** `(study_unit_urn, instance_variable_urn)`
 
 ---
 
-### 3.5 Normalization & Harmonization Infrastructure
+### 3.5 Event Logging & Audit Trail
+
+#### EventLog
+Generic lifecycle mutation and audit log for any DDI-L resource.
+
+| Column | Type | Constraints | Notes |
+| :--- | :--- | :--- | :--- |
+| `id` | `BigAutoField` | PK | Auto-incrementing ID |
+| `urn` | `CharField(512)` | indexed | Canonical or source URN of target resource |
+| `timestamp` | `DateTimeField` | auto, indexed | Event occurrence timestamp |
+| `event_type` | `CharField(128)` | indexed | Event type (`'created'`, `'normalized'`, `'quarantined'`) |
+| `event_data` | `JSONField` | default `{}` | Arbitrary payload metadata as JSONB |
+
+---
+
+### 3.6 Infrastructure, Staging & Ingestion Layer
 
 #### URNAlias
 Maps auto-generated/random URNs from external tools to canonical database entities.
@@ -416,8 +462,6 @@ Holds incoming metadata that requires archivist review due to URN collisions or 
 | `created_at` | `DateTimeField` | auto | |
 
 ---
-
-### 3.6 Staging & Multi-Standard Ingestion Layer
 
 #### StagedImport
 Stores metadata and parameters for uploaded metadata file bundles and batch import jobs.
@@ -459,16 +503,17 @@ Stores individual broken-down raw element resources extracted during Stage 1 par
 | Table | Index Column(s) | Type | Purpose |
 | :--- | :--- | :--- | :--- |
 | _All DDI entities_ | `urn` | PRIMARY KEY (B-tree) | Direct $O(1)$ / $O(\log N)$ identity lookups & FK referencing |
-| _All DDI entities_ | `content_hash` | B-tree | Fingerprint comparison & deduplication |
 | `Concept` | `uri` | UNIQUE B-tree | Controlled vocabulary URI lookup |
 | `Concept` | `vocabulary` | B-tree | Filter concepts by scheme |
 | `Concept` | `notation` | B-tree | Notation/code lookup |
-| `Code` | `(code_list_urn, code_value)` | UNIQUE composite | Code deduplication within a code list |
-| `InstanceVariable` | `(study_unit_urn, variable_name)` | UNIQUE composite | Column-name uniqueness per study |
-| `InstanceVariable` | `is_indexed` | Partial / B-tree | Elasticsearch sync queue |
+| `Code` | `(code_list_urn, code_value)` | UNIQUE composite | Code uniqueness within a code list |
 | `QuestionGroupItem` | `(question_group_urn, question_item_urn)`| UNIQUE composite | Question grouping membership uniqueness |
+| `QuestionVariable` | `(question_item_urn, represented_variable_urn)`| UNIQUE composite | Question to variable association uniqueness |
+| `InstrumentQuestion`| `(instrument_urn, question_item_urn, path)` | UNIQUE composite | Instrument question sequencing uniqueness |
 | `CategorySchemeItem`| `(category_scheme_urn, category_urn)` | UNIQUE composite | Scheme membership uniqueness |
 | `StudyUnitVariable` | `(study_unit_urn, instance_variable_urn)`| UNIQUE composite | Variable-to-study mapping uniqueness |
+| `EventLog` | `(urn, timestamp)` | Composite B-tree | Chronological audit log lookups by resource URN |
+| `EventLog` | `event_type` | B-tree | Filter audit events by classification |
 | `URNAlias` | `alias_urn` | UNIQUE B-tree | Alias resolution during ingestion |
 | `URNAlias` | `canonical_urn` | B-tree | Reverse alias lookup |
 | `MetadataQuarantine`| `resolution` | Partial (where null) | Pending archivist review queue |

@@ -67,6 +67,11 @@ class Concept(models.Model):
         default="concept",
         help_text="Concept classification type (e.g. 'domain', 'concept', 'thematic_group').",
     )
+    extended_attributes = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Extended attributes stored as an array of objects.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -105,6 +110,11 @@ class ConceptualVariable(DDIIdentifiable):
         default=list,
         blank=True,
         help_text="Multilingual description as an array of objects.",
+    )
+    extended_attributes = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Extended attributes stored as an array of objects.",
     )
 
     class Meta:
