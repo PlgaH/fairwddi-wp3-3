@@ -135,15 +135,14 @@ uv sync --all-extras
 
 ### 2. Command Line Interface (CLI)
 
-The `fairwddi` CLI provides tools for database administration, schema initialization, demonstration data seeding, DDL export, and status reporting:
+The `fairwddi` CLI provides comprehensive tools for database administration, schema lifecycle, demonstration data seeding, multi-standard metadata file ingestion, and staging node inspection:
 
 ```bash
-# Display CLI help
+# Display CLI help and package information
 uv run fairwddi --help
-
-# Display system and environment information
 uv run fairwddi info
 
+# --- Database Management (fairwddi db) ---
 # Initialize or migrate database schema
 uv run fairwddi db init
 
@@ -162,8 +161,27 @@ uv run fairwddi db load-vocab vocab/ELSST_R6.ttl --levels 2
 # Inspect loaded vocabularies inventory
 uv run fairwddi db check-vocab
 
-# Wipe all database records (requires string confirmation 'WIPE')
+# Drop and recreate database schema from scratch
+uv run fairwddi db recreate --force --seed --load-vocab
+
+# Wipe all database records (requires 4-digit confirmation code)
 uv run fairwddi db wipe
+
+# --- Metadata Import & Staging (fairwddi import) ---
+# Stage a DDI-Lifecycle 3.3 XML file with ReQuest profile
+uv run fairwddi import file path/to/study.ddi33.xml --profile request
+
+# List available YAML/JSON import profiles
+uv run fairwddi import list-profiles
+
+# List recent staged import batches
+uv run fairwddi import list --status staged
+
+# View detailed statistics and cross-tabulation
+uv run fairwddi import stats 1
+
+# Query and filter staged resource nodes (with JSON payload preview)
+uv run fairwddi import query --type QuestionItem --show-json --limit 5
 ```
 
 > 📖 **Full CLI Documentation:** See the **[CLI User Guide](deliverables/research/cli_user_guide.md)** for complete command options, environment variables, and programmatic Python examples.
@@ -195,11 +213,13 @@ uv run pyrefly check
 
 ## 📚 Deliverables & References
 
+- **Phase I Audit Report:** [deliverables/phase1_report.md](deliverables/phase1_report.md) — Official Phase I summary, technical audit of legacy ReQuest, and validated target DDI-L architecture.
 - **Project Activities & Progress Log:** [docs/activities.md](docs/activities.md) — Live log of completed tasks, ongoing work, planned milestones, and pending items.
 - **Team Presentation Deck (Marp):** [docs/20260909_meeting.md](docs/20260909_meeting.md) — 20–25 minute project overview, architecture breakdown, and roadmap slides.
 - **ReQuest Platform Overview:** [docs/request_overview.md](docs/request_overview.md) — Architecture, ETL mechanics, and search design of the current `request-ddi` codebase.
 - **Migration & Upgrade Specification:** [docs/request_upgrade.md](docs/request_upgrade.md) — Comprehensive technical roadmap, Pydantic schemas, and Elasticsearch indexing.
-- **Target Database Schema:** [deliverables/research/database.md](deliverables/research/database.md) — Complete 15-table PostgreSQL schema documentation, primary keys, foreign keys, and indexes.
+- **Target Database Schema:** [deliverables/research/database.md](deliverables/research/database.md) — Complete 28-model PostgreSQL schema documentation, primary keys, foreign keys, and indexes.
+- **PostgreSQL & Django JSONB Guide:** [deliverables/research/postgres_django_json.md](deliverables/research/postgres_django_json.md) — In-depth research on PostgreSQL JSONB architecture, JSONPath, Django ORM Key Transforms (`KT`), and GIN indexing.
 - **DDI Model Glossary:** [deliverables/research/glossary.md](deliverables/research/glossary.md) — Canonical terminology and cross-model entity mappings across DDI 4, DDI-CDI, DDI-Lifecycle, and ReQuest.
 - **Hashing & Fingerprinting:** [deliverables/research/hashing_algorithms.md](deliverables/research/hashing_algorithms.md) — Two-tier content fingerprinting, canonical JSON hashing, and drift detection.
 - **Normalization Strategy:** [deliverables/research/normalization.md](deliverables/research/normalization.md) — Multilingual string cleaning rules and format adapters.

@@ -4,13 +4,13 @@
 > **Framework:** Typer & Rich  
 > **Python Version:** ≥ 3.12 (managed via `uv`)
 
-The `fairwddi` Command-Line Interface (CLI) provides administrative and operational commands to inspect the environment, manage database schemas, export PostgreSQL DDL, seed demonstration records, and view database inventories.
+The `fairwddi` Command-Line Interface (CLI) provides administrative and operational commands to inspect the environment, manage database schemas, export PostgreSQL DDL, seed demonstration records, ingest controlled vocabularies, and stream/stage multi-standard metadata documents.
 
 ---
 
 ## 1. Installation & Execution
 
-The CLI is registered as a console script entry point in `pyproject.toml`.
+The CLI is registered as a console script entry point in [pyproject.toml](file:///Users/pascal/git-plgah/fairwddi-lifecycle/pyproject.toml).
 
 ### Running with `uv` (Recommended)
 
@@ -54,7 +54,7 @@ fairwddi version 0.1.0
 
 ### Environment & Package Info
 
-Display technical architecture and profile information:
+Display technical architecture and resolved database configuration:
 
 ```bash
 uv run fairwddi info
@@ -62,20 +62,21 @@ uv run fairwddi info
 
 **Output:**
 ```
-╭─────────────────────── Package Info ───────────────────────╮
-│ FAIRwDDI Lifecycle                                         │
-│ Version: 0.1.0                                             │
-│ Target Database: PostgreSQL >= 17 (Clean Standard DDL)     │
-│ DDI Specification: DDI Model (DDI 4 / DDI-CDI / DDI-L)     │
-│ Multilingual Format: JSONB Array of Objects                │
-╰────────────────────────────────────────────────────────────╯
+╭─────────────────────── Environment & Configuration Info ───────────────────────╮
+│ FAIRwDDI Lifecycle                                                             │
+│ Version: 0.1.0                                                                 │
+│ Active DB Engine: sqlite3                                                      │
+│ Active DB Target: /Users/pascal/git-plgah/fairwddi-lifecycle/fairwddi_dev.sqlite3│
+│ Target Specification: PostgreSQL >= 17 (DDI 4 / DDI-CDI / DDI-L)               │
+│ Multilingual Format: JSONB Array of Objects                                    │
+╰────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ---
 
 ## 3. Database Management (`fairwddi db`)
 
-All database operations are grouped under the `db` command namespace.
+All database schema operations, seeding, vocabulary ingestion, and DDL export are grouped under the `db` command namespace.
 
 ```bash
 uv run fairwddi db --help
@@ -83,7 +84,7 @@ uv run fairwddi db --help
 
 ### 3.1 Initialize Database (`fairwddi db init`)
 
-Applies all pending Django migrations to create the 16 core DDI tables, indexes, and constraints.
+Applies all pending Django migrations to create the 28 core DDI tables, indexes, and constraints.
 
 ```bash
 uv run fairwddi db init
@@ -105,7 +106,7 @@ Database initialized successfully.
 
 ### 3.2 Seed Demonstration Data (`fairwddi db seed`)
 
-Populates the database with realistic, multilingual DDI demonstration records (aligned with DDI 4 / DDI-CDI / DDI-L) across all 6 architectural layers (Concepts, Representation, Datasets, Groups, and Staging).
+Populates the database with realistic, multilingual DDI demonstration records (aligned with DDI 4 / DDI-CDI / DDI-L) across all architectural layers (Concepts, Representation, Datasets, Groups, and Staging).
 
 ```bash
 # Seed records (idempotent get_or_create)
@@ -158,7 +159,7 @@ Database seeded successfully.
 
 ### 3.3 Check Database Inventory (`fairwddi db status`)
 
-Displays the current status of all 27 models/tables along with their active record counts.
+Displays the current status of all 28 models/tables along with their active record counts.
 
 ```bash
 uv run fairwddi db status
@@ -166,7 +167,7 @@ uv run fairwddi db status
 
 **Example Output:**
 ```
-                            FAIRwDDI Model Inventory                            
+                             FAIRwDDI Model Inventory [sqlite3: fairwddi_dev.sqlite3]
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
 ┃ Model Name                ┃ Database Table                    ┃ Record Count ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
@@ -189,6 +190,7 @@ uv run fairwddi db status
 │ InstanceVariable          │ request_ddi_instancevariable      │            2 │
 │ StudyUnitVariable         │ request_ddi_studyunitvariable     │            2 │
 │ EventLog                  │ request_ddi_eventlog              │            1 │
+│ UrnRegistry               │ request_ddi_urnregistry           │            0 │
 │ URNAlias                  │ request_ddi_urnalias              │            1 │
 │ MetadataQuarantine        │ request_ddi_metadataquarantine    │            0 │
 │ StagedImport              │ request_ddi_stagedimport          │            1 │
@@ -230,7 +232,7 @@ Success: DDL written to schema.sql
 Permanently deletes all records across all tables in safe reverse topological order (respecting foreign key relationships).
 
 > [!WARNING]
-> This command completely erases all data in the active database. To prevent accidental data loss, it requires explicit string confirmation by default.
+> This command completely erases all data in the active database. To prevent accidental data loss, it requires a 4-digit verification code by default.
 
 #### Interactive Confirmation (Default):
 ```bash
@@ -238,10 +240,10 @@ uv run fairwddi db wipe
 ```
 **Interactive Prompt:**
 ```
-⚠️  WARNING: You are about to permanently delete ALL records from sqlite3 database /Users/pascal/git-plgah/fairwddi-lifecycle/fairwddi_dev.sqlite3!
-Type 'WIPE' to confirm complete database erasure: WIPE
+⚠️  WARNING: You are about to permanently delete ALL records from sqlite3 database fairwddi_dev.sqlite3!
+Type confirmation code '8472' to confirm complete database erasure: 8472
 Wiping database records...
-                 Wipe Summary                 
+                 Wipe Summary [sqlite3: fairwddi_dev.sqlite3]
 ┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
 ┃ Entity / Table         ┃ Deleted Count ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
@@ -273,7 +275,7 @@ Database wiped successfully (36 records removed).
 
 #### Non-Interactive / Script Execution:
 
-Pass confirmation string directly:
+Pass confirmation string (`WIPE` or the generated code) directly:
 ```bash
 uv run fairwddi db wipe --confirm WIPE
 ```
@@ -287,9 +289,25 @@ uv run fairwddi db wipe -f
 
 ---
 
-### 3.6 Load Controlled Vocabulary (`fairwddi db load-vocab`)
+### 3.6 Drop & Recreate Database (`fairwddi db recreate`)
 
-Generic SKOS / SKOS-XL / XKOS loader that ingests any controlled vocabulary from RDF files into the `Concept` table.
+Drops the entire schema (all tables, constraints, and sequences) and runs all migrations from scratch. Useful for local development resets and testing migrations against empty databases.
+
+```bash
+# Interactive schema drop and recreation
+uv run fairwddi db recreate
+
+# Force recreation, followed by demonstration data seeding and top ELSST concept loading
+uv run fairwddi db recreate --force --seed --load-vocab
+# or using short flags
+uv run fairwddi db recreate -f -s -v
+```
+
+---
+
+### 3.7 Load Controlled Vocabulary (`fairwddi db load-vocab`)
+
+Generic SKOS / SKOS-XL / XKOS loader that ingests controlled vocabularies from RDF files directly into the `Concept` table.
 
 #### Supported RDF Formats & Standards:
 - **Formats:** Turtle (`.ttl`), RDF/XML (`.rdf`, `.xml`), JSON-LD (`.jsonld`, `.json`), N-Triples (`.nt`), Notation3 (`.n3`).
@@ -322,7 +340,7 @@ uv run fairwddi db load-vocab vocab/ELSST_R6.ttl --levels 2
 uv run fairwddi db load-vocab vocab/ELSST_R6.ttl --levels 3
 ```
 
-#### Checking Loaded Status:
+#### Checking Loaded Status (`fairwddi db check-vocab`):
 Check all loaded vocabularies or filter by a specific scheme without modifying data:
 
 ```bash
@@ -342,25 +360,188 @@ uv run fairwddi db load-vocab vocab/ELSST_R6.ttl --levels 2 --reload
 uv run fairwddi db load-vocab vocab/ELSST_R6.ttl -l 2 -r
 ```
 
+---
+
+## 4. Metadata Import & Staging (`fairwddi import`)
+
+The `import` command group provides multi-standard metadata file ingestion, high-performance streaming parsing, YAML/JSON profile management, staging inspection, and diagnostic audit logs.
+
+```bash
+uv run fairwddi import --help
+```
+
+### 4.1 Import Metadata File (`fairwddi import file`)
+
+Streams and stages external metadata documents (`.ddi33.xml`, `.ddi40.json`, `.ddic.xml`, CSV, etc.) into `StagedImport` and `StagedResourceNode` records.
+
+```bash
+# Stage a DDI-Lifecycle 3.3 XML file using default profile
+uv run fairwddi import file path/to/study.ddi33.xml
+
+# Stage using a custom profile preset or YAML path
+uv run fairwddi import file path/to/study.ddi33.xml --profile profiles/request_profile.yaml
+# or short flag
+uv run fairwddi import file path/to/study.ddi33.xml -p request
+
+# Dry-run validation (parse and check without writing to database)
+uv run fairwddi import file path/to/study.ddi33.xml --dry-run
+
+# Force re-staging an already ingested file
+uv run fairwddi import file path/to/study.ddi33.xml --force-reload
+# or short flag
+uv run fairwddi import file path/to/study.ddi33.xml -r
+
+# Specify explicit format override and bulk batch size
+uv run fairwddi import file path/to/data.xml --format "ddi-l:3.3:xml" --batch-size 2000
+```
+
 **Example Output:**
 ```
-Loading vocabulary ELSST from vocab/ELSST_R6.ttl (Levels: 2)...
- Vocabulary Load Summary [ELSST]  
-┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
-┃ Metric                 ┃ Value ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━┩
-│ Total Concepts Loaded  │  1254 │
-│ Top Concepts (Level 1) │   249 │
-│ Levels Traversed       │     2 │
-│ Relationships Created  │  1716 │
-│ Elapsed Time           │ 3.38s │
-└────────────────────────┴───────┘
-Vocabulary 'ELSST' loaded successfully.
+Processing metadata file study.ddi33.xml with profile request...
+ Metadata Import Summary [study.ddi33.xml] 
+┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Metric / Property      ┃ Value                       ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Staged Import ID       │ #1                          │
+│ Detected Specification │ DDI-Lifecycle 3.3 (xml)     │
+│ Producer Flavor        │ Colectica                   │
+│ Active Profile         │ request                     │
+│ Total Resources Staged │ 14,280                      │
+│ Skipped Duplicates     │ 0                           │
+│ Quarantined Drift Items│ 0                           │
+│ Elapsed Time           │ 1.842s                      │
+│ Throughput             │ 7,752.4 resources/sec       │
+│ Session Audit Log      │ logs/import_1_20260925.log  │
+└────────────────────────┴─────────────────────────────┘
+ Staged Nodes by Resource Type 
+┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
+┃ Resource Type       ┃ Count ┃
+┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━┩
+│ InstanceVariable    │ 4,800 │
+│ Code                │ 4,200 │
+│ Category            │ 3,100 │
+│ QuestionItem        │ 1,200 │
+│ RepresentedVariable │   950 │
+│ CodeList            │    25 │
+│ StudyUnit           │     5 │
+└─────────────────────┴───────┘
+Stage 1 import completed successfully.
 ```
 
 ---
 
-## 4. Database Connection Configuration & `.env` Files
+### 4.2 List Available Import Profiles (`fairwddi import list-profiles`)
+
+Displays all YAML/JSON ingestion profiles located in `profiles/` with inclusion/exclusion filters and reference resolution rules.
+
+```bash
+uv run fairwddi import list-profiles
+```
+
+**Example Output:**
+```
+                              Available Import Profiles                              
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Profile Name ┃ Description                   ┃ Include Types ┃ Exclude Types ┃ Resolve Refs ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
+│ request      │ ReQuest Question Bank Profile │             8 │          None │      ✓       │
+│ all_ddi      │ Ingest all DDI-L resources    │           ALL │          None │      ✓       │
+│ minimal      │ Core variables & questions    │             3 │          None │      ✗       │
+└──────────────┴───────────────────────────────┴───────────────┴───────────────┴──────────────┘
+```
+
+---
+
+### 4.3 List Staged Import Jobs (`fairwddi import list`)
+
+Lists past import staging batches with their status, format, and staged resource counts.
+
+```bash
+# List recent staged imports
+uv run fairwddi import list
+
+# Filter by status and format with custom limit
+uv run fairwddi import list --status staged --format xml --limit 10
+# or using short flags
+uv run fairwddi import list -s staged -n 10
+```
+
+---
+
+### 4.4 Import Statistics & Reports (`fairwddi import stats`)
+
+Renders comprehensive breakdown metrics, normalization progress, URN alias counts, and resource type cross-tabulations.
+
+```bash
+# Render interactive Rich table
+uv run fairwddi import stats 1
+
+# Export structured JSON statistics
+uv run fairwddi import stats 1 --format json --output stats_1.json
+
+# Render or save Markdown audit report
+uv run fairwddi import stats 1 --format markdown --output report_1.md
+```
+
+---
+
+### 4.5 Query Staged Resource Nodes (`fairwddi import query`)
+
+Filter and inspect individual broken-down resource nodes within the staging tables without writing SQL.
+
+```bash
+# Query nodes by resource type and status
+uv run fairwddi import query --type QuestionItem --status staged
+
+# Search by URN substring and preview raw JSON payload
+uv run fairwddi import query --search "fr.cdsp:Q01" --show-json --limit 5
+
+# Filter by specific StagedImport batch ID
+uv run fairwddi import query --import-id 1 --type CodeList
+```
+
+---
+
+### 4.6 Inspect Job Status (`fairwddi import status`)
+
+Provides detailed execution status, total processed resources, timestamps, and node status breakdowns for an import ID.
+
+```bash
+uv run fairwddi import status 1
+```
+
+---
+
+### 4.7 View Session Audit Log (`fairwddi import log`)
+
+Displays the verbatim disk audit log generated during the staging process.
+
+```bash
+uv run fairwddi import log 1
+```
+
+---
+
+### 4.8 Delete Staged Import (`fairwddi import delete`)
+
+Safely deletes a staged import job and all associated child `StagedResourceNode` records. Includes automatic protection checks if resources have already been normalized or referenced downstream.
+
+```bash
+# Interactive deletion prompt
+uv run fairwddi import delete 1
+
+# Skip confirmation and clean up disk audit log
+uv run fairwddi import delete 1 --yes --delete-log
+# or short flags
+uv run fairwddi import delete 1 -y --delete-log
+
+# Force delete (overriding normalization protection checks)
+uv run fairwddi import delete 1 --yes --force
+```
+
+---
+
+## 5. Database Connection Configuration & `.env` Files
 
 The CLI automatically looks for and loads a `.env` file in the current working directory or any parent directory.
 
@@ -436,22 +617,129 @@ DJANGO_SETTINGS_MODULE=request_service.settings
 | `DJANGO_SETTINGS_MODULE` | _None_ | Host Django settings module for integrated setups. |
 | `DJANGO_SECRET_KEY` | `fairwddi-cli-default-secret-key` | Secret key used for cryptographic signing. |
 
-> ℹ️ **PostgreSQL `JSONB` vs. SQLite `JSON` Note:**  
-> For technical details on the underlying differences between SQLite JSON text storage and PostgreSQL binary `JSONB` (including GIN inverted indexing and query execution), see [Database Schema Specification §2.2.1](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md#221-in-depth-comparison-postgresql-jsonb-vs-sqlite-json).
-
 ---
 
-## 5. Python API Quick Reference
+## 6. Python Programmatic API Reference
 
-All CLI commands correspond directly to reusable Python functions in `fairwddi`:
+All CLI commands and underlying data structures correspond directly to clean, reusable Python APIs in `fairwddi`:
+
+### 6.1 Database Operations (`fairwddi.db`)
 
 ```python
-# 1. Export PostgreSQL DDL
-from fairwddi.db import export_postgres_ddl
+from fairwddi.db import (
+    export_postgres_ddl,
+    seed_sample_data,
+    wipe_database,
+    load_skos_vocabulary,
+    check_vocabulary_loaded,
+)
+
+# 1. Export PostgreSQL DDL SQL
 sql = export_postgres_ddl("custom_schema.sql")
 
-# 2. Seed Database Programmatically
-from fairwddi.db import seed_sample_data
-summary = seed_sample_data(reset=True)
-print(f"Seeded {summary['instance_variables']} instance variables.")
+# 2. Programmatically seed demonstration data
+seed_summary = seed_sample_data(reset=True)
+print(f"Seeded {seed_summary['instance_variables']} instance variables.")
+
+# 3. Ingest SKOS/XKOS controlled vocabulary
+vocab_stats = load_skos_vocabulary("vocab/ELSST_R6.ttl", max_levels=2)
+print(f"Loaded {vocab_stats['total_concepts']} concepts.")
+
+# 4. Check loaded status
+status = check_vocabulary_loaded(vocabulary="ELSST")
+if status["loaded"]:
+    print(f"ELSST is active with {status['total_concepts']} concepts.")
+
+# 5. Programmatically wipe all tables
+wipe_summary = wipe_database()
+```
+
+### 6.2 Metadata Ingestion & Staging API (`fairwddi.importer`)
+
+```python
+from pathlib import Path
+from fairwddi.importer import (
+    import_metadata_file,
+    list_staged_imports,
+    get_import_statistics,
+    query_staged_resources,
+    delete_staged_import,
+    list_available_profiles,
+    detect_metadata_format,
+)
+
+# 1. Detect file format
+fmt = detect_metadata_format(Path("study.ddi33.xml"))
+print(f"Format: {fmt.specification} {fmt.version} ({fmt.serialization})")
+
+# 2. Stage metadata file
+summary = import_metadata_file(
+    file_path="study.ddi33.xml",
+    profile="request",
+    batch_size=1000,
+    dry_run=False,
+)
+print(f"Staged {summary['total_staged']} resources (Import #{summary['staged_import_id']}).")
+
+# 3. Query staged resource nodes
+nodes = query_staged_resources(
+    import_id=summary["staged_import_id"],
+    resource_type="QuestionItem",
+    limit=20,
+)
+for item in nodes["results"]:
+    print(f"Question URN: {item['raw_urn']}")
+
+# 4. Get detailed metrics and cross-tabulation
+stats = get_import_statistics(summary["staged_import_id"])
+print(f"Normalization progress: {stats['normalization_progress_pct']}%")
+
+# 5. Delete staged batch
+delete_result = delete_staged_import(summary["staged_import_id"], force=True)
+```
+
+### 6.3 Pydantic v2 Validation & Serialization (`fairwddi.schemas`)
+
+```python
+from fairwddi.schemas import (
+    ConceptSchema,
+    QuestionItemSchema,
+    RepresentedVariableSchema,
+    InstanceVariableSchema,
+    MultilingualItem,
+)
+
+# Create a validated QuestionItem
+question = QuestionItemSchema(
+    urn="urn:ddi:fr.cdsp:QI_PolInterest:1.0.0",
+    name=[MultilingualItem(lang="fr", value="QI_Interet_Politique")],
+    question_text=[
+        MultilingualItem(lang="fr", value="Dans quelle mesure vous intéressez-vous à la politique ?"),
+        MultilingualItem(lang="en", value="How interested are you in politics?"),
+    ],
+    interviewer_instructions=[
+        MultilingualItem(lang="fr", value="Ne pas lire les options 'Sans opinion'."),
+    ],
+)
+
+# Serialize to JSON-LD / API response
+json_payload = question.model_dump_json(indent=2)
+```
+
+### 6.4 Django ORM Models (`fairwddi.models`)
+
+```python
+from fairwddi.models import (
+    Concept,
+    ConceptualVariable,
+    RepresentedVariable,
+    InstanceVariable,
+    QuestionItem,
+    CodeList,
+    StudyUnit,
+)
+
+# Query the variable cascade
+for rv in RepresentedVariable.objects.select_related("conceptual_variable").all():
+    print(f"RepresentedVariable: {rv.urn} -> Concept: {rv.conceptual_variable.urn}")
 ```

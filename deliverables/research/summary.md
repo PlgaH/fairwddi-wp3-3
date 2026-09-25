@@ -60,12 +60,12 @@ flowchart TD
 
 ### A. Database Schema & Domain Model ([`deliverables/research/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md))
 
-1. **15-Table Standard-Agnostic PostgreSQL Core (with SQLite Dev/Test Parity):**
-   - **Concept Layer:** `Concept` (generic vocabulary URI anchor, parent hierarchy, notations), `ConceptualVariable`.
-   - **Representation & Instrument Layer:** `QuestionScheme`, `QuestionItem`, `CategoryScheme`, `Category`, `CodeList`, `Code`, `RepresentedVariable`, `QuestionVariable`, `Instrument`, `InstrumentQuestion`.
-   - **Dataset Layer:** `StudyUnit` (renamed from `Survey`), `InstanceVariable` (renamed from `BindingSurveyRepresentedVariable`).
+1. **28-Model Standard-Agnostic PostgreSQL Core (with SQLite Dev/Test Parity):**
+   - **Concept Layer:** `ConceptScheme`, `Concept` (generic vocabulary URI anchor, parent hierarchy, notations), `ConceptualVariableScheme`, `ConceptualVariable`, `SemanticRelationship`.
+   - **Representation & Instrument Layer:** `QuestionScheme`, `QuestionItem`, `CategoryScheme`, `Category`, `CodeList`, `Code`, `RepresentedVariableScheme`, `RepresentedVariable`, `QuestionVariable`, `Instrument`, `InstrumentQuestion`.
+   - **Dataset Layer:** `StudyUnit` (renamed from `Survey`), `InstanceVariableScheme`, `InstanceVariable` (renamed from `BindingSurveyRepresentedVariable`), `StudyUnitVariable`.
    - **Organization & Grouping Layer:** `Organization`, `Group`.
-   - **Infrastructure & Staging Layer:** `URNAlias`, `MetadataQuarantine`, `StagedImport`, `StagedResourceNode`.
+   - **Infrastructure & Staging Layer:** `UrnRegistry`, `URNAlias`, `MetadataQuarantine`, `StagedImport`, `StagedResourceNode`, `EventLog`.
 2. **`DDIIdentifiable` Abstract Mixin:** Universal identification mixin providing `urn`, `agency`, `ddi_identifier`, `version`, `content_hash` (primary SHA-256 digest), and `content_hashes` (JSONB multi-algorithm digests).
 3. **Structured `QuestionItem` Breakdown:** Extracted from `RepresentedVariable` into explicit multilingual JSONB fields: `question_text` (literal question wording), `pre_question_text` (introductory preamble/routing), `post_question_text` (transition text), and `interviewer_instructions` (guidance).
 4. **Decoupled Structural `CodeList`:** Decouples numerical code values (e.g. Code `1`) from response text labels (`Category`). `CodeList` URN is derived purely from structural code-category mappings independent of list title.
@@ -112,7 +112,7 @@ flowchart TD
    $$\text{Exact URN Match} \longrightarrow \text{Content Hash Match} \longrightarrow \text{Heuristic ICU Collation Match} \longrightarrow \text{MetadataQuarantine}$$
 2. **3-Tier Multilingual Architecture:**
    - **Tier 1 (Non-random URN Match):** Incremental JSONB Dictionary Merge (`{"fr": "...", "en": "..."}`).
-   - **Tier 2 (Cross-language Thesaurus):** CESSDA ELSST URI anchoring (`Concept.elsst_uri`) at the `ConceptualVariable` level for semantic harmonization.
+   - **Tier 2 (Cross-language Thesaurus):** CESSDA ELSST URI anchoring (`Concept.uri`) at the `ConceptualVariable` level for semantic harmonization.
    - **Tier 3 (Search Discovery):** Elasticsearch 9.4.x multi-field language analyzers (`fr: french_combined_analyzer`, `en: english`).
 3. **`URNAlias` Engine & Provenance Audit:** Maps external/random URNs to canonical database URNs while preserving `hash_strategy` and `source_file` audit provenance.
 
@@ -122,10 +122,13 @@ flowchart TD
 
 | Deliverable File | Path | Key Contents |
 | :--- | :--- | :--- |
-| **Database Schema** | [`deliverables/research/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md) | 15-table PostgreSQL 17 schema, ER diagram, `DDIIdentifiable` mixin, `StagedImport` & `StagedResourceNode`, index strategy, zero-data-loss migration path. |
-| **Normalization Engine** | [`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md) | 4-phase cascade, standard-agnostic core, 2-stage ingestion pipeline, multi-standard format adapters, multilingual 3-tier strategy, architectural complexity evaluation (§5). |
+| **Phase I Audit Report** | [`deliverables/phase1_report.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/phase1_report.md) | Official Phase I summary report, legacy ReQuest audit, and validated target DDI-L architecture. |
+| **Database Schema** | [`deliverables/research/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md) | Complete 28-model PostgreSQL 17 schema, ER diagrams, `DDIIdentifiable` mixin, `StagedImport` & `StagedResourceNode`, index strategy, zero-data-loss migration path. |
+| **Normalization Engine** | [`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md) | 4-phase cascade, standard-agnostic core, 2-stage ingestion pipeline, multi-standard format adapters, multilingual 3-tier strategy, architectural complexity evaluation. |
 | **Hashing Specification** | [`deliverables/research/hashing_algorithms.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/hashing_algorithms.md) | Master resource-algorithm table, Simple vs. Compound hashing, shortened hash URN strategy, `CategorySet` / `CodeList` set hashing, Preferred Algorithm pattern, worked examples, BLAKE3 benchmark. |
 | **Glossary & Terminology** | [`deliverables/research/glossary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/glossary.md) | Authoritative domain reference mapping DDI-L entities, URN classifications (Authoritative vs. Random vs. Canonical vs. Alias), hashing terminology, ELSST thesaurus, and staging concepts. |
 | **Executive Summary** | [`deliverables/research/summary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/summary.md) | Master executive overview capturing all architectural decisions, design patterns, database schemas, and ingestion workflows. |
 | **Variable & Question Relationships** | [`deliverables/research/variable_question_relationships.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/variable_question_relationships.md) | Architectural analysis of the 6 canonical relationship paths between variables and questions in DDI-Lifecycle 3.3, DDI-CDI, and ReQuest. |
 | **PostgreSQL & Django JSONB Support** | [`deliverables/research/postgres_django_json.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/postgres_django_json.md) | In-depth research report on PostgreSQL JSONB architecture, JSONPath/JSON_TABLE expressions, Django ORM lookups & key transforms (`KT`), subtable unnesting patterns, GIN/B-Tree indexing, and TOAST storage. |
+| **CLI User Guide** | [`deliverables/research/cli_user_guide.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/cli_user_guide.md) | Comprehensive manual for the `fairwddi` command-line tools, database administration, seeding, vocabulary ingestion, multi-standard metadata file import, staging node inspection, and Python programmatic APIs. |
+
