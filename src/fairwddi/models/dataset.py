@@ -6,22 +6,17 @@ and StudyUnitVariable (study to variable mapping).
 
 from django.db import models
 
-from fairwddi.models.base import DDIIdentifiable
-from fairwddi.models.organization import Subcollection
+from fairwddi.models.base import DDIResource, DDIScheme
 from fairwddi.models.representation import RepresentedVariable
 
 
-class StudyUnit(DDIIdentifiable):
+class StudyUnit(DDIResource):
     """A specific survey wave or dataset (renamed from Survey)."""
 
-    subcollection = models.ForeignKey(
-        Subcollection,
-        on_delete=models.CASCADE,
-        related_name="study_units",
-        db_column="subcollection_urn",
-    )
     title = models.JSONField(
         default=list,
+        blank=True,
+        null=True,
         help_text="Multilingual study title as an array of objects.",
     )
     external_ref = models.CharField(
@@ -39,11 +34,13 @@ class StudyUnit(DDIIdentifiable):
     description = models.JSONField(
         default=list,
         blank=True,
+        null=True,
         help_text="Multilingual study abstract/description as an array of objects.",
     )
     extended_attributes = models.JSONField(
         default=list,
         blank=True,
+        null=True,
         help_text="Extended attributes stored as an array of objects.",
     )
 
@@ -53,12 +50,23 @@ class StudyUnit(DDIIdentifiable):
         verbose_name_plural = "Study Units"
 
     def __str__(self) -> str:
+        if isinstance(self.name, list) and self.name:
+            return self.name[0].get("value", self.urn)
         if isinstance(self.title, list) and self.title:
             return self.title[0].get("value", self.urn)
         return self.urn
 
 
-class InstanceVariable(DDIIdentifiable):
+class InstanceVariableScheme(DDIScheme):
+    """Named collection of instance variables (DDI-L InstanceVariableScheme)."""
+
+    class Meta:
+        db_table = "request_ddi_instancevariablescheme"
+        verbose_name = "Instance Variable Scheme"
+        verbose_name_plural = "Instance Variable Schemes"
+
+
+class InstanceVariable(DDIResource):
     """Physical realization of a variable in a specific dataset.
 
     Represents the bottom tier of the DDI variable cascade:
@@ -66,24 +74,39 @@ class InstanceVariable(DDIIdentifiable):
     Linked to StudyUnit datasets via StudyUnitVariable.
     """
 
+    scheme = models.ForeignKey(
+        InstanceVariableScheme,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="instance_variables",
+        db_column="scheme_urn",
+        help_text="Parent InstanceVariableScheme defining this instance variable.",
+    )
     represented_variable = models.ForeignKey(
         RepresentedVariable,
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         related_name="instance_variables",
         db_column="represented_variable_urn",
-    )
-    name = models.CharField(
-        max_length=255,
-        help_text="Physical variable name in the dataset (e.g. 'q01a', 'age_r').",
     )
     label = models.JSONField(
         default=list,
         blank=True,
+        null=True,
         help_text="Multilingual variable label as an array of objects.",
+    )
+    description = models.JSONField(
+        default=list,
+        blank=True,
+        null=True,
+        help_text="Multilingual description as an array of objects.",
     )
     extended_attributes = models.JSONField(
         default=list,
         blank=True,
+        null=True,
         help_text="Extended attributes stored as an array of objects.",
     )
 
@@ -91,9 +114,6 @@ class InstanceVariable(DDIIdentifiable):
         db_table = "request_ddi_instancevariable"
         verbose_name = "Instance Variable"
         verbose_name_plural = "Instance Variables"
-
-    def __str__(self) -> str:
-        return self.name or self.urn
 
 
 class StudyUnitVariable(models.Model):

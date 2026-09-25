@@ -8,27 +8,30 @@ from fairwddi.models import (
     CategoryScheme,
     Code,
     CodeList,
-    Collection,
     Concept,
+    ConceptScheme,
     ConceptualVariable,
-    Distributor,
+    ConceptualVariableScheme,
     EventLog,
+    Group,
     InstanceVariable,
+    InstanceVariableScheme,
     Instrument,
     InstrumentQuestion,
     MetadataQuarantine,
-    QuestionGroup,
-    QuestionGroupItem,
+    Organization,
     QuestionItem,
+    QuestionScheme,
     QuestionVariable,
     RepresentedVariable,
+    RepresentedVariableScheme,
     SemanticRelationship,
     StagedImport,
     StagedResourceNode,
     StudyUnit,
     StudyUnitVariable,
-    Subcollection,
     URNAlias,
+    UrnRegistry,
 )
 
 
@@ -38,76 +41,127 @@ class TestFairwDDIModels(TestCase):
 
     def setUp(self) -> None:
         """Set up foundational records."""
-        self.distributor = Distributor.objects.create(name="CDSP")
-        self.collection = Collection.objects.create(
-            distributor=self.distributor,
-            name="Baromètre Politique Français",
-            description=[{"lang": "fr", "value": "Série d'enquêtes électorales"}],
-            urn="urn:ddi:fr.sciencespo:BPF:1.0.0",
-            hashes={"sha256": "hash_coll_001"},
+        self.organization = Organization.objects.create(
+            urn="urn:ddi:fr.sciencespo:Organization.CDSP:1.0.0",
+            name=[
+                {"lang": "fr", "value": "Centre de Données Socio-Politiques"},
+                {"lang": "en", "value": "Center for Socio-Political Data"},
+            ],
+            organization_type="distributor",
+            extended_attributes=[
+                {"type": "acronym", "value": "CDSP"},
+                {"type": "uri", "value": "https://cdsp.sciences-po.fr/"},
+            ],
         )
-        self.subcollection = Subcollection.objects.create(
-            collection=self.collection,
-            name="Vagues 2007",
-            urn="urn:ddi:fr.sciencespo:BPF_2007:1.0.0",
-            hashes={"sha256": "hash_subcoll_001"},
+        self.group = Group.objects.create(
+            urn="urn:ddi:fr.sciencespo:group-bpf:1.0.0",
+            name=[{"lang": "fr", "value": "Baromètre Politique Français"}],
+            description=[{"lang": "fr", "value": "Série d'enquêtes électorales"}],
+            group_type="study_series",
+            references=[
+                {"resource_type": "StudyUnit", "urn": "urn:ddi:fr.sciencespo:su-bpf-2007-w01:1.0.0"}
+            ],
+            hashes={"sha256": "group_hash_001"},
         )
 
-    def test_organization_hierarchy(self) -> None:
-        """Test Distributor -> Collection -> Subcollection hierarchy."""
-        assert self.distributor.collections.count() == 1
-        assert self.collection.subcollections.count() == 1
-        assert str(self.subcollection) == "Baromètre Politique Français - Vagues 2007"
-        assert self.collection.pk == "urn:ddi:fr.sciencespo:BPF:1.0.0"
-        assert self.subcollection.pk == "urn:ddi:fr.sciencespo:BPF_2007:1.0.0"
-        assert self.collection.agency == "fr.sciencespo"
-        assert self.collection.identifier == "BPF"
-        assert self.collection.version == "1.0.0"
-        assert self.collection.hashes["sha256"] == "hash_coll_001"
+    def test_organization_and_group(self) -> None:
+        """Test Organization and generic Group resources."""
+        assert self.organization.pk == "urn:ddi:fr.sciencespo:Organization.CDSP:1.0.0"
+        assert self.organization.agency == "fr.sciencespo"
+        assert self.organization.organization_type == "distributor"
+        assert str(self.organization) == "Centre de Données Socio-Politiques"
+        assert len(self.organization.extended_attributes) == 2
+
+        assert self.group.pk == "urn:ddi:fr.sciencespo:group-bpf:1.0.0"
+        assert self.group.agency == "fr.sciencespo"
+        assert self.group.identifier == "group-bpf"
+        assert self.group.version == "1.0.0"
+        assert self.group.group_type == "study_series"
+        assert len(self.group.references) == 1
+        assert self.group.references[0]["resource_type"] == "StudyUnit"
+        assert str(self.group) == "Baromètre Politique Français"
+        assert self.group.hashes["sha256"] == "group_hash_001"
 
     def test_concept_layer_and_skos_hierarchy(self) -> None:
-        """Test Concept, hierarchy, SKOS relationships, and ConceptualVariable."""
+        """Test ConceptScheme, Concept, hierarchy, and ConceptualVariableScheme."""
+        concept_scheme = ConceptScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:cs-thesaurus:1.0.0",
+            name=[{"lang": "fr", "value": "Schéma de concepts"}],
+        )
+        assert concept_scheme.pk == "urn:ddi:fr.sciencespo:cs-thesaurus:1.0.0"
+        assert str(concept_scheme) == "Schéma de concepts"
+
         parent_concept = Concept.objects.create(
+            urn="urn:ddi:fr.sciencespo:concept-pol:1.0.0",
+            scheme=concept_scheme,
             uri="https://elsst.cessda.eu/id/4/Politics",
             vocabulary="ELSST",
             notation="POL",
             label=[{"lang": "fr", "value": "Politique"}, {"lang": "en", "value": "Politics"}],
             definition=[{"lang": "fr", "value": "Affaires politiques et gouvernance"}],
             concept_type="domain",
+            hashes={"sha256": "concept_pol_hash"},
             extended_attributes=[{"type": "scope", "value": "core"}],
         )
         child_concept = Concept.objects.create(
+            urn="urn:ddi:fr.sciencespo:concept-pol-att:1.0.0",
+            scheme=concept_scheme,
             uri="https://elsst.cessda.eu/id/4/PoliticalAttitudes",
             vocabulary="ELSST",
             notation="POL.ATT",
             label=[{"lang": "fr", "value": "Attitudes politiques"}],
             parent=parent_concept,
             concept_type="concept",
+            hashes={"sha256": "concept_pol_att_hash"},
         )
+        assert parent_concept.pk == "urn:ddi:fr.sciencespo:concept-pol:1.0.0"
+        assert str(parent_concept) == "Politique"
         assert parent_concept.vocabulary == "ELSST"
+        assert parent_concept.scheme == concept_scheme
+        assert concept_scheme.concepts.count() == 2
         assert parent_concept.narrower_concepts.count() == 1
         assert child_concept.parent == parent_concept
         assert parent_concept.extended_attributes[0]["value"] == "core"
 
+        # ConceptualVariableScheme
+        cv_scheme = ConceptualVariableScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:cvs-pol:1.0.0",
+            name=[{"lang": "fr", "value": "Schéma de variables conceptuelles"}],
+        )
+        assert cv_scheme.pk == "urn:ddi:fr.sciencespo:cvs-pol:1.0.0"
+        assert str(cv_scheme) == "Schéma de variables conceptuelles"
+
         # ConceptualVariable with URN PK and hashes
         cv = ConceptualVariable.objects.create(
+            scheme=cv_scheme,
             concept=child_concept,
             urn="urn:ddi:fr.sciencespo:cv-fr-001:1.0.0",
+            name=[{"lang": "fr", "value": "INTERET_POL"}],
             label=[{"lang": "fr", "value": "Intérêt pour la politique"}],
             description=[{"lang": "fr", "value": "Mesure du niveau d'intérêt politique"}],
             hashes={"sha256": "abc111", "v1_strict": "abc111"},
             extended_attributes=[{"type": "domain", "value": "attitudes"}],
         )
         assert cv.pk == "urn:ddi:fr.sciencespo:cv-fr-001:1.0.0"
+        assert str(cv) == "INTERET_POL"
+        assert cv.scheme == cv_scheme
+        assert cv_scheme.conceptual_variables.count() == 1
         assert cv.concept == child_concept
         assert cv.hashes["sha256"] == "abc111"
         assert cv.extended_attributes[0]["type"] == "domain"
 
     def test_representation_layer(self) -> None:
-        """Test QuestionItem, QuestionGroup, Category & Code hierarchy, and QuestionVariable."""
-        # QuestionItem
+        """Test QuestionScheme, QuestionItem, Category & Code hierarchy, and QuestionVariable."""
+        # QuestionScheme
+        qs = QuestionScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:qs-pol:1.0.0",
+            name=[{"lang": "fr", "value": "Schéma de questions politiques"}],
+        )
+
+        # QuestionItem linked to QuestionScheme
         qi = QuestionItem.objects.create(
             urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
+            scheme=qs,
             question_text=[
                 {"lang": "fr", "value": "Diriez-vous que vous vous intéressez à la politique ?"},
                 {"lang": "en", "value": "Would you say you are interested in politics?"},
@@ -118,39 +172,34 @@ class TestFairwDDIModels(TestCase):
             ],
         )
         assert qi.pk == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"
+        assert qi.scheme == qs
+        assert qs.questions.count() == 1
         assert qi.question_text[0]["lang"] == "fr"
         assert qi.extended_attributes[0]["type"] == "interviewer_instructions"
-
-        # QuestionGroup & QuestionGroupItem
-        qg = QuestionGroup.objects.create(
-            urn="urn:ddi:fr.sciencespo:qg-pol-interest:1.0.0",
-            label=[{"lang": "fr", "value": "Questions d'intérêt"}],
-        )
-        qg_item = QuestionGroupItem.objects.create(
-            question_group=qg,
-            question_item=qi,
-            order=1,
-        )
-        assert qg.items.count() == 1
-        assert qg_item.question_item == qi
 
         # CategoryScheme
         cat_scheme = CategoryScheme.objects.create(
             urn="urn:ddi:fr.sciencespo:cs-fr-interest:1.0.0",
             name=[{"lang": "fr", "value": "Échelle d'intérêt politique"}],
-            hashes={"sha256": "cs_hash_001"},
+        )
+
+        # Concept anchor for category
+        cat_concept = Concept.objects.create(
+            urn="urn:ddi:fr.sciencespo:concept-yes:1.0.0",
+            label=[{"lang": "fr", "value": "Accord positif"}],
         )
 
         # Categories with parent hierarchy belonging to CategoryScheme
         cat_parent = Category.objects.create(
             urn="urn:ddi:fr.sciencespo:cat-pol-general:1.0.0",
-            category_scheme=cat_scheme,
+            scheme=cat_scheme,
             order=0,
             label=[{"lang": "fr", "value": "Échelle d'accord général"}],
         )
         cat_yes = Category.objects.create(
             urn="urn:ddi:fr.sciencespo:cat-fr-yes:1.0.0",
-            category_scheme=cat_scheme,
+            scheme=cat_scheme,
+            concept=cat_concept,
             order=1,
             label=[{"lang": "fr", "value": "Oui, beaucoup"}, {"lang": "en", "value": "Yes, a lot"}],
             parent=cat_parent,
@@ -158,7 +207,7 @@ class TestFairwDDIModels(TestCase):
         )
         cat_no = Category.objects.create(
             urn="urn:ddi:fr.sciencespo:cat-fr-no:1.0.0",
-            category_scheme=cat_scheme,
+            scheme=cat_scheme,
             order=2,
             is_missing=False,
             label=[
@@ -170,16 +219,18 @@ class TestFairwDDIModels(TestCase):
         )
         cat_nsp = Category.objects.create(
             urn="urn:ddi:fr.sciencespo:cat-fr-nsp:1.0.0",
-            category_scheme=cat_scheme,
+            scheme=cat_scheme,
             order=3,
             is_missing=True,
             label=[{"lang": "fr", "value": "Ne sait pas"}],
             hashes={"sha256": "cat_nsp_hash"},
         )
         assert cat_yes.parent == cat_parent
+        assert cat_yes.concept == cat_concept
+        assert cat_concept.categories.count() == 1
         assert cat_parent.children.count() == 2
         assert cat_scheme.categories.count() == 4
-        assert cat_yes.category_scheme == cat_scheme
+        assert cat_yes.scheme == cat_scheme
         assert cat_yes.is_missing is False
         assert cat_nsp.is_missing is True
 
@@ -187,7 +238,7 @@ class TestFairwDDIModels(TestCase):
         code_list = CodeList.objects.create(
             urn="urn:ddi:fr.sciencespo:cl-fr-001:1.0.0",
             name=[{"lang": "fr", "value": "Codes intérêt"}],
-            category_scheme=cat_scheme,
+            scheme=cat_scheme,
             hashes={"sha256": "cl_hash_001"},
         )
         parent_code = Code.objects.create(
@@ -225,22 +276,57 @@ class TestFairwDDIModels(TestCase):
         assert code1.is_missing is False
         assert code_missing.is_missing is True
 
+        # RepresentedVariableScheme
+        rv_scheme = RepresentedVariableScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:rvs-pol:1.0.0",
+            name=[{"lang": "fr", "value": "Schéma de variables représentées"}],
+        )
+        assert rv_scheme.pk == "urn:ddi:fr.sciencespo:rvs-pol:1.0.0"
+        assert str(rv_scheme) == "Schéma de variables représentées"
+
         # ConceptualVariable
         cv = ConceptualVariable.objects.create(
             urn="urn:ddi:fr.sciencespo:cv-002:1.0.0",
             label=[{"lang": "fr", "value": "Intérêt politique"}],
         )
 
-        # RepresentedVariable (decoupled from question_item)
+        # RepresentedVariable (decoupled from question_item) with code value_representation
         rv = RepresentedVariable.objects.create(
+            scheme=rv_scheme,
             conceptual_variable=cv,
             code_list=code_list,
+            value_representation={"type": "code", "code_list_urn": code_list.urn},
             urn="urn:ddi:fr.sciencespo:rv-fr-001:1.0.0",
+            name=[{"lang": "fr", "value": "RV_INTERET_POL"}],
             label=[{"lang": "fr", "value": "Intérêt politique RV"}],
+            description=[{"lang": "fr", "value": "Description de la variable représentée"}],
             hashes={"sha256": "rv_hash_001"},
         )
+        assert rv.scheme == rv_scheme
+        assert str(rv) == "RV_INTERET_POL"
+        assert rv_scheme.represented_variables.count() == 1
         assert rv.code_list == code_list
         assert rv.conceptual_variable == cv
+        assert rv.value_representation["type"] == "code"
+        assert rv.value_representation["code_list_urn"] == code_list.urn
+
+        # RepresentedVariable with numeric value_representation
+        rv_numeric = RepresentedVariable.objects.create(
+            scheme=rv_scheme,
+            conceptual_variable=cv,
+            value_representation={
+                "type": "numeric",
+                "numeric_type": "integer",
+                "min": 0,
+                "max": 100,
+            },
+            urn="urn:ddi:fr.sciencespo:rv-fr-numeric:1.0.0",
+            name=[{"lang": "fr", "value": "RV_AGE_NUMERIC"}],
+            label=[{"lang": "fr", "value": "Âge en années"}],
+        )
+        assert rv_numeric.code_list is None
+        assert rv_numeric.value_representation["type"] == "numeric"
+        assert rv_numeric.value_representation["min"] == 0
 
         # QuestionVariable junction
         qv = QuestionVariable.objects.create(
@@ -279,13 +365,12 @@ class TestFairwDDIModels(TestCase):
         assert iq.order == 1
 
     def test_dataset_layer_and_cascade(self) -> None:
-        """Test StudyUnit, InstanceVariable, StudyUnitVariable with path, and variable cascade."""
+        """Test StudyUnit, InstanceVariableScheme, InstanceVariable, cascade."""
         study_unit = StudyUnit.objects.create(
-            subcollection=self.subcollection,
+            urn="urn:ddi:fr.sciencespo:su-bpf-2007-1:1.0.0",
             title=[{"lang": "fr", "value": "BPF Vague 1 (2007)"}],
             external_ref="10.7303/cdsp-bpf2007-1",
             year=2007,
-            urn="urn:ddi:fr.sciencespo:su-bpf2007-1:1.0.0",
         )
 
         cv = ConceptualVariable.objects.create(
@@ -297,10 +382,19 @@ class TestFairwDDIModels(TestCase):
             conceptual_variable=cv,
         )
 
+        iv_scheme = InstanceVariableScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:ivs-bpf:1.0.0",
+            name=[{"lang": "fr", "value": "Schéma de variables d'instance"}],
+        )
+        assert iv_scheme.pk == "urn:ddi:fr.sciencespo:ivs-bpf:1.0.0"
+        assert str(iv_scheme) == "Schéma de variables d'instance"
+
         iv = InstanceVariable.objects.create(
+            scheme=iv_scheme,
             represented_variable=rv,
-            name="q01a",
+            name=[{"value": "q01a"}],
             label=[{"lang": "fr", "value": "Intérêt politique Q1"}],
+            description=[{"lang": "fr", "value": "Variable q01a dans le dataset"}],
             extended_attributes=[
                 {"type": "universe", "value": "Ensemble des électeurs inscrits"},
                 {"type": "notes", "value": "Variable filtrée"},
@@ -308,7 +402,9 @@ class TestFairwDDIModels(TestCase):
             urn="urn:ddi:fr.sciencespo:iv-fr-bpf2007-q01a:1.0.0",
         )
         assert iv.pk == "urn:ddi:fr.sciencespo:iv-fr-bpf2007-q01a:1.0.0"
-        assert iv.name == "q01a"
+        assert str(iv) == "q01a"
+        assert iv.scheme == iv_scheme
+        assert iv_scheme.instance_variables.count() == 1
         assert iv.represented_variable.conceptual_variable == cv
         assert iv.extended_attributes[0]["type"] == "universe"
 
@@ -382,6 +478,24 @@ class TestFairwDDIModels(TestCase):
 
     def test_infrastructure_and_staging_layer(self) -> None:
         """Test URNAlias, MetadataQuarantine, StagedImport, and StagedResourceNode."""
+        # UrnRegistry
+        reg = UrnRegistry.objects.create(
+            urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
+            resource_type="QuestionItem",
+            extended_attributes=[{"type": "source", "value": "test"}],
+        )
+        assert reg.urn == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"
+        assert reg.resource_type == "QuestionItem"
+        assert str(reg) == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0 (QuestionItem)"
+
+        # External non-DDI URN / URI registration
+        reg_ext = UrnRegistry.objects.create(
+            urn="https://elsst.cessda.eu/id/4/PoliticalAttitudes",
+            resource_type="Concept",
+            extended_attributes=[{"type": "vocabulary", "value": "ELSST"}],
+        )
+        assert reg_ext.resource_type == "Concept"
+
         # URNAlias
         alias = URNAlias.objects.create(
             alias_urn="raw:colectica:random-uuid-1234",
@@ -466,3 +580,169 @@ class TestFairwDDIModels(TestCase):
                 object_type="Concept",
                 object_urn="https://elsst.cessda.eu/id/4/Politics",
             )
+
+    def test_all_resources_require_urn_and_name_and_other_fields_nullable(self) -> None:
+        """Verify that all DDI resources require urn and name, and all other fields are nullable."""
+        # 1. Organization
+        org = Organization.objects.create(
+            urn="urn:ddi:fr.sciencespo:org-minimal:1.0.0",
+            name=[{"value": "Minimal Org"}],
+            hashes=None,
+        )
+        assert org.organization_type is None
+        assert org.extended_attributes == []
+        assert org.hashes is None
+
+        # 2. Group
+        grp = Group.objects.create(
+            urn="urn:ddi:fr.sciencespo:grp-minimal:1.0.0",
+            name=[{"value": "Minimal Group"}],
+        )
+        assert grp.description == []
+        assert grp.group_type is None
+        assert grp.references == []
+
+        # 3. ConceptScheme & Concept
+        cs = ConceptScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:cs-minimal:1.0.0",
+            name=[{"value": "Minimal CS"}],
+        )
+        assert cs.description == []
+        assert not hasattr(cs, "hashes")
+        concept = Concept.objects.create(
+            urn="urn:ddi:fr.sciencespo:concept-minimal:1.0.0",
+        )
+        assert concept.scheme is None
+        assert concept.uri is None
+        assert concept.vocabulary is None
+        assert concept.notation is None
+        assert concept.label == []
+        assert concept.description == []
+        assert concept.definition == []
+        assert concept.parent is None
+        assert concept.concept_type is None
+        assert hasattr(concept, "hashes")
+
+        # 4. ConceptualVariableScheme & ConceptualVariable
+        cvs = ConceptualVariableScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:cvs-minimal:1.0.0",
+            name=[{"value": "Minimal CVS"}],
+        )
+        assert cvs.description == []
+        assert not hasattr(cvs, "hashes")
+        cv = ConceptualVariable.objects.create(
+            urn="urn:ddi:fr.sciencespo:cv-minimal:1.0.0",
+            name=[{"value": "Minimal CV"}],
+        )
+        assert cv.scheme is None
+        assert cv.concept is None
+        assert cv.label == []
+        assert cv.description == []
+        assert hasattr(cv, "hashes")
+
+        # 5. QuestionScheme & QuestionItem
+        qs = QuestionScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:qs-minimal:1.0.0",
+            name=[{"value": "Minimal QS"}],
+        )
+        assert qs.description == []
+        assert not hasattr(qs, "hashes")
+        qi = QuestionItem.objects.create(
+            urn="urn:ddi:fr.sciencespo:qi-minimal:1.0.0",
+            name=[{"value": "Minimal QI"}],
+        )
+        assert qi.scheme is None
+        assert qi.question_text == []
+        assert qi.extended_attributes == []
+        assert hasattr(qi, "hashes")
+
+        # 6. CategoryScheme & Category
+        cats = CategoryScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:cats-minimal:1.0.0",
+            name=[{"value": "Minimal CatS"}],
+        )
+        assert cats.description == []
+        assert not hasattr(cats, "hashes")
+        cat = Category.objects.create(
+            urn="urn:ddi:fr.sciencespo:cat-minimal:1.0.0",
+            name=[{"value": "Minimal Cat"}],
+        )
+        assert cat.scheme is None
+        assert cat.concept is None
+        assert cat.label == []
+        assert cat.parent is None
+        assert cat.order == 0
+        assert cat.is_missing is False
+        assert hasattr(cat, "hashes")
+
+        # 7. CodeList
+        cl = CodeList.objects.create(
+            urn="urn:ddi:fr.sciencespo:cl-minimal:1.0.0",
+            name=[{"value": "Minimal CL"}],
+        )
+        assert cl.scheme is None
+        assert cl.description == []
+        assert hasattr(cl, "hashes")
+
+        # 8. RepresentedVariableScheme & RepresentedVariable
+        rvs = RepresentedVariableScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:rvs-minimal:1.0.0",
+            name=[{"value": "Minimal RVS"}],
+        )
+        assert rvs.description == []
+        assert not hasattr(rvs, "hashes")
+        rv = RepresentedVariable.objects.create(
+            urn="urn:ddi:fr.sciencespo:rv-minimal:1.0.0",
+            name=[{"value": "Minimal RV"}],
+        )
+        assert rv.scheme is None
+        assert rv.conceptual_variable is None
+        assert rv.code_list is None
+        assert rv.label == []
+        assert rv.description == []
+        assert hasattr(rv, "hashes")
+
+        # 9. StudyUnit
+        su = StudyUnit.objects.create(
+            urn="urn:ddi:fr.sciencespo:su-minimal:1.0.0",
+            name=[{"value": "Minimal SU"}],
+        )
+        assert su.title == []
+        assert su.external_ref is None
+        assert su.year is None
+        assert su.description == []
+        assert hasattr(su, "hashes")
+
+        # 10. InstanceVariableScheme & InstanceVariable
+        ivs = InstanceVariableScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:ivs-minimal:1.0.0",
+            name=[{"value": "Minimal IVS"}],
+        )
+        assert ivs.description == []
+        assert not hasattr(ivs, "hashes")
+        iv = InstanceVariable.objects.create(
+            urn="urn:ddi:fr.sciencespo:iv-minimal:1.0.0",
+            name=[{"value": "Minimal IV"}],
+        )
+        assert iv.scheme is None
+        assert iv.represented_variable is None
+        assert iv.label == []
+        assert iv.description == []
+        assert hasattr(iv, "hashes")
+
+        # 11. Instrument
+        inst = Instrument.objects.create(
+            urn="urn:ddi:fr.sciencespo:inst-minimal:1.0.0",
+            name=[{"value": "Minimal Instrument"}],
+        )
+        assert inst.label == []
+        assert inst.description == []
+        assert inst.extended_attributes == []
+        assert hasattr(inst, "hashes")
+
+        # 12. UrnRegistry
+        reg_min = UrnRegistry.objects.create(
+            urn="urn:ddi:fr.sciencespo:min-reg:1.0.0",
+            resource_type="Unknown",
+        )
+        assert reg_min.extended_attributes == []

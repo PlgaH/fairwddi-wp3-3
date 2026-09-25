@@ -1,9 +1,44 @@
 """Infrastructure, Provenance, Quarantine, and Staging Layer models for FAIRwDDI.
 
-Includes URNAlias, MetadataQuarantine, StagedImport, and StagedResourceNode.
+Includes UrnRegistry, URNAlias, MetadataQuarantine, StagedImport, and StagedResourceNode.
 """
 
 from django.db import models
+
+
+class UrnRegistry(models.Model):
+    """Central registry mapping URNs and external URIs to their resource types.
+
+    Provides referential integrity and O(1) URN-to-type crosswalk resolution
+    for both DDI and non-DDI identifiers.
+    """
+
+    urn = models.CharField(
+        max_length=512,
+        primary_key=True,
+        help_text="Canonical URN or external identifier/URI.",
+    )
+    resource_type = models.CharField(
+        max_length=64,
+        db_index=True,
+        help_text="Resource/entity type (e.g. 'QuestionItem', 'Category', 'ExternalConcept').",
+    )
+    extended_attributes = models.JSONField(
+        default=list,
+        blank=True,
+        null=True,
+        help_text="Extended attributes stored as an array of objects.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "request_ddi_urnregistry"
+        verbose_name = "URN Registry"
+        verbose_name_plural = "URN Registries"
+
+    def __str__(self) -> str:
+        return f"{self.urn} ({self.resource_type})"
 
 
 class URNAlias(models.Model):

@@ -63,7 +63,11 @@ Agents **must** use canonical DDI terminology (aligned with DDI 4 / DDI-CDI / DD
 - Pydantic v2 schemas go in `request_ddi/core/schemas.py`.
 - Django model renames use `migrations.RenameModel` (zero-data-loss).
 - Text fields that support multilingual content use PostgreSQL `JSONB` with ISO 639-1 language keys (e.g., `{"fr": "...", "en": "..."}`).
-- All DDI entities carry persistent URN identification: `urn:ddi:{agency}:{identifier}:{version}`.
+- All DDI entities carry persistent URN identification: `urn:ddi:{agency}:{identifier}:{version}`. When importing vocabularies, original source URNs must be strictly preserved.
+- `urn` and `name` are required on all DDI resources and schemes; all other entity fields (`label`, `description`, `definition`, `parent_urn`, `scheme_urn`, `extended_attributes`, `hashes`) must be nullable/optional.
+- Use `scheme_urn` as the uniform foreign key field name connecting entities to their enclosing scheme across all layers.
+- **Schemes vs. Leaf Resources:** Schemes (`*Scheme`) inherit from `DDIScheme` (`name`, `description`, `extended_attributes`) and do **NOT** carry `hashes`. Versionable resources carry multi-algorithm content `hashes`.
+- In documentation Mermaid diagrams: use valid alphanumeric subgraph identifiers (`subgraph Subgraph_ID ["Title"]`), avoid unquoted parentheses `()` in edge pipe labels (`|...|`), and use standard `-.->|label|` arrow syntax.
 - Content deduplication uses **SHA-256 content fingerprints** (`content_hash` field).
 - String normalization follows `request_ddi/utils/normalize_string.py` patterns: Unicode NFKC, French punctuation rules, whitespace collapsing.
 - Always include `tests/conftest.py` with `settings.configure()` and `django.setup()` for isolated pytest testing of Django/Ninja components.

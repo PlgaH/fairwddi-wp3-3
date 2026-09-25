@@ -5,31 +5,29 @@ Includes Instrument and InstrumentQuestion.
 
 from django.db import models
 
-from fairwddi.models.base import DDIIdentifiable
+from fairwddi.models.base import DDIResource
 from fairwddi.models.representation import QuestionItem
 
 
-class Instrument(DDIIdentifiable):
+class Instrument(DDIResource):
     """Data collection instrument / questionnaire in DDI-Lifecycle."""
 
-    name = models.JSONField(
-        default=list,
-        blank=True,
-        help_text="Multilingual instrument technical name: [{'lang': 'fr', 'value': '...'}].",
-    )
     label = models.JSONField(
         default=list,
         blank=True,
+        null=True,
         help_text="Multilingual human-readable title / label.",
     )
     description = models.JSONField(
         default=list,
         blank=True,
+        null=True,
         help_text="Multilingual description / abstract.",
     )
     extended_attributes = models.JSONField(
         default=list,
         blank=True,
+        null=True,
         help_text="Extended attributes stored as an array of objects.",
     )
 
@@ -39,10 +37,10 @@ class Instrument(DDIIdentifiable):
         verbose_name_plural = "Instruments"
 
     def __str__(self) -> str:
-        if isinstance(self.label, list) and self.label:
-            return self.label[0].get("value", self.urn)
         if isinstance(self.name, list) and self.name:
             return self.name[0].get("value", self.urn)
+        if isinstance(self.label, list) and self.label:
+            return self.label[0].get("value", self.urn)
         return self.urn
 
 

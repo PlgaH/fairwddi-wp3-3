@@ -7,42 +7,62 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from fairwddi.schemas.common import DDIIdentifiableSchema, MultilingualText
+from fairwddi.schemas.common import (
+    DDIIdentifiableSchema,
+    DDIResourceSchema,
+    DDISchemeSchema,
+    MultilingualText,
+)
 
 # ============================================================================
 # Organizational Hierarchy
 # ============================================================================
 
 
-class DistributorSchema(BaseModel):
-    """Schema for top-level Distributor entity."""
+class OrganizationSchema(DDIResourceSchema):
+    """Schema for DDI-Lifecycle Organization resource."""
 
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int | None = None
-    name: str = Field(..., description="Organization name.")
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
-
-
-class CollectionSchema(DDIIdentifiableSchema):
-    """Schema for Collection (Series / Group)."""
-
-    distributor_id: int
-    name: str = Field(..., description="Series / Collection title.")
-    description: MultilingualText | None = Field(
+    organization_type: str | None = Field(
         default=None,
-        description="Multilingual collection abstract/description.",
+        description="Organization type (e.g. 'archive', 'distributor', 'research_center').",
+    )
+    extended_attributes: list[dict[str, Any]] = Field(
+        default_factory=list, description="Extensible attributes list of objects."
     )
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
 
-class SubcollectionSchema(DDIIdentifiableSchema):
-    """Schema for Subcollection (Sub-Series / SubGroup)."""
+class GroupReferenceSchema(BaseModel):
+    """Schema for resource references contained in a Group."""
 
-    collection_urn: str = Field(..., description="Parent Collection URN.")
-    name: str = Field(..., description="Subcollection title.")
+    model_config = ConfigDict(from_attributes=True)
+
+    resource_type: str = Field(
+        ..., description="Target DDI entity type (e.g. 'StudyUnit', 'QuestionScheme')."
+    )
+    urn: str = Field(..., description="Canonical URN of the referenced resource.")
+
+
+class GroupSchema(DDIResourceSchema):
+    """Schema for generic Group DDI resource."""
+
+    description: MultilingualText | None = Field(
+        default=None, description="Multilingual description for the group."
+    )
+    group_type: str | None = Field(
+        default=None,
+        description=(
+            "Group classification type (e.g. 'study_series', 'panel', 'thematic', 'collection')."
+        ),
+    )
+    references: list[GroupReferenceSchema | dict[str, Any]] = Field(
+        default_factory=list,
+        description="List of referenced member resources with resource_type and urn.",
+    )
+    extended_attributes: list[dict[str, Any]] = Field(
+        default_factory=list, description="Extensible attributes list of objects."
+    )
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -52,16 +72,16 @@ class SubcollectionSchema(DDIIdentifiableSchema):
 # ============================================================================
 
 
-class ConceptSchema(BaseModel):
+class ConceptSchema(DDIIdentifiableSchema):
     """Schema for Concept entity from any controlled vocabulary."""
 
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int | None = None
+    scheme_urn: str | None = Field(default=None, description="Parent ConceptScheme URN.")
     uri: str | None = Field(default=None, description="Controlled vocabulary concept URI.")
-    vocabulary: str = Field(default="", description="Controlled vocabulary name or scheme.")
+    vocabulary: str | None = Field(
+        default=None, description="Controlled vocabulary name or scheme."
+    )
     notation: str | None = Field(default=None, description="Thesaurus classification code.")
-    label: MultilingualText = Field(..., description="Multilingual concept label.")
+    label: MultilingualText | None = Field(default=None, description="Multilingual concept label.")
     description: MultilingualText | None = Field(
         default=None, description="Multilingual description."
     )
@@ -69,7 +89,11 @@ class ConceptSchema(BaseModel):
         default=None, description="Multilingual definition."
     )
     parent_urn: str | None = Field(default=None, description="Parent concept URN for hierarchy.")
-    concept_type: str = Field(default="concept", description="Type (domain, concept, etc.).")
+    concept_type: str | None = Field(default=None, description="Type (domain, concept, etc.).")
+    hashes: dict[str, Any] | None = Field(
+        default=None,
+        description="Unified key-value hash digests dictionary (e.g. {'sha256': '...'}).",
+    )
     extended_attributes: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensible attributes list of objects."
     )
@@ -77,13 +101,30 @@ class ConceptSchema(BaseModel):
     updated_at: datetime | None = None
 
 
-class ConceptualVariableSchema(DDIIdentifiableSchema):
+class ConceptSchemeSchema(DDISchemeSchema):
+    """Schema for ConceptScheme."""
+
+    concepts: list[ConceptSchema] = Field(default_factory=list)
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class ConceptualVariableSchemeSchema(DDISchemeSchema):
+    """Schema for ConceptualVariableScheme."""
+
+    conceptual_variables: list[ConceptualVariableSchema] = Field(default_factory=list)
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class ConceptualVariableSchema(DDIResourceSchema):
     """Schema for abstract ConceptualVariable."""
 
+    scheme_urn: str | None = Field(default=None, description="Parent ConceptualVariableScheme URN.")
     concept_urn: str | None = Field(
         default=None, description="Parent Concept URN in controlled vocabulary."
     )
-    label: MultilingualText = Field(..., description="Multilingual concept label.")
+    label: MultilingualText | None = Field(default=None, description="Multilingual concept label.")
     description: MultilingualText | None = Field(
         default=None, description="Multilingual description."
     )
@@ -117,10 +158,14 @@ class SemanticRelationshipSchema(BaseModel):
 # ============================================================================
 
 
-class QuestionItemSchema(DDIIdentifiableSchema):
+class QuestionItemSchema(DDIResourceSchema):
     """Schema for standalone reusable QuestionItem."""
 
-    question_text: MultilingualText = Field(..., description="Multilingual literal question text.")
+    name: MultilingualText = Field(default_factory=list, description="Multilingual question name.")
+    scheme_urn: str | None = Field(default=None, description="Parent QuestionScheme URN.")
+    question_text: MultilingualText | None = Field(
+        default=None, description="Multilingual literal question text."
+    )
     extended_attributes: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensible attributes list of objects."
     )
@@ -128,43 +173,30 @@ class QuestionItemSchema(DDIIdentifiableSchema):
     updated_at: datetime | None = None
 
 
-class QuestionGroupItemSchema(BaseModel):
-    """Schema for QuestionGroupItem junction."""
+class QuestionSchemeSchema(DDISchemeSchema):
+    """Schema for QuestionScheme."""
 
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int | None = None
-    question_group_urn: str | None = None
-    question_item_urn: str
-    order: int = 0
-
-
-class QuestionGroupSchema(DDIIdentifiableSchema):
-    """Schema for QuestionGroup."""
-
-    label: MultilingualText = Field(..., description="Multilingual group title.")
-    description: MultilingualText | None = Field(
-        default=None, description="Multilingual description."
-    )
-    parent_group_urn: str | None = None
-    items: list[QuestionGroupItemSchema] = Field(default_factory=list)
-    extended_attributes: list[dict[str, Any]] = Field(
-        default_factory=list, description="Extensible attributes list of objects."
-    )
+    questions: list[QuestionItemSchema] = Field(default_factory=list)
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
 
-class CategorySchema(DDIIdentifiableSchema):
+class CategorySchema(DDIResourceSchema):
     """Schema for Category (response label)."""
 
-    category_scheme_urn: str | None = Field(default=None, description="Parent CategoryScheme URN.")
-    label: MultilingualText = Field(..., description="Multilingual response category label.")
+    name: MultilingualText = Field(default_factory=list, description="Multilingual category name.")
+    scheme_urn: str | None = Field(default=None, description="Parent CategoryScheme URN.")
+    concept_urn: str | None = Field(
+        default=None, description="Optional Concept URN anchor in a controlled vocabulary."
+    )
+    label: MultilingualText | None = Field(
+        default=None, description="Multilingual response category label."
+    )
     parent_urn: str | None = Field(
         default=None, description="Parent Category URN for hierarchical schemes."
     )
-    order: int = Field(default=0, description="Display order within category scheme.")
-    is_missing: bool = Field(
+    order: int | None = Field(default=0, description="Display order within category scheme.")
+    is_missing: bool | None = Field(
         default=False, description="Whether this category represents a missing value."
     )
     extended_attributes: list[dict[str, Any]] = Field(
@@ -174,17 +206,10 @@ class CategorySchema(DDIIdentifiableSchema):
     updated_at: datetime | None = None
 
 
-class CategorySchemeSchema(DDIIdentifiableSchema):
+class CategorySchemeSchema(DDISchemeSchema):
     """Schema for CategoryScheme."""
 
-    name: MultilingualText = Field(..., description="Multilingual name for the category scheme.")
-    description: MultilingualText | None = Field(
-        default=None, description="Multilingual description."
-    )
     categories: list[CategorySchema] = Field(default_factory=list)
-    extended_attributes: list[dict[str, Any]] = Field(
-        default_factory=list, description="Extensible attributes list of objects."
-    )
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -193,14 +218,18 @@ class CodeSchema(DDIIdentifiableSchema):
     """Schema for individual Code inside a CodeList."""
 
     code_list_urn: str | None = None
-    category_urn: str
-    code_value: str = Field(..., description="Numerical or text code string.")
+    category_urn: str | None = None
+    code_value: str | None = Field(default=None, description="Numerical or text code string.")
     parent_urn: str | None = Field(
         default=None, description="Parent Code URN for hierarchical code schemes."
     )
-    order: int = 0
-    is_missing: bool = Field(
+    order: int | None = 0
+    is_missing: bool | None = Field(
         default=False, description="Whether this code represents a missing / non-response value."
+    )
+    hashes: dict[str, Any] | None = Field(
+        default=None,
+        description="Unified key-value hash digests dictionary (e.g. {'sha256': '...'}).",
     )
     extended_attributes: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensible attributes list of objects."
@@ -209,14 +238,14 @@ class CodeSchema(DDIIdentifiableSchema):
     updated_at: datetime | None = None
 
 
-class CodeListSchema(DDIIdentifiableSchema):
+class CodeListSchema(DDIResourceSchema):
     """Schema for CodeList entity."""
 
-    name: MultilingualText | None = Field(default=None, description="Multilingual title.")
+    name: MultilingualText = Field(default_factory=list, description="Multilingual title.")
     description: MultilingualText | None = Field(
         default=None, description="Multilingual description."
     )
-    category_scheme_urn: str | None = None
+    scheme_urn: str | None = None
     codes: list[CodeSchema] = Field(default_factory=list)
     extended_attributes: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensible attributes list of objects."
@@ -225,12 +254,33 @@ class CodeListSchema(DDIIdentifiableSchema):
     updated_at: datetime | None = None
 
 
-class RepresentedVariableSchema(DDIIdentifiableSchema):
+class RepresentedVariableSchemeSchema(DDISchemeSchema):
+    """Schema for RepresentedVariableScheme."""
+
+    represented_variables: list[RepresentedVariableSchema] = Field(default_factory=list)
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class RepresentedVariableSchema(DDIResourceSchema):
     """Schema for RepresentedVariable."""
 
-    conceptual_variable_urn: str
+    scheme_urn: str | None = Field(
+        default=None, description="Parent RepresentedVariableScheme URN."
+    )
+    conceptual_variable_urn: str | None = None
     code_list_urn: str | None = None
+    value_representation: dict[str, Any] | None = Field(
+        default=None,
+        description=(
+            "JSON object describing the value representation "
+            "(e.g. {'type': 'code', 'code_list_urn': '...'}, {'type': 'numeric', ...})."
+        ),
+    )
     label: MultilingualText | None = Field(default=None, description="Multilingual short label.")
+    description: MultilingualText | None = Field(
+        default=None, description="Multilingual description."
+    )
     extended_attributes: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensible attributes list of objects."
     )
@@ -257,10 +307,10 @@ class QuestionVariableSchema(BaseModel):
 # ============================================================================
 
 
-class InstrumentSchema(DDIIdentifiableSchema):
+class InstrumentSchema(DDIResourceSchema):
     """Schema for DDI-Lifecycle Instrument."""
 
-    name: MultilingualText | None = Field(default=None, description="Technical name.")
+    name: MultilingualText = Field(default_factory=list, description="Technical name.")
     label: MultilingualText | None = Field(default=None, description="Human-readable title.")
     description: MultilingualText | None = Field(default=None, description="Description.")
     extended_attributes: list[dict[str, Any]] = Field(
@@ -289,11 +339,11 @@ class InstrumentQuestionSchema(BaseModel):
 # ============================================================================
 
 
-class StudyUnitSchema(DDIIdentifiableSchema):
+class StudyUnitSchema(DDIResourceSchema):
     """Schema for StudyUnit (survey wave dataset)."""
 
-    subcollection_urn: str
-    title: MultilingualText = Field(..., description="Multilingual study title.")
+    name: MultilingualText = Field(default_factory=list, description="Multilingual study name.")
+    title: MultilingualText | None = Field(default=None, description="Multilingual study title.")
     external_ref: str | None = Field(default=None, description="External reference or DOI.")
     year: int | None = Field(default=None, description="Survey year.")
     description: MultilingualText | None = Field(default=None, description="Multilingual abstract.")
@@ -304,12 +354,23 @@ class StudyUnitSchema(DDIIdentifiableSchema):
     updated_at: datetime | None = None
 
 
-class InstanceVariableSchema(DDIIdentifiableSchema):
+class InstanceVariableSchemeSchema(DDISchemeSchema):
+    """Schema for InstanceVariableScheme."""
+
+    instance_variables: list[InstanceVariableSchema] = Field(default_factory=list)
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class InstanceVariableSchema(DDIResourceSchema):
     """Schema for InstanceVariable (column realization in a study dataset)."""
 
-    represented_variable_urn: str
-    name: str = Field(..., description="Dataset column name (e.g. q01a).")
+    scheme_urn: str | None = Field(default=None, description="Parent InstanceVariableScheme URN.")
+    represented_variable_urn: str | None = None
     label: MultilingualText | None = Field(default=None, description="Multilingual variable label.")
+    description: MultilingualText | None = Field(
+        default=None, description="Multilingual description."
+    )
     extended_attributes: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensible attributes list of objects."
     )
@@ -349,6 +410,23 @@ class EventLogSchema(BaseModel):
 # ============================================================================
 # Infrastructure, Provenance & Quarantine
 # ============================================================================
+
+
+class UrnRegistrySchema(BaseModel):
+    """Schema for UrnRegistry capturing URN/URI to resource type mapping."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    urn: str = Field(..., description="Canonical URN or external identifier/URI.")
+    resource_type: str = Field(
+        ...,
+        description="Target resource type (e.g. 'QuestionItem', 'Category', 'ExternalConcept').",
+    )
+    extended_attributes: list[dict[str, Any]] = Field(
+        default_factory=list, description="Extensible attributes list of objects."
+    )
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class URNAliasSchema(BaseModel):

@@ -1,13 +1,16 @@
 """FAIRwDDI Django ORM models package."""
 
-from fairwddi.models.base import DDIIdentifiable
+from fairwddi.models.base import DDIIdentifiable, DDIResource, DDIScheme
 from fairwddi.models.concept import (
     Concept,
+    ConceptScheme,
     ConceptualVariable,
+    ConceptualVariableScheme,
     SemanticRelationship,
 )
 from fairwddi.models.dataset import (
     InstanceVariable,
+    InstanceVariableScheme,
     StudyUnit,
     StudyUnitVariable,
 )
@@ -19,51 +22,56 @@ from fairwddi.models.infrastructure import (
     StagedImport,
     StagedResourceNode,
     URNAlias,
+    UrnRegistry,
 )
 from fairwddi.models.instrument import (
     Instrument,
     InstrumentQuestion,
 )
 from fairwddi.models.organization import (
-    Collection,
-    Distributor,
-    Subcollection,
+    Group,
+    Organization,
 )
 from fairwddi.models.representation import (
     Category,
     CategoryScheme,
     Code,
     CodeList,
-    QuestionGroup,
-    QuestionGroupItem,
     QuestionItem,
+    QuestionScheme,
     QuestionVariable,
     RepresentedVariable,
+    RepresentedVariableScheme,
 )
 
 __all__ = [
     "DDIIdentifiable",
-    "Distributor",
-    "Collection",
-    "Subcollection",
+    "DDIScheme",
+    "DDIResource",
+    "Organization",
+    "Group",
+    "ConceptScheme",
     "Concept",
+    "ConceptualVariableScheme",
     "ConceptualVariable",
     "SemanticRelationship",
+    "QuestionScheme",
     "QuestionItem",
-    "QuestionGroup",
-    "QuestionGroupItem",
     "QuestionVariable",
     "Instrument",
     "InstrumentQuestion",
-    "Category",
     "CategoryScheme",
+    "Category",
     "CodeList",
     "Code",
+    "RepresentedVariableScheme",
     "RepresentedVariable",
     "StudyUnit",
+    "InstanceVariableScheme",
     "InstanceVariable",
     "StudyUnitVariable",
     "EventLog",
+    "UrnRegistry",
     "URNAlias",
     "MetadataQuarantine",
     "StagedImport",

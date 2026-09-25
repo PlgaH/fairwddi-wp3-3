@@ -62,7 +62,7 @@ def test_cli_db_export_ddl_stdout() -> None:
     """Test that fairwddi db export-ddl prints valid PostgreSQL DDL SQL."""
     result = runner.invoke(app, ["db", "export-ddl"])
     assert result.exit_code == 0
-    assert "CREATE TABLE IF NOT EXISTS request_ddi_distributor" in result.stdout
+    assert "CREATE TABLE IF NOT EXISTS request_ddi_organization" in result.stdout
     assert "CREATE TABLE IF NOT EXISTS request_ddi_questionitem" in result.stdout
     assert "CREATE TABLE IF NOT EXISTS request_ddi_codelist" in result.stdout
     assert "CREATE TABLE IF NOT EXISTS request_ddi_studyunit" in result.stdout
@@ -77,7 +77,7 @@ def test_cli_db_export_ddl_file() -> None:
         assert result.exit_code == 0
         assert output_file.exists()
         content = output_file.read_text(encoding="utf-8")
-        assert "CREATE TABLE IF NOT EXISTS request_ddi_distributor" in content
+        assert "CREATE TABLE IF NOT EXISTS request_ddi_organization" in content
 
 
 @pytest.mark.django_db
@@ -195,6 +195,20 @@ def test_cli_db_load_vocab_level_1() -> None:
     assert check_res.exit_code == 0
     assert "is LOADED" in check_res.stdout
 
+    # Verify original authoritative URN is preserved
+    from fairwddi.models import Concept, ConceptScheme
+
+    scheme = ConceptScheme.objects.get(
+        urn="urn:ddi:int.cessda.elsst:00000000-0000-0000-0000-000000000001:6"
+    )
+    assert scheme.urn == "urn:ddi:int.cessda.elsst:00000000-0000-0000-0000-000000000001:6"
+
+    top_concept = Concept.objects.get(
+        urn="urn:ddi:int.cessda.elsst:000e1113-ffda-4088-8278-020b6dc71e20:6"
+    )
+    assert top_concept.urn == "urn:ddi:int.cessda.elsst:000e1113-ffda-4088-8278-020b6dc71e20:6"
+    assert top_concept.scheme == scheme
+
     # Test already loaded check without reload
     already_res = runner.invoke(app, ["db", "load-vocab", str(vocab_path)])
     assert already_res.exit_code == 0
@@ -235,3 +249,37 @@ def test_cli_db_load_generic_skos_vocab() -> None:
         assert "loaded successfully" in result.stdout
         assert "Total Concepts Loaded" in result.stdout
         assert "2" in result.stdout
+
+
+@pytest.mark.django_db
+def test_cli_db_load_skos_vocab_preserves_original_urn() -> None:
+    """Test that vocabulary loading preserves original URN from dct:identifier or subject URI."""
+    from fairwddi.models import Concept, ConceptScheme
+
+    skos_content = """
+    @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+    @prefix dct: <http://purl.org/dc/terms/> .
+
+    <http://example.org/vocabs/topics> a skos:ConceptScheme ;
+        dct:identifier "urn:ddi:org.example:scheme-topics:1" ;
+        dct:title "Authoritative Topics"@en ;
+        skos:hasTopConcept <http://example.org/vocabs/topics/c1> .
+
+    <http://example.org/vocabs/topics/c1> a skos:Concept ;
+        dct:identifier "urn:ddi:org.example:concept-c1:1" ;
+        skos:prefLabel "Social Stratification"@en ;
+        skos:topConceptOf <http://example.org/vocabs/topics> .
+    """
+    with TemporaryDirectory() as tmpdir:
+        ttl_file = Path(tmpdir) / "authored_topics.ttl"
+        ttl_file.write_text(skos_content, encoding="utf-8")
+
+        result = runner.invoke(
+            app,
+            ["db", "load-vocab", str(ttl_file), "--vocabulary", "AuthoredTopics", "--reload"],
+        )
+        assert result.exit_code == 0
+        assert ConceptScheme.objects.filter(urn="urn:ddi:org.example:scheme-topics:1").exists()
+        concept = Concept.objects.get(urn="urn:ddi:org.example:concept-c1:1")
+        assert concept.urn == "urn:ddi:org.example:concept-c1:1"
+        assert concept.scheme.urn == "urn:ddi:org.example:scheme-topics:1"

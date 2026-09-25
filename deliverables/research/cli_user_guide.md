@@ -126,27 +126,31 @@ uv run fairwddi db seed -r
 ```
 Seeding DDI-Lifecycle demonstration data...
  Demonstration Data Seed Summary 
-┏━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
-┃ Entity / Layer        ┃ Count ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━┩
-│ Distributors          │     1 │
-│ Collections           │     1 │
-│ Subcollections        │     1 │
-│ Concepts              │     2 │
-│ Concept Relationships │     1 │
-│ Conceptual Variables  │     2 │
-│ Question Items        │     1 │
-│ Categories            │     6 │
-│ Category Sets         │     1 │
-│ Code Lists            │     1 │
-│ Code Items            │     6 │
-│ Represented Variables │     1 │
-│ Study Units           │     2 │
-│ Instance Variables    │     2 │
-│ Variable Groups       │     1 │
-│ Urn Aliases           │     1 │
-│ Staged Nodes          │     1 │
-└───────────────────────┴───────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
+┃ Entity / Layer         ┃ Count ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━┩
+│ Organizations          │     1 │
+│ Groups                 │     1 │
+│ Concepts               │     2 │
+│ Conceptual Variables   │     1 │
+│ Question Schemes       │     1 │
+│ Question Items         │     1 │
+│ Question Variables     │     1 │
+│ Instruments            │     1 │
+│ Instrument Questions   │     1 │
+│ Categories             │     6 │
+│ Category Schemes       │     1 │
+│ Code Lists             │     1 │
+│ Codes                  │     6 │
+│ Represented Variables  │     1 │
+│ Study Units            │     2 │
+│ Instance Variables     │     2 │
+│ Study Unit Variables   │     2 │
+│ Urn Aliases            │     1 │
+│ Staged Nodes           │     1 │
+│ Event Logs             │     1 │
+│ Semantic Relationships │     3 │
+└────────────────────────┴───────┘
 Database seeded successfully.
 ```
 
@@ -154,7 +158,7 @@ Database seeded successfully.
 
 ### 3.3 Check Database Inventory (`fairwddi db status`)
 
-Displays the current status of all 21 models/tables along with their active record counts.
+Displays the current status of all 27 models/tables along with their active record counts.
 
 ```bash
 uv run fairwddi db status
@@ -163,30 +167,37 @@ uv run fairwddi db status
 **Example Output:**
 ```
                             FAIRwDDI Model Inventory                            
-┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
-┃ Model Name              ┃ Database Table                      ┃ Record Count ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
-│ Concept                 │ request_ddi_concept                 │            2 │
-│ ConceptualVariable      │ request_ddi_conceptualvariable      │            2 │
-│ Distributor             │ request_ddi_distributor             │            1 │
-│ Collection              │ request_ddi_collection              │            1 │
-│ Subcollection           │ request_ddi_subcollection           │            1 │
-│ QuestionItem            │ request_ddi_questionitem            │            1 │
-│ Category                │ request_ddi_category                │            6 │
-│ CategorySet             │ request_ddi_categoryset             │            1 │
-│ CategorySetItem         │ request_ddi_categorysetitem         │            4 │
-│ CodeList                │ request_ddi_codelist                │            1 │
-│ CodeItem                │ request_ddi_codeitem                │            6 │
-│ RepresentedVariable     │ request_ddi_representedvariable     │            1 │
-│ StudyUnit               │ request_ddi_studyunit               │            2 │
-│ InstanceVariable        │ request_ddi_instancevariable        │            2 │
-│ VariableGroup           │ request_ddi_variablegroup           │            1 │
-│ VariableGroupMembership │ request_ddi_variablegroupmembership │            1 │
-│ URNAlias                │ request_ddi_urnalias                │            1 │
-│ MetadataQuarantine      │ request_ddi_metadataquarantine      │            0 │
-│ StagedImport            │ request_ddi_stagedimport            │            1 │
-│ StagedResourceNode      │ request_ddi_stagedresourcenode      │            1 │
-└─────────────────────────┴─────────────────────────────────────┴──────────────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Model Name                ┃ Database Table                    ┃ Record Count ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
+│ ConceptScheme             │ request_ddi_conceptscheme         │            1 │
+│ Concept                   │ request_ddi_concept               │            2 │
+│ ConceptualVariableScheme  │ request_ddi_conceptualvariablesc… │            1 │
+│ ConceptualVariable        │ request_ddi_conceptualvariable    │            1 │
+│ SemanticRelationship      │ request_ddi_semanticrelationship  │            3 │
+│ QuestionScheme            │ request_ddi_questionscheme        │            1 │
+│ QuestionItem              │ request_ddi_questionitem          │            1 │
+│ CategoryScheme            │ request_ddi_categoryscheme        │            1 │
+│ Category                  │ request_ddi_category              │            6 │
+│ CodeList                  │ request_ddi_codelist              │            1 │
+│ Code                      │ request_ddi_code                  │            6 │
+│ RepresentedVariableScheme │ request_ddi_representedvariables… │            1 │
+│ RepresentedVariable       │ request_ddi_representedvariable   │            1 │
+│ QuestionVariable          │ request_ddi_questionvariable      │            1 │
+│ StudyUnit                 │ request_ddi_studyunit             │            2 │
+│ InstanceVariableScheme    │ request_ddi_instancevariablesche… │            1 │
+│ InstanceVariable          │ request_ddi_instancevariable      │            2 │
+│ StudyUnitVariable         │ request_ddi_studyunitvariable     │            2 │
+│ EventLog                  │ request_ddi_eventlog              │            1 │
+│ URNAlias                  │ request_ddi_urnalias              │            1 │
+│ MetadataQuarantine        │ request_ddi_metadataquarantine    │            0 │
+│ StagedImport              │ request_ddi_stagedimport          │            1 │
+│ StagedResourceNode        │ request_ddi_stagedresourcenode    │            1 │
+│ Instrument                │ request_ddi_instrument            │            1 │
+│ InstrumentQuestion        │ request_ddi_instrumentquestion    │            1 │
+│ Organization              │ request_ddi_organization          │            1 │
+│ Group                     │ request_ddi_group                 │            1 │
+└───────────────────────────┴───────────────────────────────────┴──────────────┘
 ```
 
 ---
@@ -231,31 +242,33 @@ uv run fairwddi db wipe
 Type 'WIPE' to confirm complete database erasure: WIPE
 Wiping database records...
                  Wipe Summary                 
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃ Entity / Table             ┃ Deleted Count ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ Variable Group Memberships │             1 │
-│ Variable Groups            │             1 │
-│ Instance Variables         │             2 │
-│ Study Units                │             2 │
-│ Represented Variables      │             1 │
-│ Code Items                 │             6 │
-│ Code Lists                 │             1 │
-│ Category Set Items         │             4 │
-│ Category Sets              │             1 │
-│ Categories                 │             6 │
-│ Question Items             │             1 │
-│ Conceptual Variables       │             2 │
-│ Concept Relationships      │             1 │
-│ Concepts                   │             2 │
-│ Subcollections             │             1 │
-│ Collections                │             1 │
-│ Distributors               │             1 │
-│ Urn Aliases                │             1 │
-│ Staged Nodes               │             1 │
-│ Staged Payloads            │             1 │
-└────────────────────────────┴───────────────┘
-Database wiped successfully (37 records removed).
+┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Entity / Table         ┃ Deleted Count ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ Event Logs             │             1 │
+│ Semantic Relationships │             3 │
+│ Instrument Questions   │             1 │
+│ Instruments            │             1 │
+│ Study Unit Variables   │             2 │
+│ Instance Variables     │             2 │
+│ Study Units            │             2 │
+│ Question Variables     │             1 │
+│ Represented Variables  │             1 │
+│ Codes                  │             6 │
+│ Code Lists             │             1 │
+│ Categories             │             6 │
+│ Category Schemes       │             1 │
+│ Question Items         │             1 │
+│ Question Schemes       │             1 │
+│ Conceptual Variables   │             1 │
+│ Concepts               │             2 │
+│ Groups                 │             1 │
+│ Organizations          │             1 │
+│ Urn Aliases            │             1 │
+│ Staged Nodes           │             1 │
+│ Staged Imports         │             1 │
+└────────────────────────┴───────────────┘
+Database wiped successfully (36 records removed).
 ```
 
 #### Non-Interactive / Script Execution:

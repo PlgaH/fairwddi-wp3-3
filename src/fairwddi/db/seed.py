@@ -21,26 +21,29 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         CategoryScheme,
         Code,
         CodeList,
-        Collection,
         Concept,
+        ConceptScheme,
         ConceptualVariable,
-        Distributor,
+        ConceptualVariableScheme,
         EventLog,
+        Group,
         InstanceVariable,
+        InstanceVariableScheme,
         Instrument,
         InstrumentQuestion,
-        QuestionGroup,
-        QuestionGroupItem,
+        Organization,
         QuestionItem,
+        QuestionScheme,
         QuestionVariable,
         RepresentedVariable,
+        RepresentedVariableScheme,
         SemanticRelationship,
         StagedImport,
         StagedResourceNode,
         StudyUnit,
         StudyUnitVariable,
-        Subcollection,
         URNAlias,
+        UrnRegistry,
     )
 
     if reset:
@@ -53,15 +56,42 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
     # -------------------------------------------------------------------------
     # 1. Organizational Hierarchy
     # -------------------------------------------------------------------------
-    distributor, _ = Distributor.objects.get_or_create(
-        name="Centre de Données Socio-Politiques (CDSP)",
+    organization, _ = Organization.objects.get_or_create(
+        urn=f"urn:ddi:{agency}:Organization.CDSP:1.0.0",
+        defaults={
+            "name": [
+                {
+                    "lang": "fr",
+                    "value": "Centre de Données Socio-Politiques",
+                },
+                {
+                    "lang": "en",
+                    "value": "Center for Socio-Political Data",
+                },
+            ],
+            "organization_type": "distributor",
+            "extended_attributes": [
+                {"type": "acronym", "value": "CDSP"},
+                {"type": "uri", "value": "https://cdsp.sciences-po.fr/"},
+                {"type": "email", "value": "cdsp@sciencespo.fr"},
+            ],
+        },
     )
 
-    collection, _ = Collection.objects.get_or_create(
-        urn=f"urn:ddi:{agency}:BPF:1.0.0",
+    # Group (e.g. BPF Study Series Group)
+    group_bpf, _ = Group.objects.get_or_create(
+        urn=f"urn:ddi:{agency}:group-bpf-series:1.0.0",
         defaults={
-            "distributor": distributor,
-            "name": "Baromètre Politique Français (BPF)",
+            "name": [
+                {
+                    "lang": "fr",
+                    "value": "Baromètre Politique Français (BPF)",
+                },
+                {
+                    "lang": "en",
+                    "value": "French Political Barometer (BPF)",
+                },
+            ],
             "description": [
                 {
                     "lang": "fr",
@@ -74,25 +104,45 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
                     "value": "French political barometer survey series conducted by CDSP.",
                 },
             ],
-            "hashes": {"sha256": "hash_coll_bpf_001"},
-        },
-    )
-
-    subcollection, _ = Subcollection.objects.get_or_create(
-        urn=f"urn:ddi:{agency}:BPF_2007:1.0.0",
-        defaults={
-            "collection": collection,
-            "name": "BPF 2007 (Vagues Électorales)",
-            "hashes": {"sha256": "hash_subcoll_bpf_2007"},
+            "group_type": "study_series",
+            "references": [
+                {
+                    "resource_type": "StudyUnit",
+                    "urn": f"urn:ddi:{agency}:bpf-2007-w01:1.0.0",
+                },
+                {
+                    "resource_type": "StudyUnit",
+                    "urn": f"urn:ddi:{agency}:bpf-2007-w02:1.0.0",
+                },
+            ],
+            "hashes": {"sha256": "group_hash_bpf_001"},
         },
     )
 
     # -------------------------------------------------------------------------
     # 2. Concept Layer (Controlled Vocabularies & Thesauri)
     # -------------------------------------------------------------------------
-    root_concept, _ = Concept.objects.get_or_create(
-        uri="https://elsst.cessda.eu/id/4/Politics",
+    concept_scheme, _ = ConceptScheme.objects.get_or_create(
+        urn=f"urn:ddi:{agency}:cs-politics-thesaurus:1.0.0",
         defaults={
+            "name": [
+                {"lang": "fr", "value": "Schéma de concepts politiques"},
+                {"lang": "en", "value": "Political Concepts Scheme"},
+            ],
+            "description": [
+                {
+                    "lang": "fr",
+                    "value": "Concepts et thématiques de science politique basés sur ELSST.",
+                }
+            ],
+        },
+    )
+
+    root_concept, _ = Concept.objects.get_or_create(
+        urn=f"urn:ddi:{agency}:concept-elsst-pol:1.0.0",
+        defaults={
+            "scheme": concept_scheme,
+            "uri": "https://elsst.cessda.eu/id/4/Politics",
             "vocabulary": "ELSST",
             "notation": "POL",
             "concept_type": "domain",
@@ -106,13 +156,16 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
                     "value": "Affaires politiques, gouvernement et institutions.",
                 }
             ],
+            "hashes": {"sha256": "concept_hash_pol"},
             "extended_attributes": [{"type": "scope_note", "value": "CESSDA Core Concept"}],
         },
     )
 
     sub_concept, _ = Concept.objects.get_or_create(
-        uri="https://elsst.cessda.eu/id/4/PoliticalAttitudes",
+        urn=f"urn:ddi:{agency}:concept-elsst-pol-att:1.0.0",
         defaults={
+            "scheme": concept_scheme,
+            "uri": "https://elsst.cessda.eu/id/4/PoliticalAttitudes",
             "vocabulary": "ELSST",
             "notation": "POL.ATT",
             "concept_type": "concept",
@@ -130,13 +183,35 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
                     ),
                 }
             ],
+            "hashes": {"sha256": "concept_hash_pol_att"},
+        },
+    )
+
+    cv_scheme, _ = ConceptualVariableScheme.objects.get_or_create(
+        urn=f"urn:ddi:{agency}:cvs-attitudes-core:1.0.0",
+        defaults={
+            "name": [
+                {"lang": "fr", "value": "Schéma de variables conceptuelles politiques"},
+                {"lang": "en", "value": "Political Conceptual Variables Scheme"},
+            ],
+            "description": [
+                {
+                    "lang": "fr",
+                    "value": "Variables conceptuelles mesurant les attitudes politiques.",
+                }
+            ],
         },
     )
 
     cv_interest, _ = ConceptualVariable.objects.get_or_create(
         urn=f"urn:ddi:{agency}:cv-political-interest:1.0.0",
         defaults={
+            "scheme": cv_scheme,
             "concept": sub_concept,
+            "name": [
+                {"lang": "fr", "value": "INTERET_POLITIQUE"},
+                {"lang": "en", "value": "POLITICAL_INTEREST"},
+            ],
             "label": [
                 {"lang": "fr", "value": "Intérêt pour la politique"},
                 {"lang": "en", "value": "Interest in politics"},
@@ -155,9 +230,28 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
     # -------------------------------------------------------------------------
     # 3. Representation Layer & Instruments
     # -------------------------------------------------------------------------
+    # QuestionScheme
+    qs_politics, _ = QuestionScheme.objects.get_or_create(
+        urn=f"urn:ddi:{agency}:qs-politics-core:1.0.0",
+        defaults={
+            "name": [
+                {"lang": "fr", "value": "Schéma de questions politiques"},
+                {"lang": "en", "value": "Political Questions Scheme"},
+            ],
+            "description": [
+                {"lang": "fr", "value": "Questions relatives à l'attention et l'intérêt politique"}
+            ],
+        },
+    )
+
     qi_interest, _ = QuestionItem.objects.get_or_create(
         urn=f"urn:ddi:{agency}:qi-fr-interest-pol:1.0.0",
         defaults={
+            "name": [
+                {"lang": "fr", "value": "QI_INTERET_POL"},
+                {"lang": "en", "value": "QI_POL_INTEREST"},
+            ],
+            "scheme": qs_politics,
             "question_text": [
                 {
                     "lang": "fr",
@@ -194,31 +288,12 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         },
     )
 
-    # Question Group
-    qg_politics, _ = QuestionGroup.objects.get_or_create(
-        urn=f"urn:ddi:{agency}:qg-politics-core:1.0.0",
-        defaults={
-            "label": [
-                {"lang": "fr", "value": "Module d'intérêt politique"},
-                {"lang": "en", "value": "Political Interest Core Module"},
-            ],
-            "description": [{"lang": "fr", "value": "Questions relatives à l'attention politique"}],
-            "hashes": {"sha256": "qg_hash_politics_001"},
-        },
-    )
-    QuestionGroupItem.objects.get_or_create(
-        question_group=qg_politics,
-        question_item=qi_interest,
-        defaults={"order": 1},
-    )
-
     # CategoryScheme
     cat_scheme, _ = CategoryScheme.objects.get_or_create(
         urn=f"urn:ddi:{agency}:cs-interest-4pt:1.0.0",
         defaults={
             "name": [{"lang": "fr", "value": "Échelle d'intérêt à 4 niveaux"}],
             "description": [{"lang": "fr", "value": "Beaucoup, assez, un peu, pas du tout"}],
-            "hashes": {"sha256": "cs_hash_interest_4pt"},
         },
     )
 
@@ -273,7 +348,11 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         cat, _ = Category.objects.get_or_create(
             urn=f"urn:ddi:{agency}:{cat_def['id_str']}:1.0.0",
             defaults={
-                "category_scheme": cat_scheme,
+                "name": [
+                    {"lang": "fr", "value": cat_def["fr"]},
+                    {"lang": "en", "value": cat_def["en"]},
+                ],
+                "scheme": cat_scheme,
                 "order": cat_def["order"],
                 "is_missing": cat_def["is_missing"],
                 "label": [
@@ -290,7 +369,7 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         urn=f"urn:ddi:{agency}:cl-interest-4pt:1.0.0",
         defaults={
             "name": [{"lang": "fr", "value": "Codes échelle intérêt politique (1-4, 88, 99)"}],
-            "category_scheme": cat_scheme,
+            "scheme": cat_scheme,
             "hashes": {"sha256": "cl_hash_interest_4pt"},
         },
     )
@@ -314,13 +393,34 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
             },
         )
 
+    # RepresentedVariableScheme
+    rv_scheme, _ = RepresentedVariableScheme.objects.get_or_create(
+        urn=f"urn:ddi:{agency}:rvs-bpf-core:1.0.0",
+        defaults={
+            "name": [
+                {"lang": "fr", "value": "Schéma de variables représentées"},
+                {"lang": "en", "value": "Represented Variables Scheme"},
+            ],
+            "description": [
+                {"lang": "fr", "value": "Variables représentées avec modalités de réponse."}
+            ],
+        },
+    )
+
     # RepresentedVariable
     rv_interest, _ = RepresentedVariable.objects.get_or_create(
         urn=f"urn:ddi:{agency}:rv-fr-political-interest:1.0.0",
         defaults={
+            "scheme": rv_scheme,
             "conceptual_variable": cv_interest,
             "code_list": code_list,
+            "value_representation": {
+                "type": "code",
+                "code_list_urn": code_list.urn,
+            },
+            "name": [{"lang": "fr", "value": "RV_INTERET_POL_4PT"}],
             "label": [{"lang": "fr", "value": "Intérêt politique (échelle 4 pts)"}],
+            "description": [{"lang": "fr", "value": "Mesure de l'intérêt politique (4 pts)."}],
             "hashes": {"sha256": "rv_hash_pol_interest_001"},
         },
     )
@@ -355,7 +455,7 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
     study_wave1, _ = StudyUnit.objects.get_or_create(
         urn=f"urn:ddi:{agency}:bpf-2007-w01:1.0.0",
         defaults={
-            "subcollection": subcollection,
+            "name": [{"value": "BPF_2007_W1"}],
             "title": [
                 {"lang": "fr", "value": "Baromètre Politique Français - Vague 1 (Mars 2007)"},
                 {"lang": "en", "value": "French Political Barometer - Wave 1 (March 2007)"},
@@ -375,7 +475,7 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
     study_wave2, _ = StudyUnit.objects.get_or_create(
         urn=f"urn:ddi:{agency}:bpf-2007-w02:1.0.0",
         defaults={
-            "subcollection": subcollection,
+            "name": [{"value": "BPF_2007_W2"}],
             "title": [
                 {"lang": "fr", "value": "Baromètre Politique Français - Vague 2 (Avril 2007)"},
                 {"lang": "en", "value": "French Political Barometer - Wave 2 (April 2007)"},
@@ -389,13 +489,31 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         },
     )
 
+    # InstanceVariableScheme
+    iv_scheme, _ = InstanceVariableScheme.objects.get_or_create(
+        urn=f"urn:ddi:{agency}:ivs-bpf-2007:1.0.0",
+        defaults={
+            "name": [
+                {"lang": "fr", "value": "Schéma de variables d'instance BPF 2007"},
+                {"lang": "en", "value": "BPF 2007 Instance Variables Scheme"},
+            ],
+            "description": [
+                {"lang": "fr", "value": "Variables physiques des fichiers de données BPF 2007."}
+            ],
+        },
+    )
+
     # Harmonized InstanceVariables instantiated across study waves
     iv_w1_q01, _ = InstanceVariable.objects.get_or_create(
         urn=f"urn:ddi:{agency}:bpf-2007-w01-q01:1.0.0",
         defaults={
+            "scheme": iv_scheme,
             "represented_variable": rv_interest,
-            "name": "q01_pol_interest",
+            "name": [{"value": "q01_pol_interest"}],
             "label": [{"lang": "fr", "value": "Intérêt pour la politique (Vague 1)"}],
+            "description": [
+                {"lang": "fr", "value": "Colonne q01_pol_interest dans le fichier SPSS vague 1."}
+            ],
             "extended_attributes": [
                 {"type": "universe", "value": "Ensemble des électeurs inscrits"},
                 {"type": "notes", "value": "Variable administrée en début de questionnaire"},
@@ -407,9 +525,13 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
     iv_w2_q01, _ = InstanceVariable.objects.get_or_create(
         urn=f"urn:ddi:{agency}:bpf-2007-w02-q01:1.0.0",
         defaults={
+            "scheme": iv_scheme,
             "represented_variable": rv_interest,
-            "name": "q01_pol_interest",
+            "name": [{"value": "q01_pol_interest"}],
             "label": [{"lang": "fr", "value": "Intérêt pour la politique (Vague 2)"}],
+            "description": [
+                {"lang": "fr", "value": "Colonne q01_pol_interest dans le fichier SPSS vague 2."}
+            ],
             "extended_attributes": [
                 {"type": "universe", "value": "Ensemble des électeurs inscrits"},
                 {"type": "notes", "value": "Variable répétée à l'identique de la Vague 1"},
@@ -433,6 +555,21 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
     # -------------------------------------------------------------------------
     # 5. Infrastructure, Provenance, Staging & Event Logging
     # -------------------------------------------------------------------------
+    UrnRegistry.objects.get_or_create(
+        urn=rv_interest.urn,
+        defaults={
+            "resource_type": "RepresentedVariable",
+            "extended_attributes": [{"type": "source", "value": "seed"}],
+        },
+    )
+    UrnRegistry.objects.get_or_create(
+        urn="https://elsst.cessda.eu/id/4/PoliticalAttitudes",
+        defaults={
+            "resource_type": "Concept",
+            "extended_attributes": [{"type": "vocabulary", "value": "ELSST"}],
+        },
+    )
+
     URNAlias.objects.get_or_create(
         alias_urn="raw:colectica:098f6bcd-4621-3373-8ade-4e832627b4f6:1",
         defaults={
@@ -526,25 +663,28 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
     )
 
     return {
-        "distributors": Distributor.objects.count(),
-        "collections": Collection.objects.count(),
-        "subcollections": Subcollection.objects.count(),
+        "organizations": Organization.objects.count(),
+        "groups": Group.objects.count(),
+        "concept_schemes": ConceptScheme.objects.count(),
         "concepts": Concept.objects.count(),
+        "conceptual_variable_schemes": ConceptualVariableScheme.objects.count(),
         "conceptual_variables": ConceptualVariable.objects.count(),
+        "question_schemes": QuestionScheme.objects.count(),
         "question_items": QuestionItem.objects.count(),
-        "question_groups": QuestionGroup.objects.count(),
-        "question_group_items": QuestionGroupItem.objects.count(),
         "question_variables": QuestionVariable.objects.count(),
         "instruments": Instrument.objects.count(),
         "instrument_questions": InstrumentQuestion.objects.count(),
-        "categories": Category.objects.count(),
         "category_schemes": CategoryScheme.objects.count(),
+        "categories": Category.objects.count(),
         "code_lists": CodeList.objects.count(),
         "codes": Code.objects.count(),
+        "represented_variable_schemes": RepresentedVariableScheme.objects.count(),
         "represented_variables": RepresentedVariable.objects.count(),
         "study_units": StudyUnit.objects.count(),
+        "instance_variable_schemes": InstanceVariableScheme.objects.count(),
         "instance_variables": InstanceVariable.objects.count(),
         "study_unit_variables": StudyUnitVariable.objects.count(),
+        "urn_registries": UrnRegistry.objects.count(),
         "urn_aliases": URNAlias.objects.count(),
         "staged_nodes": StagedResourceNode.objects.count(),
         "event_logs": EventLog.objects.count(),

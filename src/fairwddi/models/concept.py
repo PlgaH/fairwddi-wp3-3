@@ -7,16 +7,35 @@ and concept-to-concept relationships for semantic harmonization across any vocab
 
 from django.db import models
 
-from fairwddi.models.base import DDIIdentifiable
+from fairwddi.models.base import DDIIdentifiable, DDIResource, DDIScheme
 
 
-class Concept(models.Model):
+class ConceptScheme(DDIScheme):
+    """Named collection of reusable concepts (maps to DDI-L ConceptScheme)."""
+
+    class Meta:
+        db_table = "request_ddi_conceptscheme"
+        verbose_name = "Concept Scheme"
+        verbose_name_plural = "Concept Schemes"
+
+
+class Concept(DDIIdentifiable):
     """High-level thematic or domain concept from any controlled vocabulary or thesaurus.
 
     Supports hierarchical trees (skos:broader / skos:narrower) via parent relationship,
     notation codes, vocabulary identifiers, and multilingual definitions.
+    Inherits DDIIdentifiable with URN primary key and hashes.
     """
 
+    scheme = models.ForeignKey(
+        ConceptScheme,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="concepts",
+        db_column="scheme_urn",
+        help_text="Parent ConceptScheme defining this concept.",
+    )
     uri = models.CharField(
         max_length=512,
         unique=True,
@@ -27,8 +46,9 @@ class Concept(models.Model):
     )
     vocabulary = models.CharField(
         max_length=128,
+        null=True,
         blank=True,
-        default="",
+        default=None,
         db_index=True,
         help_text="Controlled vocabulary name or scheme (e.g. 'ELSST', 'CESSDA Topics', 'DDI-CV').",
     )
@@ -36,20 +56,25 @@ class Concept(models.Model):
         max_length=128,
         null=True,
         blank=True,
+        default=None,
         db_index=True,
         help_text="Standard thesaurus notation / classification code.",
     )
     label = models.JSONField(
         default=list,
+        null=True,
+        blank=True,
         help_text="Multilingual concept label stored as an array of objects.",
     )
     description = models.JSONField(
         default=list,
+        null=True,
         blank=True,
         help_text="Multilingual concept description stored as an array of objects.",
     )
     definition = models.JSONField(
         default=list,
+        null=True,
         blank=True,
         help_text="Multilingual skos:definition stored as an array of objects.",
     )
@@ -64,16 +89,23 @@ class Concept(models.Model):
     )
     concept_type = models.CharField(
         max_length=64,
-        default="concept",
+        null=True,
+        blank=True,
+        default=None,
         help_text="Concept classification type (e.g. 'domain', 'concept', 'thematic_group').",
+    )
+    hashes = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        help_text="Unified key-value hash digests dictionary (e.g. {'sha256': '...'}).",
     )
     extended_attributes = models.JSONField(
         default=list,
+        null=True,
         blank=True,
         help_text="Extended attributes stored as an array of objects.",
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "request_ddi_concept"
@@ -82,17 +114,35 @@ class Concept(models.Model):
 
     def __str__(self) -> str:
         if isinstance(self.label, list) and self.label:
-            return self.label[0].get("value", str(self.pk))
-        return str(self.pk)
+            return self.label[0].get("value", self.urn)
+        return self.urn
 
 
-class ConceptualVariable(DDIIdentifiable):
+class ConceptualVariableScheme(DDIScheme):
+    """Named collection of reusable conceptual variables (DDI-L ConceptualVariableScheme)."""
+
+    class Meta:
+        db_table = "request_ddi_conceptualvariablescheme"
+        verbose_name = "Conceptual Variable Scheme"
+        verbose_name_plural = "Conceptual Variable Schemes"
+
+
+class ConceptualVariable(DDIResource):
     """Abstract measurement concept (e.g. 'Left-Right Political Placement').
 
     Represents the top tier of the DDI variable cascade:
     ConceptualVariable -> RepresentedVariable -> InstanceVariable.
     """
 
+    scheme = models.ForeignKey(
+        ConceptualVariableScheme,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="conceptual_variables",
+        db_column="scheme_urn",
+        help_text="Parent ConceptualVariableScheme defining this conceptual variable.",
+    )
     concept = models.ForeignKey(
         Concept,
         on_delete=models.SET_NULL,
@@ -104,16 +154,20 @@ class ConceptualVariable(DDIIdentifiable):
     )
     label = models.JSONField(
         default=list,
+        blank=True,
+        null=True,
         help_text="Multilingual conceptual variable label as an array of objects.",
     )
     description = models.JSONField(
         default=list,
         blank=True,
+        null=True,
         help_text="Multilingual description as an array of objects.",
     )
     extended_attributes = models.JSONField(
         default=list,
         blank=True,
+        null=True,
         help_text="Extended attributes stored as an array of objects.",
     )
 
@@ -121,11 +175,6 @@ class ConceptualVariable(DDIIdentifiable):
         db_table = "request_ddi_conceptualvariable"
         verbose_name = "Conceptual Variable"
         verbose_name_plural = "Conceptual Variables"
-
-    def __str__(self) -> str:
-        if isinstance(self.label, list) and self.label:
-            return self.label[0].get("value", self.urn)
-        return self.urn
 
 
 class SemanticRelationship(models.Model):

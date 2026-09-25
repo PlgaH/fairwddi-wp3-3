@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, RootModel
+from pydantic import BaseModel, ConfigDict, Field, RootModel, model_validator
 
 
 class MultilingualItem(BaseModel):
@@ -32,6 +32,30 @@ class MultilingualText(RootModel[list[MultilingualItem]]):
     """Root container representing multilingual text stored as a JSONB array of objects."""
 
     root: list[MultilingualItem] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_multilingual_text(cls, data: Any) -> Any:
+        """Coerce strings, dictionaries, or lists of objects into list of MultilingualItem."""
+        if data is None:
+            return []
+        if isinstance(data, str):
+            return [{"value": data}]
+        if isinstance(data, dict):
+            if "value" in data:
+                return [data]
+            return [{"lang": k, "value": str(v)} for k, v in data.items()]
+        if isinstance(data, list):
+            items = []
+            for item in data:
+                if isinstance(item, str):
+                    items.append({"value": item})
+                elif isinstance(item, dict):
+                    items.append(item)
+                else:
+                    items.append(item)
+            return items
+        return data
 
     def __iter__(self):  # type: ignore[override]
         return iter(self.root)
@@ -116,10 +140,6 @@ class DDIIdentifiableSchema(BaseModel):
         default=None,
         description="Persistent canonical URN: urn:ddi:{agency}:{ID}:{version}",
     )
-    hashes: dict[str, str] = Field(
-        default_factory=dict,
-        description="Unified key-value hash digests dictionary (e.g. {'sha256': '...'}).",
-    )
 
     @property
     def is_canonical_ddi(self) -> bool:
@@ -201,3 +221,25 @@ class DDIIdentifiableSchema(BaseModel):
             if len(parts) >= 6:
                 return parts[5]
         return "1.0.0"
+
+
+class DDISchemeSchema(DDIIdentifiableSchema):
+    """Base Pydantic schema for all DDI scheme containers (without hashes)."""
+
+    name: MultilingualText = Field(..., description="Multilingual scheme name.")
+    description: MultilingualText | None = Field(
+        default=None, description="Multilingual scheme description."
+    )
+    extended_attributes: list[dict[str, Any]] = Field(
+        default_factory=list, description="Extensible attributes list of objects."
+    )
+
+
+class DDIResourceSchema(DDIIdentifiableSchema):
+    """Base Pydantic schema for all DDI resource entities requiring urn and name, with hashes."""
+
+    name: MultilingualText = Field(..., description="Multilingual resource name.")
+    hashes: dict[str, Any] | None = Field(
+        default=None,
+        description="Unified key-value hash digests dictionary (e.g. {'sha256': '...'}).",
+    )

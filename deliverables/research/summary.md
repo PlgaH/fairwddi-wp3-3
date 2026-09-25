@@ -62,9 +62,9 @@ flowchart TD
 
 1. **15-Table Standard-Agnostic PostgreSQL Core (with SQLite Dev/Test Parity):**
    - **Concept Layer:** `Concept` (generic vocabulary URI anchor, parent hierarchy, notations), `ConceptualVariable`.
-   - **Representation Layer:** `QuestionItem`, `Category`, `CategorySet`, `CategorySetItem`, `CodeList`, `CodeItem`, `RepresentedVariable`.
+   - **Representation & Instrument Layer:** `QuestionScheme`, `QuestionItem`, `CategoryScheme`, `Category`, `CodeList`, `Code`, `RepresentedVariable`, `QuestionVariable`, `Instrument`, `InstrumentQuestion`.
    - **Dataset Layer:** `StudyUnit` (renamed from `Survey`), `InstanceVariable` (renamed from `BindingSurveyRepresentedVariable`).
-   - **Organization Layer:** `VariableGroup`, `VariableGroupMembership`, `Distributor`, `Collection`, `Subcollection`.
+   - **Organization & Grouping Layer:** `Organization`, `Group`.
    - **Infrastructure & Staging Layer:** `URNAlias`, `MetadataQuarantine`, `StagedImport`, `StagedResourceNode`.
 2. **`DDIIdentifiable` Abstract Mixin:** Universal identification mixin providing `urn`, `agency`, `ddi_identifier`, `version`, `content_hash` (primary SHA-256 digest), and `content_hashes` (JSONB multi-algorithm digests).
 3. **Structured `QuestionItem` Breakdown:** Extracted from `RepresentedVariable` into explicit multilingual JSONB fields: `question_text` (literal question wording), `pre_question_text` (introductory preamble/routing), `post_question_text` (transition text), and `interviewer_instructions` (guidance).

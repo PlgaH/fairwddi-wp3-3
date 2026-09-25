@@ -9,7 +9,7 @@ from django.db import models
 
 
 class DDIIdentifiable(models.Model):
-    """Abstract mixin for DDI-Lifecycle URN identification and multi-algorithm fingerprinting.
+    """Abstract mixin for DDI-Lifecycle URN identification.
 
     Canonical DDI 3.3 / 4.0 URN format:
     urn:ddi:{agency[.sub-agency]}:{ID}:{version}
@@ -20,13 +20,6 @@ class DDIIdentifiable(models.Model):
         max_length=512,
         primary_key=True,
         help_text="Persistent canonical URN: urn:ddi:{agency}:{ID}:{version}",
-    )
-
-    # Unified multi-algorithm hash digests: e.g. {"sha256": "...", "canonical_nfkc": "..."}
-    hashes = models.JSONField(
-        default=dict,
-        blank=True,
-        help_text="Unified key-value hash digests dictionary (e.g. {'sha256': '...'}).",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -121,11 +114,10 @@ class DDIIdentifiable(models.Model):
         """Ensure a canonical URN is present before saving."""
         if not self.urn:
             agency = os.getenv("DDI_AGENCY", "fr.sciencespo")
-            primary_hash = (
-                self.hashes.get("sha256") or self.hashes.get("primary")
-                if isinstance(self.hashes, dict)
-                else None
-            )
+            primary_hash = None
+            hashes_val = getattr(self, "hashes", None)
+            if isinstance(hashes_val, dict):
+                primary_hash = hashes_val.get("sha256") or hashes_val.get("primary")
             object_id = (
                 primary_hash[:16]
                 if primary_hash
@@ -133,3 +125,59 @@ class DDIIdentifiable(models.Model):
             )
             self.urn = f"urn:ddi:{agency}:{object_id}:1.0.0"
         super().save(*args, **kwargs)
+
+
+class DDIScheme(DDIIdentifiable):
+    """Abstract base model for all DDI Scheme containers (without hashes)."""
+
+    name = models.JSONField(
+        default=list,
+        help_text="Multilingual scheme name: [{'lang': 'fr', 'value': '...' }].",
+    )
+    description = models.JSONField(
+        default=list,
+        blank=True,
+        null=True,
+        help_text="Multilingual scheme description stored as an array of objects.",
+    )
+    extended_attributes = models.JSONField(
+        default=list,
+        blank=True,
+        null=True,
+        help_text="Extended attributes stored as an array of objects.",
+    )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self) -> str:
+        if isinstance(self.name, list) and self.name:
+            return self.name[0].get("value", self.urn)
+        if isinstance(self.name, str):
+            return self.name
+        return self.urn
+
+
+class DDIResource(DDIIdentifiable):
+    """Abstract base model for all top-level DDI resources requiring urn and name, with hashes."""
+
+    name = models.JSONField(
+        default=list,
+        help_text="Multilingual name: [{'lang': 'fr', 'value': '...' }].",
+    )
+    hashes = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        help_text="Unified key-value hash digests dictionary (e.g. {'sha256': '...'}).",
+    )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self) -> str:
+        if isinstance(self.name, list) and self.name:
+            return self.name[0].get("value", self.urn)
+        if isinstance(self.name, str):
+            return self.name
+        return self.urn
