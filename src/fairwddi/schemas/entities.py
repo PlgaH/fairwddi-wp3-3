@@ -163,6 +163,14 @@ class QuestionItemSchema(DDIResourceSchema):
 
     name: MultilingualText = Field(default_factory=list, description="Multilingual question name.")
     scheme_urn: str | None = Field(default=None, description="Parent QuestionScheme URN.")
+    code_list_urn: str | None = Field(default=None, description="Associated response CodeList URN.")
+    response_domain: dict[str, Any] | None = Field(
+        default=None,
+        description=(
+            "JSON object describing the response domain "
+            "(e.g. {'type': 'code', 'code_list_urn': '...'}, {'type': 'numeric', ...})."
+        ),
+    )
     question_text: MultilingualText | None = Field(
         default=None, description="Multilingual literal question text."
     )

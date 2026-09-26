@@ -276,6 +276,30 @@ class TestFairwDDIModels(TestCase):
         assert code1.is_missing is False
         assert code_missing.is_missing is True
 
+        # Link QuestionItem with CodeList response_domain
+        qi.code_list = code_list
+        qi.save()
+        assert qi.code_list == code_list
+        assert qi.response_domain["type"] == "code"
+        assert qi.response_domain["code_list_urn"] == code_list.urn
+        assert code_list.question_items.count() == 1
+
+        # QuestionItem with numeric response_domain
+        qi_numeric = QuestionItem.objects.create(
+            urn="urn:ddi:fr.sciencespo:qi-fr-numeric:1.0.0",
+            scheme=qs,
+            name=[{"lang": "fr", "value": "QI_AGE"}],
+            response_domain={
+                "type": "numeric",
+                "numeric_type": "integer",
+                "min": 18,
+                "max": 99,
+            },
+        )
+        assert qi_numeric.code_list is None
+        assert qi_numeric.response_domain["type"] == "numeric"
+        assert qi_numeric.response_domain["min"] == 18
+
         # RepresentedVariableScheme
         rv_scheme = RepresentedVariableScheme.objects.create(
             urn="urn:ddi:fr.sciencespo:rvs-pol:1.0.0",
@@ -652,6 +676,8 @@ class TestFairwDDIModels(TestCase):
             name=[{"value": "Minimal QI"}],
         )
         assert qi.scheme is None
+        assert qi.code_list is None
+        assert qi.response_domain == {}
         assert qi.question_text == []
         assert qi.extended_attributes == []
         assert hasattr(qi, "hashes")

@@ -126,17 +126,6 @@ CREATE TABLE IF NOT EXISTS request_ddi_questionscheme (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS request_ddi_questionitem (
-    urn VARCHAR(512) PRIMARY KEY,
-    name JSONB NOT NULL DEFAULT '[]'::jsonb,
-    question_text JSONB DEFAULT '[]'::jsonb,
-    scheme_urn VARCHAR(512) REFERENCES request_ddi_questionscheme(urn) ON DELETE CASCADE,
-    hashes JSONB DEFAULT '{}'::jsonb,
-    extended_attributes JSONB DEFAULT '[]'::jsonb,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
 CREATE TABLE IF NOT EXISTS request_ddi_categoryscheme (
     urn VARCHAR(512) PRIMARY KEY,
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
@@ -185,6 +174,19 @@ CREATE TABLE IF NOT EXISTS request_ddi_code (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT req_ddi_code_unique UNIQUE (code_list_urn, code_value)
+);
+
+CREATE TABLE IF NOT EXISTS request_ddi_questionitem (
+    urn VARCHAR(512) PRIMARY KEY,
+    name JSONB NOT NULL DEFAULT '[]'::jsonb,
+    question_text JSONB DEFAULT '[]'::jsonb,
+    scheme_urn VARCHAR(512) REFERENCES request_ddi_questionscheme(urn) ON DELETE CASCADE,
+    code_list_urn VARCHAR(512) REFERENCES request_ddi_codelist(urn) ON DELETE SET NULL,
+    response_domain JSONB DEFAULT '{}'::jsonb,
+    hashes JSONB DEFAULT '{}'::jsonb,
+    extended_attributes JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS request_ddi_representedvariablescheme (

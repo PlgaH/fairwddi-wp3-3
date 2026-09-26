@@ -393,6 +393,11 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
             },
         )
 
+    # Link QuestionItem to CodeList
+    qi_interest.code_list = code_list
+    qi_interest.response_domain = {"type": "code", "code_list_urn": code_list.urn}
+    qi_interest.save()
+
     # RepresentedVariableScheme
     rv_scheme, _ = RepresentedVariableScheme.objects.get_or_create(
         urn=f"urn:ddi:{agency}:rvs-bpf-core:1.0.0",

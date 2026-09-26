@@ -35,6 +35,24 @@ class QuestionItem(DDIResource):
         db_column="scheme_urn",
         help_text="Parent QuestionScheme defining this question.",
     )
+    code_list = models.ForeignKey(
+        "fairwddi.CodeList",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="question_items",
+        db_column="code_list_urn",
+        help_text="Associated response CodeList (null for non-coded response domains).",
+    )
+    response_domain = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        help_text=(
+            "JSON object describing the response domain "
+            "(e.g. {'type': 'code', 'code_list_urn': '...'}, {'type': 'numeric', ...})."
+        ),
+    )
     question_text = models.JSONField(
         default=list,
         blank=True,
@@ -52,6 +70,18 @@ class QuestionItem(DDIResource):
         db_table = "request_ddi_questionitem"
         verbose_name = "Question Item"
         verbose_name_plural = "Question Items"
+
+    def save(self, *args, **kwargs) -> None:
+        if self.code_list_id and not self.response_domain:
+            self.response_domain = {"type": "code", "code_list_urn": self.code_list_id}
+        elif (
+            isinstance(self.response_domain, dict)
+            and self.response_domain.get("type") == "code"
+            and self.response_domain.get("code_list_urn")
+            and not self.code_list_id
+        ):
+            self.code_list_id = self.response_domain["code_list_urn"]
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         if isinstance(self.name, list) and self.name:

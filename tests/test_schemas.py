@@ -156,6 +156,11 @@ def test_domain_entity_schemas() -> None:
     q_schema = QuestionItemSchema(
         urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
         scheme_urn="urn:ddi:fr.sciencespo:qs-pol:1.0.0",
+        code_list_urn="urn:ddi:fr.sciencespo:cl-fr-001:1.0.0",
+        response_domain={
+            "type": "code",
+            "code_list_urn": "urn:ddi:fr.sciencespo:cl-fr-001:1.0.0",
+        },
         question_text=MultilingualText.from_dict({"fr": "Êtes-vous intéressé par la politique ?"}),
         hashes={"sha256": "abc1234", "v2_unordered": "xyz9876"},
         extended_attributes=[{"type": "scope", "value": "core"}],
@@ -163,6 +168,8 @@ def test_domain_entity_schemas() -> None:
     assert q_schema.urn == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"
     assert q_schema.agency == "fr.sciencespo"
     assert q_schema.scheme_urn == "urn:ddi:fr.sciencespo:qs-pol:1.0.0"
+    assert q_schema.code_list_urn == "urn:ddi:fr.sciencespo:cl-fr-001:1.0.0"
+    assert q_schema.response_domain["type"] == "code"
     assert q_schema.question_text.get("fr") == "Êtes-vous intéressé par la politique ?"
     assert q_schema.hashes["v2_unordered"] == "xyz9876"
     assert q_schema.extended_attributes[0]["value"] == "core"
@@ -515,6 +522,8 @@ def test_all_resource_schemas_require_urn_and_name_and_other_fields_nullable() -
     qi = QuestionItemSchema(urn="urn:ddi:fr.sciencespo:qi:1.0.0", name=min_name)
     assert qi.question_text is None
     assert qi.scheme_urn is None
+    assert qi.code_list_urn is None
+    assert qi.response_domain is None
     assert "hashes" in QuestionItemSchema.model_fields
 
     # 6. CategorySchemeSchema & CategorySchema

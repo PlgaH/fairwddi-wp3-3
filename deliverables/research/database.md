@@ -260,10 +260,11 @@ graph TD
         Cat -->|labels| Code
     end
     subgraph Questions_Variables ["Questions & Variables"]
-        QS["<b>QuestionScheme</b>"] -->|contains| QI["<b>QuestionItem</b><br/><i>(Question text)</i>"]
+        QS["<b>QuestionScheme</b>"] -->|contains| QI["<b>QuestionItem</b><br/><i>(Question text & domain)</i>"]
         RVS["<b>RepresentedVariableScheme</b>"] -->|contains| RV["<b>RepresentedVariable</b>"]
         QI -->|junction path| QV["<b>QuestionVariable</b>"]
         RV -->|junction| QV
+        CL -.->|response domain| QI
         CL -->|uses codes| RV
     end
     subgraph Data_Collection ["Data Collection"]
@@ -360,12 +361,14 @@ Named collection of reusable questions (maps to DDI-L `QuestionScheme`). Inherit
 ---
 
 #### QuestionItem
-Standalone reusable question text. Belongs to a single QuestionScheme. Inherits `DDIResource`.
+Standalone reusable question wording and response domain specification. Belongs to a single `QuestionScheme`, can link directly to a response `CodeList` or define a flexible `response_domain` JSON object (coded, numeric, text, datetime, scale, etc.), and inherits `DDIResource`.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `urn` | `CharField(512)` | PK | Canonical QuestionItem URN |
 | `scheme_urn` | `CharField(512)` | FK → QuestionScheme(urn), nullable | Parent QuestionScheme defining this question |
+| `code_list_urn` | `CharField(512)` | FK → CodeList(urn), nullable | Associated response CodeList (null for non-coded response domains) |
+| `response_domain` | `JSONField` | default `{}` | JSON object describing response domain (`{"type": "code", "code_list_urn": "..."}`, `{"type": "numeric", ...}`) |
 | `name` | `JSONField` | required | Technical identifier / multilingual name |
 | `question_text` | `JSONField` | nullable | Multilingual literal question text |
 | `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
