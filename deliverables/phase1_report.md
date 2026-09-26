@@ -329,8 +329,9 @@ Some examples:
 ### 3.1 Summary of Changes
 
 - Questions are now in a dedicated `QuestionItem` table
+  - A Question can be directly associated with response domain (e.g. CodeList)
 - All three variable cascade entities are now explicitly in the model:
-  - `RepresentedVariable` continues to be the bridge between questions and their representation (e.g., code list)
+  - `RepresentedVariable` can still be used as  a bridge between questions and value representation (e.g., code list)
   - `InstanceVariable` essentially replaces the binding survey variables table
 - New `<type>Scheme`tables have been added to support maintenance containers for relevant resources (concepts, questions, variables, categories, codes)
 - Collection and sub-collections have been replaced by the more generic `Group` resource (can be nested and used for grouping various resources, including studies)
@@ -365,8 +366,8 @@ The tables representing DDI resources typically contain the following fields:
   - We currently have both a `code_list_urn` and a generic `response_domain` JSONB object that can carry the many options supported by DDI-L
   - If the question has a CodeDomain, the JSON will hold a URN pointing to the CodeList in the database
   - **​*:question: Do you want the flexibility of response domain, or do we only need support for code list? Or both?***
-  - **:question: A QuestionItem can also be associated with a have CategoryDomain. Is this a use case we want to support?**
-  - **:information_source: Technically, ReQuest does not need variables if only concerned with questions**
+  - **​*:question: A QuestionItem can also be associated with a have CategoryDomain. Is this a use case we want to support?***
+  - *​**:information_source: Technically, ReQuest does not need variables if only concerned with questions and their representation***
 - It can be related to:
   - An Instrument through the `InstrumentQuestion` table
   - A RepresentedVariable through the`QuestionVariable` table
