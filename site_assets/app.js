@@ -102,6 +102,12 @@
         state.mobileSidebarOpen = false;
         el.sidebar.classList.remove('open');
       }
+      const dd = document.getElementById('diagram-custom-dropdown');
+      if (dd && !dd.contains(e.target)) {
+        dd.classList.remove('is-open');
+        const trigger = document.getElementById('diagram-dropdown-trigger');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      }
     });
 
     if (el.searchTrigger) {
@@ -112,8 +118,19 @@
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         openSearchModal();
-      } else if (e.key === 'Escape' && state.searchOpen) {
-        closeSearchModal();
+      } else if (e.key === 'Escape') {
+        if (state.searchOpen) {
+          closeSearchModal();
+        }
+        const dd = document.getElementById('diagram-custom-dropdown');
+        if (dd && dd.classList.contains('is-open')) {
+          dd.classList.remove('is-open');
+          const trigger = document.getElementById('diagram-dropdown-trigger');
+          if (trigger) {
+            trigger.setAttribute('aria-expanded', 'false');
+            trigger.focus();
+          }
+        }
       }
     });
 
@@ -422,9 +439,6 @@
             <button class="btn-secondary" onclick="toggleSidebarCollapse()" title="Toggle Sidebar Width">
               ${icons['sidebar']} Toggle Sidebar
             </button>
-            <button class="btn-secondary" onclick="toggleExplorerFullscreen()">
-              ${icons['cpu']} Fullscreen
-            </button>
             <a href="./deliverables/research/database_explorer.html" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background: linear-gradient(135deg, var(--brand-cdsp), var(--brand-primary));">
               ${icons['external']} Open in Standalone Tab ↗
             </a>
@@ -465,13 +479,6 @@
         } catch (e) {
           console.log('Layer filter dispatched:', layer);
         }
-      }
-    };
-
-    window.toggleExplorerFullscreen = function () {
-      const wrap = document.getElementById('explorer-frame-wrap');
-      if (wrap) {
-        wrap.classList.toggle('fullscreen');
       }
     };
 
@@ -532,22 +539,47 @@
         <!-- Modern Diagram Dropdown Selector Bar -->
         <div class="diagram-selector-bar">
           <div class="diagram-selector-left">
-            <label class="diagram-select-label" for="diagram-dropdown-select">
+            <label class="diagram-select-label">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
               <span>Diagram:</span>
             </label>
-            <div class="diagram-dropdown-wrapper">
-              <select id="diagram-dropdown-select" class="diagram-dropdown-select" onchange="window.location.hash='#diagrams/' + this.value">
+            <div class="diagram-custom-dropdown" id="diagram-custom-dropdown">
+              <button type="button" class="diagram-dropdown-trigger" id="diagram-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false" onclick="toggleDiagramDropdown(event)">
+                <div class="diagram-trigger-content">
+                  <span class="diagram-trigger-badge">${activeDiag.category || 'Architecture'}</span>
+                  <span class="diagram-trigger-title">${activeDiag.title}</span>
+                </div>
+                <div class="diagram-trigger-chevron">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </button>
+
+              <div class="diagram-dropdown-menu" id="diagram-dropdown-menu" role="listbox">
                 ${Object.entries(categories).map(([cat, diags]) => `
-                  <optgroup label="── ${cat} ──">
+                  <div class="diagram-menu-group">
+                    <div class="diagram-group-header">
+                      <span class="diagram-group-tag">${cat}</span>
+                      <span class="diagram-group-line"></span>
+                    </div>
                     ${diags.map(d => `
-                      <option value="${d.id}" ${d.id === activeDiag.id ? 'selected' : ''}>
-                        ${d.title}
-                      </option>
+                      <div class="diagram-menu-item ${d.id === activeDiag.id ? 'is-active' : ''}" 
+                           role="option" 
+                           aria-selected="${d.id === activeDiag.id ? 'true' : 'false'}"
+                           tabindex="0"
+                           onclick="selectDiagram('${d.id}')"
+                           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectDiagram('${d.id}');}">
+                        <div class="diagram-item-left">
+                          <span class="diagram-item-check">
+                            ${d.id === activeDiag.id ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+                          </span>
+                          <span class="diagram-item-title">${d.title}</span>
+                        </div>
+                        <span class="diagram-item-badge">${d.category}</span>
+                      </div>
                     `).join('')}
-                  </optgroup>
+                  </div>
                 `).join('')}
-              </select>
+              </div>
             </div>
             <span class="diagram-index-badge">${currentIndex + 1} of ${diagrams.length}</span>
           </div>
@@ -637,6 +669,23 @@
       if (el.appContainer) {
         el.appContainer.classList.toggle('sidebar-collapsed', state.sidebarCollapsed);
       }
+    };
+
+    window.toggleDiagramDropdown = function (e) {
+      if (e) e.stopPropagation();
+      const dd = document.getElementById('diagram-custom-dropdown');
+      const trigger = document.getElementById('diagram-dropdown-trigger');
+      if (!dd) return;
+      const isOpen = dd.classList.toggle('is-open');
+      if (trigger) trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    };
+
+    window.selectDiagram = function (diagId) {
+      const dd = document.getElementById('diagram-custom-dropdown');
+      if (dd) dd.classList.remove('is-open');
+      const trigger = document.getElementById('diagram-dropdown-trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      window.location.hash = '#diagrams/' + diagId;
     };
   }
 

@@ -1216,47 +1216,213 @@ input, select, textarea {
   gap: 0.45rem;
 }
 
-.diagram-dropdown-wrapper {
+.diagram-custom-dropdown {
   position: relative;
   flex: 1;
-  max-width: 480px;
+  max-width: 500px;
 }
 
-.diagram-dropdown-select {
+.diagram-dropdown-trigger {
   width: 100%;
-  padding: 0.6rem 2.2rem 0.6rem 0.95rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.95rem;
   background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   color: var(--text-bright);
+  font-family: inherit;
   font-size: 0.92rem;
   font-weight: 600;
   cursor: pointer;
   outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+  text-align: left;
+  gap: 0.75rem;
 }
 
-.diagram-dropdown-select:focus {
+.diagram-dropdown-trigger:hover {
   border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  background: var(--bg-elevated);
 }
 
-.diagram-dropdown-select optgroup {
+.diagram-dropdown-trigger:focus-visible,
+.diagram-custom-dropdown.is-open .diagram-dropdown-trigger {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  background: var(--bg-elevated);
+}
+
+.diagram-trigger-content {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.diagram-trigger-badge {
+  font-size: 0.68rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.12rem 0.45rem;
+  border-radius: var(--radius-sm);
+  background: rgba(59, 130, 246, 0.15);
   color: var(--brand-primary);
-  background: var(--bg-surface);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.diagram-dropdown-select option {
-  font-weight: 500;
-  color: var(--text-main);
+.diagram-trigger-title {
+  font-weight: 600;
+  color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diagram-trigger-chevron {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.diagram-custom-dropdown.is-open .diagram-trigger-chevron {
+  transform: rotate(180deg);
+  color: var(--brand-primary);
+}
+
+.diagram-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
   background: var(--bg-surface);
-  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  z-index: 150;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 0.4rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.diagram-custom-dropdown.is-open .diagram-dropdown-menu {
+  display: block;
+  animation: diagramMenuFadeIn 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes diagramMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.diagram-menu-group {
+  margin-bottom: 0.35rem;
+}
+
+.diagram-menu-group:last-child {
+  margin-bottom: 0;
+}
+
+.diagram-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.6rem 0.2rem 0.6rem;
+}
+
+.diagram-group-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.diagram-group-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+.diagram-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.52rem 0.7rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--text-main);
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.diagram-menu-item:hover,
+.diagram-menu-item:focus {
+  background: var(--bg-hover);
+  color: var(--text-bright);
+  outline: none;
+}
+
+.diagram-menu-item.is-active {
+  background: rgba(59, 130, 246, 0.16);
+  color: var(--brand-primary);
+  font-weight: 600;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.diagram-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.diagram-item-check {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-primary);
+  flex-shrink: 0;
+}
+
+.diagram-item-title {
+  font-size: 0.88rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diagram-item-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  border: 1px solid var(--border-color);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .diagram-index-badge {
