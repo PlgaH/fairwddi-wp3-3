@@ -23,10 +23,12 @@ The FAIRwDDI architecture implements a **standard-agnostic, lightweight DDI mode
 
 | Convention | Rule |
 | :--- | :--- |
-| **Primary key (DDI Resources)** | `urn` — `VARCHAR(512) PRIMARY KEY` (Canonical DDI 3.3 / 4.0 URN format). |
+| **Supertype Master Registry** | `request_ddi_urnregistry` — master table of all canonical URNs and external URIs (`urn`, `resource_type`, `extended_attributes`). |
+| **Primary key (DDI Resources)** | `urn` — `VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE` (Canonical DDI 3.3 / 4.0 URN format). |
 | **Primary key (Junction & Non-DDI)** | `id` — `BigAutoField` / `BIGSERIAL PRIMARY KEY`. |
 | **Parent Scheme Foreign Keys** | `scheme_urn` — `VARCHAR(512) REFERENCES ...(urn)` (maps to `models.ForeignKey(..., db_column="scheme_urn")`). |
 | **Inter-Resource Foreign Keys** | `*_urn` — `VARCHAR(512) REFERENCES ...(urn)` (e.g. `study_unit_urn`, `represented_variable_urn`, `conceptual_variable_urn`, `question_item_urn`, `code_list_urn`, `category_urn`, `instrument_urn`). |
+| **Polymorphic Foreign Keys** | `VARCHAR(512) REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE` (used in `URNAlias.canonical_urn`, `SemanticRelationship.subject_urn/object_urn`, `EventLog.urn`). |
 | **Canonical URN Format** | Colon-separated: `urn:ddi:agency[.sub-agency]:ID:Version`.<br>• Agency-scoped: `urn:ddi:fr.sciencespo:V321:1.0.0`<br>• Maintainable-scoped: `urn:ddi:fr.sciencespo:MaintainableID.ObjectID:1.0.0` |
 | **Unified Hashes** | `hashes` (`JSONB`) — unified key-value mapping of hash algorithm types to digests (e.g. `{"sha256": "...", "canonical_nfkc": "..."}`). |
 | **Extended Attributes** | `extended_attributes` (`JSONB`) — array of objects capturing flexible provider/specification attributes (intent, interviewer guidance, notes, value domains, inclusion/exclusion) without SQL schema bloat. |
@@ -34,13 +36,13 @@ The FAIRwDDI architecture implements a **standard-agnostic, lightweight DDI mode
 | **Timestamps** | `created_at` (`auto_now_add`), `updated_at` (`auto_now`) on all entity tables. |
 | **Naming** | Table names use canonical DDI model terminology (`request_ddi_{snake_case}`). |
 
-### 1.2 DDI Resource Base Models
+### 1.2 DDI Resource Base Models & Supertype Lifecycle
 
-Every DDI entity inherits from `DDIIdentifiable` providing persistent canonical URN identification. Scheme container packages inherit from `DDIScheme` (`urn`, `name`, `description`, `extended_attributes` without hashes), while versionable DDI resources inherit from `DDIResource`, where `urn` and `name` are required, multi-algorithm content `hashes` are maintained, and all entity-specific metadata fields are nullable:
+Every DDI entity inherits from `DDIIdentifiable` providing persistent canonical URN identification and automatic supertype synchronization with `UrnRegistry`. Scheme container packages inherit from `DDIScheme` (`urn`, `name`, `description`, `extended_attributes` without hashes), while versionable DDI resources inherit from `DDIResource`, where `urn` and `name` are required, multi-algorithm content `hashes` are maintained, and all entity-specific metadata fields are nullable:
 
 ```python
 class DDIIdentifiable(models.Model):
-    """Abstract mixin for DDI-Lifecycle URN identification."""
+    """Abstract mixin for DDI-Lifecycle URN identification and UrnRegistry supertype sync."""
 
     urn = models.CharField(
         max_length=512,
@@ -52,6 +54,40 @@ class DDIIdentifiable(models.Model):
 
     class Meta:
         abstract = True
+
+    def save(self, *args, **kwargs) -> None:
+        """Ensure canonical URN is generated and pre-registered in UrnRegistry supertype table."""
+        if not self.urn:
+            agency = os.getenv("DDI_AGENCY", "fr.sciencespo")
+            primary_hash = None
+            hashes_val = getattr(self, "hashes", None)
+            if isinstance(hashes_val, dict):
+                primary_hash = hashes_val.get("sha256") or hashes_val.get("primary")
+            object_id = (
+                primary_hash[:16]
+                if primary_hash
+                else f"{self.__class__.__name__}-{uuid.uuid4().hex[:12]}"
+            )
+            self.urn = f"urn:ddi:{agency}:{object_id}:1.0.0"
+
+        # Pre-register URN in UrnRegistry supertype table before inserting child row
+        from fairwddi.models.infrastructure import UrnRegistry
+
+        UrnRegistry.objects.update_or_create(
+            urn=self.urn,
+            defaults={"resource_type": self.__class__.__name__},
+        )
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        """Delete instance and clean up central UrnRegistry record."""
+        from fairwddi.models.infrastructure import UrnRegistry
+
+        urn = self.urn
+        res = super().delete(*args, **kwargs)
+        UrnRegistry.objects.filter(urn=urn).delete()
+        return res
+```
 
 
 class DDIScheme(DDIIdentifiable):
@@ -614,11 +650,11 @@ graph LR
 ### 8.1 Table Definitions
 
 #### UrnRegistry
-Central master registry mapping canonical URNs and external URIs to their target resource types. Provides universal referential integrity and $O(1)$ URN-to-type crosswalk resolution for both DDI and non-DDI identifiers.
+Central master supertype entity table mapping canonical URNs and external URIs to their target resource types. Serves as the primary key foreign-key constraint target for all DDI entity tables (`REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE`) and polymorphic reference tables (`URNAlias.canonical_urn`, `SemanticRelationship.subject_urn/object_urn`, `EventLog.urn`), guaranteeing global URN uniqueness and $O(1)$ crosswalk resolution for DDI and non-DDI identifiers.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
-| `urn` | `CharField(512)` | PK | Canonical URN or external identifier/URI |
+| `urn` | `CharField(512)` | PK | Canonical URN or external identifier/URI (referenced by all entity tables) |
 | `resource_type` | `CharField(64)` | indexed, required | Target entity/resource type (`"QuestionItem"`, `"Category"`, `"Concept"`, etc.) |
 | `extended_attributes` | `JSONField` | default `[]` | Extensible attributes array of objects |
 | `created_at` | `DateTimeField` | auto | Record creation timestamp |

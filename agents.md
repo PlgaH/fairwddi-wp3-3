@@ -64,10 +64,13 @@ Agents **must** use canonical DDI terminology (aligned with DDI 4 / DDI-CDI / DD
 - Django model renames use `migrations.RenameModel` (zero-data-loss).
 - Text fields that support multilingual content use PostgreSQL `JSONB` with ISO 639-1 language keys (e.g., `{"fr": "...", "en": "..."}`).
 - All DDI entities carry persistent URN identification: `urn:ddi:{agency}:{identifier}:{version}`. When importing vocabularies, original source URNs must be strictly preserved.
+- **UrnRegistry Supertype Lifecycle:** `request_ddi_urnregistry` is the central supertype master table. All DDI entity tables reference `request_ddi_urnregistry(urn) ON DELETE CASCADE`. `DDIIdentifiable.save()` must automatically pre-register/upsert into `UrnRegistry` before saving child records, and `DDIIdentifiable.delete()` cleans up the registry record.
+- **Polymorphic Foreign Keys:** Polymorphic cross-resource relations (`URNAlias.canonical_urn`, `SemanticRelationship.subject_urn/object_urn`, `EventLog.urn`) must target `request_ddi_urnregistry(urn) ON DELETE CASCADE`.
 - `urn` and `name` are required on all DDI resources and schemes; all other entity fields (`label`, `description`, `definition`, `parent_urn`, `scheme_urn`, `extended_attributes`, `hashes`) must be nullable/optional.
 - Use `scheme_urn` as the uniform foreign key field name connecting entities to their enclosing scheme across all layers.
 - **Schemes vs. Leaf Resources:** Schemes (`*Scheme`) inherit from `DDIScheme` (`name`, `description`, `extended_attributes`) and do **NOT** carry `hashes`. Versionable resources carry multi-algorithm content `hashes`.
-- In documentation Mermaid diagrams: use valid alphanumeric subgraph identifiers (`subgraph Subgraph_ID ["Title"]`), avoid unquoted parentheses `()` in edge pipe labels (`|...|`), and use standard `-.->|label|` arrow syntax.
+- In documentation Mermaid diagrams: use valid alphanumeric subgraph identifiers (`subgraph Subgraph_ID ["Title"]`), avoid unquoted parentheses `()` in edge pipe labels (`|...|`), use standard `-.->|label|` arrow syntax, and in `erDiagram` avoid parentheses in data types (use plain tokens like `varchar`, `string`, `jsonb` instead of `varchar(512)`) and never double-quote field names.
+- **Interactive Visualizers vs. Documentation Diagrams:** Browser-based explorers (`*_explorer.html`) must use native, responsive interactive SVG/canvas with pan, zoom, search, node inspection, and question/cascade spotlights. Do not embed static Mermaid diagrams inside interactive HTML apps; reserve Mermaid for Markdown sidecars (`*_diagram.md`, `*.mmd`).
 - Content deduplication uses **SHA-256 content fingerprints** (`content_hash` field).
 - String normalization follows `request_ddi/utils/normalize_string.py` patterns: Unicode NFKC, French punctuation rules, whitespace collapsing.
 - Always include `tests/conftest.py` with `settings.configure()` and `django.setup()` for isolated pytest testing of Django/Ninja components.
@@ -126,13 +129,14 @@ _Goal: Integrate the solution into CDSP infrastructure and close the project._
 ## Key Architectural Decisions
 
 1. **Variable Cascade:** Three-tier entity hierarchy — `ConceptualVariable → RepresentedVariable → InstanceVariable` — enables cross-survey harmonization where identical questions are reused and conceptual variants are clustered.
-2. **URN-First Technical Normalization:** Deterministic URN matching is the primary deduplication mechanism; ICU collation-based heuristic matching serves as fallback for legacy DDI-Codebook files or auto-generated/random URNs.
-3. **Decoupled Normalization & Harmonization:** Technical metadata normalization (string cleaning, SHA-256 fingerprinting, URN generation, format adapters) is handled by the automated ingestion pipeline ([`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md)), while semantic harmonization is handled at the Concept Layer via controlled vocabulary/thesaurus anchoring.
-4. **Content Fingerprinting:** SHA-256 hashes detect metadata drift (same URN, different content) and trigger quarantine for archivist review.
-5. **Multilingual JSONB:** All text fields support multiple languages via JSONB with sorted-key canonical hashing for deterministic fingerprints.
-6. **Streaming XML Parsing:** `lxml.etree.iterparse` replaces BeautifulSoup for DDI-Lifecycle XML to minimize memory footprint on large files.
-7. **Pydantic v2 Unified Schemas:** Single schema layer shared across file import validation, `django-ninja` API serialization, and Elasticsearch bulk indexing.
-8. **Controlled Vocabulary & Thesaurus Anchoring:** The `Concept` entity is vocabulary-agnostic (`uri`, `vocabulary`, `notation`, `parent_urn`, `concept_type`) and supports arbitrary controlled vocabularies and classifications (e.g. CESSDA ELSST, CESSDA Topics, DDI-CV, or custom schemes). Sciences Po can use ELSST or other selected thesauri to establish a controlled, multilingual concept hierarchy for clustering `RepresentedVariable` entities across surveys.
+2. **Supertype Master Registry (`UrnRegistry`):** Global URN master table guaranteeing universal referential integrity, $O(1)$ type resolution, polymorphic relation anchoring, and clean cascading deletions.
+3. **URN-First Technical Normalization:** Deterministic URN matching is the primary deduplication mechanism; ICU collation-based heuristic matching serves as fallback for legacy DDI-Codebook files or auto-generated/random URNs.
+4. **Decoupled Normalization & Harmonization:** Technical metadata normalization (string cleaning, SHA-256 fingerprinting, URN generation, format adapters) is handled by the automated ingestion pipeline ([`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md)), while semantic harmonization is handled at the Concept Layer via controlled vocabulary/thesaurus anchoring.
+5. **Content Fingerprinting:** SHA-256 hashes detect metadata drift (same URN, different content) and trigger quarantine for archivist review.
+6. **Multilingual JSONB:** All text fields support multiple languages via JSONB with sorted-key canonical hashing for deterministic fingerprints.
+7. **Streaming XML Parsing:** `lxml.etree.iterparse` replaces BeautifulSoup for DDI-Lifecycle XML to minimize memory footprint on large files.
+8. **Pydantic v2 Unified Schemas:** Single schema layer shared across file import validation, `django-ninja` API serialization, and Elasticsearch bulk indexing.
+9. **Controlled Vocabulary & Thesaurus Anchoring:** The `Concept` entity is vocabulary-agnostic (`uri`, `vocabulary`, `notation`, `parent_urn`, `concept_type`) and supports arbitrary controlled vocabularies and classifications (e.g. CESSDA ELSST, CESSDA Topics, DDI-CV, or custom schemes). Sciences Po can use ELSST or other selected thesauri to establish a controlled, multilingual concept hierarchy for clustering `RepresentedVariable` entities across surveys.
 
 ---
 

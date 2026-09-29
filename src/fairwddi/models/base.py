@@ -111,7 +111,7 @@ class DDIIdentifiable(models.Model):
         return "1.0.0"
 
     def save(self, *args, **kwargs) -> None:
-        """Ensure a canonical URN is present before saving."""
+        """Ensure a canonical URN is present and registered before saving."""
         if not self.urn:
             agency = os.getenv("DDI_AGENCY", "fr.sciencespo")
             primary_hash = None
@@ -124,7 +124,24 @@ class DDIIdentifiable(models.Model):
                 else f"{self.__class__.__name__}-{uuid.uuid4().hex[:12]}"
             )
             self.urn = f"urn:ddi:{agency}:{object_id}:1.0.0"
+
+        # Pre-register URN in UrnRegistry supertype table before inserting child row
+        from fairwddi.models.infrastructure import UrnRegistry
+
+        UrnRegistry.objects.update_or_create(
+            urn=self.urn,
+            defaults={"resource_type": self.__class__.__name__},
+        )
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        """Delete instance and clean up central UrnRegistry record."""
+        from fairwddi.models.infrastructure import UrnRegistry
+
+        urn = self.urn
+        res = super().delete(*args, **kwargs)
+        UrnRegistry.objects.filter(urn=urn).delete()
+        return res
 
 
 class DDIScheme(DDIIdentifiable):

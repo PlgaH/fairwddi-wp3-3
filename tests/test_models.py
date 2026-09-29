@@ -772,3 +772,39 @@ class TestFairwDDIModels(TestCase):
             resource_type="Unknown",
         )
         assert reg_min.extended_attributes == []
+
+    def test_urn_registry_supertype_lifecycle(self) -> None:
+        """Test UrnRegistry supertype automatic registration and deletion lifecycle."""
+        # Creating a QuestionItem should automatically create a matching UrnRegistry record
+        qi = QuestionItem.objects.create(
+            urn="urn:ddi:fr.sciencespo:qi-supertype-test:1.0.0",
+            name=[{"value": "Supertype Test Question"}],
+            question_text=[{"lang": "fr", "value": "Question test"}],
+        )
+        reg_entry = UrnRegistry.objects.filter(urn=qi.urn).first()
+        assert reg_entry is not None
+        assert reg_entry.resource_type == "QuestionItem"
+
+        # Creating a Concept should register with resource_type 'Concept'
+        cs = ConceptScheme.objects.create(
+            urn="urn:ddi:fr.sciencespo:cs-supertype-test:1.0.0",
+            name=[{"value": "Supertype Test CS"}],
+        )
+        concept = Concept.objects.create(
+            urn="urn:ddi:fr.sciencespo:concept-supertype-test:1.0.0",
+            scheme=cs,
+            label=[{"lang": "en", "value": "Test Concept"}],
+        )
+        reg_cs = UrnRegistry.objects.filter(urn=cs.urn).first()
+        assert reg_cs is not None
+        assert reg_cs.resource_type == "ConceptScheme"
+
+        reg_concept = UrnRegistry.objects.filter(urn=concept.urn).first()
+        assert reg_concept is not None
+        assert reg_concept.resource_type == "Concept"
+
+        # Deleting an entity should clean up its UrnRegistry entry
+        qi_urn = qi.urn
+        qi.delete()
+        assert UrnRegistry.objects.filter(urn=qi_urn).first() is None
+

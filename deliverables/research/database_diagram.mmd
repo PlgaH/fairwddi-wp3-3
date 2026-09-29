@@ -374,5 +374,8 @@ erDiagram
     StudyUnit ||--o{ StudyUnitVariable : "contains"
     InstanceVariable ||--o{ StudyUnitVariable : "maps_to"
 
-    %% Infrastructure Layer
+    %% Supertype & Infrastructure Layer
+    UrnRegistry ||--o{ URNAlias : "canonical_urn"
+    UrnRegistry ||--o{ SemanticRelationship : "triples"
+    UrnRegistry ||--o{ EventLog : "logged_for"
     StagedImport ||--o{ StagedResourceNode : "extracts"

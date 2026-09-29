@@ -476,6 +476,10 @@ erDiagram
     StudyUnit ||--o{ StudyUnitVariable : "contains"
     InstanceVariable ||--o{ StudyUnitVariable : "binds"
 
+    %% Supertype & Infrastructure
+    UrnRegistry ||--o{ URNAlias : "canonical_urn"
+    UrnRegistry ||--o{ SemanticRelationship : "triples"
+    UrnRegistry ||--o{ EventLog : "logged_for"
     StagedImport ||--o{ StagedResourceNode : "extracts"
 ```
 

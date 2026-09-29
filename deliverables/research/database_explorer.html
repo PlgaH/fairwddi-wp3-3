@@ -1307,7 +1307,7 @@
           </div>
 
           <!-- Interactive SVG Diagram View -->
-          <svg id="svg-diagram-viewport" viewBox="0 0 1600 950" xmlns="http://www.w3.org/2000/svg">
+          <svg id="svg-diagram-viewport" viewBox="15 15 1560 910" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <marker id="arrow-default" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b"/>
@@ -1416,10 +1416,10 @@
           </div>
 
           <div class="filter-group">
-            <button class="filter-chip active" onclick="filterLayer('all', this)">All (26)</button>
+            <button class="filter-chip active" onclick="filterLayer('all', this)">All (30)</button>
             <button class="filter-chip" onclick="filterLayer('org', this)">Org (2)</button>
             <button class="filter-chip" onclick="filterLayer('concept', this)">Concept (5)</button>
-            <button class="filter-chip" onclick="filterLayer('rep', this)">Rep (9)</button>
+            <button class="filter-chip" onclick="filterLayer('rep', this)">Rep (13)</button>
             <button class="filter-chip" onclick="filterLayer('dataset', this)">Dataset (4)</button>
             <button class="filter-chip" onclick="filterLayer('infra', this)">Infra (5)</button>
             <button class="filter-chip" onclick="filterLayer('audit', this)">Audit (1)</button>
@@ -1558,7 +1558,7 @@
             📊 Entity Relationship & Dependency Matrix
           </h2>
           <p style="color: var(--text-muted); font-size: 0.875rem;">
-            Cross-reference table mapping all 26 entities, foreign keys (<span style="color: var(--accent-primary); font-weight: 600;">FK</span>), junctions (<span style="color: var(--accent-emerald); font-weight: 600;">JCT</span>), and polymorphic references (<span style="color: var(--accent-amber); font-weight: 600;">REF</span>). Click any cell to jump to the entity details.
+            Cross-reference table mapping all 30 entities, foreign keys (<span style="color: var(--accent-primary); font-weight: 600;">FK</span>), junctions (<span style="color: var(--accent-emerald); font-weight: 600;">JCT</span>), and polymorphic references (<span style="color: var(--accent-amber); font-weight: 600;">REF</span>). Click any cell to jump to the entity details.
           </p>
         </div>
         <div style="overflow-x: auto;">
@@ -1613,6 +1613,34 @@
   <script>
     // Complete Entity Database Model Metadata
     const SCHEMA_DATA = {
+      // 0. Supertype URN Registry Layer
+      UrnRegistry: {
+        layer: "infra",
+        layerName: "Infrastructure & Ingestion",
+        base: "Model",
+        table: "request_ddi_urnregistry",
+        ddiTag: "URN Supertype / Crosswalk",
+        urnPattern: "urn:ddi:fr.sciencespo:QuestionItem.qi-leftright:1.0.0",
+        description: "Master supertype registry holding every canonical DDI entity URN and external URI. Enforces universal referential integrity (Class Table Inheritance) and provides O(1) URN-to-resource_type polymorphic crosswalk resolution across the entire repository.",
+        pos: { x: 1140, y: 80 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical URN or external identifier/URI (Supertype Primary Key)" },
+          { name: "resource_type", type: "VARCHAR(64)", req: true, idx: true, notes: "Target entity type ('QuestionItem', 'Category', 'Concept', etc.)" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "All DDI Entities", type: "Supertype FK (18 Entity Tables PK FK)" },
+          { target: "URNAlias", type: "Foreign Key (canonical_urn)" },
+          { target: "SemanticRelationship", type: "Foreign Key (subject_urn, object_urn)" },
+          { target: "EventLog", type: "Foreign Key (urn)" },
+          { target: "MetadataQuarantine", type: "Foreign Key (existing_urn)" },
+          { target: "StagedResourceNode", type: "Foreign Key (canonical_urn)" }
+        ]
+      },
+
       // 1. Organization Layer
       Organization: {
         layer: "org",
@@ -1624,7 +1652,7 @@
         description: "Institutional organization resource in DDI-Lifecycle. Represents archives, distributors, research centers, universities, and funding bodies. Secondary details (acronyms, contact info, URIs) are captured in extended_attributes.",
         pos: { x: 60, y: 80 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical DDI-L Organization URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical DDI-L Organization URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual organization name [{'lang': 'fr', 'value': '...'}]" },
           { name: "organization_type", type: "VARCHAR(64)", req: true, idx: true, notes: "Classification type ('archive', 'distributor', 'funder')" },
           { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects (acronyms, contact info, address)" },
@@ -1647,7 +1675,7 @@
         description: "Generic Group DDI resource. Logical grouping of related resources (e.g. longitudinal study series, panels, thematic collections, or waves) referenced via polymorphic typed URN references.",
         pos: { x: 60, y: 170 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical DDI-L Group URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical DDI-L Group URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual group name [{'lang': 'fr', 'value': '...'}]" },
           { name: "description", type: "JSONB", notes: "Multilingual group description" },
           { name: "group_type", type: "VARCHAR(64)", req: true, idx: true, notes: "Group classification ('study_series', 'panel', 'thematic', 'collection')" },
@@ -1674,7 +1702,7 @@
         description: "Named collection of reusable domain concepts (maps to DDI-L ConceptScheme or SKOS ConceptScheme). Contains hierarchical Concept entities.",
         pos: { x: 430, y: 80 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical ConceptScheme URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical ConceptScheme URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
           { name: "description", type: "JSONB", notes: "Multilingual description" },
           { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
@@ -1696,7 +1724,7 @@
         description: "High-level thematic domain concept from any controlled vocabulary or thesaurus (e.g. CESSDA ELSST, CESSDA Topics, DDI-CV). Supports hierarchical trees via parent_urn.",
         pos: { x: 430, y: 170 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical Concept URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical Concept URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "scheme_urn", type: "VARCHAR(512)", fk: "ConceptScheme", notes: "FK -> ConceptScheme.urn" },
           { name: "uri", type: "VARCHAR(512)", uq: true, idx: true, notes: "Controlled vocabulary concept URI (e.g. ELSST URI, unique)" },
           { name: "vocabulary", type: "VARCHAR(128)", idx: true, notes: "Controlled vocabulary name ('ELSST', 'Topics', 'DDI-CV')" },
@@ -1718,6 +1746,7 @@
         incoming: [
           { target: "ConceptualVariable", type: "Semantic Anchor FK (ConceptualVariable.concept_urn)" },
           { target: "Category", type: "Optional Concept Anchor FK (Category.concept_urn)" },
+          { target: "QuestionItem", type: "Optional Concept Anchor FK (QuestionItem.concept_urn)" },
           { target: "SemanticRelationship", type: "RDF Triple Subject / Object" }
         ]
       },
@@ -1731,7 +1760,7 @@
         description: "Named collection of reusable conceptual variables (maps to DDI-L ConceptualVariableScheme).",
         pos: { x: 740, y: 80 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical ConceptualVariableScheme URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical ConceptualVariableScheme URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
           { name: "description", type: "JSONB", notes: "Multilingual description" },
           { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
@@ -1753,7 +1782,7 @@
         description: "Abstract measurement concept (e.g. 'Left-Right Political Placement', 'Subjective Health') representing Tier 1 of the Variable Cascade.",
         pos: { x: 740, y: 170 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical ConceptualVariable URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical ConceptualVariable URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "scheme_urn", type: "VARCHAR(512)", fk: "ConceptualVariableScheme", notes: "FK -> ConceptualVariableScheme.urn" },
           { name: "concept_urn", type: "VARCHAR(512)", fk: "Concept", notes: "FK -> Concept.urn (Semantic controlled thesaurus anchor)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual conceptual variable name" },
@@ -1785,15 +1814,17 @@
         fields: [
           { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
           { name: "subject_type", type: "VARCHAR(128)", req: true, idx: true, notes: "Subject entity type ('Concept', 'ConceptualVariable')" },
-          { name: "subject_urn", type: "VARCHAR(512)", req: true, idx: true, notes: "Subject canonical URN or URI" },
+          { name: "subject_urn", type: "VARCHAR(512)", fk: "UrnRegistry", req: true, idx: true, notes: "Subject canonical URN (FK -> UrnRegistry.urn)" },
           { name: "predicate", type: "VARCHAR(256)", req: true, idx: true, notes: "Semantic predicate (e.g. 'skos:exactMatch', 'prov:wasDerivedFrom')" },
           { name: "object_type", type: "VARCHAR(128)", req: true, idx: true, notes: "Target entity type ('Concept', 'ConceptualVariable')" },
-          { name: "object_urn", type: "VARCHAR(512)", req: true, idx: true, notes: "Target canonical URN or URI" },
+          { name: "object_urn", type: "VARCHAR(512)", fk: "UrnRegistry", req: true, idx: true, notes: "Target canonical URN (FK -> UrnRegistry.urn)" },
           { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes (confidence score, mapping tool, notes)" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
         ],
-        outgoing: [],
+        outgoing: [
+          { target: "UrnRegistry", type: "Foreign Key (subject_urn, object_urn)" }
+        ],
         incoming: []
       },
 
@@ -1808,7 +1839,7 @@
         description: "Named collection of reusable categories (maps to DDI-L CategoryScheme).",
         pos: { x: 60, y: 340 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical CategoryScheme URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical CategoryScheme URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
           { name: "description", type: "JSONB", notes: "Multilingual description" },
           { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
@@ -1817,8 +1848,7 @@
         ],
         outgoing: [],
         incoming: [
-          { target: "Category", type: "Foreign Key (Category.scheme_urn)" },
-          { target: "CodeList", type: "Optional Link (CodeList.scheme_urn)" }
+          { target: "Category", type: "Foreign Key (Category.scheme_urn)" }
         ]
       },
       Category: {
@@ -1828,19 +1858,19 @@
         table: "request_ddi_category",
         ddiTag: "<ddi:Category>",
         urnPattern: "urn:ddi:fr.sciencespo:Category.cat-left:1.0.0",
-        description: "Response category text label (decoupled from numerical code values). Supports self-referential hierarchy via parent_urn.",
+        description: "Response category text label (decoupled from numerical code values). Supports self-referential hierarchy via parent_urn and optional semantic anchoring to Concept.",
         pos: { x: 60, y: 440 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical Category URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical Category URN (Supertype FK -> UrnRegistry.urn)" },
+          { name: "name", type: "JSONB", req: true, notes: "Technical identifier / multilingual name" },
           { name: "scheme_urn", type: "VARCHAR(512)", fk: "CategoryScheme", notes: "FK -> CategoryScheme.urn" },
           { name: "concept_urn", type: "VARCHAR(512)", fk: "Concept", notes: "Optional semantic concept anchor FK -> Concept.urn" },
-          { name: "name", type: "JSONB", req: true, notes: "Technical identifier / multilingual name" },
           { name: "label", type: "JSONB", notes: "Multilingual category label" },
           { name: "parent_urn", type: "VARCHAR(512)", fk: "Category", notes: "FK -> Category.urn (hierarchical schemes)" },
           { name: "order", type: "INTEGER", notes: "Display order within scheme (default 0)" },
           { name: "is_missing", type: "BOOLEAN", notes: "Missing / non-response indicator (default False)" },
-          { name: "extended_attributes", type: "JSONB", notes: "Category definitions, inclusions/exclusions" },
           { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "extended_attributes", type: "JSONB", notes: "Category definitions, inclusions/exclusions" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
         ],
@@ -1853,6 +1883,28 @@
           { target: "Code", type: "Label Association FK (Code.category_urn)" }
         ]
       },
+      CodeListScheme: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "DDIScheme",
+        table: "request_ddi_codelistscheme",
+        ddiTag: "<ddi:CodeListScheme>",
+        urnPattern: "urn:ddi:fr.sciencespo:CodeListScheme.cls-scales:1.0.0",
+        description: "Named collection of reusable code lists (maps to DDI-L CodeListScheme).",
+        pos: { x: 230, y: 340 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical CodeListScheme URN (Supertype FK -> UrnRegistry.urn)" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "CodeList", type: "Foreign Key (CodeList.scheme_urn)" }
+        ]
+      },
       CodeList: {
         layer: "rep",
         layerName: "Representation & Instrument",
@@ -1861,19 +1913,19 @@
         ddiTag: "<ddi:CodeList>",
         urnPattern: "urn:ddi:fr.sciencespo:CodeList.cl-lrscale:1.0.0",
         description: "Structural set of response codes linked to categories. Reusable across multiple QuestionItems and RepresentedVariables.",
-        pos: { x: 230, y: 340 },
+        pos: { x: 230, y: 440 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical CodeList URN" },
-          { name: "scheme_urn", type: "VARCHAR(512)", fk: "CategoryScheme", notes: "Optional FK -> CategoryScheme.urn" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical CodeList URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual human title" },
           { name: "description", type: "JSONB", notes: "Multilingual description" },
-          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "scheme_urn", type: "VARCHAR(512)", fk: "CodeListScheme", notes: "FK -> CodeListScheme.urn" },
           { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
         ],
         outgoing: [
-          { target: "CategoryScheme", type: "Optional Foreign Key (scheme_urn)" }
+          { target: "CodeListScheme", type: "Foreign Key (scheme_urn)" }
         ],
         incoming: [
           { target: "Code", type: "Parent Code List FK (Code.code_list_urn)" },
@@ -1889,17 +1941,17 @@
         ddiTag: "<ddi:Code>",
         urnPattern: "urn:ddi:fr.sciencespo:Code.code-lr0:1.0.0",
         description: "Junction connecting a CodeList to a Category with a discrete code value (e.g. '1', '98', 'DK'). Supports self-referential hierarchy.",
-        pos: { x: 230, y: 440 },
+        pos: { x: 230, y: 530 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical Code URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical Code URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "code_list_urn", type: "VARCHAR(512)", fk: "CodeList", req: true, notes: "FK -> CodeList.urn" },
           { name: "category_urn", type: "VARCHAR(512)", fk: "Category", req: true, notes: "FK -> Category.urn" },
           { name: "code_value", type: "VARCHAR(64)", req: true, notes: "Numerical/string code value (e.g. '1', '98', 'DK')" },
           { name: "parent_urn", type: "VARCHAR(512)", fk: "Code", notes: "FK -> Code.urn (hierarchical code lists)" },
           { name: "order", type: "INTEGER", notes: "Display order within list (default 0)" },
           { name: "is_missing", type: "BOOLEAN", notes: "True if code represents missing/non-response" },
-          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
           { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
         ],
@@ -1920,7 +1972,7 @@
         description: "Named collection of reusable questions (maps to DDI-L QuestionScheme).",
         pos: { x: 420, y: 340 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical QuestionScheme URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical QuestionScheme URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
           { name: "description", type: "JSONB", notes: "Multilingual description" },
           { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
@@ -1939,27 +1991,30 @@
         table: "request_ddi_questionitem",
         ddiTag: "<ddi:QuestionItem>",
         urnPattern: "urn:ddi:fr.sciencespo:QuestionItem.qi-leftright:1.0.0",
-        description: "Standalone reusable question wording and response domain specification. Belongs to a single QuestionScheme and can link directly to a response CodeList.",
+        description: "Standalone reusable question wording and response domain specification. Belongs to a single QuestionScheme, can link directly to a response CodeList or define a flexible response_domain JSON object.",
         pos: { x: 420, y: 440 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical QuestionItem URN" },
-          { name: "scheme_urn", type: "VARCHAR(512)", fk: "QuestionScheme", notes: "FK -> QuestionScheme.urn" },
-          { name: "code_list_urn", type: "VARCHAR(512)", fk: "CodeList", notes: "FK -> CodeList.urn (associated coded response domain)" },
-          { name: "response_domain", type: "JSONB", notes: "Response domain specification JSON {'type': 'code' | 'numeric' | 'text'}" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical QuestionItem URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Technical identifier / multilingual name" },
           { name: "question_text", type: "JSONB", notes: "Multilingual literal question text [{'lang': 'fr', 'value': '...'}]" },
-          { name: "extended_attributes", type: "JSONB", notes: "Interviewer instructions, preamble, intent" },
+          { name: "scheme_urn", type: "VARCHAR(512)", fk: "QuestionScheme", notes: "FK -> QuestionScheme.urn" },
+          { name: "code_list_urn", type: "VARCHAR(512)", fk: "CodeList", notes: "FK -> CodeList.urn (associated coded response domain)" },
+          { name: "concept_urn", type: "VARCHAR(512)", fk: "Concept", notes: "FK -> Concept.urn (optional semantic concept anchor)" },
+          { name: "response_domain", type: "JSONB", notes: "Response domain specification JSON {'type': 'code' | 'numeric' | 'text'}" },
           { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "extended_attributes", type: "JSONB", notes: "Interviewer instructions, preamble, intent" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
         ],
         outgoing: [
           { target: "QuestionScheme", type: "Foreign Key (scheme_urn)" },
-          { target: "CodeList", type: "Foreign Key (code_list_urn)" }
+          { target: "CodeList", type: "Foreign Key (code_list_urn)" },
+          { target: "Concept", type: "Optional Concept Anchor FK (concept_urn)" }
         ],
         incoming: [
           { target: "QuestionVariable", type: "Junction FK (QuestionVariable.question_item_urn)" },
-          { target: "InstrumentQuestion", type: "Junction FK (InstrumentQuestion.question_item_urn)" }
+          { target: "InstrumentQuestion", type: "Junction FK (InstrumentQuestion.question_item_urn)" },
+          { target: "RepresentedVariable", type: "Optional direct binding FK (RepresentedVariable.question_item_urn)" }
         ]
       },
       RepresentedVariableScheme: {
@@ -1972,7 +2027,7 @@
         description: "Named collection of reusable represented variables (maps to DDI-L RepresentedVariableScheme).",
         pos: { x: 740, y: 340 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical RepresentedVariableScheme URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical RepresentedVariableScheme URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
           { name: "description", type: "JSONB", notes: "Multilingual description" },
           { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
@@ -1994,22 +2049,24 @@
         description: "Combination of conceptual variable and response representation (e.g. code list, numeric range). Represents Tier 2 of the Variable Cascade.",
         pos: { x: 740, y: 440 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical RepresentedVariable URN" },
-          { name: "scheme_urn", type: "VARCHAR(512)", fk: "RepresentedVariableScheme", notes: "FK -> RepresentedVariableScheme.urn" },
-          { name: "conceptual_variable_urn", type: "VARCHAR(512)", fk: "ConceptualVariable", notes: "FK -> ConceptualVariable.urn (Cascade Tier 1)" },
-          { name: "code_list_urn", type: "VARCHAR(512)", fk: "CodeList", notes: "FK -> CodeList.urn (Direct response code structure)" },
-          { name: "value_representation", type: "JSONB", notes: "Value representation details JSON" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical RepresentedVariable URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual represented variable name" },
           { name: "label", type: "JSONB", notes: "Multilingual human label" },
           { name: "description", type: "JSONB", notes: "Multilingual description" },
-          { name: "extended_attributes", type: "JSONB", notes: "Value domain, data type, variable characteristics" },
+          { name: "value_representation", type: "JSONB", notes: "Value representation details JSON" },
+          { name: "scheme_urn", type: "VARCHAR(512)", fk: "RepresentedVariableScheme", notes: "FK -> RepresentedVariableScheme.urn" },
+          { name: "conceptual_variable_urn", type: "VARCHAR(512)", fk: "ConceptualVariable", notes: "FK -> ConceptualVariable.urn (Cascade Tier 1)" },
+          { name: "question_item_urn", type: "VARCHAR(512)", fk: "QuestionItem", notes: "FK -> QuestionItem.urn (optional direct question binding)" },
+          { name: "code_list_urn", type: "VARCHAR(512)", fk: "CodeList", notes: "FK -> CodeList.urn (Direct response code structure)" },
           { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "extended_attributes", type: "JSONB", notes: "Value domain, data type, variable characteristics" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
         ],
         outgoing: [
           { target: "RepresentedVariableScheme", type: "Foreign Key (scheme_urn)" },
           { target: "ConceptualVariable", type: "Cascade Tier 1 Link FK (conceptual_variable_urn)" },
+          { target: "QuestionItem", type: "Optional Question Item FK (question_item_urn)" },
           { target: "CodeList", type: "Response Domain FK (code_list_urn)" }
         ],
         incoming: [
@@ -2041,6 +2098,28 @@
         ],
         incoming: []
       },
+      InstrumentScheme: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "DDIScheme",
+        table: "request_ddi_instrumentscheme",
+        ddiTag: "<ddi:InstrumentScheme>",
+        urnPattern: "urn:ddi:fr.sciencespo:InstrumentScheme.is-ess:1.0.0",
+        description: "Named collection of survey questionnaires and data collection instruments (maps to DDI-L InstrumentScheme).",
+        pos: { x: 920, y: 340 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical InstrumentScheme URN (Supertype FK -> UrnRegistry.urn)" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "Instrument", type: "Foreign Key (Instrument.scheme_urn)" }
+        ]
+      },
       Instrument: {
         layer: "rep",
         layerName: "Representation & Instrument",
@@ -2049,18 +2128,21 @@
         ddiTag: "<ddi:Instrument>",
         urnPattern: "urn:ddi:fr.sciencespo:Instrument.inst-ess3:1.0.0",
         description: "Data collection instrument / questionnaire in DDI-Lifecycle. Holds ordered question items.",
-        pos: { x: 920, y: 340 },
+        pos: { x: 920, y: 440 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical Instrument URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical Instrument URN (Supertype FK -> UrnRegistry.urn)" },
+          { name: "scheme_urn", type: "VARCHAR(512)", fk: "InstrumentScheme", notes: "FK -> InstrumentScheme.urn" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual technical name" },
           { name: "label", type: "JSONB", notes: "Multilingual human title" },
           { name: "description", type: "JSONB", notes: "Multilingual description" },
-          { name: "extended_attributes", type: "JSONB", notes: "Mode of collection, administration notes" },
           { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "extended_attributes", type: "JSONB", notes: "Mode of collection, administration notes" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
         ],
-        outgoing: [],
+        outgoing: [
+          { target: "InstrumentScheme", type: "Foreign Key (scheme_urn)" }
+        ],
         incoming: [
           { target: "InstrumentQuestion", type: "Junction FK (InstrumentQuestion.instrument_urn)" }
         ]
@@ -2073,7 +2155,7 @@
         ddiTag: "<ddi:InstrumentQuestion>",
         urnPattern: "Surrogate PK (id: BigInt)",
         description: "Junction connecting an Instrument to member QuestionItem entities with sequencing flow path.",
-        pos: { x: 920, y: 440 },
+        pos: { x: 920, y: 530 },
         fields: [
           { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
           { name: "instrument_urn", type: "VARCHAR(512)", fk: "Instrument", req: true, notes: "FK -> Instrument.urn" },
@@ -2101,14 +2183,14 @@
         description: "A specific survey wave or dataset (renamed from Survey). Contains concrete physical dataset variables.",
         pos: { x: 60, y: 720 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical StudyUnit URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical StudyUnit URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual dataset identifier / name" },
           { name: "title", type: "JSONB", notes: "Multilingual study title" },
           { name: "external_ref", type: "VARCHAR(512)", uq: true, notes: "DOI or external repository identifier (unique)" },
           { name: "year", type: "INTEGER", notes: "Survey reference year" },
           { name: "description", type: "JSONB", notes: "Multilingual abstract" },
-          { name: "extended_attributes", type: "JSONB", notes: "Methodological metadata, universe, sampling" },
           { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "extended_attributes", type: "JSONB", notes: "Methodological metadata, universe, sampling" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
         ],
@@ -2128,7 +2210,7 @@
         description: "Named collection of instance variables for a specific survey wave.",
         pos: { x: 740, y: 720 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical InstanceVariableScheme URN" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical InstanceVariableScheme URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
           { name: "description", type: "JSONB", notes: "Multilingual description" },
           { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
@@ -2150,14 +2232,14 @@
         description: "Physical realization of a variable in a specific dataset column (e.g. q01a). Represents Tier 3 of the Variable Cascade.",
         pos: { x: 740, y: 810 },
         fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical InstanceVariable URN" },
-          { name: "scheme_urn", type: "VARCHAR(512)", fk: "InstanceVariableScheme", notes: "FK -> InstanceVariableScheme.urn" },
-          { name: "represented_variable_urn", type: "VARCHAR(512)", fk: "RepresentedVariable", notes: "FK -> RepresentedVariable.urn (Cascade Tier 2)" },
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical InstanceVariable URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Column name / mnemonic (e.g. 'q01a', 'lrscale')" },
           { name: "label", type: "JSONB", notes: "Multilingual column label" },
           { name: "description", type: "JSONB", notes: "Multilingual description" },
-          { name: "extended_attributes", type: "JSONB", notes: "Storage format, missing values, column index" },
+          { name: "scheme_urn", type: "VARCHAR(512)", fk: "InstanceVariableScheme", notes: "FK -> InstanceVariableScheme.urn" },
+          { name: "represented_variable_urn", type: "VARCHAR(512)", fk: "RepresentedVariable", notes: "FK -> RepresentedVariable.urn (Cascade Tier 2)" },
           { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "extended_attributes", type: "JSONB", notes: "Storage format, missing values, column index" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
         ],
@@ -2206,35 +2288,18 @@
         pos: { x: 1140, y: 720 },
         fields: [
           { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
-          { name: "urn", type: "VARCHAR(512)", req: true, idx: true, notes: "Target resource canonical or source URN" },
+          { name: "urn", type: "VARCHAR(512)", fk: "UrnRegistry", req: true, idx: true, notes: "Target resource canonical URN (FK -> UrnRegistry.urn)" },
           { name: "event_type", type: "VARCHAR(128)", req: true, idx: true, notes: "Event classification ('created', 'normalized', 'quarantined')" },
-          { name: "event_data", type: "JSONB", notes: "Arbitrary audit payload metadata as JSONB" },
+          { name: "event_data", type: "JSONB", req: true, notes: "Arbitrary audit payload metadata as JSONB" },
           { name: "timestamp", type: "TIMESTAMP", req: true, idx: true, notes: "Event occurrence timestamp" }
         ],
-        outgoing: [],
+        outgoing: [
+          { target: "UrnRegistry", type: "Foreign Key (urn)" }
+        ],
         incoming: []
       },
 
       // 6. Infrastructure & Ingestion Layer
-      UrnRegistry: {
-        layer: "infra",
-        layerName: "Infrastructure & Ingestion",
-        base: "Model",
-        table: "request_ddi_urnregistry",
-        ddiTag: "URN Crosswalk",
-        urnPattern: "urn:ddi:agency:ID:version (PK)",
-        description: "Central master registry mapping canonical URNs and external URIs to their target resource types. Provides O(1) URN-to-type crosswalk resolution.",
-        pos: { x: 1140, y: 80 },
-        fields: [
-          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical URN or external identifier/URI" },
-          { name: "resource_type", type: "VARCHAR(64)", req: true, idx: true, notes: "Target entity type ('QuestionItem', 'Category', 'Concept')" },
-          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
-          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
-          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
-        ],
-        outgoing: [],
-        incoming: []
-      },
       URNAlias: {
         layer: "infra",
         layerName: "Infrastructure & Ingestion",
@@ -2247,13 +2312,15 @@
         fields: [
           { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
           { name: "alias_urn", type: "VARCHAR(512)", req: true, uq: true, notes: "External / random source URN" },
-          { name: "canonical_urn", type: "VARCHAR(512)", req: true, idx: true, notes: "Canonical database URN" },
+          { name: "canonical_urn", type: "VARCHAR(512)", fk: "UrnRegistry", req: true, idx: true, notes: "Canonical database URN (FK -> UrnRegistry.urn)" },
           { name: "entity_type", type: "VARCHAR(64)", req: true, notes: "Target DDI entity type" },
           { name: "hash_strategy", type: "VARCHAR(64)", notes: "Strategy used (default 'v1_strict_sha256')" },
           { name: "source_file", type: "VARCHAR(512)", notes: "Originating import file" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" }
         ],
-        outgoing: [],
+        outgoing: [
+          { target: "UrnRegistry", type: "Foreign Key (canonical_urn)" }
+        ],
         incoming: []
       },
       MetadataQuarantine: {
@@ -2268,7 +2335,7 @@
         fields: [
           { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
           { name: "incoming_urn", type: "VARCHAR(512)", req: true, notes: "Conflicting incoming URN" },
-          { name: "existing_urn", type: "VARCHAR(512)", notes: "Conflicting existing canonical URN" },
+          { name: "existing_urn", type: "VARCHAR(512)", fk: "UrnRegistry", notes: "Conflicting existing canonical URN (FK -> UrnRegistry.urn)" },
           { name: "entity_type", type: "VARCHAR(64)", req: true, notes: "Target DDI entity type" },
           { name: "incoming_content", type: "JSONB", req: true, notes: "Full serialized incoming payload" },
           { name: "existing_content_hash", type: "VARCHAR(64)", notes: "SHA-256 hash of existing record" },
@@ -2281,7 +2348,9 @@
           { name: "import_task_id", type: "VARCHAR(255)", notes: "Background task ID" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" }
         ],
-        outgoing: [],
+        outgoing: [
+          { target: "UrnRegistry", type: "Foreign Key (existing_urn)" }
+        ],
         incoming: []
       },
       StagedImport: {
@@ -2326,12 +2395,13 @@
           { name: "resource_type", type: "VARCHAR(64)", req: true, idx: true, notes: "Target entity type ('QuestionItem', 'CodeList', etc.)" },
           { name: "raw_urn", type: "VARCHAR(512)", idx: true, notes: "Raw external URN from source file" },
           { name: "raw_value", type: "JSONB", req: true, notes: "Pre-normalized raw payload" },
-          { name: "canonical_urn", type: "VARCHAR(512)", idx: true, notes: "Resolved canonical database URN" },
+          { name: "canonical_urn", type: "VARCHAR(512)", fk: "UrnRegistry", idx: true, notes: "Resolved canonical database URN (FK -> UrnRegistry.urn)" },
           { name: "status", type: "VARCHAR(32)", notes: "Status: 'staged', 'normalized', 'quarantined', 'failed'" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" }
         ],
         outgoing: [
-          { target: "StagedImport", type: "Foreign Key (staged_import_id)" }
+          { target: "StagedImport", type: "Foreign Key (staged_import_id)" },
+          { target: "UrnRegistry", type: "Foreign Key (canonical_urn)" }
         ],
         incoming: []
       }
@@ -2416,6 +2486,9 @@
 
         source.fields.forEach(f => {
           if (f.fk && SCHEMA_DATA[f.fk] && SCHEMA_DATA[f.fk].pos) {
+            // Avoid cluttering canvas with inheritance arrows to UrnRegistry from every entity's PK
+            if (f.fk === "UrnRegistry" && f.pk) return;
+
             const target = SCHEMA_DATA[f.fk];
             const edgeId = `edge-${sourceKey}-${f.fk}`;
             if (renderedEdges.has(edgeId) || sourceKey === f.fk) return;
@@ -2428,7 +2501,9 @@
                                    (sourceKey === "QuestionVariable" && f.fk === "QuestionItem") ||
                                    (sourceKey === "QuestionVariable" && f.fk === "RepresentedVariable") ||
                                    (sourceKey === "InstrumentQuestion" && f.fk === "QuestionItem") ||
-                                   (sourceKey === "InstrumentQuestion" && f.fk === "Instrument");
+                                   (sourceKey === "InstrumentQuestion" && f.fk === "Instrument") ||
+                                   (sourceKey === "Instrument" && f.fk === "InstrumentScheme") ||
+                                   (sourceKey === "CodeList" && f.fk === "CodeListScheme");
 
             const sx = source.pos.x + nodeWidth / 2;
             const sy = source.pos.y + nodeHeight / 2;
@@ -2547,7 +2622,7 @@
         colorClass: "focused-question",
         edgeClass: "highlight-question",
         marker: "url(#arrow-question)",
-        nodes: ["QuestionScheme", "QuestionItem", "CodeList", "Category", "QuestionVariable", "RepresentedVariable", "Instrument", "InstrumentQuestion"],
+        nodes: ["QuestionScheme", "QuestionItem", "CodeListScheme", "CodeList", "CategoryScheme", "Category", "QuestionVariable", "RepresentedVariable", "InstrumentScheme", "Instrument", "InstrumentQuestion"],
         edges: [
           ["QuestionItem", "QuestionScheme"],
           ["QuestionItem", "CodeList"],
@@ -2555,8 +2630,10 @@
           ["QuestionVariable", "RepresentedVariable"],
           ["InstrumentQuestion", "QuestionItem"],
           ["InstrumentQuestion", "Instrument"],
-          ["CodeList", "CategoryScheme"],
-          ["RepresentedVariable", "CodeList"]
+          ["Instrument", "InstrumentScheme"],
+          ["CodeList", "CodeListScheme"],
+          ["RepresentedVariable", "CodeList"],
+          ["Category", "CategoryScheme"]
         ]
       },
       cascade: {
@@ -2584,15 +2661,15 @@
         colorClass: "focused-response",
         edgeClass: "highlight-response",
         marker: "url(#arrow-response)",
-        nodes: ["CategoryScheme", "Category", "CodeList", "Code", "QuestionItem", "RepresentedVariable"],
+        nodes: ["CategoryScheme", "Category", "CodeListScheme", "CodeList", "Code", "QuestionItem", "RepresentedVariable"],
         edges: [
           ["Category", "CategoryScheme"],
           ["Category", "Concept"],
+          ["CodeList", "CodeListScheme"],
           ["Code", "CodeList"],
           ["Code", "Category"],
           ["QuestionItem", "CodeList"],
-          ["RepresentedVariable", "CodeList"],
-          ["CodeList", "CategoryScheme"]
+          ["RepresentedVariable", "CodeList"]
         ]
       },
       ingestion: {
@@ -2603,7 +2680,11 @@
         marker: "url(#arrow-ingestion)",
         nodes: ["StagedImport", "StagedResourceNode", "UrnRegistry", "URNAlias", "MetadataQuarantine", "EventLog"],
         edges: [
-          ["StagedResourceNode", "StagedImport"]
+          ["StagedResourceNode", "StagedImport"],
+          ["URNAlias", "UrnRegistry"],
+          ["MetadataQuarantine", "UrnRegistry"],
+          ["StagedResourceNode", "UrnRegistry"],
+          ["EventLog", "UrnRegistry"]
         ]
       }
     };
@@ -2690,13 +2771,18 @@
       svg.addEventListener("mousedown", (e) => {
         if (e.target.closest(".node-group")) return;
         isPanning = true;
-        panStart = { x: e.clientX - diagramTransform.x, y: e.clientY - diagramTransform.y };
+        panStart = { x: e.clientX, y: e.clientY, initX: diagramTransform.x, initY: diagramTransform.y };
       });
 
       window.addEventListener("mousemove", (e) => {
         if (!isPanning) return;
-        diagramTransform.x = e.clientX - panStart.x;
-        diagramTransform.y = e.clientY - panStart.y;
+        const rect = svg.getBoundingClientRect();
+        const svgW = 1560;
+        const svgH = 910;
+        const dx = (e.clientX - panStart.x) * (svgW / (rect.width || svgW));
+        const dy = (e.clientY - panStart.y) * (svgH / (rect.height || svgH));
+        diagramTransform.x = panStart.initX + dx;
+        diagramTransform.y = panStart.initY + dy;
         updateDiagramTransform();
       });
 
@@ -2706,13 +2792,20 @@
 
       svg.addEventListener("wheel", (e) => {
         e.preventDefault();
-        const factor = e.deltaY < 0 ? 1.1 : 0.9;
-        zoomDiagram(factor);
+        const factor = e.deltaY < 0 ? 1.15 : 0.87;
+        const rect = svg.getBoundingClientRect();
+        const mouseSvgX = 15 + ((e.clientX - rect.left) / (rect.width || 1)) * 1560;
+        const mouseSvgY = 15 + ((e.clientY - rect.top) / (rect.height || 1)) * 910;
+        zoomDiagram(factor, mouseSvgX, mouseSvgY);
       }, { passive: false });
     }
 
-    function zoomDiagram(factor) {
-      diagramTransform.scale = Math.min(Math.max(diagramTransform.scale * factor, 0.4), 2.5);
+    function zoomDiagram(factor, focalX = 795, focalY = 470) {
+      const newScale = Math.min(Math.max(diagramTransform.scale * factor, 0.5), 3.5);
+      const ratio = newScale / diagramTransform.scale;
+      diagramTransform.x = focalX - (focalX - diagramTransform.x) * ratio;
+      diagramTransform.y = focalY - (focalY - diagramTransform.y) * ratio;
+      diagramTransform.scale = newScale;
       updateDiagramTransform();
     }
 
@@ -2723,12 +2816,7 @@
     }
 
     function fitDiagramToScreen() {
-      const wrapper = document.getElementById("diagram-canvas-wrapper");
-      if (!wrapper) return;
-      const w = wrapper.clientWidth || 1200;
-      const h = wrapper.clientHeight || 750;
-      const scale = Math.min(w / 1600, h / 950) * 0.95;
-      diagramTransform = { scale, x: (w - 1600 * scale) / 2, y: (h - 950 * scale) / 2 };
+      diagramTransform = { scale: 1, x: 0, y: 0 };
       updateDiagramTransform();
     }
 
@@ -2985,9 +3073,14 @@
         let sql = `CREATE TABLE ${entity.table} (\n`;
         const lines = entity.fields.map(f => {
           let line = `    ${f.name.padEnd(24)} ${f.type.padEnd(16)}`;
-          if (f.pk) line += " PRIMARY KEY";
-          if (f.req && !f.pk) line += " NOT NULL";
-          if (f.fk) line += ` REFERENCES ${SCHEMA_DATA[f.fk].table}(urn)`;
+          if (f.pk && f.fk) {
+            line += ` PRIMARY KEY REFERENCES ${SCHEMA_DATA[f.fk].table}(urn) ON DELETE CASCADE`;
+          } else if (f.pk) {
+            line += " PRIMARY KEY";
+          } else {
+            if (f.req) line += " NOT NULL";
+            if (f.fk) line += ` REFERENCES ${SCHEMA_DATA[f.fk].table}(urn) ON DELETE CASCADE`;
+          }
           return line;
         });
         sql += lines.join(",\n");
@@ -3198,7 +3291,7 @@
     function renderFullDDL() {
       let ddl = `-- ==================================================================\n`;
       ddl += `-- FAIRwDDI WP3 ST3 — Complete Standard-Agnostic PostgreSQL 17 DDL\n`;
-      ddl += `-- Canonical URN Primary Keys, ICU Collations, and JSONB GIN Indexes\n`;
+      ddl += `-- Supertype URN Registry, Canonical URN Primary Keys, ICU Collations\n`;
       ddl += `-- ==================================================================\n\n`;
 
       Object.keys(SCHEMA_DATA).forEach(key => {
@@ -3209,9 +3302,14 @@
         ddl += `CREATE TABLE IF NOT EXISTS ${entity.table} (\n`;
         const lines = entity.fields.map(f => {
           let line = `    ${f.name.padEnd(26)} ${f.type.padEnd(18)}`;
-          if (f.pk) line += " PRIMARY KEY";
-          if (f.req && !f.pk) line += " NOT NULL";
-          if (f.fk) line += ` REFERENCES ${SCHEMA_DATA[f.fk].table}(urn) ON DELETE CASCADE`;
+          if (f.pk && f.fk) {
+            line += ` PRIMARY KEY REFERENCES ${SCHEMA_DATA[f.fk].table}(urn) ON DELETE CASCADE`;
+          } else if (f.pk) {
+            line += " PRIMARY KEY";
+          } else {
+            if (f.req) line += " NOT NULL";
+            if (f.fk) line += ` REFERENCES ${SCHEMA_DATA[f.fk].table}(urn) ON DELETE CASCADE`;
+          }
           return line;
         });
         ddl += lines.join(",\n");
