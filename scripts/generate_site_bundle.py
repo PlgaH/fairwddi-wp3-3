@@ -1,4 +1,15 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+"""
+FAIRwDDI Lifecycle — Static Site Bundle Builder
+Generates index.html, site_assets/app.css, site_assets/app.js, 404.html, and site_data.js.
+"""
+
+import sys
+from pathlib import Path
+
+WORKSPACE = Path(__file__).resolve().parent.parent
+
+INDEX_HTML = """<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
@@ -356,3 +367,55 @@
   <script src="./site_assets/app.js"></script>
 </body>
 </html>
+"""
+
+FOUR_OH_FOUR_HTML = """<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redirecting — FAIRwDDI Lifecycle</title>
+  <script>
+    (function () {
+      var fullPath = window.location.pathname;
+      var pathSegments = fullPath.split('/').filter(Boolean);
+      // Remove repository base segment if on GitHub Pages
+      if (pathSegments.length > 0 && pathSegments[0] === 'fairwddi-wp3-3') {
+        pathSegments.shift();
+      }
+      var route = pathSegments.join('/').replace(/\\.html$/, '');
+      var base = window.location.pathname.startsWith('/fairwddi-wp3-3') ? '/fairwddi-wp3-3/' : './';
+      if (route) {
+        window.location.replace(base + '#' + route);
+      } else {
+        window.location.replace(base + '#home');
+      }
+    })();
+  </script>
+</head>
+<body style="background: #0a0e17; color: #94a3b8; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
+  <div style="text-align: center;">
+    <h2 style="color: #f8fafc; margin-bottom: 0.5rem;">Redirecting to FAIRwDDI Portal...</h2>
+    <p>If you are not redirected automatically, <a href="./#home" style="color: #3b82f6;">click here</a>.</p>
+  </div>
+</body>
+</html>
+"""
+
+def generate_bundle():
+    print("Generating complete site files...")
+    
+    # Write index.html
+    (WORKSPACE / "index.html").write_text(INDEX_HTML, encoding="utf-8")
+    print(f"✅ Wrote index.html ({(WORKSPACE / 'index.html').stat().st_size:,} bytes)")
+
+    # Write 404.html
+    (WORKSPACE / "404.html").write_text(FOUR_OH_FOUR_HTML, encoding="utf-8")
+    print(f"✅ Wrote 404.html ({(WORKSPACE / '404.html').stat().st_size:,} bytes)")
+
+    # Ensure .nojekyll
+    (WORKSPACE / ".nojekyll").write_text("# Disable Jekyll\n", encoding="utf-8")
+    print("✅ Wrote .nojekyll")
+
+if __name__ == "__main__":
+    generate_bundle()

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redirecting — FAIRwDDI Lifecycle</title>
+  <script>
+    (function () {
+      var fullPath = window.location.pathname;
+      var pathSegments = fullPath.split('/').filter(Boolean);
+      // Remove repository base segment if on GitHub Pages
+      if (pathSegments.length > 0 && pathSegments[0] === 'fairwddi-wp3-3') {
+        pathSegments.shift();
+      }
+      var route = pathSegments.join('/').replace(/\.html$/, '');
+      var base = window.location.pathname.startsWith('/fairwddi-wp3-3') ? '/fairwddi-wp3-3/' : './';
+      if (route) {
+        window.location.replace(base + '#' + route);
+      } else {
+        window.location.replace(base + '#home');
+      }
+    })();
+  </script>
+</head>
+<body style="background: #0a0e17; color: #94a3b8; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
+  <div style="text-align: center;">
+    <h2 style="color: #f8fafc; margin-bottom: 0.5rem;">Redirecting to FAIRwDDI Portal...</h2>
+    <p>If you are not redirected automatically, <a href="./#home" style="color: #3b82f6;">click here</a>.</p>
+  </div>
+</body>
+</html>
