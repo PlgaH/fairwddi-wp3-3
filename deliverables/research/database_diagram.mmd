@@ -1,0 +1,378 @@
+%% FAIRwDDI WP3 ST3 — Full Database Schema ER & Architecture Diagrams
+%% Canonical DDI 4.0 / DDI-CDI / DDI-Lifecycle 3.3 Data Model for ReQuest
+
+erDiagram
+    %% ==========================================
+    %% 1. ORGANIZATION & GROUPING LAYER
+    %% ==========================================
+    Organization {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:org-cdsp:1.0.0)"
+        jsonb name "Multilingual name [{'lang': 'fr', 'value': '...'}]"
+        string organization_type "Type: archive, distributor, funder"
+        jsonb extended_attributes "Extensible attributes array"
+        jsonb hashes "Content digest hashes {'sha256': '...'}"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    Group {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:grp-ess:1.0.0)"
+        jsonb name "Multilingual name [{'lang': 'fr', 'value': '...'}]"
+        jsonb description "Multilingual description"
+        string group_type "Type: study_series, panel, thematic, collection"
+        jsonb references "Polymorphic references [{'resource_type': 'StudyUnit', 'urn': '...'}]"
+        jsonb extended_attributes "Extensible attributes array"
+        jsonb hashes "Content digest hashes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    %% ==========================================
+    %% 2. CONCEPT LAYER
+    %% ==========================================
+    ConceptScheme {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:cs-elsst:1.0.0)"
+        jsonb name "Multilingual scheme name"
+        jsonb description "Multilingual description"
+        jsonb extended_attributes "Extensible attributes array"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    Concept {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:c-politics:1.0.0)"
+        string scheme_urn FK "FK -> ConceptScheme.urn"
+        string uri "Controlled vocabulary URI (e.g. ELSST URI, unique)"
+        string vocabulary "Thesaurus name (e.g. ELSST, Topics)"
+        string notation "Thesaurus notation code"
+        jsonb label "Multilingual preferred label (skos:prefLabel)"
+        jsonb description "Multilingual description"
+        jsonb definition "Multilingual definition (skos:definition)"
+        string parent_urn FK "FK -> Concept.urn (hierarchical tree / skos:broader)"
+        string concept_type "Type: domain, concept, top_concept"
+        jsonb extended_attributes "Extensible attributes array"
+        jsonb hashes "Content digest hashes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    ConceptualVariableScheme {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:cvs-core:1.0.0)"
+        jsonb name "Multilingual scheme name"
+        jsonb description "Multilingual description"
+        jsonb extended_attributes "Extensible attributes array"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    ConceptualVariable {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:cv-leftright:1.0.0)"
+        string scheme_urn FK "FK -> ConceptualVariableScheme.urn"
+        string concept_urn FK "FK -> Concept.urn (Semantic Anchor)"
+        jsonb name "Multilingual conceptual variable name"
+        jsonb label "Multilingual human label"
+        jsonb description "Multilingual description"
+        jsonb extended_attributes "Extensible attributes array"
+        jsonb hashes "Content digest hashes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    SemanticRelationship {
+        bigint id PK "Auto-incrementing surrogate ID"
+        string subject_type "Subject entity type (Concept, ConceptualVariable)"
+        string subject_urn "Subject URN / URI"
+        string predicate "Semantic predicate (skos:exactMatch, prov:wasDerivedFrom)"
+        string object_type "Target entity type"
+        string object_urn "Target URN / URI"
+        jsonb extended_attributes "Confidence, tool, notes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    %% ==========================================
+    %% 3. REPRESENTATION & INSTRUMENT LAYER
+    %% ==========================================
+    CategoryScheme {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:cats-scales:1.0.0)"
+        jsonb name "Multilingual scheme name"
+        jsonb description "Multilingual description"
+        jsonb extended_attributes "Extensible attributes array"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    Category {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:cat-left:1.0.0)"
+        string scheme_urn FK "FK -> CategoryScheme.urn"
+        string concept_urn FK "FK -> Concept.urn (Optional Concept Anchor)"
+        string parent_urn FK "FK -> Category.urn (Self-referential hierarchy)"
+        jsonb name "Multilingual technical name"
+        jsonb label "Multilingual category label"
+        integer order "Display order within scheme"
+        boolean is_missing "Missing value indicator"
+        jsonb extended_attributes "Inclusions, exclusions, definitions"
+        jsonb hashes "Content digest hashes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    CodeList {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:cl-lrscale:1.0.0)"
+        string scheme_urn FK "FK -> CategoryScheme.urn (Optional)"
+        jsonb name "Multilingual human title"
+        jsonb description "Multilingual description"
+        jsonb extended_attributes "Extensible attributes array"
+        jsonb hashes "Content digest hashes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    Code {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:code-lr0:1.0.0)"
+        string code_list_urn FK "FK -> CodeList.urn"
+        string category_urn FK "FK -> Category.urn"
+        string parent_urn FK "FK -> Code.urn (Self-referential hierarchy)"
+        string code_value "Discrete code value (1, 98, DK)"
+        integer order "Display order within code list"
+        boolean is_missing "True if non-response / missing"
+        jsonb extended_attributes "Extensible attributes array"
+        jsonb hashes "Content digest hashes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    QuestionScheme {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:qs-attitudes:1.0.0)"
+        jsonb name "Multilingual scheme name"
+        jsonb description "Multilingual description"
+        jsonb extended_attributes "Extensible attributes array"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    QuestionItem {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:qi-leftright:1.0.0)"
+        string scheme_urn FK "FK -> QuestionScheme.urn"
+        string code_list_urn FK "FK -> CodeList.urn (Direct Coded Domain)"
+        jsonb response_domain "Response domain JSON (code, numeric, text, scale)"
+        jsonb name "Multilingual technical name"
+        jsonb question_text "Multilingual literal question wording"
+        jsonb extended_attributes "Interviewer instructions, preamble, intent"
+        jsonb hashes "Content digest hashes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    RepresentedVariableScheme {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:rvs-harmonized:1.0.0)"
+        jsonb name "Multilingual scheme name"
+        jsonb description "Multilingual description"
+        jsonb extended_attributes "Extensible attributes array"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    RepresentedVariable {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:rv-lrscale:1.0.0)"
+        string scheme_urn FK "FK -> RepresentedVariableScheme.urn"
+        string conceptual_variable_urn FK "FK -> ConceptualVariable.urn (Cascade Top)"
+        string code_list_urn FK "FK -> CodeList.urn (Direct Code Structure)"
+        jsonb value_representation "Representation details JSON"
+        jsonb name "Multilingual variable name"
+        jsonb label "Multilingual human label"
+        jsonb description "Multilingual description"
+        jsonb extended_attributes "Data type, valid ranges, variable notes"
+        jsonb hashes "Content digest hashes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    QuestionVariable {
+        bigint id PK "Auto-incrementing surrogate ID"
+        string question_item_urn FK "FK -> QuestionItem.urn"
+        string represented_variable_urn FK "FK -> RepresentedVariable.urn"
+        string path "Referencing path / XPath"
+        integer order "Association sequence order"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    Instrument {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:inst-ess3:1.0.0)"
+        jsonb name "Multilingual questionnaire name"
+        jsonb label "Multilingual title"
+        jsonb description "Multilingual description"
+        jsonb extended_attributes "Mode of collection, administration notes"
+        jsonb hashes "Content digest hashes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    InstrumentQuestion {
+        bigint id PK "Auto-incrementing surrogate ID"
+        string instrument_urn FK "FK -> Instrument.urn"
+        string question_item_urn FK "FK -> QuestionItem.urn"
+        string path "Questionnaire routing path (e.g. /Seq/Q01)"
+        integer order "Display / sequencing order"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    %% ==========================================
+    %% 4. DATASET LAYER
+    %% ==========================================
+    StudyUnit {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:su-ess2007:1.0.0)"
+        jsonb name "Multilingual dataset identifier"
+        jsonb title "Multilingual study title"
+        string external_ref "External DOI / repo identifier (unique)"
+        integer year "Reference survey year"
+        jsonb description "Multilingual study abstract"
+        jsonb extended_attributes "Methodology, universe, sampling"
+        jsonb hashes "Content digest hashes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    InstanceVariableScheme {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:ivs-ess2007:1.0.0)"
+        jsonb name "Multilingual scheme name"
+        jsonb description "Multilingual description"
+        jsonb extended_attributes "Extensible attributes array"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    InstanceVariable {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:iv-ess2007-q01:1.0.0)"
+        string scheme_urn FK "FK -> InstanceVariableScheme.urn"
+        string represented_variable_urn FK "FK -> RepresentedVariable.urn (Cascade Mid)"
+        jsonb name "Column name / mnemonic (e.g. q01a, lrscale)"
+        jsonb label "Multilingual column label"
+        jsonb description "Multilingual description"
+        jsonb extended_attributes "Storage format, missing values, column index"
+        jsonb hashes "Content digest hashes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    StudyUnitVariable {
+        bigint id PK "Auto-incrementing surrogate ID"
+        string study_unit_urn FK "FK -> StudyUnit.urn"
+        string instance_variable_urn FK "FK -> InstanceVariable.urn"
+        string path "Dataset path / table location"
+        integer order "Physical column order in dataset"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    %% ==========================================
+    %% 5. EVENT LOGGING & AUDIT TRAIL
+    %% ==========================================
+    EventLog {
+        bigint id PK "Auto-incrementing surrogate ID"
+        string urn "Target resource URN (indexed)"
+        string event_type "Type: created, normalized, quarantined, updated"
+        jsonb event_data "Arbitrary audit payload metadata"
+        timestamp timestamp "Occurrence timestamp (indexed)"
+    }
+
+    %% ==========================================
+    %% 6. INFRASTRUCTURE & INGESTION LAYER
+    %% ==========================================
+    UrnRegistry {
+        string urn PK "Canonical URN or external URI"
+        string resource_type "Target entity type (e.g. QuestionItem)"
+        jsonb extended_attributes "Extensible attributes array"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    URNAlias {
+        bigint id PK "Auto-incrementing surrogate ID"
+        string alias_urn "External / random source URN (unique)"
+        string canonical_urn "Canonical database URN (indexed)"
+        string entity_type "Target DDI entity type"
+        string hash_strategy "Strategy used: v1_strict_sha256"
+        string source_file "Originating import file"
+        timestamp created_at "Creation timestamp"
+    }
+
+    MetadataQuarantine {
+        bigint id PK "Auto-incrementing surrogate ID"
+        string incoming_urn "Conflicting incoming URN"
+        string existing_urn "Conflicting existing URN"
+        string entity_type "Target DDI entity type"
+        jsonb incoming_content "Full serialized incoming payload"
+        string existing_content_hash "Hash of existing record"
+        string incoming_content_hash "Hash of incoming record"
+        string conflict_type "Type: staged_urn_drift, hash_mismatch"
+        string resolution "Status: approved, forked, rejected"
+        string resolved_by "Reviewing archivist username"
+        timestamp resolved_at "Review resolution timestamp"
+        string source_file "Originating file"
+        string import_task_id "Background task ID"
+        timestamp created_at "Creation timestamp"
+    }
+
+    StagedImport {
+        bigint id PK "Auto-incrementing surrogate ID"
+        string source_format "Format: ddi-l:3.3:xml, ddi-c:2.5:xml, croissant, csv"
+        string file_name "Original uploaded filename"
+        string file_path "Storage file path"
+        jsonb import_options "Batch configuration metadata"
+        integer total_resources "Total staged resource nodes"
+        integer processed_resources "Processed resource count"
+        string status "Status: staged, normalized, quarantined, failed"
+        string import_task_id "Background task ID"
+        timestamp created_at "Creation timestamp"
+        timestamp processed_at "Completion timestamp"
+    }
+
+    StagedResourceNode {
+        bigint id PK "Auto-incrementing surrogate ID"
+        bigint staged_import_id FK "FK -> StagedImport.id"
+        string resource_type "Entity type (QuestionItem, CodeList, etc.)"
+        string raw_urn "Raw external URN from source"
+        jsonb raw_value "Pre-normalized raw payload"
+        string canonical_urn "Resolved canonical URN"
+        string status "Status: staged, normalized, quarantined, failed"
+        timestamp created_at "Creation timestamp"
+    }
+
+    %% ==========================================
+    %% RELATIONSHIPS & CARDINALITY
+    %% ==========================================
+    %% Concept Layer
+    ConceptScheme ||--o{ Concept : "contains"
+    Concept ||--o{ Concept : "hierarchy"
+    ConceptualVariableScheme ||--o{ ConceptualVariable : "contains"
+    Concept ||--o{ ConceptualVariable : "anchors"
+
+    %% Representation & Instrument Layer
+    CategoryScheme ||--o{ Category : "contains"
+    Category ||--o{ Category : "hierarchy"
+    Concept ||--o{ Category : "categorizes"
+    CategoryScheme ||--o{ CodeList : "contains"
+    CodeList ||--o{ Code : "contains"
+    Category ||--o{ Code : "labels"
+    Code ||--o{ Code : "hierarchy"
+    QuestionScheme ||--o{ QuestionItem : "contains"
+    CodeList ||--o{ QuestionItem : "response_domain"
+    RepresentedVariableScheme ||--o{ RepresentedVariable : "contains"
+    ConceptualVariable ||--o{ RepresentedVariable : "cascade_harmonizes"
+    CodeList ||--o{ RepresentedVariable : "value_representation"
+    QuestionItem ||--o{ QuestionVariable : "associates"
+    RepresentedVariable ||--o{ QuestionVariable : "binds"
+    Instrument ||--o{ InstrumentQuestion : "flows"
+    QuestionItem ||--o{ InstrumentQuestion : "sequences"
+
+    %% Dataset Layer
+    InstanceVariableScheme ||--o{ InstanceVariable : "contains"
+    RepresentedVariable ||--o{ InstanceVariable : "cascade_instantiates"
+    StudyUnit ||--o{ StudyUnitVariable : "contains"
+    InstanceVariable ||--o{ StudyUnitVariable : "maps_to"
+
+    %% Infrastructure Layer
+    StagedImport ||--o{ StagedResourceNode : "extracts"

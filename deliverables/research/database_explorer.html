@@ -1,0 +1,3232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAIRwDDI Database Model Explorer — DDI 4.0 / DDI-CDI / DDI-L 3.3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1e293b;
+      --bg-surface-hover: #283548;
+      --border-color: #334155;
+      --border-color-light: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --accent-primary: #3b82f6;
+      --accent-primary-hover: #2563eb;
+      --accent-cyan: #06b6d4;
+      --accent-purple: #8b5cf6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-slate: #64748b;
+
+      --layer-org: #3b82f6;
+      --layer-concept: #8b5cf6;
+      --layer-rep: #10b981;
+      --layer-dataset: #f59e0b;
+      --layer-infra: #06b6d4;
+      --layer-audit: #ec4899;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-elevated: #f1f5f9;
+      --bg-surface-hover: #e2e8f0;
+      --border-color: #cbd5e1;
+      --border-color-light: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .navbar {
+      max-width: 1700px;
+      margin: 0 auto;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6, #10b981);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: white;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: var(--accent-primary);
+      border-radius: 9999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: var(--bg-surface-elevated);
+      padding: 0.25rem;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .nav-tab {
+      padding: 0.45rem 0.9rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-radius: 7px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-tab.active {
+      color: var(--text-main);
+      background: var(--bg-surface);
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .theme-toggle-btn, .action-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.45rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .theme-toggle-btn:hover, .action-btn:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--text-muted);
+    }
+
+    /* Main Container Layout */
+    .app-container {
+      max-width: 1700px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Subviews */
+    .view-panel {
+      display: none;
+    }
+
+    .view-panel.active {
+      display: block;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* VIEW: DIAGRAM VISUALIZER */
+    .diagram-panel-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .diagram-toolbar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .flow-highlight-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .flow-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .flow-btn:hover {
+      color: var(--text-main);
+      background: var(--bg-surface-hover);
+      border-color: var(--text-dim);
+    }
+
+    .flow-btn.active-question {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border-color: #10b981;
+      font-weight: 700;
+    }
+
+    .flow-btn.active-cascade {
+      background: rgba(139, 92, 246, 0.2);
+      color: #a78bfa;
+      border-color: #8b5cf6;
+      font-weight: 700;
+    }
+
+    .flow-btn.active-response {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border-color: #f59e0b;
+      font-weight: 700;
+    }
+
+    .flow-btn.active-ingestion {
+      background: rgba(6, 182, 212, 0.2);
+      color: #22d3ee;
+      border-color: #06b6d4;
+      font-weight: 700;
+    }
+
+    .diagram-zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .diagram-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .diagram-btn:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--text-muted);
+    }
+
+    .diagram-canvas-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      min-height: 720px;
+      height: calc(100vh - 15rem);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    #svg-diagram-viewport {
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+      user-select: none;
+    }
+
+    #svg-diagram-viewport:active {
+      cursor: grabbing;
+    }
+
+    .node-group {
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.15s ease;
+    }
+
+    .node-group:hover {
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+    }
+
+    .node-group.dimmed {
+      opacity: 0.12;
+    }
+
+    .node-group.focused {
+      opacity: 1 !important;
+      filter: drop-shadow(0 0 16px var(--accent-primary));
+    }
+
+    .node-group.focused-question {
+      opacity: 1 !important;
+      filter: drop-shadow(0 0 16px #10b981);
+    }
+
+    .node-group.focused-cascade {
+      opacity: 1 !important;
+      filter: drop-shadow(0 0 16px #8b5cf6);
+    }
+
+    .node-group.focused-response {
+      opacity: 1 !important;
+      filter: drop-shadow(0 0 16px #f59e0b);
+    }
+
+    .node-group.focused-ingestion {
+      opacity: 1 !important;
+      filter: drop-shadow(0 0 16px #06b6d4);
+    }
+
+    .edge-path {
+      stroke: var(--border-color);
+      stroke-width: 1.5;
+      fill: none;
+      transition: stroke 0.2s ease, stroke-width 0.2s ease, opacity 0.2s ease;
+    }
+
+    .edge-path.highlight-question {
+      stroke: #10b981 !important;
+      stroke-width: 3.5 !important;
+      stroke-dasharray: 6 3;
+      animation: dashPulse 2s linear infinite;
+      opacity: 1 !important;
+    }
+
+    .edge-path.highlight-cascade {
+      stroke: #8b5cf6 !important;
+      stroke-width: 3.5 !important;
+      stroke-dasharray: 6 3;
+      animation: dashPulse 2s linear infinite;
+      opacity: 1 !important;
+    }
+
+    .edge-path.highlight-response {
+      stroke: #f59e0b !important;
+      stroke-width: 3.5 !important;
+      stroke-dasharray: 6 3;
+      animation: dashPulse 2s linear infinite;
+      opacity: 1 !important;
+    }
+
+    .edge-path.highlight-ingestion {
+      stroke: #06b6d4 !important;
+      stroke-width: 3.5 !important;
+      stroke-dasharray: 6 3;
+      animation: dashPulse 2s linear infinite;
+      opacity: 1 !important;
+    }
+
+    @keyframes dashPulse {
+      to { stroke-dashoffset: -18; }
+    }
+
+    .edge-path.highlighted {
+      stroke: var(--accent-cyan) !important;
+      stroke-width: 3 !important;
+      opacity: 1 !important;
+    }
+
+    .edge-path.dimmed {
+      opacity: 0.08;
+    }
+
+    .flow-toast {
+      position: absolute;
+      top: 1.25rem;
+      left: 1.25rem;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: var(--shadow-md);
+      z-index: 10;
+      backdrop-filter: blur(12px);
+    }
+
+    /* Floating Inspector Card in Diagram */
+    .diagram-floating-inspector {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 380px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow-lg);
+      display: none;
+      flex-direction: column;
+      gap: 0.75rem;
+      z-index: 20;
+      backdrop-filter: blur(16px);
+      animation: slideInUp 0.2s ease;
+    }
+
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .inspector-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .inspector-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .inspector-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 0.2rem;
+    }
+
+    .inspector-close-btn:hover {
+      color: var(--text-main);
+    }
+
+    .inspector-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .inspector-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      background: var(--bg-surface);
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color-light);
+      font-size: 0.75rem;
+    }
+
+    .inspector-action-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    /* Explorer Layout */
+    .explorer-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* Left Sidebar: Entity List */
+    .sidebar-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: sticky;
+      top: 5rem;
+      max-height: calc(100vh - 6.5rem);
+      overflow-y: auto;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .search-wrapper {
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.6rem 0.85rem 0.6rem 2.25rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .filter-chip {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color-light);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .filter-chip:hover {
+      color: var(--text-main);
+      border-color: var(--border-color);
+    }
+
+    .filter-chip.active {
+      background: var(--accent-primary);
+      color: white;
+      border-color: var(--accent-primary);
+      font-weight: 600;
+    }
+
+    .entity-tree {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .layer-group-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .entity-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .entity-item {
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all 0.12s ease;
+      border: 1px solid transparent;
+    }
+
+    .entity-item:hover {
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+    }
+
+    .entity-item.active {
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+      font-weight: 600;
+      border-color: var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .entity-item-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+
+    /* Right Detail Panel */
+    .detail-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .entity-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+    }
+
+    .entity-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .entity-name {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .entity-table-name {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--text-dim);
+      background: var(--bg-surface-elevated);
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color-light);
+    }
+
+    .entity-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .badge-org { background: rgba(59, 130, 246, 0.15); color: var(--layer-org); border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-concept { background: rgba(139, 92, 246, 0.15); color: var(--layer-concept); border: 1px solid rgba(139, 92, 246, 0.3); }
+    .badge-rep { background: rgba(16, 185, 129, 0.15); color: var(--layer-rep); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-dataset { background: rgba(245, 158, 11, 0.15); color: var(--layer-dataset); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-infra { background: rgba(6, 182, 212, 0.15); color: var(--layer-infra); border: 1px solid rgba(6, 182, 212, 0.3); }
+    .badge-audit { background: rgba(236, 72, 153, 0.15); color: var(--layer-audit); border: 1px solid rgba(236, 72, 153, 0.3); }
+
+    .badge-base { background: var(--bg-surface-elevated); color: var(--text-muted); border: 1px solid var(--border-color); font-family: var(--font-mono); }
+
+    .entity-desc {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .urn-pattern-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .urn-pattern-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+    }
+
+    .urn-pattern-code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent-cyan);
+    }
+
+    /* Field Schema Table */
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-surface-elevated);
+    }
+
+    table.fields-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    table.fields-table th {
+      background: var(--bg-surface);
+      color: var(--text-dim);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    table.fields-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color-light);
+      vertical-align: middle;
+    }
+
+    table.fields-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .field-name {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .field-type {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-purple);
+    }
+
+    .field-constraints {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .tag-pk {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+
+    .tag-fk {
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+    }
+
+    .tag-fk:hover {
+      text-decoration: underline;
+    }
+
+    .tag-null {
+      color: var(--text-dim);
+      font-size: 0.7rem;
+    }
+
+    .tag-req {
+      color: var(--accent-rose);
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .tag-idx {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--accent-primary);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      font-size: 0.65rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }
+
+    .field-notes {
+      color: var(--text-muted);
+      font-size: 0.825rem;
+      line-height: 1.4;
+    }
+
+    /* Relationships View */
+    .relations-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .relations-grid { grid-template-columns: 1fr; }
+    }
+
+    .relation-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .relation-card-header {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .relation-link-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.45rem 0.65rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color-light);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .relation-link-item:hover {
+      border-color: var(--accent-primary);
+      background: var(--bg-surface-hover);
+    }
+
+    .relation-link-title {
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .relation-link-type {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    /* Code Tabs & Snippets */
+    .code-tabs-container {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .code-tabs-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.35rem 0.5rem;
+    }
+
+    .code-tab-buttons {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .code-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      transition: all 0.15s ease;
+    }
+
+    .code-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .code-tab-btn.active {
+      background: var(--bg-surface-elevated);
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    .copy-code-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+    }
+
+    .copy-code-btn:hover {
+      color: var(--text-main);
+      background: var(--bg-surface-hover);
+      border-color: var(--text-muted);
+    }
+
+    .code-content-block {
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.825rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      max-height: 380px;
+      color: var(--text-main);
+      white-space: pre;
+    }
+
+    /* Cascade Simulator View */
+    .cascade-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .cascade-intro {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .cascade-stages-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    @media (max-width: 1024px) {
+      .cascade-stages-grid { grid-template-columns: 1fr; }
+    }
+
+    .cascade-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: relative;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .cascade-card.tier-1 { border-top: 4px solid var(--layer-concept); }
+    .cascade-card.tier-2 { border-top: 4px solid var(--layer-rep); }
+    .cascade-card.tier-3 { border-top: 4px solid var(--layer-dataset); }
+
+    .cascade-tier-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      align-self: flex-start;
+    }
+
+    /* Relationship Matrix View */
+    .matrix-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      overflow-x: auto;
+    }
+
+    table.matrix-table {
+      border-collapse: collapse;
+      font-size: 0.75rem;
+      width: 100%;
+    }
+
+    table.matrix-table th, table.matrix-table td {
+      border: 1px solid var(--border-color);
+      padding: 0.45rem 0.6rem;
+      text-align: center;
+    }
+
+    table.matrix-table th {
+      background: var(--bg-surface-elevated);
+      color: var(--text-dim);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    table.matrix-table th.sticky-col, table.matrix-table td.sticky-col {
+      position: sticky;
+      left: 0;
+      background: var(--bg-surface);
+      text-align: left;
+      font-weight: 600;
+      z-index: 2;
+    }
+
+    .matrix-cell-fk {
+      background: rgba(59, 130, 246, 0.2);
+      color: var(--accent-primary);
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .matrix-cell-junction {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent-emerald);
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .matrix-cell-poly {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--accent-amber);
+      font-weight: 700;
+      border-radius: 4px;
+    }
+
+    /* SQL DDL Hub */
+    .ddl-hub-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      padding: 1.25rem 1.5rem;
+      margin-top: auto;
+    }
+
+    .footer-content {
+      max-width: 1700px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.825rem;
+      color: var(--text-dim);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .footer-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .footer-link:hover {
+      color: var(--accent-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header>
+    <div class="navbar">
+      <div class="brand-section">
+        <div class="brand-logo">DDI</div>
+        <div>
+          <div class="brand-title">
+            FAIRwDDI Model Explorer
+            <span class="brand-badge">WP3 ST3</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="nav-tab active" onclick="switchView('diagram')">
+          <span>📐</span> Interactive Diagram
+        </button>
+        <button class="nav-tab" onclick="switchView('explorer')">
+          <span>🗂️</span> Entity Explorer
+        </button>
+        <button class="nav-tab" onclick="switchView('cascade')">
+          <span>🪜</span> Variable Cascade
+        </button>
+        <button class="nav-tab" onclick="switchView('matrix')">
+          <span>📊</span> Relationship Matrix
+        </button>
+        <button class="nav-tab" onclick="switchView('ddl')">
+          <span>⚡</span> DDL & SQL Hub
+        </button>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode" id="theme-btn">
+          <span>🌙</span> Theme
+        </button>
+        <button class="action-btn" onclick="exportSchemaJson()" title="Export entire model metadata as JSON">
+          <span>📥</span> Export JSON
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Container -->
+  <main class="app-container">
+
+    <!-- VIEW 0: INTERACTIVE MODEL DIAGRAM -->
+    <div id="view-diagram" class="view-panel active">
+      <div class="diagram-panel-container">
+        <div class="diagram-toolbar">
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <div class="search-wrapper" style="width: 220px;">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="diagram-node-search" class="search-input" style="padding-top: 0.35rem; padding-bottom: 0.35rem;" placeholder="Locate entity node..." oninput="searchDiagramNode(this.value)">
+            </div>
+          </div>
+
+          <!-- Flow Highlight Mode Buttons -->
+          <div class="flow-highlight-group">
+            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-right: 0.2rem;">Spotlight:</span>
+            <button class="flow-btn" id="btn-flow-question" onclick="setFlowHighlight('question')" title="Spotlight Question Bank flow (ReQuest focus: Questions, Response Domains, Questionnaire instruments, and Variables)">
+              <span>❓</span> Questions (ReQuest)
+            </button>
+            <button class="flow-btn" id="btn-flow-cascade" onclick="setFlowHighlight('cascade')" title="Spotlight the 3-Tier Variable Cascade (Concept -> RepresentedVariable -> InstanceVariable)">
+              <span>🪜</span> Variable Cascade
+            </button>
+            <button class="flow-btn" id="btn-flow-response" onclick="setFlowHighlight('response')" title="Spotlight Categories, CodeLists, and Discrete Codes">
+              <span>🏷️</span> Response Codes
+            </button>
+            <button class="flow-btn" id="btn-flow-ingestion" onclick="setFlowHighlight('ingestion')" title="Spotlight Staging, Ingestion, URN Aliasing & Metadata Quarantine">
+              <span>📥</span> Ingestion Pipeline
+            </button>
+            <button class="flow-btn" id="btn-flow-clear" onclick="clearFlowHighlight()" title="Clear Spotlight / Show All">
+              <span>✨</span> Clear
+            </button>
+          </div>
+
+          <div class="diagram-zoom-controls">
+            <button class="diagram-btn" onclick="zoomDiagram(1.2)" title="Zoom In"><span>➕</span></button>
+            <button class="diagram-btn" onclick="zoomDiagram(0.8)" title="Zoom Out"><span>➖</span></button>
+            <button class="diagram-btn" onclick="resetDiagramZoom()" title="Reset Zoom & Pan"><span>↺</span> Reset</button>
+            <button class="diagram-btn" onclick="fitDiagramToScreen()" title="Fit to Screen"><span>⛶</span> Fit</button>
+          </div>
+        </div>
+
+        <div class="diagram-canvas-box" id="diagram-canvas-wrapper">
+          <!-- Flow Active Toast Banner -->
+          <div class="flow-toast" id="flow-toast">
+            <span id="flow-toast-icon">❓</span>
+            <span id="flow-toast-text" style="font-weight: 600;">Question Bank Flow Active</span>
+          </div>
+
+          <!-- Interactive SVG Diagram View -->
+          <svg id="svg-diagram-viewport" viewBox="0 0 1600 950" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrow-default" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b"/>
+              </marker>
+              <marker id="arrow-highlight" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 9 5 L 0 9 z" fill="#06b6d4"/>
+              </marker>
+              <marker id="arrow-question" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path d="M 0 0.5 L 9 5 L 0 9.5 z" fill="#10b981"/>
+              </marker>
+              <marker id="arrow-cascade" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path d="M 0 0.5 L 9 5 L 0 9.5 z" fill="#8b5cf6"/>
+              </marker>
+              <marker id="arrow-response" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path d="M 0 0.5 L 9 5 L 0 9.5 z" fill="#f59e0b"/>
+              </marker>
+              <marker id="arrow-ingestion" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path d="M 0 0.5 L 9 5 L 0 9.5 z" fill="#06b6d4"/>
+              </marker>
+            </defs>
+
+            <!-- Background Grid Layer -->
+            <g id="svg-grid-layer" opacity="0.15">
+              <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-width="0.75" />
+              </pattern>
+              <rect width="100%" height="100%" fill="url(#grid-pattern)" />
+            </g>
+
+            <!-- Transformable Graph Container -->
+            <g id="svg-graph-content" transform="matrix(1 0 0 1 0 0)">
+              <!-- Layer Background Boundary Containers -->
+              <g id="svg-layer-regions">
+                <!-- Org Layer -->
+                <rect x="30" y="30" width="340" height="230" rx="14" fill="#3b82f6" fill-opacity="0.04" stroke="#3b82f6" stroke-opacity="0.25" stroke-dasharray="4 4" />
+                <text x="45" y="55" fill="#3b82f6" font-size="12" font-weight="700" letter-spacing="0.08em">1. ORGANIZATION & GROUPING</text>
+
+                <!-- Concept Layer -->
+                <rect x="400" y="30" width="670" height="230" rx="14" fill="#8b5cf6" fill-opacity="0.04" stroke="#8b5cf6" stroke-opacity="0.25" stroke-dasharray="4 4" />
+                <text x="415" y="55" fill="#8b5cf6" font-size="12" font-weight="700" letter-spacing="0.08em">2. CONCEPT LAYER (SKOS / THESAURI)</text>
+
+                <!-- Representation Layer -->
+                <rect x="30" y="290" width="1040" height="340" rx="14" fill="#10b981" fill-opacity="0.04" stroke="#10b981" stroke-opacity="0.25" stroke-dasharray="4 4" />
+                <text x="45" y="315" fill="#10b981" font-size="12" font-weight="700" letter-spacing="0.08em">3. REPRESENTATION & INSTRUMENT LAYER</text>
+
+                <!-- Dataset Layer -->
+                <rect x="30" y="660" width="1040" height="250" rx="14" fill="#f59e0b" fill-opacity="0.04" stroke="#f59e0b" stroke-opacity="0.25" stroke-dasharray="4 4" />
+                <text x="45" y="685" fill="#f59e0b" font-size="12" font-weight="700" letter-spacing="0.08em">4. DATASET LAYER (PHYSICAL WAVES & VARIABLES)</text>
+
+                <!-- Infrastructure Layer -->
+                <rect x="1100" y="30" width="460" height="600" rx="14" fill="#06b6d4" fill-opacity="0.04" stroke="#06b6d4" stroke-opacity="0.25" stroke-dasharray="4 4" />
+                <text x="1115" y="55" fill="#06b6d4" font-size="12" font-weight="700" letter-spacing="0.08em">5. INGESTION & STAGING LAYER</text>
+
+                <!-- Audit Layer -->
+                <rect x="1100" y="660" width="460" height="250" rx="14" fill="#ec4899" fill-opacity="0.04" stroke="#ec4899" stroke-opacity="0.25" stroke-dasharray="4 4" />
+                <text x="1115" y="685" fill="#ec4899" font-size="12" font-weight="700" letter-spacing="0.08em">6. EVENT LOGGING & AUDIT TRAIL</text>
+              </g>
+
+              <!-- Connection Edges Paths -->
+              <g id="svg-edges-group">
+                <!-- Dynamically populated edges -->
+              </g>
+
+              <!-- Entity Nodes -->
+              <g id="svg-nodes-group">
+                <!-- Dynamically populated interactive SVG nodes -->
+              </g>
+            </g>
+          </svg>
+
+          <!-- Floating Inspector Drawer -->
+          <div class="diagram-floating-inspector" id="floating-inspector">
+            <div class="inspector-header">
+              <div class="inspector-title">
+                <span id="insp-icon">📦</span>
+                <span id="insp-name">EntityName</span>
+              </div>
+              <button class="inspector-close-btn" onclick="closeInspector()">✕</button>
+            </div>
+            <div class="inspector-desc" id="insp-desc">Entity description here...</div>
+            <div class="inspector-stats-grid">
+              <div><strong>Layer:</strong> <span id="insp-layer">Concept</span></div>
+              <div><strong>Base:</strong> <span id="insp-base">DDIResource</span></div>
+              <div><strong>Table:</strong> <span id="insp-table">request_ddi_...</span></div>
+              <div><strong>Fields:</strong> <span id="insp-fields-count">8</span></div>
+            </div>
+            <div class="inspector-action-row">
+              <button class="diagram-btn" style="flex: 1; justify-content: center; background: var(--accent-primary); color: white;" onclick="jumpToEntityInExplorer()">
+                <span>🔍</span> Open in Explorer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 1: ENTITY EXPLORER -->
+    <div id="view-explorer" class="view-panel">
+      <div class="explorer-layout">
+        
+        <!-- Left Sidebar: Search & Entity Directory -->
+        <aside class="sidebar-panel">
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="entity-search" class="search-input" placeholder="Search tables, fields, URNs..." oninput="handleSearch(this.value)">
+          </div>
+
+          <div class="filter-group">
+            <button class="filter-chip active" onclick="filterLayer('all', this)">All (26)</button>
+            <button class="filter-chip" onclick="filterLayer('org', this)">Org (2)</button>
+            <button class="filter-chip" onclick="filterLayer('concept', this)">Concept (5)</button>
+            <button class="filter-chip" onclick="filterLayer('rep', this)">Rep (9)</button>
+            <button class="filter-chip" onclick="filterLayer('dataset', this)">Dataset (4)</button>
+            <button class="filter-chip" onclick="filterLayer('infra', this)">Infra (5)</button>
+            <button class="filter-chip" onclick="filterLayer('audit', this)">Audit (1)</button>
+          </div>
+
+          <div class="entity-tree" id="entity-tree-container">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </aside>
+
+        <!-- Right Content: Entity Detail Inspector -->
+        <section class="detail-panel" id="detail-panel">
+          <div class="entity-header">
+            <div class="entity-title-row">
+              <div class="entity-name">
+                <span id="ent-name">QuestionItem</span>
+                <span class="entity-table-name" id="ent-table">request_ddi_questionitem</span>
+              </div>
+              <div class="entity-badges" id="ent-badges">
+                <!-- Badges populated dynamically -->
+              </div>
+            </div>
+            <p class="entity-desc" id="ent-desc">
+              Standalone reusable question wording and response domain specification. Belongs to a single QuestionScheme, can link directly to a response CodeList or define a flexible response_domain JSON object.
+            </p>
+            <div class="urn-pattern-box">
+              <span class="urn-pattern-label">Canonical URN Pattern</span>
+              <span class="urn-pattern-code" id="ent-urn-pattern">urn:ddi:fr.sciencespo:QuestionItem.qi-leftright:1.0.0</span>
+            </div>
+          </div>
+
+          <!-- Fields Table -->
+          <div>
+            <h3 class="section-title">
+              <span>📋</span> Schema Attributes & Fields (<span id="field-count">8</span>)
+            </h3>
+            <div class="table-responsive">
+              <table class="fields-table">
+                <thead>
+                  <tr>
+                    <th>Column Name</th>
+                    <th>Data Type</th>
+                    <th>Constraints</th>
+                    <th>Notes & Semantics</th>
+                  </tr>
+                </thead>
+                <tbody id="fields-tbody">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Relationships Panel -->
+          <div>
+            <h3 class="section-title">
+              <span>🔗</span> Model Relationships & Associations
+            </h3>
+            <div class="relations-grid">
+              <div class="relation-card">
+                <div class="relation-card-header">
+                  <span>↗️</span> Outgoing Foreign Keys / Links
+                </div>
+                <div id="outgoing-relations" style="display: flex; flex-direction: column; gap: 0.35rem;">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+              <div class="relation-card">
+                <div class="relation-card-header">
+                  <span>↙️</span> Incoming References & Junctions
+                </div>
+                <div id="incoming-relations" style="display: flex; flex-direction: column; gap: 0.35rem;">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Code & Schema Inspector Tabs -->
+          <div>
+            <h3 class="section-title">
+              <span>💻</span> Code Definition & Serialization
+            </h3>
+            <div class="code-tabs-container">
+              <div class="code-tabs-header">
+                <div class="code-tab-buttons">
+                  <button class="code-tab-btn active" onclick="switchCodeTab('django')">Django 6.0 Model</button>
+                  <button class="code-tab-btn" onclick="switchCodeTab('sql')">PostgreSQL DDL</button>
+                  <button class="code-tab-btn" onclick="switchCodeTab('pydantic')">Pydantic v2</button>
+                  <button class="code-tab-btn" onclick="switchCodeTab('ddi-xml')">DDI-L 3.3 XML</button>
+                  <button class="code-tab-btn" onclick="switchCodeTab('json')">JSON-LD</button>
+                </div>
+                <button class="copy-code-btn" onclick="copyCurrentCode()">
+                  <span>📋</span> Copy Snippet
+                </button>
+              </div>
+              <pre class="code-content-block" id="code-snippet-box"></pre>
+            </div>
+          </div>
+
+        </section>
+      </div>
+    </div>
+
+    <!-- VIEW 2: VARIABLE CASCADE SIMULATOR -->
+    <div id="view-cascade" class="view-panel">
+      <div class="cascade-container">
+        <div class="cascade-intro">
+          <h2 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">
+            🪜 The DDI Variable Cascade — Live Interactive Flow
+          </h2>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">
+            The core innovation of the upgraded FAIRwDDI architecture is the <b>three-tier DDI Variable Cascade</b> (<code style="color: var(--accent-purple);">ConceptualVariable</code> → <code style="color: var(--accent-emerald);">RepresentedVariable</code> → <code style="color: var(--accent-amber);">InstanceVariable</code>). This decouples abstract social-science concepts from survey questionnaire wordings and physical dataset columns, enabling flawless cross-survey harmonization across decades of waves.
+          </p>
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem;">
+            <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-dim);">Select Real-World Example:</label>
+            <select id="cascade-example-select" onchange="renderCascadeExample(this.value)" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.4rem 0.75rem; border-radius: 6px; font-family: inherit;">
+              <option value="leftright">Left-Right Political Scale (0-10)</option>
+              <option value="health">Subjective General Health (5-point)</option>
+              <option value="trust_parliament">Trust in National Parliament (0-10 scale)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="cascade-stages-grid" id="cascade-stages-box">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: RELATIONSHIP MATRIX -->
+    <div id="view-matrix" class="view-panel">
+      <div class="matrix-container">
+        <div>
+          <h2 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.25rem;">
+            📊 Entity Relationship & Dependency Matrix
+          </h2>
+          <p style="color: var(--text-muted); font-size: 0.875rem;">
+            Cross-reference table mapping all 26 entities, foreign keys (<span style="color: var(--accent-primary); font-weight: 600;">FK</span>), junctions (<span style="color: var(--accent-emerald); font-weight: 600;">JCT</span>), and polymorphic references (<span style="color: var(--accent-amber); font-weight: 600;">REF</span>). Click any cell to jump to the entity details.
+          </p>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="matrix-table" id="matrix-table">
+            <!-- Dynamically populated -->
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: DDL & SQL HUB -->
+    <div id="view-ddl" class="view-panel">
+      <div class="ddl-hub-container">
+        <div class="cascade-intro">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <h2 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">
+                ⚡ PostgreSQL 17 Standard DDL Script
+              </h2>
+              <p style="color: var(--text-muted); font-size: 0.875rem;">
+                Complete PostgreSQL DDL schema with ICU collations, canonical URN primary keys, foreign keys, and JSONB GIN indexing.
+              </p>
+            </div>
+            <button class="action-btn" onclick="copyFullDDL()">
+              <span>📋</span> Copy Full DDL (PostgreSQL)
+            </button>
+          </div>
+        </div>
+        <div class="code-tabs-container">
+          <pre class="code-content-block" id="full-ddl-box" style="max-height: 600px;"></pre>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div>
+        <strong>FAIRwDDI Lifecycle Architecture</strong> — Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS
+      </div>
+      <div class="footer-links">
+        <a href="database.md" class="footer-link">📄 database.md</a>
+        <a href="database_diagram.md" class="footer-link">📊 database_diagram.md</a>
+        <a href="database_diagram.mmd" class="footer-link">📐 database_diagram.mmd</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Core Data & Application Logic -->
+  <script>
+    // Complete Entity Database Model Metadata
+    const SCHEMA_DATA = {
+      // 1. Organization Layer
+      Organization: {
+        layer: "org",
+        layerName: "Organization & Grouping",
+        base: "DDIResource",
+        table: "request_ddi_organization",
+        ddiTag: "<ddi:Organization>",
+        urnPattern: "urn:ddi:fr.sciencespo:Organization.org-cdsp:1.0.0",
+        description: "Institutional organization resource in DDI-Lifecycle. Represents archives, distributors, research centers, universities, and funding bodies. Secondary details (acronyms, contact info, URIs) are captured in extended_attributes.",
+        pos: { x: 60, y: 80 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical DDI-L Organization URN" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual organization name [{'lang': 'fr', 'value': '...'}]" },
+          { name: "organization_type", type: "VARCHAR(64)", req: true, idx: true, notes: "Classification type ('archive', 'distributor', 'funder')" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects (acronyms, contact info, address)" },
+          { name: "hashes", type: "JSONB", notes: "Unified multi-algorithm content digests {'sha256': '...'}" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp (auto_now_add)" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp (auto_now)" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "Group", type: "Polymorphic reference in Group.references" }
+        ]
+      },
+      Group: {
+        layer: "org",
+        layerName: "Organization & Grouping",
+        base: "DDIResource",
+        table: "request_ddi_group",
+        ddiTag: "<ddi:Group> / <ddi:SubGroup>",
+        urnPattern: "urn:ddi:fr.sciencespo:Group.grp-ess:1.0.0",
+        description: "Generic Group DDI resource. Logical grouping of related resources (e.g. longitudinal study series, panels, thematic collections, or waves) referenced via polymorphic typed URN references.",
+        pos: { x: 60, y: 170 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical DDI-L Group URN" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual group name [{'lang': 'fr', 'value': '...'}]" },
+          { name: "description", type: "JSONB", notes: "Multilingual group description" },
+          { name: "group_type", type: "VARCHAR(64)", req: true, idx: true, notes: "Group classification ('study_series', 'panel', 'thematic', 'collection')" },
+          { name: "references", type: "JSONB", notes: "Polymorphic member URN references [{'resource_type': 'StudyUnit', 'urn': '...'}]" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "hashes", type: "JSONB", notes: "Unified multi-algorithm content digests {'sha256': '...'}" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "StudyUnit", type: "Polymorphic member reference via references JSONB" }
+        ],
+        incoming: []
+      },
+
+      // 2. Concept Layer
+      ConceptScheme: {
+        layer: "concept",
+        layerName: "Concept Layer",
+        base: "DDIScheme",
+        table: "request_ddi_conceptscheme",
+        ddiTag: "<ddi:ConceptScheme> / <skos:ConceptScheme>",
+        urnPattern: "urn:ddi:fr.sciencespo:ConceptScheme.cs-elsst:1.0.0",
+        description: "Named collection of reusable domain concepts (maps to DDI-L ConceptScheme or SKOS ConceptScheme). Contains hierarchical Concept entities.",
+        pos: { x: 430, y: 80 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical ConceptScheme URN" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "Concept", type: "Foreign Key (Concept.scheme_urn)" }
+        ]
+      },
+      Concept: {
+        layer: "concept",
+        layerName: "Concept Layer",
+        base: "DDIIdentifiable",
+        table: "request_ddi_concept",
+        ddiTag: "<ddi:Concept> / <skos:Concept>",
+        urnPattern: "urn:ddi:fr.sciencespo:Concept.c-politics:1.0.0",
+        description: "High-level thematic domain concept from any controlled vocabulary or thesaurus (e.g. CESSDA ELSST, CESSDA Topics, DDI-CV). Supports hierarchical trees via parent_urn.",
+        pos: { x: 430, y: 170 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical Concept URN" },
+          { name: "scheme_urn", type: "VARCHAR(512)", fk: "ConceptScheme", notes: "FK -> ConceptScheme.urn" },
+          { name: "uri", type: "VARCHAR(512)", uq: true, idx: true, notes: "Controlled vocabulary concept URI (e.g. ELSST URI, unique)" },
+          { name: "vocabulary", type: "VARCHAR(128)", idx: true, notes: "Controlled vocabulary name ('ELSST', 'Topics', 'DDI-CV')" },
+          { name: "notation", type: "VARCHAR(128)", idx: true, notes: "Standard thesaurus notation code" },
+          { name: "label", type: "JSONB", notes: "Multilingual preferred label (skos:prefLabel)" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "definition", type: "JSONB", notes: "Multilingual definition (skos:definition)" },
+          { name: "parent_urn", type: "VARCHAR(512)", fk: "Concept", notes: "FK -> Concept.urn (hierarchical tree / skos:broader)" },
+          { name: "concept_type", type: "VARCHAR(64)", notes: "Classification ('domain', 'concept', 'top_concept')" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "ConceptScheme", type: "Foreign Key (scheme_urn)" },
+          { target: "Concept", type: "Self-referential FK (parent_urn)" }
+        ],
+        incoming: [
+          { target: "ConceptualVariable", type: "Semantic Anchor FK (ConceptualVariable.concept_urn)" },
+          { target: "Category", type: "Optional Concept Anchor FK (Category.concept_urn)" },
+          { target: "SemanticRelationship", type: "RDF Triple Subject / Object" }
+        ]
+      },
+      ConceptualVariableScheme: {
+        layer: "concept",
+        layerName: "Concept Layer",
+        base: "DDIScheme",
+        table: "request_ddi_conceptualvariablescheme",
+        ddiTag: "<ddi:ConceptualVariableScheme>",
+        urnPattern: "urn:ddi:fr.sciencespo:ConceptualVariableScheme.cvs-core:1.0.0",
+        description: "Named collection of reusable conceptual variables (maps to DDI-L ConceptualVariableScheme).",
+        pos: { x: 740, y: 80 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical ConceptualVariableScheme URN" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "ConceptualVariable", type: "Foreign Key (ConceptualVariable.scheme_urn)" }
+        ]
+      },
+      ConceptualVariable: {
+        layer: "concept",
+        layerName: "Concept Layer",
+        base: "DDIResource",
+        table: "request_ddi_conceptualvariable",
+        ddiTag: "<ddi:ConceptualVariable>",
+        urnPattern: "urn:ddi:fr.sciencespo:ConceptualVariable.cv-leftright:1.0.0",
+        description: "Abstract measurement concept (e.g. 'Left-Right Political Placement', 'Subjective Health') representing Tier 1 of the Variable Cascade.",
+        pos: { x: 740, y: 170 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical ConceptualVariable URN" },
+          { name: "scheme_urn", type: "VARCHAR(512)", fk: "ConceptualVariableScheme", notes: "FK -> ConceptualVariableScheme.urn" },
+          { name: "concept_urn", type: "VARCHAR(512)", fk: "Concept", notes: "FK -> Concept.urn (Semantic controlled thesaurus anchor)" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual conceptual variable name" },
+          { name: "label", type: "JSONB", notes: "Multilingual human label" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "ConceptualVariableScheme", type: "Foreign Key (scheme_urn)" },
+          { target: "Concept", type: "Semantic Anchor FK (concept_urn)" }
+        ],
+        incoming: [
+          { target: "RepresentedVariable", type: "Cascade Tier 1 -> Tier 2 FK (RepresentedVariable.conceptual_variable_urn)" },
+          { target: "SemanticRelationship", type: "RDF Triple Subject / Object" }
+        ]
+      },
+      SemanticRelationship: {
+        layer: "concept",
+        layerName: "Concept Layer",
+        base: "Model",
+        table: "request_ddi_semanticrelationship",
+        ddiTag: "<skos:mappingRelation> / RDF Triple",
+        urnPattern: "Surrogate PK (id: BigInt)",
+        description: "Captures RDF triple relationships between resources across any layer (e.g. SKOS mappings skos:exactMatch, skos:broadMatch, provenance prov:wasDerivedFrom).",
+        pos: { x: 920, y: 120 },
+        fields: [
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
+          { name: "subject_type", type: "VARCHAR(128)", req: true, idx: true, notes: "Subject entity type ('Concept', 'ConceptualVariable')" },
+          { name: "subject_urn", type: "VARCHAR(512)", req: true, idx: true, notes: "Subject canonical URN or URI" },
+          { name: "predicate", type: "VARCHAR(256)", req: true, idx: true, notes: "Semantic predicate (e.g. 'skos:exactMatch', 'prov:wasDerivedFrom')" },
+          { name: "object_type", type: "VARCHAR(128)", req: true, idx: true, notes: "Target entity type ('Concept', 'ConceptualVariable')" },
+          { name: "object_urn", type: "VARCHAR(512)", req: true, idx: true, notes: "Target canonical URN or URI" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes (confidence score, mapping tool, notes)" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: []
+      },
+
+      // 3. Representation Layer
+      CategoryScheme: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "DDIScheme",
+        table: "request_ddi_categoryscheme",
+        ddiTag: "<ddi:CategoryScheme>",
+        urnPattern: "urn:ddi:fr.sciencespo:CategoryScheme.cats-scales:1.0.0",
+        description: "Named collection of reusable categories (maps to DDI-L CategoryScheme).",
+        pos: { x: 60, y: 340 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical CategoryScheme URN" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "Category", type: "Foreign Key (Category.scheme_urn)" },
+          { target: "CodeList", type: "Optional Link (CodeList.scheme_urn)" }
+        ]
+      },
+      Category: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "DDIResource",
+        table: "request_ddi_category",
+        ddiTag: "<ddi:Category>",
+        urnPattern: "urn:ddi:fr.sciencespo:Category.cat-left:1.0.0",
+        description: "Response category text label (decoupled from numerical code values). Supports self-referential hierarchy via parent_urn.",
+        pos: { x: 60, y: 440 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical Category URN" },
+          { name: "scheme_urn", type: "VARCHAR(512)", fk: "CategoryScheme", notes: "FK -> CategoryScheme.urn" },
+          { name: "concept_urn", type: "VARCHAR(512)", fk: "Concept", notes: "Optional semantic concept anchor FK -> Concept.urn" },
+          { name: "name", type: "JSONB", req: true, notes: "Technical identifier / multilingual name" },
+          { name: "label", type: "JSONB", notes: "Multilingual category label" },
+          { name: "parent_urn", type: "VARCHAR(512)", fk: "Category", notes: "FK -> Category.urn (hierarchical schemes)" },
+          { name: "order", type: "INTEGER", notes: "Display order within scheme (default 0)" },
+          { name: "is_missing", type: "BOOLEAN", notes: "Missing / non-response indicator (default False)" },
+          { name: "extended_attributes", type: "JSONB", notes: "Category definitions, inclusions/exclusions" },
+          { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "CategoryScheme", type: "Foreign Key (scheme_urn)" },
+          { target: "Concept", type: "Optional Concept Anchor FK (concept_urn)" },
+          { target: "Category", type: "Self-referential FK (parent_urn)" }
+        ],
+        incoming: [
+          { target: "Code", type: "Label Association FK (Code.category_urn)" }
+        ]
+      },
+      CodeList: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "DDIResource",
+        table: "request_ddi_codelist",
+        ddiTag: "<ddi:CodeList>",
+        urnPattern: "urn:ddi:fr.sciencespo:CodeList.cl-lrscale:1.0.0",
+        description: "Structural set of response codes linked to categories. Reusable across multiple QuestionItems and RepresentedVariables.",
+        pos: { x: 230, y: 340 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical CodeList URN" },
+          { name: "scheme_urn", type: "VARCHAR(512)", fk: "CategoryScheme", notes: "Optional FK -> CategoryScheme.urn" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual human title" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "CategoryScheme", type: "Optional Foreign Key (scheme_urn)" }
+        ],
+        incoming: [
+          { target: "Code", type: "Parent Code List FK (Code.code_list_urn)" },
+          { target: "QuestionItem", type: "Response Domain Link FK (QuestionItem.code_list_urn)" },
+          { target: "RepresentedVariable", type: "Value Representation FK (RepresentedVariable.code_list_urn)" }
+        ]
+      },
+      Code: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "DDIIdentifiable",
+        table: "request_ddi_code",
+        ddiTag: "<ddi:Code>",
+        urnPattern: "urn:ddi:fr.sciencespo:Code.code-lr0:1.0.0",
+        description: "Junction connecting a CodeList to a Category with a discrete code value (e.g. '1', '98', 'DK'). Supports self-referential hierarchy.",
+        pos: { x: 230, y: 440 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical Code URN" },
+          { name: "code_list_urn", type: "VARCHAR(512)", fk: "CodeList", req: true, notes: "FK -> CodeList.urn" },
+          { name: "category_urn", type: "VARCHAR(512)", fk: "Category", req: true, notes: "FK -> Category.urn" },
+          { name: "code_value", type: "VARCHAR(64)", req: true, notes: "Numerical/string code value (e.g. '1', '98', 'DK')" },
+          { name: "parent_urn", type: "VARCHAR(512)", fk: "Code", notes: "FK -> Code.urn (hierarchical code lists)" },
+          { name: "order", type: "INTEGER", notes: "Display order within list (default 0)" },
+          { name: "is_missing", type: "BOOLEAN", notes: "True if code represents missing/non-response" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "CodeList", type: "Foreign Key (code_list_urn)" },
+          { target: "Category", type: "Foreign Key (category_urn)" },
+          { target: "Code", type: "Self-referential FK (parent_urn)" }
+        ],
+        incoming: []
+      },
+      QuestionScheme: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "DDIScheme",
+        table: "request_ddi_questionscheme",
+        ddiTag: "<ddi:QuestionScheme>",
+        urnPattern: "urn:ddi:fr.sciencespo:QuestionScheme.qs-attitudes:1.0.0",
+        description: "Named collection of reusable questions (maps to DDI-L QuestionScheme).",
+        pos: { x: 420, y: 340 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical QuestionScheme URN" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "QuestionItem", type: "Foreign Key (QuestionItem.scheme_urn)" }
+        ]
+      },
+      QuestionItem: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "DDIResource",
+        table: "request_ddi_questionitem",
+        ddiTag: "<ddi:QuestionItem>",
+        urnPattern: "urn:ddi:fr.sciencespo:QuestionItem.qi-leftright:1.0.0",
+        description: "Standalone reusable question wording and response domain specification. Belongs to a single QuestionScheme and can link directly to a response CodeList.",
+        pos: { x: 420, y: 440 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical QuestionItem URN" },
+          { name: "scheme_urn", type: "VARCHAR(512)", fk: "QuestionScheme", notes: "FK -> QuestionScheme.urn" },
+          { name: "code_list_urn", type: "VARCHAR(512)", fk: "CodeList", notes: "FK -> CodeList.urn (associated coded response domain)" },
+          { name: "response_domain", type: "JSONB", notes: "Response domain specification JSON {'type': 'code' | 'numeric' | 'text'}" },
+          { name: "name", type: "JSONB", req: true, notes: "Technical identifier / multilingual name" },
+          { name: "question_text", type: "JSONB", notes: "Multilingual literal question text [{'lang': 'fr', 'value': '...'}]" },
+          { name: "extended_attributes", type: "JSONB", notes: "Interviewer instructions, preamble, intent" },
+          { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "QuestionScheme", type: "Foreign Key (scheme_urn)" },
+          { target: "CodeList", type: "Foreign Key (code_list_urn)" }
+        ],
+        incoming: [
+          { target: "QuestionVariable", type: "Junction FK (QuestionVariable.question_item_urn)" },
+          { target: "InstrumentQuestion", type: "Junction FK (InstrumentQuestion.question_item_urn)" }
+        ]
+      },
+      RepresentedVariableScheme: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "DDIScheme",
+        table: "request_ddi_representedvariablescheme",
+        ddiTag: "<ddi:RepresentedVariableScheme>",
+        urnPattern: "urn:ddi:fr.sciencespo:RepresentedVariableScheme.rvs-core:1.0.0",
+        description: "Named collection of reusable represented variables (maps to DDI-L RepresentedVariableScheme).",
+        pos: { x: 740, y: 340 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical RepresentedVariableScheme URN" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "RepresentedVariable", type: "Foreign Key (RepresentedVariable.scheme_urn)" }
+        ]
+      },
+      RepresentedVariable: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "DDIResource",
+        table: "request_ddi_representedvariable",
+        ddiTag: "<ddi:RepresentedVariable>",
+        urnPattern: "urn:ddi:fr.sciencespo:RepresentedVariable.rv-lrscale:1.0.0",
+        description: "Combination of conceptual variable and response representation (e.g. code list, numeric range). Represents Tier 2 of the Variable Cascade.",
+        pos: { x: 740, y: 440 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical RepresentedVariable URN" },
+          { name: "scheme_urn", type: "VARCHAR(512)", fk: "RepresentedVariableScheme", notes: "FK -> RepresentedVariableScheme.urn" },
+          { name: "conceptual_variable_urn", type: "VARCHAR(512)", fk: "ConceptualVariable", notes: "FK -> ConceptualVariable.urn (Cascade Tier 1)" },
+          { name: "code_list_urn", type: "VARCHAR(512)", fk: "CodeList", notes: "FK -> CodeList.urn (Direct response code structure)" },
+          { name: "value_representation", type: "JSONB", notes: "Value representation details JSON" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual represented variable name" },
+          { name: "label", type: "JSONB", notes: "Multilingual human label" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Value domain, data type, variable characteristics" },
+          { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "RepresentedVariableScheme", type: "Foreign Key (scheme_urn)" },
+          { target: "ConceptualVariable", type: "Cascade Tier 1 Link FK (conceptual_variable_urn)" },
+          { target: "CodeList", type: "Response Domain FK (code_list_urn)" }
+        ],
+        incoming: [
+          { target: "QuestionVariable", type: "Junction FK (QuestionVariable.represented_variable_urn)" },
+          { target: "InstanceVariable", type: "Cascade Tier 2 -> Tier 3 FK (InstanceVariable.represented_variable_urn)" }
+        ]
+      },
+      QuestionVariable: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "Model",
+        table: "request_ddi_questionvariable",
+        ddiTag: "<ddi:QuestionVariable>",
+        urnPattern: "Surrogate PK (id: BigInt)",
+        description: "Junction connecting a QuestionItem to a RepresentedVariable with referencing path / XPath.",
+        pos: { x: 580, y: 530 },
+        fields: [
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
+          { name: "question_item_urn", type: "VARCHAR(512)", fk: "QuestionItem", req: true, notes: "FK -> QuestionItem.urn" },
+          { name: "represented_variable_urn", type: "VARCHAR(512)", fk: "RepresentedVariable", req: true, notes: "FK -> RepresentedVariable.urn" },
+          { name: "path", type: "VARCHAR(512)", notes: "Referencing path / XPath (default '')" },
+          { name: "order", type: "INTEGER", notes: "Association order (default 0)" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "QuestionItem", type: "Foreign Key (question_item_urn)" },
+          { target: "RepresentedVariable", type: "Foreign Key (represented_variable_urn)" }
+        ],
+        incoming: []
+      },
+      Instrument: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "DDIResource",
+        table: "request_ddi_instrument",
+        ddiTag: "<ddi:Instrument>",
+        urnPattern: "urn:ddi:fr.sciencespo:Instrument.inst-ess3:1.0.0",
+        description: "Data collection instrument / questionnaire in DDI-Lifecycle. Holds ordered question items.",
+        pos: { x: 920, y: 340 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical Instrument URN" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual technical name" },
+          { name: "label", type: "JSONB", notes: "Multilingual human title" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Mode of collection, administration notes" },
+          { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "InstrumentQuestion", type: "Junction FK (InstrumentQuestion.instrument_urn)" }
+        ]
+      },
+      InstrumentQuestion: {
+        layer: "rep",
+        layerName: "Representation & Instrument",
+        base: "Model",
+        table: "request_ddi_instrumentquestion",
+        ddiTag: "<ddi:InstrumentQuestion>",
+        urnPattern: "Surrogate PK (id: BigInt)",
+        description: "Junction connecting an Instrument to member QuestionItem entities with sequencing flow path.",
+        pos: { x: 920, y: 440 },
+        fields: [
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
+          { name: "instrument_urn", type: "VARCHAR(512)", fk: "Instrument", req: true, notes: "FK -> Instrument.urn" },
+          { name: "question_item_urn", type: "VARCHAR(512)", fk: "QuestionItem", req: true, notes: "FK -> QuestionItem.urn" },
+          { name: "path", type: "VARCHAR(512)", notes: "Questionnaire routing path (e.g. /Seq/Q01)" },
+          { name: "order", type: "INTEGER", notes: "Display / sequencing order (default 0)" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "Instrument", type: "Foreign Key (instrument_urn)" },
+          { target: "QuestionItem", type: "Foreign Key (question_item_urn)" }
+        ],
+        incoming: []
+      },
+
+      // 4. Dataset Layer
+      StudyUnit: {
+        layer: "dataset",
+        layerName: "Dataset Layer",
+        base: "DDIResource",
+        table: "request_ddi_studyunit",
+        ddiTag: "<ddi:StudyUnit>",
+        urnPattern: "urn:ddi:fr.sciencespo:StudyUnit.su-ess2007:1.0.0",
+        description: "A specific survey wave or dataset (renamed from Survey). Contains concrete physical dataset variables.",
+        pos: { x: 60, y: 720 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical StudyUnit URN" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual dataset identifier / name" },
+          { name: "title", type: "JSONB", notes: "Multilingual study title" },
+          { name: "external_ref", type: "VARCHAR(512)", uq: true, notes: "DOI or external repository identifier (unique)" },
+          { name: "year", type: "INTEGER", notes: "Survey reference year" },
+          { name: "description", type: "JSONB", notes: "Multilingual abstract" },
+          { name: "extended_attributes", type: "JSONB", notes: "Methodological metadata, universe, sampling" },
+          { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "StudyUnitVariable", type: "Junction FK (StudyUnitVariable.study_unit_urn)" },
+          { target: "Group", type: "Polymorphic reference in Group.references" }
+        ]
+      },
+      InstanceVariableScheme: {
+        layer: "dataset",
+        layerName: "Dataset Layer",
+        base: "DDIScheme",
+        table: "request_ddi_instancevariablescheme",
+        ddiTag: "<ddi:VariableScheme> / <ddi:InstanceVariableScheme>",
+        urnPattern: "urn:ddi:fr.sciencespo:InstanceVariableScheme.ivs-ess2007:1.0.0",
+        description: "Named collection of instance variables for a specific survey wave.",
+        pos: { x: 740, y: 720 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical InstanceVariableScheme URN" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "InstanceVariable", type: "Foreign Key (InstanceVariable.scheme_urn)" }
+        ]
+      },
+      InstanceVariable: {
+        layer: "dataset",
+        layerName: "Dataset Layer",
+        base: "DDIResource",
+        table: "request_ddi_instancevariable",
+        ddiTag: "<ddi:Variable> / <ddi:InstanceVariable>",
+        urnPattern: "urn:ddi:fr.sciencespo:InstanceVariable.iv-ess2007-q01:1.0.0",
+        description: "Physical realization of a variable in a specific dataset column (e.g. q01a). Represents Tier 3 of the Variable Cascade.",
+        pos: { x: 740, y: 810 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical InstanceVariable URN" },
+          { name: "scheme_urn", type: "VARCHAR(512)", fk: "InstanceVariableScheme", notes: "FK -> InstanceVariableScheme.urn" },
+          { name: "represented_variable_urn", type: "VARCHAR(512)", fk: "RepresentedVariable", notes: "FK -> RepresentedVariable.urn (Cascade Tier 2)" },
+          { name: "name", type: "JSONB", req: true, notes: "Column name / mnemonic (e.g. 'q01a', 'lrscale')" },
+          { name: "label", type: "JSONB", notes: "Multilingual column label" },
+          { name: "description", type: "JSONB", notes: "Multilingual description" },
+          { name: "extended_attributes", type: "JSONB", notes: "Storage format, missing values, column index" },
+          { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "InstanceVariableScheme", type: "Foreign Key (scheme_urn)" },
+          { target: "RepresentedVariable", type: "Cascade Tier 2 Link FK (represented_variable_urn)" }
+        ],
+        incoming: [
+          { target: "StudyUnitVariable", type: "Junction FK (StudyUnitVariable.instance_variable_urn)" }
+        ]
+      },
+      StudyUnitVariable: {
+        layer: "dataset",
+        layerName: "Dataset Layer",
+        base: "Model",
+        table: "request_ddi_studyunitvariable",
+        ddiTag: "<ddi:StudyUnitVariable>",
+        urnPattern: "Surrogate PK (id: BigInt)",
+        description: "Junction capturing the direct relationship between a StudyUnit and its member InstanceVariable entries.",
+        pos: { x: 420, y: 770 },
+        fields: [
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
+          { name: "study_unit_urn", type: "VARCHAR(512)", fk: "StudyUnit", req: true, notes: "FK -> StudyUnit.urn" },
+          { name: "instance_variable_urn", type: "VARCHAR(512)", fk: "InstanceVariable", req: true, notes: "FK -> InstanceVariable.urn" },
+          { name: "path", type: "VARCHAR(512)", notes: "Dataset path / table location" },
+          { name: "order", type: "INTEGER", notes: "Physical column order in dataset" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "StudyUnit", type: "Foreign Key (study_unit_urn)" },
+          { target: "InstanceVariable", type: "Foreign Key (instance_variable_urn)" }
+        ],
+        incoming: []
+      },
+
+      // 5. Event & Audit Layer
+      EventLog: {
+        layer: "audit",
+        layerName: "Event & Audit Layer",
+        base: "Model",
+        table: "request_ddi_eventlog",
+        ddiTag: "Audit Trail",
+        urnPattern: "Surrogate PK (id: BigInt)",
+        description: "Generic append-only lifecycle mutation and audit log for any DDI-L resource.",
+        pos: { x: 1140, y: 720 },
+        fields: [
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
+          { name: "urn", type: "VARCHAR(512)", req: true, idx: true, notes: "Target resource canonical or source URN" },
+          { name: "event_type", type: "VARCHAR(128)", req: true, idx: true, notes: "Event classification ('created', 'normalized', 'quarantined')" },
+          { name: "event_data", type: "JSONB", notes: "Arbitrary audit payload metadata as JSONB" },
+          { name: "timestamp", type: "TIMESTAMP", req: true, idx: true, notes: "Event occurrence timestamp" }
+        ],
+        outgoing: [],
+        incoming: []
+      },
+
+      // 6. Infrastructure & Ingestion Layer
+      UrnRegistry: {
+        layer: "infra",
+        layerName: "Infrastructure & Ingestion",
+        base: "Model",
+        table: "request_ddi_urnregistry",
+        ddiTag: "URN Crosswalk",
+        urnPattern: "urn:ddi:agency:ID:version (PK)",
+        description: "Central master registry mapping canonical URNs and external URIs to their target resource types. Provides O(1) URN-to-type crosswalk resolution.",
+        pos: { x: 1140, y: 80 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical URN or external identifier/URI" },
+          { name: "resource_type", type: "VARCHAR(64)", req: true, idx: true, notes: "Target entity type ('QuestionItem', 'Category', 'Concept')" },
+          { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [],
+        incoming: []
+      },
+      URNAlias: {
+        layer: "infra",
+        layerName: "Infrastructure & Ingestion",
+        base: "Model",
+        table: "request_ddi_urnalias",
+        ddiTag: "URN Aliasing",
+        urnPattern: "Surrogate PK (id: BigInt)",
+        description: "Maps auto-generated or random URNs from external tools to canonical database entities.",
+        pos: { x: 1140, y: 190 },
+        fields: [
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
+          { name: "alias_urn", type: "VARCHAR(512)", req: true, uq: true, notes: "External / random source URN" },
+          { name: "canonical_urn", type: "VARCHAR(512)", req: true, idx: true, notes: "Canonical database URN" },
+          { name: "entity_type", type: "VARCHAR(64)", req: true, notes: "Target DDI entity type" },
+          { name: "hash_strategy", type: "VARCHAR(64)", notes: "Strategy used (default 'v1_strict_sha256')" },
+          { name: "source_file", type: "VARCHAR(512)", notes: "Originating import file" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" }
+        ],
+        outgoing: [],
+        incoming: []
+      },
+      MetadataQuarantine: {
+        layer: "infra",
+        layerName: "Infrastructure & Ingestion",
+        base: "Model",
+        table: "request_ddi_metadataquarantine",
+        ddiTag: "Ingestion Quarantine",
+        urnPattern: "Surrogate PK (id: BigInt)",
+        description: "Holds incoming metadata requiring archivist review due to URN collisions, hash drift, or semantic discrepancies.",
+        pos: { x: 1140, y: 300 },
+        fields: [
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
+          { name: "incoming_urn", type: "VARCHAR(512)", req: true, notes: "Conflicting incoming URN" },
+          { name: "existing_urn", type: "VARCHAR(512)", notes: "Conflicting existing canonical URN" },
+          { name: "entity_type", type: "VARCHAR(64)", req: true, notes: "Target DDI entity type" },
+          { name: "incoming_content", type: "JSONB", req: true, notes: "Full serialized incoming payload" },
+          { name: "existing_content_hash", type: "VARCHAR(64)", notes: "SHA-256 hash of existing record" },
+          { name: "incoming_content_hash", type: "VARCHAR(64)", req: true, notes: "SHA-256 hash of incoming record" },
+          { name: "conflict_type", type: "VARCHAR(32)", req: true, notes: "Type: 'staged_urn_drift', 'hash_mismatch'" },
+          { name: "resolution", type: "VARCHAR(32)", notes: "Status: 'approved', 'forked', 'rejected'" },
+          { name: "resolved_by", type: "VARCHAR(255)", notes: "Reviewing archivist username" },
+          { name: "resolved_at", type: "TIMESTAMP", notes: "Review resolution timestamp" },
+          { name: "source_file", type: "VARCHAR(512)", notes: "Originating source file" },
+          { name: "import_task_id", type: "VARCHAR(255)", notes: "Background task ID" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" }
+        ],
+        outgoing: [],
+        incoming: []
+      },
+      StagedImport: {
+        layer: "infra",
+        layerName: "Infrastructure & Ingestion",
+        base: "Model",
+        table: "request_ddi_stagedimport",
+        ddiTag: "Batch Staging",
+        urnPattern: "Surrogate PK (id: BigInt)",
+        description: "Stores metadata and parameters for uploaded metadata file bundles and streaming batch import jobs.",
+        pos: { x: 1140, y: 410 },
+        fields: [
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing import job ID" },
+          { name: "source_format", type: "VARCHAR(64)", req: true, notes: "Format ('ddi-l:3.3:xml', 'ddi-c:2.5:xml', 'croissant', 'csv')" },
+          { name: "file_name", type: "VARCHAR(512)", req: true, notes: "Original uploaded filename" },
+          { name: "file_path", type: "VARCHAR(512)", notes: "File storage path" },
+          { name: "import_options", type: "JSONB", notes: "Batch configuration metadata JSON" },
+          { name: "total_resources", type: "INTEGER", notes: "Total staged resource nodes (default 0)" },
+          { name: "processed_resources", type: "INTEGER", notes: "Processed count (default 0)" },
+          { name: "status", type: "VARCHAR(32)", notes: "Status: 'staged', 'normalized', 'quarantined', 'failed'" },
+          { name: "import_task_id", type: "VARCHAR(255)", notes: "Background task ID" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "processed_at", type: "TIMESTAMP", notes: "Completion timestamp" }
+        ],
+        outgoing: [],
+        incoming: [
+          { target: "StagedResourceNode", type: "Foreign Key (StagedResourceNode.staged_import_id)" }
+        ]
+      },
+      StagedResourceNode: {
+        layer: "infra",
+        layerName: "Infrastructure & Ingestion",
+        base: "Model",
+        table: "request_ddi_stagedresourcenode",
+        ddiTag: "Staging Node",
+        urnPattern: "Surrogate PK (id: BigInt)",
+        description: "Stores individual broken-down raw element resources extracted during Stage 1 parsing.",
+        pos: { x: 1140, y: 510 },
+        fields: [
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing node ID" },
+          { name: "staged_import_id", type: "BIGINT", fk: "StagedImport", req: true, notes: "FK -> StagedImport.id" },
+          { name: "resource_type", type: "VARCHAR(64)", req: true, idx: true, notes: "Target entity type ('QuestionItem', 'CodeList', etc.)" },
+          { name: "raw_urn", type: "VARCHAR(512)", idx: true, notes: "Raw external URN from source file" },
+          { name: "raw_value", type: "JSONB", req: true, notes: "Pre-normalized raw payload" },
+          { name: "canonical_urn", type: "VARCHAR(512)", idx: true, notes: "Resolved canonical database URN" },
+          { name: "status", type: "VARCHAR(32)", notes: "Status: 'staged', 'normalized', 'quarantined', 'failed'" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" }
+        ],
+        outgoing: [
+          { target: "StagedImport", type: "Foreign Key (staged_import_id)" }
+        ],
+        incoming: []
+      }
+    };
+
+    // State Variables
+    let currentEntityKey = "QuestionItem";
+    let currentCodeTab = "django";
+    let currentLayerFilter = "all";
+    let currentSearchTerm = "";
+    let activeFlowHighlight = null;
+    let diagramTransform = { scale: 1, x: 0, y: 0 };
+    let isPanning = false;
+    let panStart = { x: 0, y: 0 };
+
+    // DOM Init
+    document.addEventListener("DOMContentLoaded", () => {
+      renderEntityTree();
+      selectEntity(currentEntityKey);
+      renderMatrix();
+      renderCascadeExample("leftright");
+      renderFullDDL();
+      initInteractiveSvgDiagram();
+      setupDiagramPanZoom();
+      setTimeout(fitDiagramToScreen, 100);
+    });
+
+    // Theme Toggle
+    function toggleTheme() {
+      const isLight = document.body.getAttribute("data-theme") === "light";
+      if (isLight) {
+        document.body.removeAttribute("data-theme");
+        document.getElementById("theme-btn").innerHTML = "<span>🌙</span> Theme";
+      } else {
+        document.body.setAttribute("data-theme", "light");
+        document.getElementById("theme-btn").innerHTML = "<span>☀️</span> Theme";
+      }
+    }
+
+    // Switch Views
+    function switchView(viewName) {
+      document.querySelectorAll(".nav-tab").forEach(tab => tab.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(panel => panel.classList.remove("active"));
+
+      const activeTab = Array.from(document.querySelectorAll(".nav-tab")).find(t => t.textContent.toLowerCase().includes(viewName));
+      if (activeTab) activeTab.classList.add("active");
+
+      const targetPanel = document.getElementById(`view-${viewName}`);
+      if (targetPanel) {
+        targetPanel.classList.add("active");
+        if (viewName === 'diagram') {
+          setTimeout(fitDiagramToScreen, 50);
+        }
+      }
+    }
+
+    // Initialize Interactive SVG Graph
+    function initInteractiveSvgDiagram() {
+      const nodesGroup = document.getElementById("svg-nodes-group");
+      const edgesGroup = document.getElementById("svg-edges-group");
+      nodesGroup.innerHTML = "";
+      edgesGroup.innerHTML = "";
+
+      const nodeWidth = 150;
+      const nodeHeight = 60;
+
+      // Layer color map
+      const layerColors = {
+        org: { bg: "#1e293b", stroke: "#3b82f6", text: "#60a5fa" },
+        concept: { bg: "#1e293b", stroke: "#8b5cf6", text: "#a78bfa" },
+        rep: { bg: "#1e293b", stroke: "#10b981", text: "#34d399" },
+        dataset: { bg: "#1e293b", stroke: "#f59e0b", text: "#fbbf24" },
+        infra: { bg: "#1e293b", stroke: "#06b6d4", text: "#22d3ee" },
+        audit: { bg: "#1e293b", stroke: "#ec4899", text: "#f472b6" }
+      };
+
+      // Draw Connection Edges
+      const renderedEdges = new Set();
+      Object.keys(SCHEMA_DATA).forEach(sourceKey => {
+        const source = SCHEMA_DATA[sourceKey];
+        if (!source.pos) return;
+
+        source.fields.forEach(f => {
+          if (f.fk && SCHEMA_DATA[f.fk] && SCHEMA_DATA[f.fk].pos) {
+            const target = SCHEMA_DATA[f.fk];
+            const edgeId = `edge-${sourceKey}-${f.fk}`;
+            if (renderedEdges.has(edgeId) || sourceKey === f.fk) return;
+            renderedEdges.add(edgeId);
+
+            const isCascade = (sourceKey === "RepresentedVariable" && f.fk === "ConceptualVariable") ||
+                              (sourceKey === "InstanceVariable" && f.fk === "RepresentedVariable");
+            const isQuestionFlow = (sourceKey === "QuestionItem" && f.fk === "QuestionScheme") ||
+                                   (sourceKey === "QuestionItem" && f.fk === "CodeList") ||
+                                   (sourceKey === "QuestionVariable" && f.fk === "QuestionItem") ||
+                                   (sourceKey === "QuestionVariable" && f.fk === "RepresentedVariable") ||
+                                   (sourceKey === "InstrumentQuestion" && f.fk === "QuestionItem") ||
+                                   (sourceKey === "InstrumentQuestion" && f.fk === "Instrument");
+
+            const sx = source.pos.x + nodeWidth / 2;
+            const sy = source.pos.y + nodeHeight / 2;
+            const tx = target.pos.x + nodeWidth / 2;
+            const ty = target.pos.y + nodeHeight / 2;
+
+            // Draw curved bezier path
+            const dx = tx - sx;
+            const dy = ty - sy;
+            const cx1 = sx + dx * 0.2;
+            const cy1 = sy + dy * 0.5;
+            const cx2 = sx + dx * 0.8;
+            const cy2 = sy + dy * 0.5;
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("id", edgeId);
+            path.setAttribute("d", `M ${sx} ${sy} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${tx} ${ty}`);
+            path.setAttribute("class", `edge-path ${isCascade ? 'cascade-edge' : ''}`);
+            path.setAttribute("data-source", sourceKey);
+            path.setAttribute("data-target", f.fk);
+            path.setAttribute("data-is-question", isQuestionFlow ? "true" : "false");
+            path.setAttribute("data-is-cascade", isCascade ? "true" : "false");
+            path.setAttribute("marker-end", "url(#arrow-default)");
+            edgesGroup.appendChild(path);
+          }
+        });
+      });
+
+      // Draw Nodes
+      Object.keys(SCHEMA_DATA).forEach(key => {
+        const entity = SCHEMA_DATA[key];
+        if (!entity.pos) return;
+
+        const color = layerColors[entity.layer] || layerColors.rep;
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", "node-group");
+        g.setAttribute("id", `node-${key}`);
+        g.setAttribute("transform", `translate(${entity.pos.x}, ${entity.pos.y})`);
+        g.setAttribute("data-key", key);
+        g.setAttribute("data-layer", entity.layer);
+
+        g.onclick = (e) => {
+          e.stopPropagation();
+          showFloatingInspector(key);
+        };
+
+        g.onmouseenter = () => highlightNodeConnections(key);
+        g.onmouseleave = () => unhighlightNodeConnections();
+
+        g.innerHTML = `
+          <rect width="${nodeWidth}" height="${nodeHeight}" rx="8" fill="${color.bg}" stroke="${color.stroke}" stroke-width="2" />
+          <text x="12" y="24" fill="${color.text}" font-size="12" font-weight="700" font-family="Inter, sans-serif">${key}</text>
+          <text x="12" y="42" fill="#94a3b8" font-size="9" font-family="'Fira Code', monospace">${entity.base}</text>
+          <circle cx="${nodeWidth - 14}" cy="14" r="4" fill="${color.stroke}" />
+        `;
+
+        nodesGroup.appendChild(g);
+      });
+    }
+
+    // Hover Highlight in Diagram
+    function highlightNodeConnections(key) {
+      if (activeFlowHighlight) return;
+
+      const allNodes = document.querySelectorAll(".node-group");
+      const allEdges = document.querySelectorAll(".edge-path");
+
+      const connectedTargets = new Set([key]);
+
+      allEdges.forEach(edge => {
+        const src = edge.getAttribute("data-source");
+        const tgt = edge.getAttribute("data-target");
+
+        if (src === key || tgt === key) {
+          edge.classList.add("highlighted");
+          edge.classList.remove("dimmed");
+          edge.setAttribute("marker-end", "url(#arrow-highlight)");
+          if (src) connectedTargets.add(src);
+          if (tgt) connectedTargets.add(tgt);
+        } else {
+          edge.classList.add("dimmed");
+          edge.classList.remove("highlighted");
+        }
+      });
+
+      allNodes.forEach(node => {
+        const nKey = node.getAttribute("data-key");
+        if (connectedTargets.has(nKey)) {
+          node.classList.remove("dimmed");
+          if (nKey === key) node.classList.add("focused");
+        } else {
+          node.classList.add("dimmed");
+          node.classList.remove("focused");
+        }
+      });
+    }
+
+    function unhighlightNodeConnections() {
+      if (activeFlowHighlight) return;
+
+      document.querySelectorAll(".node-group").forEach(node => {
+        node.classList.remove("dimmed", "focused", "focused-question", "focused-cascade", "focused-response", "focused-ingestion");
+      });
+
+      document.querySelectorAll(".edge-path").forEach(edge => {
+        edge.classList.remove("dimmed", "highlighted", "highlight-question", "highlight-cascade", "highlight-response", "highlight-ingestion");
+        edge.setAttribute("marker-end", "url(#arrow-default)");
+      });
+    }
+
+    // MULTIPLE FLOW HIGHLIGHTS
+    const FLOW_DEFINITIONS = {
+      question: {
+        title: "Question Bank Lifecycle (ReQuest Core)",
+        icon: "❓",
+        colorClass: "focused-question",
+        edgeClass: "highlight-question",
+        marker: "url(#arrow-question)",
+        nodes: ["QuestionScheme", "QuestionItem", "CodeList", "Category", "QuestionVariable", "RepresentedVariable", "Instrument", "InstrumentQuestion"],
+        edges: [
+          ["QuestionItem", "QuestionScheme"],
+          ["QuestionItem", "CodeList"],
+          ["QuestionVariable", "QuestionItem"],
+          ["QuestionVariable", "RepresentedVariable"],
+          ["InstrumentQuestion", "QuestionItem"],
+          ["InstrumentQuestion", "Instrument"],
+          ["CodeList", "CategoryScheme"],
+          ["RepresentedVariable", "CodeList"]
+        ]
+      },
+      cascade: {
+        title: "DDI 3-Tier Variable Cascade",
+        icon: "🪜",
+        colorClass: "focused-cascade",
+        edgeClass: "highlight-cascade",
+        marker: "url(#arrow-cascade)",
+        nodes: ["ConceptScheme", "Concept", "ConceptualVariableScheme", "ConceptualVariable", "RepresentedVariableScheme", "RepresentedVariable", "InstanceVariableScheme", "InstanceVariable", "StudyUnit", "StudyUnitVariable"],
+        edges: [
+          ["Concept", "ConceptScheme"],
+          ["ConceptualVariable", "Concept"],
+          ["ConceptualVariable", "ConceptualVariableScheme"],
+          ["RepresentedVariable", "ConceptualVariable"],
+          ["RepresentedVariable", "RepresentedVariableScheme"],
+          ["InstanceVariable", "RepresentedVariable"],
+          ["InstanceVariable", "InstanceVariableScheme"],
+          ["StudyUnitVariable", "StudyUnit"],
+          ["StudyUnitVariable", "InstanceVariable"]
+        ]
+      },
+      response: {
+        title: "Response Domains, Categories & Codes",
+        icon: "🏷️",
+        colorClass: "focused-response",
+        edgeClass: "highlight-response",
+        marker: "url(#arrow-response)",
+        nodes: ["CategoryScheme", "Category", "CodeList", "Code", "QuestionItem", "RepresentedVariable"],
+        edges: [
+          ["Category", "CategoryScheme"],
+          ["Category", "Concept"],
+          ["Code", "CodeList"],
+          ["Code", "Category"],
+          ["QuestionItem", "CodeList"],
+          ["RepresentedVariable", "CodeList"],
+          ["CodeList", "CategoryScheme"]
+        ]
+      },
+      ingestion: {
+        title: "Streaming Ingestion, Aliasing & Quarantine",
+        icon: "📥",
+        colorClass: "focused-ingestion",
+        edgeClass: "highlight-ingestion",
+        marker: "url(#arrow-ingestion)",
+        nodes: ["StagedImport", "StagedResourceNode", "UrnRegistry", "URNAlias", "MetadataQuarantine", "EventLog"],
+        edges: [
+          ["StagedResourceNode", "StagedImport"]
+        ]
+      }
+    };
+
+    function setFlowHighlight(flowKey) {
+      activeFlowHighlight = flowKey;
+      const flow = FLOW_DEFINITIONS[flowKey];
+
+      // Update button active state
+      document.querySelectorAll(".flow-btn").forEach(btn => {
+        btn.classList.remove("active-question", "active-cascade", "active-response", "active-ingestion");
+      });
+      document.getElementById(`btn-flow-${flowKey}`).classList.add(`active-${flowKey}`);
+
+      // Show toast
+      const toast = document.getElementById("flow-toast");
+      document.getElementById("flow-toast-icon").textContent = flow.icon;
+      document.getElementById("flow-toast-text").textContent = flow.title;
+      toast.style.display = "flex";
+
+      const nodeSet = new Set(flow.nodes);
+
+      // Highlight nodes
+      document.querySelectorAll(".node-group").forEach(node => {
+        const k = node.getAttribute("data-key");
+        node.classList.remove("dimmed", "focused", "focused-question", "focused-cascade", "focused-response", "focused-ingestion");
+        if (nodeSet.has(k)) {
+          node.classList.add(flow.colorClass);
+        } else {
+          node.classList.add("dimmed");
+        }
+      });
+
+      // Highlight edges
+      const edgePairs = new Set(flow.edges.map(p => `${p[0]}->${p[1]}`));
+      document.querySelectorAll(".edge-path").forEach(edge => {
+        const src = edge.getAttribute("data-source");
+        const tgt = edge.getAttribute("data-target");
+        edge.classList.remove("dimmed", "highlighted", "highlight-question", "highlight-cascade", "highlight-response", "highlight-ingestion");
+
+        if (edgePairs.has(`${src}->${tgt}`) || (nodeSet.has(src) && nodeSet.has(tgt))) {
+          edge.classList.add(flow.edgeClass);
+          edge.setAttribute("marker-end", flow.marker);
+        } else {
+          edge.classList.add("dimmed");
+          edge.setAttribute("marker-end", "url(#arrow-default)");
+        }
+      });
+    }
+
+    function clearFlowHighlight() {
+      activeFlowHighlight = null;
+      document.querySelectorAll(".flow-btn").forEach(btn => {
+        btn.classList.remove("active-question", "active-cascade", "active-response", "active-ingestion");
+      });
+      document.getElementById("flow-toast").style.display = "none";
+      unhighlightNodeConnections();
+    }
+
+    // Locate Node by Search
+    function searchDiagramNode(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) {
+        if (!activeFlowHighlight) unhighlightNodeConnections();
+        return;
+      }
+
+      document.querySelectorAll(".node-group").forEach(node => {
+        const k = node.getAttribute("data-key").toLowerCase();
+        if (k.includes(q)) {
+          node.classList.remove("dimmed");
+          node.classList.add("focused");
+        } else {
+          node.classList.add("dimmed");
+          node.classList.remove("focused");
+        }
+      });
+    }
+
+    // Zoom & Pan for Diagram Canvas
+    function setupDiagramPanZoom() {
+      const svg = document.getElementById("svg-diagram-viewport");
+
+      svg.addEventListener("mousedown", (e) => {
+        if (e.target.closest(".node-group")) return;
+        isPanning = true;
+        panStart = { x: e.clientX - diagramTransform.x, y: e.clientY - diagramTransform.y };
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!isPanning) return;
+        diagramTransform.x = e.clientX - panStart.x;
+        diagramTransform.y = e.clientY - panStart.y;
+        updateDiagramTransform();
+      });
+
+      window.addEventListener("mouseup", () => {
+        isPanning = false;
+      });
+
+      svg.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.1 : 0.9;
+        zoomDiagram(factor);
+      }, { passive: false });
+    }
+
+    function zoomDiagram(factor) {
+      diagramTransform.scale = Math.min(Math.max(diagramTransform.scale * factor, 0.4), 2.5);
+      updateDiagramTransform();
+    }
+
+    function resetDiagramZoom() {
+      diagramTransform = { scale: 1, x: 0, y: 0 };
+      updateDiagramTransform();
+      clearFlowHighlight();
+    }
+
+    function fitDiagramToScreen() {
+      const wrapper = document.getElementById("diagram-canvas-wrapper");
+      if (!wrapper) return;
+      const w = wrapper.clientWidth || 1200;
+      const h = wrapper.clientHeight || 750;
+      const scale = Math.min(w / 1600, h / 950) * 0.95;
+      diagramTransform = { scale, x: (w - 1600 * scale) / 2, y: (h - 950 * scale) / 2 };
+      updateDiagramTransform();
+    }
+
+    function updateDiagramTransform() {
+      const content = document.getElementById("svg-graph-content");
+      if (content) {
+        content.setAttribute("transform", `matrix(${diagramTransform.scale} 0 0 ${diagramTransform.scale} ${diagramTransform.x} ${diagramTransform.y})`);
+      }
+    }
+
+    // Floating Inspector Drawer
+    function showFloatingInspector(key) {
+      const entity = SCHEMA_DATA[key];
+      if (!entity) return;
+
+      currentEntityKey = key;
+      document.getElementById("insp-name").textContent = key;
+      document.getElementById("insp-desc").textContent = entity.description;
+      document.getElementById("insp-layer").textContent = entity.layerName;
+      document.getElementById("insp-base").textContent = entity.base;
+      document.getElementById("insp-table").textContent = entity.table;
+      document.getElementById("insp-fields-count").textContent = `${entity.fields.length} attributes`;
+
+      document.getElementById("floating-inspector").style.display = "flex";
+    }
+
+    function closeInspector() {
+      document.getElementById("floating-inspector").style.display = "none";
+    }
+
+    function jumpToEntityInExplorer() {
+      closeInspector();
+      selectEntity(currentEntityKey);
+      switchView("explorer");
+    }
+
+    // Layer Filtering
+    function filterLayer(layer, btn) {
+      currentLayerFilter = layer;
+      document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+      btn.classList.add("active");
+      renderEntityTree();
+    }
+
+    function handleSearch(term) {
+      currentSearchTerm = term.trim().toLowerCase();
+      renderEntityTree();
+    }
+
+    // Render Left Sidebar Tree
+    function renderEntityTree() {
+      const container = document.getElementById("entity-tree-container");
+      container.innerHTML = "";
+
+      const layers = [
+        { id: "org", name: "1. Organization & Grouping" },
+        { id: "concept", name: "2. Concept Layer" },
+        { id: "rep", name: "3. Representation & Instrument" },
+        { id: "dataset", name: "4. Dataset Layer" },
+        { id: "infra", name: "5. Infrastructure & Staging" },
+        { id: "audit", name: "6. Event & Audit" }
+      ];
+
+      layers.forEach(layer => {
+        if (currentLayerFilter !== "all" && currentLayerFilter !== layer.id) return;
+
+        const entitiesInLayer = Object.keys(SCHEMA_DATA).filter(key => {
+          const item = SCHEMA_DATA[key];
+          if (item.layer !== layer.id) return false;
+          if (!currentSearchTerm) return true;
+
+          const matchName = key.toLowerCase().includes(currentSearchTerm);
+          const matchTable = item.table.toLowerCase().includes(currentSearchTerm);
+          const matchDesc = item.description.toLowerCase().includes(currentSearchTerm);
+          const matchField = item.fields.some(f => f.name.toLowerCase().includes(currentSearchTerm) || f.notes.toLowerCase().includes(currentSearchTerm));
+          return matchName || matchTable || matchDesc || matchField;
+        });
+
+        if (entitiesInLayer.length === 0) return;
+
+        const groupEl = document.createElement("div");
+        groupEl.innerHTML = `
+          <div class="layer-group-title">
+            <span>${layer.name}</span>
+            <span>(${entitiesInLayer.length})</span>
+          </div>
+          <ul class="entity-list" id="layer-list-${layer.id}"></ul>
+        `;
+
+        const listEl = groupEl.querySelector(`#layer-list-${layer.id}`);
+        entitiesInLayer.forEach(key => {
+          const item = SCHEMA_DATA[key];
+          const li = document.createElement("li");
+          li.className = `entity-item ${key === currentEntityKey ? "active" : ""}`;
+          li.onclick = () => selectEntity(key);
+          li.innerHTML = `
+            <span>${key}</span>
+            <span class="entity-item-badge badge-${item.layer}">${item.base}</span>
+          `;
+          listEl.appendChild(li);
+        });
+
+        container.appendChild(groupEl);
+      });
+    }
+
+    // Select Entity & Update Detail View
+    function selectEntity(key) {
+      if (!SCHEMA_DATA[key]) return;
+      currentEntityKey = key;
+      const entity = SCHEMA_DATA[key];
+
+      // Update active state in sidebar
+      document.querySelectorAll(".entity-item").forEach(el => {
+        if (el.querySelector("span").textContent === key) {
+          el.classList.add("active");
+        } else {
+          el.classList.remove("active");
+        }
+      });
+
+      // Update Header
+      document.getElementById("ent-name").textContent = key;
+      document.getElementById("ent-table").textContent = entity.table;
+      document.getElementById("ent-desc").textContent = entity.description;
+      document.getElementById("ent-urn-pattern").textContent = entity.urnPattern;
+
+      const badgesContainer = document.getElementById("ent-badges");
+      badgesContainer.innerHTML = `
+        <span class="badge badge-${entity.layer}">${entity.layerName}</span>
+        <span class="badge badge-base">Base: ${entity.base}</span>
+        <span class="badge badge-base">DDI: ${entity.ddiTag}</span>
+      `;
+
+      // Update Fields Table
+      document.getElementById("field-count").textContent = entity.fields.length;
+      const tbody = document.getElementById("fields-tbody");
+      tbody.innerHTML = "";
+
+      entity.fields.forEach(field => {
+        const tr = document.createElement("tr");
+
+        let constraintsHtml = "";
+        if (field.pk) constraintsHtml += `<span class="tag-pk">PK</span> `;
+        if (field.fk) constraintsHtml += `<span class="tag-fk" onclick="selectEntity('${field.fk}')" title="Foreign Key to ${field.fk}">FK → ${field.fk}</span> `;
+        if (field.uq) constraintsHtml += `<span class="tag-idx">UNIQUE</span> `;
+        if (field.idx) constraintsHtml += `<span class="tag-idx">INDEXED</span> `;
+        if (field.req) constraintsHtml += `<span class="tag-req">NOT NULL</span> `;
+        else constraintsHtml += `<span class="tag-null">NULL</span> `;
+
+        tr.innerHTML = `
+          <td><div class="field-name">${field.name}</div></td>
+          <td><div class="field-type">${field.type}</div></td>
+          <td><div class="field-constraints">${constraintsHtml}</div></td>
+          <td><div class="field-notes">${field.notes}</div></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Update Relationships Panel
+      const outgoingBox = document.getElementById("outgoing-relations");
+      outgoingBox.innerHTML = "";
+      if (entity.outgoing && entity.outgoing.length > 0) {
+        entity.outgoing.forEach(rel => {
+          const div = document.createElement("div");
+          div.className = "relation-link-item";
+          div.onclick = () => selectEntity(rel.target);
+          div.innerHTML = `
+            <div class="relation-link-title"><span>➡️</span> ${rel.target}</div>
+            <div class="relation-link-type">${rel.type}</div>
+          `;
+          outgoingBox.appendChild(div);
+        });
+      } else {
+        outgoingBox.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-dim); padding: 0.5rem;">No outgoing foreign keys.</div>`;
+      }
+
+      const incomingBox = document.getElementById("incoming-relations");
+      incomingBox.innerHTML = "";
+      if (entity.incoming && entity.incoming.length > 0) {
+        entity.incoming.forEach(rel => {
+          const div = document.createElement("div");
+          div.className = "relation-link-item";
+          div.onclick = () => selectEntity(rel.target);
+          div.innerHTML = `
+            <div class="relation-link-title"><span>⬅️</span> ${rel.target}</div>
+            <div class="relation-link-type">${rel.type}</div>
+          `;
+          incomingBox.appendChild(div);
+        });
+      } else {
+        incomingBox.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-dim); padding: 0.5rem;">No direct incoming references.</div>`;
+      }
+
+      // Update Code Snippet
+      updateCodeSnippet();
+    }
+
+    // Code Snippet Generation
+    function switchCodeTab(tabName) {
+      currentCodeTab = tabName;
+      document.querySelectorAll(".code-tab-btn").forEach(btn => {
+        if (btn.textContent.toLowerCase().includes(tabName)) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+      updateCodeSnippet();
+    }
+
+    function updateCodeSnippet() {
+      const entity = SCHEMA_DATA[currentEntityKey];
+      const box = document.getElementById("code-snippet-box");
+
+      if (currentCodeTab === "django") {
+        let code = `class ${currentEntityKey}(${entity.base}):\n`;
+        code += `    """${entity.description}"""\n\n`;
+        entity.fields.forEach(f => {
+          if (["urn", "created_at", "updated_at"].includes(f.name) && entity.base !== "Model") return;
+          if (["name", "description", "extended_attributes"].includes(f.name) && entity.base === "DDIScheme") return;
+          if (["name", "hashes"].includes(f.name) && entity.base === "DDIResource") return;
+
+          if (f.fk) {
+            code += `    ${f.name.replace('_urn', '')} = models.ForeignKey(\n`;
+            code += `        "${f.fk}",\n`;
+            code += `        on_delete=models.${f.req ? 'CASCADE' : 'SET_NULL'},\n`;
+            code += `        null=${!f.req},\n`;
+            code += `        blank=${!f.req},\n`;
+            code += `        db_column="${f.name}",\n`;
+            code += `        related_name="${currentEntityKey.toLowerCase()}s",\n`;
+            code += `        help_text="${f.notes}",\n`;
+            code += `    )\n`;
+          } else if (f.type === "JSONB") {
+            code += `    ${f.name} = models.JSONField(\n`;
+            code += `        default=${f.name === 'hashes' || f.name.includes('domain') || f.name.includes('rep') ? 'dict' : 'list'},\n`;
+            code += `        blank=True,\n`;
+            code += `        help_text="${f.notes}",\n`;
+            code += `    )\n`;
+          } else if (f.type.startsWith("VARCHAR")) {
+            const maxLen = f.type.match(/\\d+/)[0];
+            code += `    ${f.name} = models.CharField(max_length=${maxLen}, ${f.req ? '' : 'null=True, blank=True, '}help_text="${f.notes}")\n`;
+          } else if (f.type === "INTEGER") {
+            code += `    ${f.name} = models.PositiveIntegerField(default=0, help_text="${f.notes}")\n`;
+          } else if (f.type === "BOOLEAN") {
+            code += `    ${f.name} = models.BooleanField(default=False, help_text="${f.notes}")\n`;
+          }
+        });
+        code += `\n    class Meta:\n`;
+        code += `        db_table = "${entity.table}"\n`;
+        code += `        verbose_name = "${currentEntityKey}"\n`;
+        box.textContent = code;
+      } else if (currentCodeTab === "sql") {
+        let sql = `CREATE TABLE ${entity.table} (\n`;
+        const lines = entity.fields.map(f => {
+          let line = `    ${f.name.padEnd(24)} ${f.type.padEnd(16)}`;
+          if (f.pk) line += " PRIMARY KEY";
+          if (f.req && !f.pk) line += " NOT NULL";
+          if (f.fk) line += ` REFERENCES ${SCHEMA_DATA[f.fk].table}(urn)`;
+          return line;
+        });
+        sql += lines.join(",\n");
+        sql += `\n);`;
+        box.textContent = sql;
+      } else if (currentCodeTab === "pydantic") {
+        let py = `from pydantic import BaseModel, Field\nfrom typing import Optional, List, Dict, Any\nfrom datetime import datetime\n\n`;
+        py += `class ${currentEntityKey}Schema(BaseModel):\n`;
+        entity.fields.forEach(f => {
+          let t = "str";
+          if (f.type === "JSONB") t = "List[Dict[str, Any]] | Dict[str, Any]";
+          if (f.type === "INTEGER") t = "int";
+          if (f.type === "BOOLEAN") t = "bool";
+          if (f.type === "TIMESTAMP") t = "datetime";
+          if (!f.req && !f.pk) t = `Optional[${t}] = None`;
+          py += `    ${f.name}: ${t} = Field(description="${f.notes}")\n`;
+        });
+        py += `\n    class Config:\n        from_attributes = True\n`;
+        box.textContent = py;
+      } else if (currentCodeTab === "ddi-xml") {
+        box.textContent = `<!-- Canonical DDI-Lifecycle 3.3 Fragment -->\n${entity.ddiTag.replace('>', '')} isUniversallyUnique="true">\n    <r:URN>${entity.urnPattern}</r:URN>\n    <r:UserAttributePair>\n        <r:AttributeKey>entity_type</r:AttributeKey>\n        <r:AttributeValue>${currentEntityKey}</r:AttributeValue>\n    </r:UserAttributePair>\n    <r:Name>\n        <r:String xml:lang="fr">Exemple ${currentEntityKey}</r:String>\n        <r:String xml:lang="en">Example ${currentEntityKey}</r:String>\n    </r:Name>\n${entity.ddiTag.replace('<', '</')}`;
+      } else if (currentCodeTab === "json") {
+        const sampleObj = {
+          "@context": "https://ddialliance.org/specification/ddi-cdi/1.0/context.jsonld",
+          "@type": `ddi:${currentEntityKey}`,
+          "urn": entity.urnPattern,
+          "name": [
+            { "lang": "fr", "value": `Nom ${currentEntityKey}` },
+            { "lang": "en", "value": `Name ${currentEntityKey}` }
+          ],
+          "extended_attributes": []
+        };
+        box.textContent = JSON.stringify(sampleObj, null, 2);
+      }
+    }
+
+    function copyCurrentCode() {
+      const code = document.getElementById("code-snippet-box").textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert("Code snippet copied to clipboard!");
+      });
+    }
+
+    function exportSchemaJson() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(SCHEMA_DATA, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "fairwddi_ddi_schema.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    // Cascade Simulator Data
+    const CASCADE_EXAMPLES = {
+      leftright: {
+        concept: {
+          name: "Left-Right Political Scale",
+          thesaurus: "ELSST Thesaurus (#c4820)",
+          urn: "urn:ddi:fr.sciencespo:cv-leftright:1.0.0",
+          desc: "Abstract ideological positioning scale measuring individual political placement on the traditional left-right continuum."
+        },
+        represented: {
+          name: "11-Point Left-Right Scale (0-10)",
+          urn: "urn:ddi:fr.sciencespo:rv-lr-11pt:1.0.0",
+          question: "En politique, on parle de gauche et de droite. Où vous situez-vous personnellement sur une échelle de 0 (gauche) à 10 (droite) ?",
+          codes: "0 (Extrême gauche) .. 10 (Extrême droite), 98 (Refus), 99 (NSP)"
+        },
+        instances: [
+          { study: "European Social Survey — Round 3 (2007)", varName: "lrscale", urn: "urn:ddi:fr.sciencespo:iv-ess3-lrscale:1.0.0" },
+          { study: "Panel Electoral Français (2012)", varName: "q04_gauche_droite", urn: "urn:ddi:fr.sciencespo:iv-pef2012-q04:1.0.0" },
+          { study: "Baromètre Politique CDSP (2017)", varName: "v12_pol_orient", urn: "urn:ddi:fr.sciencespo:iv-cdsp2017-v12:1.0.0" }
+        ]
+      },
+      health: {
+        concept: {
+          name: "Subjective General Health",
+          thesaurus: "ELSST Thesaurus (#c1928)",
+          urn: "urn:ddi:fr.sciencespo:cv-health:1.0.0",
+          desc: "Self-perceived general state of physical and mental health independently of diagnosed clinical conditions."
+        },
+        represented: {
+          name: "5-Point Self-Assessed Health",
+          urn: "urn:ddi:fr.sciencespo:rv-health-5pt:1.0.0",
+          question: "Comment évaluez-vous votre état de santé général ?",
+          codes: "1 (Très bon), 2 (Bon), 3 (Moyen), 4 (Mauvais), 5 (Très mauvais)"
+        },
+        instances: [
+          { study: "ESS Wave 4 (2008)", varName: "health", urn: "urn:ddi:fr.sciencespo:iv-ess4-health:1.0.0" },
+          { study: "Enquête Santé & Société (2015)", varName: "sante_gen", urn: "urn:ddi:fr.sciencespo:iv-ess2015-sante:1.0.0" }
+        ]
+      },
+      trust_parliament: {
+        concept: {
+          name: "Trust in Democratic Institutions",
+          thesaurus: "ELSST Thesaurus (#c5112)",
+          urn: "urn:ddi:fr.sciencespo:cv-trust-inst:1.0.0",
+          desc: "Attitudinal measurement of citizen confidence in national legislative assemblies."
+        },
+        represented: {
+          name: "11-Point Trust in National Parliament",
+          urn: "urn:ddi:fr.sciencespo:rv-trust-parl-11pt:1.0.0",
+          question: "À quel point faites-vous confiance au parlement national sur une échelle de 0 (aucune confiance) à 10 (confiance totale) ?",
+          codes: "0 (Aucune confiance) .. 10 (Confiance totale)"
+        },
+        instances: [
+          { study: "ESS Round 5 (2010)", varName: "trstprl", urn: "urn:ddi:fr.sciencespo:iv-ess5-trstprl:1.0.0" },
+          { study: "Post-Electoral Study (2022)", varName: "conf_parlement", urn: "urn:ddi:fr.sciencespo:iv-pes2022-conf:1.0.0" }
+        ]
+      }
+    };
+
+    function renderCascadeExample(exampleKey) {
+      const data = CASCADE_EXAMPLES[exampleKey];
+      const box = document.getElementById("cascade-stages-box");
+
+      box.innerHTML = `
+        <!-- Tier 1 -->
+        <div class="cascade-card tier-1">
+          <span class="cascade-tier-badge" style="background: rgba(139, 92, 246, 0.2); color: var(--layer-concept);">Tier 1 • Conceptual Variable</span>
+          <div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">${data.concept.name}</h3>
+            <div style="font-size: 0.8rem; color: var(--accent-purple); font-weight: 600; margin-top: 0.2rem;">Anchored: ${data.concept.thesaurus}</div>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">${data.concept.desc}</p>
+          <div style="background: var(--bg-surface-elevated); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-cyan); word-break: break-all;">
+            ${data.concept.urn}
+          </div>
+        </div>
+
+        <!-- Tier 2 -->
+        <div class="cascade-card tier-2">
+          <span class="cascade-tier-badge" style="background: rgba(16, 185, 129, 0.2); color: var(--layer-rep);">Tier 2 • Represented Variable</span>
+          <div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">${data.represented.name}</h3>
+            <div style="font-size: 0.8rem; color: var(--accent-emerald); font-weight: 600; margin-top: 0.2rem;">Harmonized across survey waves</div>
+          </div>
+          <div style="background: var(--bg-surface-elevated); padding: 0.75rem; border-radius: 6px; font-size: 0.825rem; color: var(--text-main); font-style: italic; border-left: 3px solid var(--accent-emerald);">
+            "${data.represented.question}"
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            <strong>Response Domain:</strong> ${data.represented.codes}
+          </div>
+          <div style="background: var(--bg-surface-elevated); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-cyan); word-break: break-all;">
+            ${data.represented.urn}
+          </div>
+        </div>
+
+        <!-- Tier 3 -->
+        <div class="cascade-card tier-3">
+          <span class="cascade-tier-badge" style="background: rgba(245, 158, 11, 0.2); color: var(--layer-dataset);">Tier 3 • Physical Instance Variables (${data.instances.length})</span>
+          <div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">Survey Column Bindings</h3>
+            <div style="font-size: 0.8rem; color: var(--accent-amber); font-weight: 600; margin-top: 0.2rem;">Physical realization in datasets</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+            ${data.instances.map(inst => `
+              <div style="background: var(--bg-surface-elevated); padding: 0.6rem 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.2rem;">
+                <div style="font-weight: 600; font-size: 0.85rem; color: var(--text-main);">${inst.study}</div>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-amber); font-weight: 700;">Column: ${inst.varName}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // Relationship Matrix
+    function renderMatrix() {
+      const table = document.getElementById("matrix-table");
+      const entityKeys = Object.keys(SCHEMA_DATA);
+
+      let theadHtml = `<thead><tr><th class="sticky-col">Entities (${entityKeys.length})</th>`;
+      entityKeys.forEach(k => {
+        theadHtml += `<th>${k.substring(0, 10)}</th>`;
+      });
+      theadHtml += `</tr></thead>`;
+
+      let tbodyHtml = `<tbody>`;
+      entityKeys.forEach(sourceKey => {
+        const source = SCHEMA_DATA[sourceKey];
+        tbodyHtml += `<tr><td class="sticky-col" onclick="selectEntity('${sourceKey}'); switchView('explorer');" style="cursor: pointer; color: var(--text-main);">${sourceKey}</td>`;
+
+        entityKeys.forEach(targetKey => {
+          let cellHtml = `-`;
+          const fkMatch = source.fields.find(f => f.fk === targetKey);
+          const outMatch = source.outgoing.find(o => o.target === targetKey);
+
+          if (fkMatch) {
+            cellHtml = `<span class="matrix-cell-fk" onclick="selectEntity('${sourceKey}'); switchView('explorer');" title="${sourceKey}.${fkMatch.name} -> ${targetKey}">FK</span>`;
+          } else if (outMatch && outMatch.type.includes("Junction")) {
+            cellHtml = `<span class="matrix-cell-junction" onclick="selectEntity('${sourceKey}'); switchView('explorer');" title="${outMatch.type}">JCT</span>`;
+          } else if (outMatch && outMatch.type.includes("Polymorphic")) {
+            cellHtml = `<span class="matrix-cell-poly" onclick="selectEntity('${sourceKey}'); switchView('explorer');" title="${outMatch.type}">REF</span>`;
+          }
+          tbodyHtml += `<td>${cellHtml}</td>`;
+        });
+        tbodyHtml += `</tr>`;
+      });
+      tbodyHtml += `</tbody>`;
+
+      table.innerHTML = theadHtml + tbodyHtml;
+    }
+
+    // Full PostgreSQL DDL Generation
+    function renderFullDDL() {
+      let ddl = `-- ==================================================================\n`;
+      ddl += `-- FAIRwDDI WP3 ST3 — Complete Standard-Agnostic PostgreSQL 17 DDL\n`;
+      ddl += `-- Canonical URN Primary Keys, ICU Collations, and JSONB GIN Indexes\n`;
+      ddl += `-- ==================================================================\n\n`;
+
+      Object.keys(SCHEMA_DATA).forEach(key => {
+        const entity = SCHEMA_DATA[key];
+        ddl += `-- ------------------------------------------------------------------\n`;
+        ddl += `-- Table: ${entity.table} (${key})\n`;
+        ddl += `-- ------------------------------------------------------------------\n`;
+        ddl += `CREATE TABLE IF NOT EXISTS ${entity.table} (\n`;
+        const lines = entity.fields.map(f => {
+          let line = `    ${f.name.padEnd(26)} ${f.type.padEnd(18)}`;
+          if (f.pk) line += " PRIMARY KEY";
+          if (f.req && !f.pk) line += " NOT NULL";
+          if (f.fk) line += ` REFERENCES ${SCHEMA_DATA[f.fk].table}(urn) ON DELETE CASCADE`;
+          return line;
+        });
+        ddl += lines.join(",\n");
+        ddl += `\n);\n\n`;
+      });
+
+      document.getElementById("full-ddl-box").textContent = ddl;
+    }
+
+    function copyFullDDL() {
+      const ddl = document.getElementById("full-ddl-box").textContent;
+      navigator.clipboard.writeText(ddl).then(() => {
+        alert("Full PostgreSQL DDL copied to clipboard!");
+      });
+    }
+  </script>
+</body>
+</html>

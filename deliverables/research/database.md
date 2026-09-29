@@ -2,7 +2,9 @@
 
 > **Status:** Implementation Complete & Validated  
 > **Scope:** Standard-agnostic core DDI data model for the ReQuest question bank, aligned with DDI 4 (COGS model), DDI-CDI, and DDI-Lifecycle 3.3 with canonical URN-based primary keys  
-> **Target DB:** PostgreSQL ≥ 17 (ICU collations, JSONB indexing, standard SQL DDL; compatible with SQLite dev & test)
+> **Target DB:** PostgreSQL ≥ 17 (ICU collations, JSONB indexing, standard SQL DDL; compatible with SQLite dev & test)  
+> **Interactive Model Explorer:** [`database_explorer.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database_explorer.html) *(interactive browser app)*  
+> **Full Mermaid Diagrams:** [`database_diagram.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database_diagram.md) | [`database_diagram.mmd`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database_diagram.mmd)
 
 ---
 

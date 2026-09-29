@@ -221,11 +221,15 @@ The following principles guided the redesign:
 
 Example:
 
-```
+```json
 [
 {"normalized-fr":"8d734..."}
 {"normalized-en":"7ff4s5..."}
 {"normalized-i18n":af76cc76...""}
+{"request-v1":"8d09ff..."}
+{"request-v2":"63ab009..."}
+{"request-v2-codes":"6526fbc..."}
+{"request-v2-categories":"e65d78..."}
 {"ai-agent-0001":6fb8s7...","llm":"gemini-flash-3.7"}
 ]
 ```
@@ -248,6 +252,13 @@ _Example: a question coming from DDI-L carrying few extra properties of interest
 
 ```{json}
 [
+{
+  "$schema": "https://request.sciencespo.fr/schemas/ddil-question-item.json",
+  "urn": "urn:ddi:int.example:c7233173-2d8f-4a3f-918b-60ee08d61d5d:1",
+  "Description": "This is a great question",
+  "QuestionIntent": "Get a great answer"
+  ]
+}
 {
   "$schema": "https://request.sciencespo.fr/schemas/ddil-question-item.json",
   "urn": "urn:ddi:int.example:c7233173-2d8f-4a3f-918b-60ee08d61d5d:1",
