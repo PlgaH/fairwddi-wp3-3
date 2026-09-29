@@ -447,40 +447,11 @@
       </div>
 
       <div class="explorer-hub-container">
-        <div class="explorer-toolbar">
-          <div class="layer-filter-pills">
-            <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Quick Filter Layer:</span>
-            <button class="layer-pill" onclick="filterExplorerLayer('all')">All (28)</button>
-            <button class="layer-pill" onclick="filterExplorerLayer('concept')">Concept (SKOS)</button>
-            <button class="layer-pill" onclick="filterExplorerLayer('representation')">Representation & Questions</button>
-            <button class="layer-pill" onclick="filterExplorerLayer('dataset')">Dataset (Waves)</button>
-            <button class="layer-pill" onclick="filterExplorerLayer('organization')">Organization</button>
-            <button class="layer-pill" onclick="filterExplorerLayer('infrastructure')">Infrastructure (URNs)</button>
-            <button class="layer-pill" onclick="filterExplorerLayer('staging')">Staging & Ingestion</button>
-          </div>
-
-          <div style="font-size: 0.82rem; color: var(--text-dim);">
-            <span>💡 Tip: Click nodes to inspect schema fields or generate SQL DDL</span>
-          </div>
-        </div>
-
         <div class="explorer-frame-container" id="explorer-frame-wrap">
           <iframe src="./deliverables/research/database_explorer.html" id="explorer-iframe" title="FAIRwDDI Database Explorer"></iframe>
         </div>
       </div>
     `;
-
-    window.filterExplorerLayer = function (layer) {
-      const iframe = document.getElementById('explorer-iframe');
-      if (iframe && iframe.contentWindow) {
-        try {
-          const filterBtn = iframe.contentWindow.document.querySelector(`[data-layer="${layer}"]`);
-          if (filterBtn) filterBtn.click();
-        } catch (e) {
-          console.log('Layer filter dispatched:', layer);
-        }
-      }
-    };
 
     window.toggleSidebarCollapse = function () {
       state.sidebarCollapsed = !state.sidebarCollapsed;
