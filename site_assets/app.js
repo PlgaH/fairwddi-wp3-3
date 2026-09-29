@@ -14,7 +14,8 @@
     selectedSearchResult: 0,
     currentDiagramId: 'cascade_diagram',
     diagramZoom: 1,
-    mobileSidebarOpen: false
+    mobileSidebarOpen: false,
+    sidebarCollapsed: false
   };
 
   // DOM Elements cache
@@ -26,7 +27,7 @@
     'compass': `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`,
     'database': `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
     'git-merge': `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>`,
-    'sliders': `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>`,
+    'sliders': `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="20" y1="21" x2="20" y2="16"/></svg>`,
     'shield': `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
     'code': `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
     'layers': `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`,
@@ -50,19 +51,21 @@
     'menu': `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`,
     'external': `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
     'arrow-right': `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
-    'arrow-left': `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`
+    'arrow-left': `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`,
+    'sidebar': `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>`
   };
 
   /**
    * Initialize Application
    */
   async function initApp() {
-    // Cache DOM
     el = {
-      app: document.getElementById('app'),
+      appContainer: document.querySelector('.app-container'),
       themeToggle: document.getElementById('theme-toggle-btn'),
       mobileMenuBtn: document.getElementById('mobile-menu-btn'),
       sidebar: document.getElementById('site-sidebar'),
+      siteMain: document.querySelector('.site-main'),
+      contentWrapper: document.querySelector('.content-wrapper'),
       mainContent: document.getElementById('main-content-target'),
       tocContainer: document.getElementById('site-toc-target'),
       progressBar: document.getElementById('reading-progress-bar'),
@@ -74,29 +77,19 @@
       navLinks: document.querySelectorAll('.header-nav .nav-link')
     };
 
-    // Apply theme
     applyTheme(state.theme);
-
-    // Setup Event Listeners
     setupEventListeners();
-
-    // Initial Route Handling
     handleRoute();
   }
 
-  /**
-   * Setup Event Listeners
-   */
   function setupEventListeners() {
     window.addEventListener('hashchange', handleRoute);
     window.addEventListener('scroll', handleScroll, { passive: true });
 
-    // Theme Toggle
     if (el.themeToggle) {
       el.themeToggle.addEventListener('click', toggleTheme);
     }
 
-    // Mobile Sidebar
     if (el.mobileMenuBtn) {
       el.mobileMenuBtn.addEventListener('click', () => {
         state.mobileSidebarOpen = !state.mobileSidebarOpen;
@@ -104,7 +97,6 @@
       });
     }
 
-    // Close mobile sidebar on click outside
     document.addEventListener('click', (e) => {
       if (state.mobileSidebarOpen && !el.sidebar.contains(e.target) && !el.mobileMenuBtn.contains(e.target)) {
         state.mobileSidebarOpen = false;
@@ -112,7 +104,6 @@
       }
     });
 
-    // Search Modal Triggers & Hotkey (Cmd/Ctrl + K)
     if (el.searchTrigger) {
       el.searchTrigger.addEventListener('click', openSearchModal);
     }
@@ -137,7 +128,6 @@
       el.searchInput.addEventListener('keydown', handleSearchKeydown);
     }
 
-    // Sidebar search filter
     if (el.sidebarSearchInput) {
       el.sidebarSearchInput.addEventListener('input', (e) => {
         filterSidebarLinks(e.target.value.toLowerCase().trim());
@@ -145,9 +135,6 @@
     }
   }
 
-  /**
-   * Theme Management
-   */
   function applyTheme(theme) {
     state.theme = theme;
     document.documentElement.setAttribute('data-theme', theme);
@@ -172,45 +159,40 @@
     }
   }
 
-  /**
-   * Route Handler & Dispatcher
-   */
   function handleRoute() {
     const rawHash = window.location.hash.slice(1).replace(/^\//, '');
     const route = rawHash.split('#')[0] || 'home';
     state.currentRoute = route;
 
-    // Close mobile menu on navigate
     if (state.mobileSidebarOpen) {
       state.mobileSidebarOpen = false;
       if (el.sidebar) el.sidebar.classList.remove('open');
     }
 
-    // Update Header Active Link
     updateHeaderNav(route);
-
-    // Update Sidebar Active Link
     updateSidebarNav(route);
 
-    // Render View
     if (route === 'home' || route === '') {
+      resetLayoutWidth();
       renderHomeView();
     } else if (route === 'explorer') {
       renderExplorerView();
     } else if (route.startsWith('diagrams')) {
+      resetLayoutWidth();
       const parts = route.split('/');
       const diagramId = parts[1] || 'cascade_diagram';
       renderDiagramsView(diagramId);
     } else if (route === 'tools') {
+      resetLayoutWidth();
       renderToolsView();
     } else if (route === 'slides') {
+      resetLayoutWidth();
       renderSlidesView();
     } else {
-      // Document View
+      resetLayoutWidth();
       renderDocumentView(route);
     }
 
-    // Scroll to top or specific heading anchor
     if (rawHash.includes('#')) {
       const anchorId = rawHash.split('#')[1];
       const anchorEl = document.getElementById(anchorId);
@@ -220,6 +202,12 @@
     } else {
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
+  }
+
+  function resetLayoutWidth() {
+    if (el.contentWrapper) el.contentWrapper.classList.remove('full-width');
+    if (el.siteMain) el.siteMain.classList.remove('full-width');
+    if (el.appContainer) el.appContainer.classList.remove('full-width');
   }
 
   function updateHeaderNav(route) {
@@ -266,15 +254,11 @@
     });
   }
 
-  /**
-   * View: Home / Dashboard
-   */
   function renderHomeView() {
     const data = window.FAIRWDDI_DATA || { metadata: {}, documents: [] };
     const meta = data.metadata || {};
     const stats = meta.stats || { modelsCount: 28, deliverablesCount: 10, diagramsCount: 8 };
 
-    // Hide TOC for Home
     if (el.tocContainer) el.tocContainer.style.display = 'none';
 
     el.mainContent.innerHTML = `
@@ -326,7 +310,6 @@
         </div>
       </div>
 
-      <!-- Feature Spotlight Grid -->
       <div class="section-heading-wrap">
         <div>
           <h2 class="section-title">Core Deliverables & Specifications</h2>
@@ -396,7 +379,6 @@
         </a>
       </div>
 
-      <!-- Interactive Explorer Banner -->
       <div class="hero-section" style="padding: 2rem; margin-bottom: 3rem;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
           <div style="max-width: 600px;">
@@ -419,49 +401,61 @@
   }
 
   /**
-   * View: Embedded Database Explorer
+   * View: Embedded Database Explorer (FULL PAGE WIDTH + STANDALONE TAB OPTION)
    */
   function renderExplorerView() {
     if (el.tocContainer) el.tocContainer.style.display = 'none';
+    if (el.contentWrapper) el.contentWrapper.classList.add('full-width');
+    if (el.siteMain) el.siteMain.classList.add('full-width');
+    if (el.appContainer) el.appContainer.classList.add('full-width');
 
     el.mainContent.innerHTML = `
-      <div class="article-header">
-        <div class="breadcrumbs">
-          <a href="#home">Home</a> <span>/</span> <span>Interactive Explorer</span>
-        </div>
-        <h1 class="article-title">FAIRwDDI Interactive Database Model Explorer</h1>
-        <div class="article-meta">
-          <span class="meta-item"><span class="badge-tag primary">28 Tables</span></span>
-          <span class="meta-item"><span class="badge-tag emerald">PostgreSQL 17 / SQLite</span></span>
-          <span class="meta-item"><span class="badge-tag cdsp">DDI 4 / CDI / DDI-L 3.3</span></span>
+      <div class="article-header" style="margin-bottom: 0.85rem; padding-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div class="breadcrumbs" style="margin-bottom: 0.35rem;">
+              <a href="#home">Home</a> <span>/</span> <span>Interactive Database Explorer</span>
+            </div>
+            <h1 class="article-title" style="font-size: 1.75rem; margin-bottom: 0.2rem;">FAIRwDDI Database Model Explorer</h1>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">
+              28 Core Models • Standard-Agnostic PostgreSQL 17 / SQLite • DDI 4.0 / CDI / DDI-L 3.3
+            </div>
+          </div>
+
+          <div class="explorer-actions">
+            <button class="btn-secondary" onclick="toggleSidebarCollapse()" title="Toggle Sidebar Width">
+              ${icons['sidebar']} Toggle Sidebar
+            </button>
+            <button class="btn-secondary" onclick="toggleExplorerFullscreen()">
+              ${icons['cpu']} Fullscreen
+            </button>
+            <a href="./deliverables/research/database_explorer.html" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background: linear-gradient(135deg, var(--brand-cdsp), var(--brand-primary));">
+              ${icons['external']} Open in Standalone Tab ↗
+            </a>
+          </div>
         </div>
       </div>
 
       <div class="explorer-hub-container">
         <div class="explorer-toolbar">
           <div class="layer-filter-pills">
-            <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Quick Filter:</span>
-            <button class="layer-pill" onclick="filterExplorerLayer('all')">All Layers</button>
-            <button class="layer-pill" onclick="filterExplorerLayer('concept')">Concept</button>
-            <button class="layer-pill" onclick="filterExplorerLayer('representation')">Representation</button>
-            <button class="layer-pill" onclick="filterExplorerLayer('dataset')">Dataset</button>
+            <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Quick Filter Layer:</span>
+            <button class="layer-pill" onclick="filterExplorerLayer('all')">All (28)</button>
+            <button class="layer-pill" onclick="filterExplorerLayer('concept')">Concept (SKOS)</button>
+            <button class="layer-pill" onclick="filterExplorerLayer('representation')">Representation & Questions</button>
+            <button class="layer-pill" onclick="filterExplorerLayer('dataset')">Dataset (Waves)</button>
             <button class="layer-pill" onclick="filterExplorerLayer('organization')">Organization</button>
-            <button class="layer-pill" onclick="filterExplorerLayer('infrastructure')">Infrastructure</button>
-            <button class="layer-pill" onclick="filterExplorerLayer('staging')">Staging</button>
+            <button class="layer-pill" onclick="filterExplorerLayer('infrastructure')">Infrastructure (URNs)</button>
+            <button class="layer-pill" onclick="filterExplorerLayer('staging')">Staging & Ingestion</button>
           </div>
 
-          <div class="explorer-actions">
-            <button class="btn-secondary" style="padding: 0.45rem 0.85rem; font-size: 0.85rem;" onclick="toggleExplorerFullscreen()">
-              ${icons['external']} Fullscreen
-            </button>
-            <a href="./deliverables/research/database_explorer.html" target="_blank" class="btn-secondary" style="padding: 0.45rem 0.85rem; font-size: 0.85rem;">
-              ${icons['external']} Open Standalone
-            </a>
+          <div style="font-size: 0.82rem; color: var(--text-dim);">
+            <span>💡 Tip: Click nodes to inspect schema fields or generate SQL DDL</span>
           </div>
         </div>
 
         <div class="explorer-frame-container" id="explorer-frame-wrap">
-          <iframe src="./deliverables/research/database_explorer.html" id="explorer-iframe" title="Database Explorer"></iframe>
+          <iframe src="./deliverables/research/database_explorer.html" id="explorer-iframe" title="FAIRwDDI Database Explorer"></iframe>
         </div>
       </div>
     `;
@@ -473,7 +467,7 @@
           const filterBtn = iframe.contentWindow.document.querySelector(`[data-layer="${layer}"]`);
           if (filterBtn) filterBtn.click();
         } catch (e) {
-          console.log('Layer filter dispatched');
+          console.log('Layer filter dispatched:', layer);
         }
       }
     };
@@ -484,11 +478,15 @@
         wrap.classList.toggle('fullscreen');
       }
     };
+
+    window.toggleSidebarCollapse = function () {
+      state.sidebarCollapsed = !state.sidebarCollapsed;
+      if (el.appContainer) {
+        el.appContainer.classList.toggle('sidebar-collapsed', state.sidebarCollapsed);
+      }
+    };
   }
 
-  /**
-   * View: Diagrams Gallery
-   */
   function renderDiagramsView(activeDiagramId) {
     if (el.tocContainer) el.tocContainer.style.display = 'none';
     const data = window.FAIRWDDI_DATA || {};
@@ -508,7 +506,6 @@
       </div>
 
       <div class="diagram-viewer-wrap">
-        <!-- Diagram Selector Tabs -->
         <div class="diagram-tabs-row">
           ${diagrams.map((d) => `
             <a href="#diagrams/${d.id}" class="diagram-tab-btn ${d.id === activeDiag.id ? 'active' : ''}">
@@ -517,7 +514,6 @@
           `).join('')}
         </div>
 
-        <!-- Diagram Header Info -->
         <div class="diagram-viewer-header">
           <div>
             <span class="badge-tag primary" style="margin-bottom: 0.35rem;">${activeDiag.category || 'Architecture'}</span>
@@ -534,7 +530,6 @@
           </div>
         </div>
 
-        <!-- Diagram Canvas Container -->
         <div class="diagram-canvas-box" id="diagram-canvas-box">
           <div id="diagram-svg-render" style="width: 100%; display: flex; justify-content: center;">
             ${activeDiag.svg || '<p>Diagram SVG loading...</p>'}
@@ -588,9 +583,6 @@
     };
   }
 
-  /**
-   * View: Interactive Tools
-   */
   function renderToolsView() {
     if (el.tocContainer) el.tocContainer.style.display = 'none';
 
@@ -606,7 +598,6 @@
       </div>
 
       <div class="tools-container">
-        <!-- Tool 1: URN Generator & Validator -->
         <div class="tool-card">
           <div class="tool-header">
             <h2 class="tool-title">1. Canonical URN Generator & Validator</h2>
@@ -652,7 +643,6 @@
           </div>
         </div>
 
-        <!-- Tool 2: Multilingual JSONB Builder -->
         <div class="tool-card">
           <div class="tool-header">
             <h2 class="tool-title">2. Multilingual JSONB Faceted Dictionary Builder</h2>
@@ -680,7 +670,6 @@
           </div>
         </div>
 
-        <!-- Tool 3: Set-Theoretic Deduplication Simulator -->
         <div class="tool-card">
           <div class="tool-header">
             <h2 class="tool-title">3. Set-Theoretic Unordered Hashing Deduplicator</h2>
@@ -797,9 +786,6 @@
     updateSetCompare();
   }
 
-  /**
-   * View: Slides Presentation
-   */
   function renderSlidesView() {
     if (el.tocContainer) el.tocContainer.style.display = 'none';
 
@@ -837,9 +823,6 @@
     `;
   }
 
-  /**
-   * View: Markdown Document
-   */
   function renderDocumentView(routeId) {
     const data = window.FAIRWDDI_DATA || { documents: [] };
     const docs = data.documents || [];
@@ -850,13 +833,10 @@
       return;
     }
 
-    // Render TOC on Right Sidebar
     renderTableOfContents(doc.headings || []);
 
-    // Transform and Render Markdown
     const renderedHtml = parseMarkdown(doc.content);
 
-    // Find Previous and Next Articles for pagination
     const currentIndex = docs.findIndex((d) => d.id === routeId);
     const prevDoc = currentIndex > 0 ? docs[currentIndex - 1] : null;
     const nextDoc = currentIndex < docs.length - 1 ? docs[currentIndex + 1] : null;
@@ -955,7 +935,6 @@
       html = fallbackMarkdownParser(md);
     }
 
-    // Callout box transformer
     html = html.replace(/<blockquote>\s*<p>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(.*?)(<\/p>[\s\S]*?<\/blockquote>)/gi, (match, type, titleLine, rest) => {
       const typeLower = type.toLowerCase();
       return `<div class="callout ${typeLower}">
@@ -968,14 +947,12 @@
       </div>`;
     });
 
-    // Intercept internal file links
     html = html.replace(/href="file:\/\/\/[^"]*?deliverables\/phase1_report\.md"/g, 'href="#deliverables/phase1_report"');
     html = html.replace(/href="file:\/\/\/[^"]*?deliverables\/research\/([a-z0-9_-]+)\.md"/g, 'href="#research/$1"');
     html = html.replace(/href="file:\/\/\/[^"]*?docs\/([a-z0-9_-]+)\.md"/g, 'href="#docs/$1"');
     html = html.replace(/href="deliverables\/research\/database_explorer\.html"/g, 'href="#explorer"');
     html = html.replace(/href="docs\/assets\/diagrams\/([a-z0-9_-]+)\.svg"/g, 'href="#diagrams/$1"');
 
-    // Add slug IDs to headings if missing
     html = html.replace(/<(h[1-4])>(.*?)<\/\1>/gi, (match, tag, content) => {
       const cleanText = content.replace(/<[^>]*>/g, '').trim();
       const slug = cleanText.toLowerCase().replace(/[^\w\- ]/g, '').trim().replace(/\s+/g, '-');
@@ -1197,6 +1174,5 @@
     closeSearchModal();
   };
 
-  // Start app on DOMContentLoaded
   document.addEventListener('DOMContentLoaded', initApp);
 })();

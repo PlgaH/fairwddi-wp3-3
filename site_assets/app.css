@@ -361,6 +361,19 @@ input, select, textarea {
   max-width: 1720px;
   width: 100%;
   margin: 0 auto;
+  transition: max-width var(--transition-normal);
+}
+
+.app-container.full-width {
+  max-width: 100% !important;
+}
+
+.app-container.sidebar-collapsed .site-sidebar {
+  width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  border-right: none !important;
+  overflow: hidden !important;
 }
 
 .site-sidebar {
@@ -376,6 +389,7 @@ input, select, textarea {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  transition: width var(--transition-normal), padding var(--transition-normal);
 }
 
 .sidebar-search-box {
@@ -488,11 +502,21 @@ input, select, textarea {
   justify-content: center;
   padding: 2rem 2.5rem 4rem;
   background-color: var(--bg-app);
+  transition: padding var(--transition-normal);
+}
+
+.site-main.full-width {
+  padding: 1.25rem 1.5rem 2rem !important;
 }
 
 .content-wrapper {
   width: 100%;
   max-width: var(--content-max-width);
+  transition: max-width var(--transition-normal);
+}
+
+.content-wrapper.full-width {
+  max-width: 100% !important;
 }
 
 .site-toc {
@@ -1104,13 +1128,18 @@ input, select, textarea {
 .pagination-title { font-weight: 600; font-size: 0.95rem; color: var(--brand-primary); }
 
 /* Explorer Hub */
-.explorer-hub-container { display: flex; flex-direction: column; gap: 1.25rem; width: 100%; }
+.explorer-hub-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
 
 .explorer-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.85rem 1.25rem;
+  padding: 0.75rem 1.25rem;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -1133,11 +1162,12 @@ input, select, textarea {
 
 .layer-pill:hover, .layer-pill.active { background: var(--brand-primary); color: #ffffff; border-color: var(--brand-primary); }
 
-.explorer-actions { display: flex; align-items: center; gap: 0.6rem; }
+.explorer-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
 
 .explorer-frame-container {
   width: 100%;
-  height: 820px;
+  height: calc(100vh - 195px);
+  min-height: 820px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   overflow: hidden;
