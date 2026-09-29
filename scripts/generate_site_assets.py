@@ -1189,8 +1189,124 @@ input, select, textarea {
 .explorer-frame-container iframe { width: 100%; height: 100%; border: none; }
 .explorer-frame-container.fullscreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; border-radius: 0; }
 
-/* Diagrams */
-.diagram-viewer-wrap { display: flex; flex-direction: column; gap: 1.5rem; }
+/* Diagrams Gallery & Dropdown Selector */
+.diagram-viewer-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.diagram-selector-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.diagram-selector-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 300px;
+}
+
+.diagram-select-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.diagram-dropdown-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 480px;
+}
+
+.diagram-dropdown-select {
+  width: 100%;
+  padding: 0.6rem 2.2rem 0.6rem 0.95rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-bright);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.diagram-dropdown-select:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.diagram-dropdown-select optgroup {
+  font-weight: 700;
+  color: var(--brand-primary);
+  background: var(--bg-surface);
+}
+
+.diagram-dropdown-select option {
+  font-weight: 500;
+  color: var(--text-main);
+  background: var(--bg-surface);
+  padding: 0.35rem 0.5rem;
+}
+
+.diagram-index-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.diagram-step-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.diagram-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.diagram-nav-btn:hover {
+  color: var(--text-bright);
+  background: var(--bg-hover);
+  border-color: var(--brand-primary);
+}
 
 .diagram-viewer-header {
   display: flex;
@@ -1203,23 +1319,6 @@ input, select, textarea {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
 }
-
-.diagram-tabs-row { display: flex; align-items: center; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; }
-
-.diagram-tab-btn {
-  padding: 0.45rem 0.9rem;
-  border-radius: var(--radius-md);
-  font-size: 0.82rem;
-  font-weight: 600;
-  border: 1px solid var(--border-color);
-  background: var(--bg-surface);
-  color: var(--text-muted);
-  white-space: nowrap;
-  transition: all var(--transition-fast);
-}
-
-.diagram-tab-btn:hover { color: var(--text-bright); background: var(--bg-hover); }
-.diagram-tab-btn.active { background: var(--brand-primary); color: #ffffff; border-color: var(--brand-primary); }
 
 .diagram-canvas-box {
   background: #ffffff;
@@ -1394,6 +1493,7 @@ input, select, textarea {
   .site-main { padding: 1.5rem 1rem 3rem; }
   .hero-title { font-size: 2rem; }
   .footer-top-grid { grid-template-columns: 1fr; }
+  .diagram-selector-left { min-width: 100%; }
 }
 """
 
@@ -1577,7 +1677,6 @@ APP_JS = """/**
     } else if (route === 'explorer') {
       renderExplorerView();
     } else if (route.startsWith('diagrams')) {
-      resetLayoutWidth();
       const parts = route.split('/');
       const diagramId = parts[1] || 'cascade_diagram';
       renderDiagramsView(diagramId);
@@ -1799,9 +1898,6 @@ APP_JS = """/**
     `;
   }
 
-  /**
-   * View: Embedded Database Explorer (FULL PAGE WIDTH + STANDALONE TAB OPTION)
-   */
   function renderExplorerView() {
     if (el.tocContainer) el.tocContainer.style.display = 'none';
     if (el.contentWrapper) el.contentWrapper.classList.add('full-width');
@@ -1886,40 +1982,93 @@ APP_JS = """/**
     };
   }
 
+  /**
+   * View: Diagrams Gallery (WITH CONVENIENT DROPDOWN SELECTOR & STEP BUTTONS)
+   */
   function renderDiagramsView(activeDiagramId) {
     if (el.tocContainer) el.tocContainer.style.display = 'none';
+    if (el.contentWrapper) el.contentWrapper.classList.add('full-width');
+    if (el.siteMain) el.siteMain.classList.add('full-width');
+    if (el.appContainer) el.appContainer.classList.add('full-width');
+
     const data = window.FAIRWDDI_DATA || {};
     const diagrams = data.diagrams || [];
     const activeDiag = diagrams.find((d) => d.id === activeDiagramId) || diagrams[0] || {};
     state.currentDiagramId = activeDiag.id;
+    const currentIndex = diagrams.findIndex((d) => d.id === activeDiag.id);
+    const prevDiag = currentIndex > 0 ? diagrams[currentIndex - 1] : diagrams[diagrams.length - 1];
+    const nextDiag = currentIndex < diagrams.length - 1 ? diagrams[currentIndex + 1] : diagrams[0];
+
+    // Group diagrams by category for clean optgroups
+    const categories = {};
+    diagrams.forEach(d => {
+      const cat = d.category || 'Architecture';
+      if (!categories[cat]) categories[cat] = [];
+      categories[cat].push(d);
+    });
 
     el.mainContent.innerHTML = `
-      <div class="article-header">
-        <div class="breadcrumbs">
+      <div class="article-header" style="margin-bottom: 0.85rem; padding-bottom: 0.75rem;">
+        <div class="breadcrumbs" style="margin-bottom: 0.35rem;">
           <a href="#home">Home</a> <span>/</span> <a href="#diagrams">Architecture Diagrams</a> <span>/</span> <span>${activeDiag.title || 'Diagrams'}</span>
         </div>
-        <h1 class="article-title">FAIRwDDI Architecture Diagrams & Visualizations</h1>
-        <p style="color: var(--text-muted); font-size: 1.05rem;">
-          High-resolution vector architecture diagrams covering data modeling, ingestion pipelines, variable cascades, and hashing workflows.
-        </p>
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h1 class="article-title" style="font-size: 1.75rem; margin-bottom: 0.2rem;">FAIRwDDI Architecture Diagrams & Visualizations</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              High-resolution vector architecture diagrams covering data modeling, ingestion pipelines, variable cascades, and hashing workflows.
+            </p>
+          </div>
+          <div>
+            <button class="btn-secondary" onclick="toggleSidebarCollapse()" title="Toggle Sidebar Width">
+              ${icons['sidebar']} Toggle Sidebar
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="diagram-viewer-wrap">
-        <div class="diagram-tabs-row">
-          ${diagrams.map((d) => `
-            <a href="#diagrams/${d.id}" class="diagram-tab-btn ${d.id === activeDiag.id ? 'active' : ''}">
-              ${d.title}
+        <!-- Modern Diagram Dropdown Selector Bar -->
+        <div class="diagram-selector-bar">
+          <div class="diagram-selector-left">
+            <label class="diagram-select-label" for="diagram-dropdown-select">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Diagram:</span>
+            </label>
+            <div class="diagram-dropdown-wrapper">
+              <select id="diagram-dropdown-select" class="diagram-dropdown-select" onchange="window.location.hash='#diagrams/' + this.value">
+                ${Object.entries(categories).map(([cat, diags]) => `
+                  <optgroup label="── ${cat} ──">
+                    ${diags.map(d => `
+                      <option value="${d.id}" ${d.id === activeDiag.id ? 'selected' : ''}>
+                        ${d.title}
+                      </option>
+                    `).join('')}
+                  </optgroup>
+                `).join('')}
+              </select>
+            </div>
+            <span class="diagram-index-badge">${currentIndex + 1} of ${diagrams.length}</span>
+          </div>
+
+          <div class="diagram-step-nav">
+            <a href="#diagrams/${prevDiag.id}" class="diagram-nav-btn" title="Previous: ${prevDiag.title}">
+              ${icons['arrow-left']} Previous
             </a>
-          `).join('')}
+            <a href="#diagrams/${nextDiag.id}" class="diagram-nav-btn" title="Next: ${nextDiag.title}">
+              Next ${icons['arrow-right']}
+            </a>
+          </div>
         </div>
 
+        <!-- Diagram Header Info -->
         <div class="diagram-viewer-header">
           <div>
             <span class="badge-tag primary" style="margin-bottom: 0.35rem;">${activeDiag.category || 'Architecture'}</span>
-            <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: var(--text-bright);">${activeDiag.title}</h2>
+            <h2 style="font-family: var(--font-heading); font-size: 1.35rem; color: var(--text-bright);">${activeDiag.title}</h2>
             <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.25rem;">${activeDiag.description || ''}</p>
           </div>
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
             <button class="btn-secondary" style="padding: 0.45rem 0.85rem; font-size: 0.85rem;" onclick="downloadDiagramSVG('${activeDiag.id}')">
               Download SVG
             </button>
@@ -1929,6 +2078,7 @@ APP_JS = """/**
           </div>
         </div>
 
+        <!-- Diagram Canvas Container -->
         <div class="diagram-canvas-box" id="diagram-canvas-box">
           <div id="diagram-svg-render" style="width: 100%; display: flex; justify-content: center;">
             ${activeDiag.svg || '<p>Diagram SVG loading...</p>'}
@@ -1979,6 +2129,13 @@ APP_JS = """/**
       navigator.clipboard.writeText(diag.svg).then(() => {
         alert('SVG XML copied to clipboard!');
       });
+    };
+
+    window.toggleSidebarCollapse = function () {
+      state.sidebarCollapsed = !state.sidebarCollapsed;
+      if (el.appContainer) {
+        el.appContainer.classList.toggle('sidebar-collapsed', state.sidebarCollapsed);
+      }
     };
   }
 

@@ -178,7 +178,6 @@
     } else if (route === 'explorer') {
       renderExplorerView();
     } else if (route.startsWith('diagrams')) {
-      resetLayoutWidth();
       const parts = route.split('/');
       const diagramId = parts[1] || 'cascade_diagram';
       renderDiagramsView(diagramId);
@@ -400,9 +399,6 @@
     `;
   }
 
-  /**
-   * View: Embedded Database Explorer (FULL PAGE WIDTH + STANDALONE TAB OPTION)
-   */
   function renderExplorerView() {
     if (el.tocContainer) el.tocContainer.style.display = 'none';
     if (el.contentWrapper) el.contentWrapper.classList.add('full-width');
@@ -487,40 +483,93 @@
     };
   }
 
+  /**
+   * View: Diagrams Gallery (WITH CONVENIENT DROPDOWN SELECTOR & STEP BUTTONS)
+   */
   function renderDiagramsView(activeDiagramId) {
     if (el.tocContainer) el.tocContainer.style.display = 'none';
+    if (el.contentWrapper) el.contentWrapper.classList.add('full-width');
+    if (el.siteMain) el.siteMain.classList.add('full-width');
+    if (el.appContainer) el.appContainer.classList.add('full-width');
+
     const data = window.FAIRWDDI_DATA || {};
     const diagrams = data.diagrams || [];
     const activeDiag = diagrams.find((d) => d.id === activeDiagramId) || diagrams[0] || {};
     state.currentDiagramId = activeDiag.id;
+    const currentIndex = diagrams.findIndex((d) => d.id === activeDiag.id);
+    const prevDiag = currentIndex > 0 ? diagrams[currentIndex - 1] : diagrams[diagrams.length - 1];
+    const nextDiag = currentIndex < diagrams.length - 1 ? diagrams[currentIndex + 1] : diagrams[0];
+
+    // Group diagrams by category for clean optgroups
+    const categories = {};
+    diagrams.forEach(d => {
+      const cat = d.category || 'Architecture';
+      if (!categories[cat]) categories[cat] = [];
+      categories[cat].push(d);
+    });
 
     el.mainContent.innerHTML = `
-      <div class="article-header">
-        <div class="breadcrumbs">
+      <div class="article-header" style="margin-bottom: 0.85rem; padding-bottom: 0.75rem;">
+        <div class="breadcrumbs" style="margin-bottom: 0.35rem;">
           <a href="#home">Home</a> <span>/</span> <a href="#diagrams">Architecture Diagrams</a> <span>/</span> <span>${activeDiag.title || 'Diagrams'}</span>
         </div>
-        <h1 class="article-title">FAIRwDDI Architecture Diagrams & Visualizations</h1>
-        <p style="color: var(--text-muted); font-size: 1.05rem;">
-          High-resolution vector architecture diagrams covering data modeling, ingestion pipelines, variable cascades, and hashing workflows.
-        </p>
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h1 class="article-title" style="font-size: 1.75rem; margin-bottom: 0.2rem;">FAIRwDDI Architecture Diagrams & Visualizations</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              High-resolution vector architecture diagrams covering data modeling, ingestion pipelines, variable cascades, and hashing workflows.
+            </p>
+          </div>
+          <div>
+            <button class="btn-secondary" onclick="toggleSidebarCollapse()" title="Toggle Sidebar Width">
+              ${icons['sidebar']} Toggle Sidebar
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="diagram-viewer-wrap">
-        <div class="diagram-tabs-row">
-          ${diagrams.map((d) => `
-            <a href="#diagrams/${d.id}" class="diagram-tab-btn ${d.id === activeDiag.id ? 'active' : ''}">
-              ${d.title}
+        <!-- Modern Diagram Dropdown Selector Bar -->
+        <div class="diagram-selector-bar">
+          <div class="diagram-selector-left">
+            <label class="diagram-select-label" for="diagram-dropdown-select">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Diagram:</span>
+            </label>
+            <div class="diagram-dropdown-wrapper">
+              <select id="diagram-dropdown-select" class="diagram-dropdown-select" onchange="window.location.hash='#diagrams/' + this.value">
+                ${Object.entries(categories).map(([cat, diags]) => `
+                  <optgroup label="── ${cat} ──">
+                    ${diags.map(d => `
+                      <option value="${d.id}" ${d.id === activeDiag.id ? 'selected' : ''}>
+                        ${d.title}
+                      </option>
+                    `).join('')}
+                  </optgroup>
+                `).join('')}
+              </select>
+            </div>
+            <span class="diagram-index-badge">${currentIndex + 1} of ${diagrams.length}</span>
+          </div>
+
+          <div class="diagram-step-nav">
+            <a href="#diagrams/${prevDiag.id}" class="diagram-nav-btn" title="Previous: ${prevDiag.title}">
+              ${icons['arrow-left']} Previous
             </a>
-          `).join('')}
+            <a href="#diagrams/${nextDiag.id}" class="diagram-nav-btn" title="Next: ${nextDiag.title}">
+              Next ${icons['arrow-right']}
+            </a>
+          </div>
         </div>
 
+        <!-- Diagram Header Info -->
         <div class="diagram-viewer-header">
           <div>
             <span class="badge-tag primary" style="margin-bottom: 0.35rem;">${activeDiag.category || 'Architecture'}</span>
-            <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: var(--text-bright);">${activeDiag.title}</h2>
+            <h2 style="font-family: var(--font-heading); font-size: 1.35rem; color: var(--text-bright);">${activeDiag.title}</h2>
             <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.25rem;">${activeDiag.description || ''}</p>
           </div>
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
             <button class="btn-secondary" style="padding: 0.45rem 0.85rem; font-size: 0.85rem;" onclick="downloadDiagramSVG('${activeDiag.id}')">
               Download SVG
             </button>
@@ -530,6 +579,7 @@
           </div>
         </div>
 
+        <!-- Diagram Canvas Container -->
         <div class="diagram-canvas-box" id="diagram-canvas-box">
           <div id="diagram-svg-render" style="width: 100%; display: flex; justify-content: center;">
             ${activeDiag.svg || '<p>Diagram SVG loading...</p>'}
@@ -580,6 +630,13 @@
       navigator.clipboard.writeText(diag.svg).then(() => {
         alert('SVG XML copied to clipboard!');
       });
+    };
+
+    window.toggleSidebarCollapse = function () {
+      state.sidebarCollapsed = !state.sidebarCollapsed;
+      if (el.appContainer) {
+        el.appContainer.classList.toggle('sidebar-collapsed', state.sidebarCollapsed);
+      }
     };
   }
 

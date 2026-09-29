@@ -1178,8 +1178,124 @@ input, select, textarea {
 .explorer-frame-container iframe { width: 100%; height: 100%; border: none; }
 .explorer-frame-container.fullscreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; border-radius: 0; }
 
-/* Diagrams */
-.diagram-viewer-wrap { display: flex; flex-direction: column; gap: 1.5rem; }
+/* Diagrams Gallery & Dropdown Selector */
+.diagram-viewer-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.diagram-selector-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.diagram-selector-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 300px;
+}
+
+.diagram-select-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.diagram-dropdown-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 480px;
+}
+
+.diagram-dropdown-select {
+  width: 100%;
+  padding: 0.6rem 2.2rem 0.6rem 0.95rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-bright);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.diagram-dropdown-select:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.diagram-dropdown-select optgroup {
+  font-weight: 700;
+  color: var(--brand-primary);
+  background: var(--bg-surface);
+}
+
+.diagram-dropdown-select option {
+  font-weight: 500;
+  color: var(--text-main);
+  background: var(--bg-surface);
+  padding: 0.35rem 0.5rem;
+}
+
+.diagram-index-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.diagram-step-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.diagram-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.diagram-nav-btn:hover {
+  color: var(--text-bright);
+  background: var(--bg-hover);
+  border-color: var(--brand-primary);
+}
 
 .diagram-viewer-header {
   display: flex;
@@ -1192,23 +1308,6 @@ input, select, textarea {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
 }
-
-.diagram-tabs-row { display: flex; align-items: center; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; }
-
-.diagram-tab-btn {
-  padding: 0.45rem 0.9rem;
-  border-radius: var(--radius-md);
-  font-size: 0.82rem;
-  font-weight: 600;
-  border: 1px solid var(--border-color);
-  background: var(--bg-surface);
-  color: var(--text-muted);
-  white-space: nowrap;
-  transition: all var(--transition-fast);
-}
-
-.diagram-tab-btn:hover { color: var(--text-bright); background: var(--bg-hover); }
-.diagram-tab-btn.active { background: var(--brand-primary); color: #ffffff; border-color: var(--brand-primary); }
 
 .diagram-canvas-box {
   background: #ffffff;
@@ -1383,4 +1482,5 @@ input, select, textarea {
   .site-main { padding: 1.5rem 1rem 3rem; }
   .hero-title { font-size: 2rem; }
   .footer-top-grid { grid-template-columns: 1fr; }
+  .diagram-selector-left { min-width: 100%; }
 }
