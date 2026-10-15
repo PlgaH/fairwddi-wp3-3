@@ -12,7 +12,12 @@ from fairwddi.models import (
     ConceptScheme,
     ConceptualVariable,
     ConceptualVariableScheme,
+    Datafile,
+    DatafileVariable,
+    DatafileVariableFrequency,
+    DatafileVariableStatistic,
     EventLog,
+    Frequency,
     Group,
     InstanceVariable,
     InstanceVariableScheme,
@@ -28,8 +33,8 @@ from fairwddi.models import (
     SemanticRelationship,
     StagedImport,
     StagedResourceNode,
+    StudyInstrument,
     StudyUnit,
-    StudyUnitVariable,
     URNAlias,
     UrnRegistry,
 )
@@ -432,16 +437,88 @@ class TestFairwDDIModels(TestCase):
         assert iv.represented_variable.conceptual_variable == cv
         assert iv.extended_attributes[0]["type"] == "universe"
 
-        # StudyUnitVariable mapping with path
-        su_var = StudyUnitVariable.objects.create(
+        # Minimal Datafile entity relating InstanceVariable to StudyUnit
+        datafile = Datafile.objects.create(
             study_unit=study_unit,
+            name=[{"value": "bpf_2007.sav"}],
+            description=[{"lang": "fr", "value": "Fichier SPSS principal"}],
+            urn="urn:ddi:fr.sciencespo:df-fr-bpf2007:1.0.0",
+        )
+        assert datafile.study == study_unit
+        assert datafile.study_unit == study_unit
+        assert str(datafile) == "bpf_2007.sav"
+        assert study_unit.datafiles.count() == 1
+
+        # DatafileVariable junction table relating Datafile to InstanceVariables with ordering
+        df_var = DatafileVariable.objects.create(
+            datafile=datafile,
             instance_variable=iv,
-            path="/StudyUnit/DataPipeline/q01a",
             order=1,
         )
-        assert study_unit.study_unit_variables.count() == 1
-        assert su_var.instance_variable == iv
-        assert su_var.path == "/StudyUnit/DataPipeline/q01a"
+        assert df_var.id is not None
+        assert df_var.order == 1
+        assert "order=1" in str(df_var)
+        assert datafile.instance_variables.count() == 1
+        assert iv.datafile == datafile
+
+        # DatafileVariableFrequency table storing categorical variable count statistics
+        freq_unweighted = DatafileVariableFrequency.objects.create(
+            datafile=datafile,
+            instance_variable=iv,
+            code_value="1",
+            frequency=150.0,
+        )
+        assert freq_unweighted.id is not None
+        assert freq_unweighted.code_value == "1"
+        assert freq_unweighted.frequency == 150.0
+        assert freq_unweighted.weight is None
+        assert "150.0" in str(freq_unweighted)
+
+        freq_weighted = Frequency.objects.create(
+            datafile=datafile,
+            instance_variable=iv,
+            code_value="2",
+            frequency=320.5,
+            weight="poidstot",
+        )
+        assert freq_weighted.frequency == 320.5
+        assert freq_weighted.weight == "poidstot"
+        assert "weight=poidstot" in str(freq_weighted)
+        assert datafile.frequencies.count() == 2
+        assert iv.frequencies.count() == 2
+
+        # DatafileVariableStatistic table storing descriptive statistics (JSONB)
+        stat = DatafileVariableStatistic.objects.create(
+            datafile=datafile,
+            instance_variable=iv,
+            statistics={"mean": 1.5, "min": 1.0, "max": 2.0, "stddev": 0.5},
+            weight="poidstot",
+        )
+        assert stat.id is not None
+        assert stat.statistics["mean"] == 1.5
+        assert stat.statistics["min"] == 1.0
+        assert stat.statistics["max"] == 2.0
+        assert stat.weight == "poidstot"
+        assert "mean" in str(stat)
+        assert datafile.statistics.count() == 1
+        assert iv.statistics.count() == 1
+
+        # StudyInstrument table linking StudyUnit to Instrument
+        inst = Instrument.objects.create(
+            urn="urn:ddi:fr.sciencespo:inst-cascade-test:1.0.0",
+            name=[{"lang": "fr", "value": "Questionnaire Cascade"}],
+        )
+        study_inst = StudyInstrument.objects.create(
+            study_unit=study_unit,
+            instrument=inst,
+            path="/StudyUnit/Instrument/Cascade",
+            order=1,
+        )
+        assert study_unit.study_instruments.count() == 1
+        assert inst.study_associations.count() == 1
+        assert study_inst.path == "/StudyUnit/Instrument/Cascade"
+        assert study_inst.order == 1
+        assert str(study_inst).startswith(study_unit.urn)
 
     def test_event_log(self) -> None:
         """Test EventLog model for generic DDI resource lifecycle tracking."""
@@ -807,4 +884,3 @@ class TestFairwDDIModels(TestCase):
         qi_urn = qi.urn
         qi.delete()
         assert UrnRegistry.objects.filter(urn=qi_urn).first() is None
-

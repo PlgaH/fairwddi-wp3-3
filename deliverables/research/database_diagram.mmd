@@ -257,12 +257,53 @@ erDiagram
         timestamp updated_at "Update timestamp"
     }
 
-    StudyUnitVariable {
+    Datafile {
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:df-bpf2007:1.0.0)"
+        string study_unit_urn FK "FK -> StudyUnit.urn"
+        jsonb name "Multilingual file name (e.g. bpf2007.sav)"
+        jsonb description "Multilingual file description"
+        jsonb extended_attributes "File format, case count, storage location"
+        jsonb hashes "Content digest hashes"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    DatafileVariable {
+        bigint id PK "Auto-incrementing surrogate ID"
+        string datafile_urn FK "FK -> Datafile.urn"
+        string instance_variable_urn FK "FK -> InstanceVariable.urn"
+        integer order "Column sequence or display order"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    DatafileVariableFrequency {
+        bigint id PK "Auto-incrementing surrogate ID"
+        string datafile_urn FK "FK -> Datafile.urn"
+        string instance_variable_urn FK "FK -> InstanceVariable.urn"
+        string code_value "Discrete categorical response code string"
+        float frequency "Frequency count statistic (weighted or unweighted)"
+        string weight "Optional weighting variable or specification"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    DatafileVariableStatistic {
+        bigint id PK "Auto-incrementing surrogate ID"
+        string datafile_urn FK "FK -> Datafile.urn"
+        string instance_variable_urn FK "FK -> InstanceVariable.urn"
+        jsonb statistics "Descriptive statistics JSONB (mean, min, max, stddev, etc.)"
+        string weight "Optional weighting variable or specification"
+        timestamp created_at "Creation timestamp"
+        timestamp updated_at "Update timestamp"
+    }
+
+    StudyInstrument {
         bigint id PK "Auto-incrementing surrogate ID"
         string study_unit_urn FK "FK -> StudyUnit.urn"
-        string instance_variable_urn FK "FK -> InstanceVariable.urn"
-        string path "Dataset path / table location"
-        integer order "Physical column order in dataset"
+        string instrument_urn FK "FK -> Instrument.urn"
+        string path "Sequencing/referencing path"
+        integer order "Display or execution order"
         timestamp created_at "Creation timestamp"
         timestamp updated_at "Update timestamp"
     }
@@ -371,8 +412,15 @@ erDiagram
     %% Dataset Layer
     InstanceVariableScheme ||--o{ InstanceVariable : "contains"
     RepresentedVariable ||--o{ InstanceVariable : "cascade_instantiates"
-    StudyUnit ||--o{ StudyUnitVariable : "contains"
-    InstanceVariable ||--o{ StudyUnitVariable : "maps_to"
+    StudyUnit ||--o{ Datafile : "contains"
+    Datafile ||--o{ DatafileVariable : "contains"
+    InstanceVariable ||--o{ DatafileVariable : "datafiles"
+    Datafile ||--o{ DatafileVariableFrequency : "measures"
+    InstanceVariable ||--o{ DatafileVariableFrequency : "frequencies"
+    Datafile ||--o{ DatafileVariableStatistic : "aggregates"
+    InstanceVariable ||--o{ DatafileVariableStatistic : "statistics"
+    StudyUnit ||--o{ StudyInstrument : "uses"
+    Instrument ||--o{ StudyInstrument : "associations"
 
     %% Supertype & Infrastructure Layer
     UrnRegistry ||--o{ URNAlias : "canonical_urn"

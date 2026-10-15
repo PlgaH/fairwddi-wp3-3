@@ -12,7 +12,12 @@ from fairwddi.schemas import (
     ConceptSchemeSchema,
     ConceptualVariableSchema,
     ConceptualVariableSchemeSchema,
+    DatafileSchema,
+    DatafileVariableFrequencySchema,
+    DatafileVariableSchema,
+    DatafileVariableStatisticSchema,
     EventLogSchema,
+    FrequencySchema,
     GroupReferenceSchema,
     GroupSchema,
     InstanceVariableSchema,
@@ -30,6 +35,7 @@ from fairwddi.schemas import (
     SemanticRelationshipSchema,
     StagedImportSchema,
     StagedResourceNodeSchema,
+    StudyInstrumentSchema,
     StudyUnitSchema,
     StudyUnitVariableSchema,
     UrnRegistrySchema,
@@ -354,6 +360,67 @@ def test_domain_entity_schemas() -> None:
     assert iv_schema.scheme_urn == "urn:ddi:fr.sciencespo:ivs-bpf:1.0.0"
     assert iv_schema.name.get() == "q01a"
     assert iv_schema.description.get("fr") == "Variable q01a"
+
+    datafile_schema = DatafileSchema(
+        urn="urn:ddi:fr.sciencespo:df-2007:1.0.0",
+        name="bpf_2007.sav",
+        study_unit_urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
+        description=MultilingualText.from_single("Fichier SPSS", lang="fr"),
+    )
+    assert datafile_schema.urn == "urn:ddi:fr.sciencespo:df-2007:1.0.0"
+    assert datafile_schema.study_unit_urn == "urn:ddi:fr.sciencespo:su-2007:1.0.0"
+
+    iv_schema.datafile_urn = "urn:ddi:fr.sciencespo:df-2007:1.0.0"
+    assert iv_schema.datafile_urn == "urn:ddi:fr.sciencespo:df-2007:1.0.0"
+
+    df_var_schema = DatafileVariableSchema(
+        datafile_urn="urn:ddi:fr.sciencespo:df-2007:1.0.0",
+        instance_variable_urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
+        order=2,
+    )
+    assert df_var_schema.datafile_urn == "urn:ddi:fr.sciencespo:df-2007:1.0.0"
+    assert df_var_schema.instance_variable_urn == "urn:ddi:fr.sciencespo:iv-q01a:1.0.0"
+    assert df_var_schema.order == 2
+
+    freq_schema = DatafileVariableFrequencySchema(
+        datafile_urn="urn:ddi:fr.sciencespo:df-2007:1.0.0",
+        instance_variable_urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
+        code_value="1",
+        frequency=150.0,
+        weight="poidstot",
+    )
+    assert freq_schema.code_value == "1"
+    assert freq_schema.frequency == 150.0
+    assert freq_schema.weight == "poidstot"
+
+    # Also test backward compatibility alias FrequencySchema
+    freq_alias_schema = FrequencySchema(
+        datafile_urn="urn:ddi:fr.sciencespo:df-2007:1.0.0",
+        instance_variable_urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
+        code_value="2",
+        frequency=200.0,
+    )
+    assert freq_alias_schema.frequency == 200.0
+
+    stat_schema = DatafileVariableStatisticSchema(
+        datafile_urn="urn:ddi:fr.sciencespo:df-2007:1.0.0",
+        instance_variable_urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
+        statistics={"mean": 3.4, "min": 1.0, "max": 5.0, "stddev": 1.1},
+        weight="poidstot",
+    )
+    assert stat_schema.datafile_urn == "urn:ddi:fr.sciencespo:df-2007:1.0.0"
+    assert stat_schema.statistics["mean"] == 3.4
+    assert stat_schema.statistics["min"] == 1.0
+    assert stat_schema.weight == "poidstot"
+
+    study_inst_schema = StudyInstrumentSchema(
+        study_unit_urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
+        instrument_urn="urn:ddi:fr.sciencespo:inst-2007:1.0.0",
+        path="/StudyUnit/Instrument/Main",
+        order=1,
+    )
+    assert study_inst_schema.study_unit_urn == "urn:ddi:fr.sciencespo:su-2007:1.0.0"
+    assert study_inst_schema.instrument_urn == "urn:ddi:fr.sciencespo:inst-2007:1.0.0"
 
     suv_schema = StudyUnitVariableSchema(
         study_unit_urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",

@@ -25,7 +25,12 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         ConceptScheme,
         ConceptualVariable,
         ConceptualVariableScheme,
+        Datafile,
+        DatafileVariable,
+        DatafileVariableFrequency,
+        DatafileVariableStatistic,
         EventLog,
+        Frequency,
         Group,
         InstanceVariable,
         InstanceVariableScheme,
@@ -40,8 +45,8 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         SemanticRelationship,
         StagedImport,
         StagedResourceNode,
+        StudyInstrument,
         StudyUnit,
-        StudyUnitVariable,
         URNAlias,
         UrnRegistry,
     )
@@ -508,7 +513,36 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         },
     )
 
-    # Harmonized InstanceVariables instantiated across study waves
+    # Datafiles relating InstanceVariables to StudyUnits
+    datafile_w1, _ = Datafile.objects.get_or_create(
+        urn=f"urn:ddi:{agency}:datafile-bpf-2007-w01:1.0.0",
+        defaults={
+            "study_unit": study_wave1,
+            "name": [{"value": "bpf_2007_w01.sav"}],
+            "description": [{"lang": "fr", "value": "Fichier de données SPSS de la Vague 1."}],
+            "extended_attributes": [
+                {"type": "format", "value": "application/x-spss-sav"},
+                {"type": "case_count", "value": "1500"},
+            ],
+            "hashes": {"sha256": "df_hash_w1"},
+        },
+    )
+
+    datafile_w2, _ = Datafile.objects.get_or_create(
+        urn=f"urn:ddi:{agency}:datafile-bpf-2007-w02:1.0.0",
+        defaults={
+            "study_unit": study_wave2,
+            "name": [{"value": "bpf_2007_w02.sav"}],
+            "description": [{"lang": "fr", "value": "Fichier de données SPSS de la Vague 2."}],
+            "extended_attributes": [
+                {"type": "format", "value": "application/x-spss-sav"},
+                {"type": "case_count", "value": "1480"},
+            ],
+            "hashes": {"sha256": "df_hash_w2"},
+        },
+    )
+
+    # Harmonized InstanceVariables instantiated across study waves and datafiles
     iv_w1_q01, _ = InstanceVariable.objects.get_or_create(
         urn=f"urn:ddi:{agency}:bpf-2007-w01-q01:1.0.0",
         defaults={
@@ -545,16 +579,59 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         },
     )
 
-    # StudyUnit to Variable relationship mapping with path
-    StudyUnitVariable.objects.get_or_create(
-        study_unit=study_wave1,
+    # DatafileVariable junctions relating Datafile to InstanceVariables with ordering
+    DatafileVariable.objects.get_or_create(
+        datafile=datafile_w1,
         instance_variable=iv_w1_q01,
-        defaults={"path": "/StudyUnit/DataPipeline/q01_pol_interest", "order": 1},
+        defaults={"order": 1},
     )
-    StudyUnitVariable.objects.get_or_create(
-        study_unit=study_wave2,
+    DatafileVariable.objects.get_or_create(
+        datafile=datafile_w2,
         instance_variable=iv_w2_q01,
-        defaults={"path": "/StudyUnit/DataPipeline/q01_pol_interest", "order": 1},
+        defaults={"order": 1},
+    )
+
+    # Frequencies (categorical variable count statistics)
+    DatafileVariableFrequency.objects.get_or_create(
+        datafile=datafile_w1,
+        instance_variable=iv_w1_q01,
+        code_value="1",
+        defaults={"frequency": 425.0, "weight": None},
+    )
+    DatafileVariableFrequency.objects.get_or_create(
+        datafile=datafile_w1,
+        instance_variable=iv_w1_q01,
+        code_value="2",
+        defaults={"frequency": 510.5, "weight": "poidstot"},
+    )
+
+    # Descriptive statistics (summary metrics JSONB object)
+    DatafileVariableStatistic.objects.get_or_create(
+        datafile=datafile_w1,
+        instance_variable=iv_w1_q01,
+        defaults={
+            "statistics": {
+                "mean": 2.14,
+                "stddev": 0.88,
+                "min": 1.0,
+                "max": 4.0,
+                "valid_cases": 935,
+                "missing_cases": 15,
+            },
+            "weight": "poidstot",
+        },
+    )
+
+    # StudyInstrument relationship mapping with path
+    StudyInstrument.objects.get_or_create(
+        study_unit=study_wave1,
+        instrument=instrument,
+        defaults={"path": "/StudyUnit/Instrument/MainQuestionnaire", "order": 1},
+    )
+    StudyInstrument.objects.get_or_create(
+        study_unit=study_wave2,
+        instrument=instrument,
+        defaults={"path": "/StudyUnit/Instrument/MainQuestionnaire", "order": 1},
     )
 
     # -------------------------------------------------------------------------
@@ -686,9 +763,14 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         "represented_variable_schemes": RepresentedVariableScheme.objects.count(),
         "represented_variables": RepresentedVariable.objects.count(),
         "study_units": StudyUnit.objects.count(),
+        "datafiles": Datafile.objects.count(),
         "instance_variable_schemes": InstanceVariableScheme.objects.count(),
         "instance_variables": InstanceVariable.objects.count(),
-        "study_unit_variables": StudyUnitVariable.objects.count(),
+        "datafile_variables": DatafileVariable.objects.count(),
+        "datafile_variable_frequencies": DatafileVariableFrequency.objects.count(),
+        "frequencies": Frequency.objects.count(),
+        "datafile_variable_statistics": DatafileVariableStatistic.objects.count(),
+        "study_instruments": StudyInstrument.objects.count(),
         "urn_registries": UrnRegistry.objects.count(),
         "urn_aliases": URNAlias.objects.count(),
         "staged_nodes": StagedResourceNode.objects.count(),

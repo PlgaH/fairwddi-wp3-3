@@ -43,10 +43,10 @@ DOCUMENTS_CONFIG = [
         "title": "Target Database Model & PostgreSQL 17 Schema Specification",
         "shortTitle": "Database Model Specification",
         "category": "Research Reports",
-        "badge": "28 Models",
+        "badge": "30 Models",
         "icon": "database",
         "featured": True,
-        "description": "Complete 28-model standard-agnostic PostgreSQL 17 schema, ER diagrams, DDIIdentifiable mixin, staging nodes, and migration path."
+        "description": "Complete 30-model standard-agnostic PostgreSQL 17 schema, ER diagrams, DDIIdentifiable mixin, staging nodes, and migration path."
     },
     {
         "id": "research/database_diagram",
@@ -225,7 +225,7 @@ DIAGRAMS_CONFIG = [
         "file": "docs/assets/diagrams/database_er_diagram.svg",
         "title": "Database Entity-Relationship Model",
         "category": "Database",
-        "description": "Complete relational layout of all 28 core tables with foreign keys, polymorphic URN registry relations, and shortcut lookup tables."
+        "description": "Complete relational layout of all 30 core tables with foreign keys, polymorphic URN registry relations, and shortcut lookup tables."
     },
     {
         "id": "ingestion_pipeline",
@@ -396,7 +396,7 @@ def build_site_data():
             "version": "1.0.0-RC1",
             "generatedAt": "2026-09-29T18:00:00Z",
             "stats": {
-                "modelsCount": 28,
+                "modelsCount": 30,
                 "deliverablesCount": len([d for d in docs_output if d["category"] in ("Deliverables", "Research Reports")]),
                 "documentationCount": len([d for d in docs_output if d["category"] == "Documentation"]),
                 "diagramsCount": len(diagrams_output),

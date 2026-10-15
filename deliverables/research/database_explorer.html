@@ -2196,9 +2196,61 @@
         ],
         outgoing: [],
         incoming: [
-          { target: "StudyUnitVariable", type: "Junction FK (StudyUnitVariable.study_unit_urn)" },
+          { target: "Datafile", type: "Parent FK (Datafile.study_unit_urn)" },
+          { target: "StudyInstrument", type: "Junction FK (StudyInstrument.study_unit_urn)" },
           { target: "Group", type: "Polymorphic reference in Group.references" }
         ]
+      },
+      Datafile: {
+        layer: "dataset",
+        layerName: "Dataset Layer",
+        base: "DDIResource",
+        table: "request_ddi_datafile",
+        ddiTag: "<ddi:DataFile> / <ddi:PhysicalInstance>",
+        urnPattern: "urn:ddi:fr.sciencespo:Datafile.df-ess2007:1.0.0",
+        description: "Minimal Datafile entity relating InstanceVariables to StudyUnit (replaces legacy StudyVariable table). A datafile points to a study wave.",
+        pos: { x: 420, y: 720 },
+        fields: [
+          { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical Datafile URN (Supertype FK -> UrnRegistry.urn)" },
+          { name: "study_unit_urn", type: "VARCHAR(512)", fk: "StudyUnit", req: true, notes: "FK -> StudyUnit.urn" },
+          { name: "name", type: "JSONB", req: true, notes: "Multilingual file name / identifier (e.g. 'ess2007.sav')" },
+          { name: "description", type: "JSONB", notes: "Multilingual file description" },
+          { name: "hashes", type: "JSONB", notes: "Multi-algorithm content digests" },
+          { name: "extended_attributes", type: "JSONB", notes: "File format, case count, storage path" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "StudyUnit", type: "Foreign Key (study_unit_urn)" }
+        ],
+        incoming: [
+          { target: "DatafileVariable", type: "Foreign Key (DatafileVariable.datafile_urn)" },
+          { target: "DatafileVariableFrequency", type: "Foreign Key (DatafileVariableFrequency.datafile_urn)" },
+          { target: "DatafileVariableStatistic", type: "Foreign Key (DatafileVariableStatistic.datafile_urn)" }
+        ]
+      },
+      DatafileVariable: {
+        layer: "dataset",
+        layerName: "Dataset Layer",
+        base: "Model",
+        table: "request_ddi_datafilevariable",
+        ddiTag: "<ddi:DatafileVariable>",
+        urnPattern: "Surrogate PK (id: BigInt)",
+        description: "Junction table linking Datafile to member InstanceVariable columns, with sequence/display ordering.",
+        pos: { x: 580, y: 740 },
+        fields: [
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
+          { name: "datafile_urn", type: "VARCHAR(512)", fk: "Datafile", req: true, notes: "FK -> Datafile.urn" },
+          { name: "instance_variable_urn", type: "VARCHAR(512)", fk: "InstanceVariable", req: true, notes: "FK -> InstanceVariable.urn" },
+          { name: "order", type: "INTEGER", notes: "Column sequence or display order within datafile" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "Datafile", type: "Foreign Key (datafile_urn)" },
+          { target: "InstanceVariable", type: "Foreign Key (instance_variable_urn)" }
+        ],
+        incoming: []
       },
       InstanceVariableScheme: {
         layer: "dataset",
@@ -2229,7 +2281,7 @@
         table: "request_ddi_instancevariable",
         ddiTag: "<ddi:Variable> / <ddi:InstanceVariable>",
         urnPattern: "urn:ddi:fr.sciencespo:InstanceVariable.iv-ess2007-q01:1.0.0",
-        description: "Physical realization of a variable in a specific dataset column (e.g. q01a). Represents Tier 3 of the Variable Cascade.",
+        description: "Physical realization of a variable in a specific dataset column (e.g. q01a). Relates to Datafile via DatafileVariable.",
         pos: { x: 740, y: 810 },
         fields: [
           { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical InstanceVariable URN (Supertype FK -> UrnRegistry.urn)" },
@@ -2248,30 +2300,81 @@
           { target: "RepresentedVariable", type: "Cascade Tier 2 Link FK (represented_variable_urn)" }
         ],
         incoming: [
-          { target: "StudyUnitVariable", type: "Junction FK (StudyUnitVariable.instance_variable_urn)" }
+          { target: "DatafileVariable", type: "Junction FK (DatafileVariable.instance_variable_urn)" },
+          { target: "DatafileVariableFrequency", type: "Junction FK (DatafileVariableFrequency.instance_variable_urn)" },
+          { target: "DatafileVariableStatistic", type: "Junction FK (DatafileVariableStatistic.instance_variable_urn)" }
         ]
       },
-      StudyUnitVariable: {
+      DatafileVariableFrequency: {
         layer: "dataset",
         layerName: "Dataset Layer",
         base: "Model",
-        table: "request_ddi_studyunitvariable",
-        ddiTag: "<ddi:StudyUnitVariable>",
+        table: "request_ddi_datafilevariablefrequency",
+        ddiTag: "<ddi:SummaryStatistic> / <ddi:VariableStatistics>",
         urnPattern: "Surrogate PK (id: BigInt)",
-        description: "Junction capturing the direct relationship between a StudyUnit and its member InstanceVariable entries.",
-        pos: { x: 420, y: 770 },
+        description: "Stores categorical variable count statistics per response code within a specific Datafile, with optional weighting.",
+        pos: { x: 480, y: 880 },
+        fields: [
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
+          { name: "datafile_urn", type: "VARCHAR(512)", fk: "Datafile", req: true, notes: "FK -> Datafile.urn" },
+          { name: "instance_variable_urn", type: "VARCHAR(512)", fk: "InstanceVariable", req: true, notes: "FK -> InstanceVariable.urn" },
+          { name: "code_value", type: "VARCHAR(128)", req: true, notes: "Discrete code value as string (e.g. '1', '98')" },
+          { name: "frequency", type: "DOUBLE PRECISION", req: true, notes: "Count or frequency statistic" },
+          { name: "weight", type: "VARCHAR(256)", notes: "Optional weight variable name, URN, or specification" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "Datafile", type: "Foreign Key (datafile_urn)" },
+          { target: "InstanceVariable", type: "Foreign Key (instance_variable_urn)" }
+        ],
+        incoming: []
+      },
+      DatafileVariableStatistic: {
+        layer: "dataset",
+        layerName: "Dataset Layer",
+        base: "Model",
+        table: "request_ddi_datafilevariablestatistic",
+        ddiTag: "<ddi:SummaryStatistic>",
+        urnPattern: "Surrogate PK (id: BigInt)",
+        description: "Stores descriptive summary statistics (JSONB) for an instance variable within a specific Datafile.",
+        pos: { x: 680, y: 880 },
+        fields: [
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
+          { name: "datafile_urn", type: "VARCHAR(512)", fk: "Datafile", req: true, notes: "FK -> Datafile.urn" },
+          { name: "instance_variable_urn", type: "VARCHAR(512)", fk: "InstanceVariable", req: true, notes: "FK -> InstanceVariable.urn" },
+          { name: "statistics", type: "JSONB", req: true, notes: "Descriptive statistics object mapping metric to value" },
+          { name: "weight", type: "VARCHAR(256)", notes: "Optional weight variable name, URN, or specification" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
+        ],
+        outgoing: [
+          { target: "Datafile", type: "Foreign Key (datafile_urn)" },
+          { target: "InstanceVariable", type: "Foreign Key (instance_variable_urn)" }
+        ],
+        incoming: []
+      },
+      StudyInstrument: {
+        layer: "dataset",
+        layerName: "Dataset Layer",
+        base: "Model",
+        table: "request_ddi_studyinstrument",
+        ddiTag: "<ddi:StudyInstrument>",
+        urnPattern: "Surrogate PK (id: BigInt)",
+        description: "Junction capturing the direct relationship between a StudyUnit and its data collection Instrument(s) with path.",
+        pos: { x: 60, y: 830 },
         fields: [
           { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
           { name: "study_unit_urn", type: "VARCHAR(512)", fk: "StudyUnit", req: true, notes: "FK -> StudyUnit.urn" },
-          { name: "instance_variable_urn", type: "VARCHAR(512)", fk: "InstanceVariable", req: true, notes: "FK -> InstanceVariable.urn" },
-          { name: "path", type: "VARCHAR(512)", notes: "Dataset path / table location" },
-          { name: "order", type: "INTEGER", notes: "Physical column order in dataset" },
+          { name: "instrument_urn", type: "VARCHAR(512)", fk: "Instrument", req: true, notes: "FK -> Instrument.urn" },
+          { name: "path", type: "VARCHAR(512)", notes: "Referencing path from study unit to instrument" },
+          { name: "order", type: "INTEGER", notes: "Display order / sequence" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
         ],
         outgoing: [
           { target: "StudyUnit", type: "Foreign Key (study_unit_urn)" },
-          { target: "InstanceVariable", type: "Foreign Key (instance_variable_urn)" }
+          { target: "Instrument", type: "Foreign Key (instrument_urn)" }
         ],
         incoming: []
       },
@@ -2642,7 +2745,7 @@
         colorClass: "focused-cascade",
         edgeClass: "highlight-cascade",
         marker: "url(#arrow-cascade)",
-        nodes: ["ConceptScheme", "Concept", "ConceptualVariableScheme", "ConceptualVariable", "RepresentedVariableScheme", "RepresentedVariable", "InstanceVariableScheme", "InstanceVariable", "StudyUnit", "StudyUnitVariable"],
+        nodes: ["ConceptScheme", "Concept", "ConceptualVariableScheme", "ConceptualVariable", "RepresentedVariableScheme", "RepresentedVariable", "InstanceVariableScheme", "InstanceVariable", "Datafile", "DatafileVariable", "StudyUnit", "DatafileVariableFrequency", "DatafileVariableStatistic"],
         edges: [
           ["Concept", "ConceptScheme"],
           ["ConceptualVariable", "Concept"],
@@ -2651,8 +2754,13 @@
           ["RepresentedVariable", "RepresentedVariableScheme"],
           ["InstanceVariable", "RepresentedVariable"],
           ["InstanceVariable", "InstanceVariableScheme"],
-          ["StudyUnitVariable", "StudyUnit"],
-          ["StudyUnitVariable", "InstanceVariable"]
+          ["DatafileVariable", "Datafile"],
+          ["DatafileVariable", "InstanceVariable"],
+          ["Datafile", "StudyUnit"],
+          ["DatafileVariableFrequency", "Datafile"],
+          ["DatafileVariableFrequency", "InstanceVariable"],
+          ["DatafileVariableStatistic", "Datafile"],
+          ["DatafileVariableStatistic", "InstanceVariable"]
         ]
       },
       response: {

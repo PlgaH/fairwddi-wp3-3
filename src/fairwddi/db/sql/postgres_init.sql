@@ -297,6 +297,28 @@ CREATE TABLE IF NOT EXISTS request_ddi_studyunit (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS request_ddi_studyinstrument (
+    id BIGSERIAL PRIMARY KEY,
+    study_unit_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_studyunit(urn) ON DELETE CASCADE,
+    instrument_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instrument(urn) ON DELETE CASCADE,
+    path VARCHAR(512) NOT NULL DEFAULT '',
+    "order" INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT req_ddi_si_unique UNIQUE (study_unit_urn, instrument_urn)
+);
+
+CREATE TABLE IF NOT EXISTS request_ddi_datafile (
+    urn VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE,
+    name JSONB NOT NULL DEFAULT '[]'::jsonb,
+    study_unit_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_studyunit(urn) ON DELETE CASCADE,
+    description JSONB DEFAULT '[]'::jsonb,
+    hashes JSONB DEFAULT '{}'::jsonb,
+    extended_attributes JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS request_ddi_instancevariablescheme (
     urn VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE,
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
@@ -319,14 +341,44 @@ CREATE TABLE IF NOT EXISTS request_ddi_instancevariable (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS request_ddi_studyunitvariable (
+CREATE TABLE IF NOT EXISTS request_ddi_datafilevariable (
     id BIGSERIAL PRIMARY KEY,
-    study_unit_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_studyunit(urn) ON DELETE CASCADE,
+    datafile_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_datafile(urn) ON DELETE CASCADE,
     instance_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instancevariable(urn) ON DELETE CASCADE,
-    path VARCHAR(512) NOT NULL DEFAULT '',
     "order" INTEGER DEFAULT 0,
-    CONSTRAINT req_ddi_suv_unique UNIQUE (study_unit_urn, instance_variable_urn)
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT req_ddi_df_iv_unique UNIQUE (datafile_urn, instance_variable_urn)
 );
+
+CREATE INDEX IF NOT EXISTS idx_req_ddi_df_iv_df ON request_ddi_datafilevariable (datafile_urn);
+CREATE INDEX IF NOT EXISTS idx_req_ddi_df_iv_iv ON request_ddi_datafilevariable (instance_variable_urn);
+
+CREATE TABLE IF NOT EXISTS request_ddi_datafilevariablefrequency (
+    id BIGSERIAL PRIMARY KEY,
+    datafile_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_datafile(urn) ON DELETE CASCADE,
+    instance_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instancevariable(urn) ON DELETE CASCADE,
+    code_value VARCHAR(128) NOT NULL,
+    frequency DOUBLE PRECISION NOT NULL,
+    weight VARCHAR(256),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_req_ddi_dfv_freq_df_iv ON request_ddi_datafilevariablefrequency (datafile_urn, instance_variable_urn);
+CREATE INDEX IF NOT EXISTS idx_req_ddi_dfv_freq_iv_code ON request_ddi_datafilevariablefrequency (instance_variable_urn, code_value);
+
+CREATE TABLE IF NOT EXISTS request_ddi_datafilevariablestatistic (
+    id BIGSERIAL PRIMARY KEY,
+    datafile_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_datafile(urn) ON DELETE CASCADE,
+    instance_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instancevariable(urn) ON DELETE CASCADE,
+    statistics JSONB NOT NULL DEFAULT '{}'::jsonb,
+    weight VARCHAR(256),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_req_ddi_dfv_stat_df_iv ON request_ddi_datafilevariablestatistic (datafile_urn, instance_variable_urn);
 
 -- ----------------------------------------------------------------------------
 -- 6. Event Logging & Resource Lifecycle Audit Trail

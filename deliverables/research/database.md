@@ -502,13 +502,20 @@ Junction connecting an `Instrument` to member `QuestionItem` entities with seque
 
 ## 5. Dataset Layer
 
-The Dataset layer represents specific survey data files and their concrete physical column variables.
+The Dataset layer represents specific survey data files, data collection instruments, and concrete physical column variables with categorical frequency distributions.
 
 ```mermaid
 graph TD
-    SU["<b>StudyUnit</b><br/><i>(Survey wave / dataset)</i>"] -->|junction path| SUV["<b>StudyUnitVariable</b>"]
-    IVS["<b>InstanceVariableScheme</b>"] -->|contains| IV["<b>InstanceVariable</b><br/><i>(Dataset column)</i>"]
-    IV -->|junction| SUV
+    SU["<b>StudyUnit</b><br/><i>(Survey wave / dataset)</i>"] -->|contains| DF["<b>Datafile</b><br/><i>(Physical data file)</i>"]
+    DF -->|contains| DV["<b>DatafileVariable</b><br/><i>(Junction & order)</i>"]
+    DV -->|variable| IV["<b>InstanceVariable</b><br/><i>(Dataset column)</i>"]
+    IVS["<b>InstanceVariableScheme</b>"] -->|contains| IV
+    DF -.->|datafile| DVF["<b>DatafileVariableFrequency</b><br/><i>(Count statistics)</i>"]
+    IV -.->|variable| DVF
+    DF -.->|datafile| DVS["<b>DatafileVariableStatistic</b><br/><i>(Descriptive JSONB)</i>"]
+    IV -.->|variable| DVS
+    SU -->|uses| SI["<b>StudyInstrument</b><br/><i>(Junction)</i>"]
+    Inst["<b>Instrument</b><br/><i>(Questionnaire)</i>"] -->|instrument| SI
 ```
 
 ### 5.1 Table Definitions
@@ -531,6 +538,36 @@ A specific survey wave or dataset (renamed from `Survey`). Inherits `DDIResource
 
 ---
 
+#### Datafile
+A minimal Datafile entity relating `InstanceVariable` to `StudyUnit` via `DatafileVariable` (replaces legacy `StudyVariable`). A datafile points to a study wave. Inherits `DDIResource`.
+
+| Column | Type | Constraints | Notes |
+| :--- | :--- | :--- | :--- |
+| `urn` | `CharField(512)` | PK | Canonical Datafile URN |
+| `study_unit_urn` | `CharField(512)` | FK → StudyUnit(urn) | Parent study wave |
+| `name` | `JSONField` | required | File name / multilingual identifier |
+| `description` | `JSONField` | nullable | Multilingual file description |
+| `hashes` | `JSONField` | default `{}` | Multi-algorithm digests |
+| `extended_attributes` | `JSONField` | default `[]` | File format, case count, storage path |
+| `created_at` | `DateTimeField` | auto | Record creation timestamp |
+| `updated_at` | `DateTimeField` | auto | Record update timestamp |
+
+---
+
+#### DatafileVariable
+Junction table relating a `Datafile` to its member `InstanceVariable` columns, with display/column ordering.
+
+| Column | Type | Constraints | Notes |
+| :--- | :--- | :--- | :--- |
+| `id` | `BigAutoField` | PK | Auto-incrementing identifier |
+| `datafile_urn` | `CharField(512)` | FK → Datafile(urn) | Parent Datafile |
+| `instance_variable_urn` | `CharField(512)` | FK → InstanceVariable(urn) | Member InstanceVariable column |
+| `order` | `IntegerField` | default 0 | Column sequence / display order within datafile |
+| `created_at` | `DateTimeField` | auto | Record creation timestamp |
+| `updated_at` | `DateTimeField` | auto | Record update timestamp |
+
+---
+
 #### InstanceVariableScheme
 Named collection of instance variables (maps to DDI-L `InstanceVariableScheme` / `VariableScheme`). Inherits `DDIScheme`.
 
@@ -546,7 +583,7 @@ Named collection of instance variables (maps to DDI-L `InstanceVariableScheme` /
 ---
 
 #### InstanceVariable
-Physical realization of a variable in a specific dataset column. Inherits `DDIResource`.
+Physical realization of a variable in a specific dataset column within a `Datafile` (linked via `DatafileVariable`). Inherits `DDIResource`.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
@@ -563,14 +600,45 @@ Physical realization of a variable in a specific dataset column. Inherits `DDIRe
 
 ---
 
-#### StudyUnitVariable
-Junction capturing the direct relationship between a `StudyUnit` and its member `InstanceVariable` entries with path.
+#### DatafileVariableFrequency
+Stores categorical variable count statistics per response code within a specific `Datafile`, with optional weighting.
+
+| Column | Type | Constraints | Notes |
+| :--- | :--- | :--- | :--- |
+| `id` | `BigAutoField` | PK | Auto-incrementing identifier |
+| `datafile_urn` | `CharField(512)` | FK → Datafile(urn) | Datafile containing the variable observations |
+| `instance_variable_urn` | `CharField(512)` | FK → InstanceVariable(urn) | Instance variable measured |
+| `code_value` | `CharField(128)` | required | Discrete code value as string (e.g. `'1'`, `'98'`, `'DK'`) |
+| `frequency` | `FloatField` | required | Count or frequency statistic |
+| `weight` | `CharField(256)` | nullable | Optional weight variable name, URN, or specification |
+| `created_at` | `DateTimeField` | auto | Record creation timestamp |
+| `updated_at` | `DateTimeField` | auto | Record update timestamp |
+
+---
+
+#### DatafileVariableStatistic
+Stores descriptive summary statistics (mean, median, min, max, stddev, valid/missing cases) for an instance variable within a specific `Datafile`, with optional weighting. The `statistics` column holds a JSONB object with statistic ID and value pairs.
+
+| Column | Type | Constraints | Notes |
+| :--- | :--- | :--- | :--- |
+| `id` | `BigAutoField` | PK | Auto-incrementing identifier |
+| `datafile_urn` | `CharField(512)` | FK → Datafile(urn) | Datafile containing the variable observations |
+| `instance_variable_urn` | `CharField(512)` | FK → InstanceVariable(urn) | Instance variable measured |
+| `statistics` | `JSONField` | default `{}` | Descriptive statistics key-value pairs (e.g. `{"mean": 3.4, "min": 1.0, ...}`) |
+| `weight` | `CharField(256)` | nullable | Optional weight variable name, URN, or specification |
+| `created_at` | `DateTimeField` | auto | Record creation timestamp |
+| `updated_at` | `DateTimeField` | auto | Record update timestamp |
+
+---
+
+#### StudyInstrument
+Junction capturing the direct relationship between a `StudyUnit` and its data collection `Instrument` with sequencing path.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `id` | `BigAutoField` | PK | Auto-incrementing junction ID |
-| `study_unit_urn` | `CharField(512)` | FK → StudyUnit(urn) | Parent study wave |
-| `instance_variable_urn` | `CharField(512)` | FK → InstanceVariable(urn) | Member variable |
+| `study_unit_urn` | `CharField(512)` | FK → StudyUnit(urn) | Study unit that used this instrument |
+| `instrument_urn` | `CharField(512)` | FK → Instrument(urn) | Instrument used |
 | `path` | `CharField(512)` | default `""` | Referencing path |
 | `order` | `PositiveIntegerField` | default 0 | Display order |
 | `created_at` | `DateTimeField` | auto | Record creation timestamp |
@@ -593,11 +661,18 @@ graph LR
         CL["<b>CodeList</b><br/><i>Response Domain</i>"] -.->|uses| RV
     end
     subgraph Dataset_Layer ["Dataset Layer"]
-        IV1["<b>InstanceVariable</b><br/><i>Wave 2007 (q01a)</i>"]
-        IV2["<b>InstanceVariable</b><br/><i>Wave 2012 (v_pol_int)</i>"]
-        SU1["<b>StudyUnit</b><br/><i>(2007)</i>"] -.->|StudyUnitVariable| IV1
-        SU2["<b>StudyUnit</b><br/><i>(2012)</i>"] -.->|StudyUnitVariable| IV2
+        DF1["<b>Datafile</b><br/><i>(2007.sav)</i>"] --> IV1["<b>InstanceVariable</b><br/><i>Wave 2007 (q01a)</i>"]
+        DF2["<b>Datafile</b><br/><i>(2012.sav)</i>"] --> IV2["<b>InstanceVariable</b><br/><i>Wave 2012 (v_pol_int)</i>"]
+        SU1["<b>StudyUnit</b><br/><i>(2007)</i>"] -->|contains| DF1
+        SU2["<b>StudyUnit</b><br/><i>(2012)</i>"] -->|contains| DF2
+        IV1 -.-> Freq1["<b>Frequency</b><br/><i>(Stats)</i>"]
+        IV2 -.-> Freq2["<b>Frequency</b><br/><i>(Stats)</i>"]
     end
+
+    CV -->|harmonizes| RV
+    RV -->|instantiated in| IV1
+    RV -->|instantiated in| IV2
+```
 
     CV -->|harmonizes| RV
     RV -->|instantiated in| IV1
@@ -744,8 +819,11 @@ Stores individual broken-down raw element resources extracted during Stage 1 par
 | `Concept` | `notation` | B-tree | Notation/code lookup |
 | `Code` | `(code_list_urn, code_value)` | UNIQUE composite | Code uniqueness within a code list |
 | `QuestionVariable` | `(question_item_urn, represented_variable_urn)`| UNIQUE composite | Question to variable association uniqueness |
-| `InstrumentQuestion`| `(instrument_urn, question_item_urn, path)` | UNIQUE composite | Instrument question sequencing uniqueness |
-| `StudyUnitVariable` | `(study_unit_urn, instance_variable_urn)`| UNIQUE composite | Variable-to-study mapping uniqueness |
+| `Datafile` | `urn` | PRIMARY KEY (B-tree) | Identity lookup & variable grouping |
+| `Datafile` | `study_unit_urn` | B-tree | Study wave datafiles lookup |
+| `Frequency` | `(datafile_urn, instance_variable_urn)` | Composite B-tree | Variable distribution retrieval per datafile |
+| `Frequency` | `(instance_variable_urn, code_value)` | Composite B-tree | Category code frequency lookup |
+| `StudyInstrument` | `(study_unit_urn, instrument_urn)` | UNIQUE composite | Study to instrument mapping uniqueness |
 | `EventLog` | `(urn, timestamp)` | Composite B-tree | Chronological audit log lookups by resource URN |
 | `EventLog` | `event_type` | B-tree | Filter audit events by classification |
 | `UrnRegistry` | `resource_type` | B-tree | Fast polymorphic resource type filtering |

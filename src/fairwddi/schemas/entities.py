@@ -362,6 +362,23 @@ class StudyUnitSchema(DDIResourceSchema):
     updated_at: datetime | None = None
 
 
+class DatafileSchema(DDIResourceSchema):
+    """Schema for Datafile (dataset file entity relating InstanceVariables to StudyUnit)."""
+
+    study_unit_urn: str = Field(..., description="Parent StudyUnit canonical URN.")
+    description: MultilingualText | None = Field(
+        default=None, description="Multilingual description."
+    )
+    extended_attributes: list[dict[str, Any]] = Field(
+        default_factory=list, description="Extensible attributes list of objects."
+    )
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+DataFileSchema = DatafileSchema
+
+
 class InstanceVariableSchemeSchema(DDISchemeSchema):
     """Schema for InstanceVariableScheme."""
 
@@ -374,6 +391,7 @@ class InstanceVariableSchema(DDIResourceSchema):
     """Schema for InstanceVariable (column realization in a study dataset)."""
 
     scheme_urn: str | None = Field(default=None, description="Parent InstanceVariableScheme URN.")
+    datafile_urn: str | None = Field(default=None, description="Parent Datafile URN.")
     represented_variable_urn: str | None = None
     label: MultilingualText | None = Field(default=None, description="Multilingual variable label.")
     description: MultilingualText | None = Field(
@@ -386,8 +404,84 @@ class InstanceVariableSchema(DDIResourceSchema):
     updated_at: datetime | None = None
 
 
+class DatafileVariableSchema(BaseModel):
+    """Schema for Datafile to InstanceVariable junction."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int | None = None
+    datafile_urn: str = Field(..., description="Datafile canonical URN.")
+    instance_variable_urn: str = Field(..., description="InstanceVariable canonical URN.")
+    order: int = Field(default=0, description="Column order or sequence within the datafile.")
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class DatafileVariableFrequencySchema(BaseModel):
+    """Schema for categorical variable count statistics (formerly Frequency)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int | None = None
+    datafile_urn: str = Field(..., description="Datafile canonical URN.")
+    instance_variable_urn: str = Field(..., description="InstanceVariable canonical URN.")
+    code_value: str = Field(..., description="Discrete code value as string.")
+    frequency: float = Field(..., description="Count or frequency statistic.")
+    weight: str | None = Field(
+        default=None, description="Optional weight variable name, URN, or specification."
+    )
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+# Backward-compatibility aliases
+FrequencySchema = DatafileVariableFrequencySchema
+VariableFrequencySchema = DatafileVariableFrequencySchema
+
+
+class DatafileVariableStatisticSchema(BaseModel):
+    """Schema for descriptive statistics (mean, min, max, stddev, etc.)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int | None = None
+    datafile_urn: str = Field(..., description="Datafile canonical URN.")
+    instance_variable_urn: str = Field(..., description="InstanceVariable canonical URN.")
+    statistics: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Descriptive statistics object mapping statistic ID/type to value.",
+    )
+    weight: str | None = Field(
+        default=None, description="Optional weight variable name, URN, or specification."
+    )
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+# Backward-compatibility aliases
+VariableStatisticSchema = DatafileVariableStatisticSchema
+DatafileStatisticSchema = DatafileVariableStatisticSchema
+
+
+class StudyInstrumentSchema(BaseModel):
+    """Schema for StudyUnit to Instrument relationship junction."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int | None = None
+    study_unit_urn: str = Field(..., description="StudyUnit canonical URN.")
+    instrument_urn: str = Field(..., description="Instrument canonical URN.")
+    path: str = Field(default="", description="Referencing path from study unit to instrument.")
+    order: int = 0
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+StudyUnitInstrumentSchema = StudyInstrumentSchema
+
+
 class StudyUnitVariableSchema(BaseModel):
-    """Schema for StudyUnit to Variable relationship junction."""
+    """Schema for legacy StudyUnit to Variable relationship junction (deprecated)."""
 
     model_config = ConfigDict(from_attributes=True)
 

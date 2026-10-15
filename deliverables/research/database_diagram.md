@@ -84,15 +84,26 @@ graph TD
     end
 
     %% 4. Dataset Layer
-    subgraph Dataset_Layer ["4. Dataset Layer (Physical Survey Waves & Columns)"]
+    subgraph Dataset_Layer ["4. Dataset Layer (Physical Survey Waves, Files & Columns)"]
         SU["<b>StudyUnit</b><br/><code>urn (PK)</code><br/><i>Survey Wave / Dataset</i>"]:::datasetLayer
+        DF["<b>Datafile</b><br/><code>urn (PK)</code><br/><i>Data File</i>"]:::datasetLayer
+        DV["<b>DatafileVariable</b><br/><code>id (PK)</code><br/><i>Column Order Junction</i>"]:::junction
         IVS["<b>InstanceVariableScheme</b><br/><code>urn (PK)</code>"]:::datasetLayer
         IV["<b>InstanceVariable</b><br/><code>urn (PK)</code><br/><i>Cascade Tier 3 (Physical Column)</i>"]:::datasetLayer
-        SUV["<b>StudyUnitVariable</b><br/><code>id (PK)</code>"]:::junction
+        DVF["<b>DatafileVariableFrequency</b><br/><code>id (PK)</code><br/><i>Count Statistics</i>"]:::datasetLayer
+        DVS["<b>DatafileVariableStatistic</b><br/><code>id (PK)</code><br/><i>Descriptive Stats (JSONB)</i>"]:::datasetLayer
+        SI["<b>StudyInstrument</b><br/><code>id (PK)</code>"]:::junction
 
+        SU -->|contains| DF
+        DF -->|contains| DV
+        DV -->|variable| IV
         IVS -->|contains| IV
-        SU -->|contains| SUV
-        IV -->|column binding| SUV
+        DF -.->|datafile| DVF
+        IV -.->|variable| DVF
+        DF -.->|datafile| DVS
+        IV -.->|variable| DVS
+        SU -->|uses| SI
+        Inst -->|instrument| SI
         Grp -.->|polymorphic reference| SU
     end
 
@@ -376,10 +387,51 @@ erDiagram
         timestamp updated_at
     }
 
-    StudyUnitVariable {
+    Datafile {
+        string urn PK
+        string study_unit_urn FK
+        jsonb name
+        jsonb description
+        jsonb extended_attributes
+        jsonb hashes
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    DatafileVariable {
+        bigint id PK
+        string datafile_urn FK
+        string instance_variable_urn FK
+        integer order
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    DatafileVariableFrequency {
+        bigint id PK
+        string datafile_urn FK
+        string instance_variable_urn FK
+        string code_value
+        float frequency
+        string weight
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    DatafileVariableStatistic {
+        bigint id PK
+        string datafile_urn FK
+        string instance_variable_urn FK
+        jsonb statistics
+        string weight
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    StudyInstrument {
         bigint id PK
         string study_unit_urn FK
-        string instance_variable_urn FK
+        string instrument_urn FK
         string path
         integer order
         timestamp created_at
@@ -473,8 +525,15 @@ erDiagram
 
     InstanceVariableScheme ||--o{ InstanceVariable : "contains"
     RepresentedVariable ||--o{ InstanceVariable : "instantiates"
-    StudyUnit ||--o{ StudyUnitVariable : "contains"
-    InstanceVariable ||--o{ StudyUnitVariable : "binds"
+    StudyUnit ||--o{ Datafile : "contains"
+    Datafile ||--o{ DatafileVariable : "contains"
+    InstanceVariable ||--o{ DatafileVariable : "datafiles"
+    Datafile ||--o{ DatafileVariableFrequency : "measures"
+    InstanceVariable ||--o{ DatafileVariableFrequency : "frequencies"
+    Datafile ||--o{ DatafileVariableStatistic : "aggregates"
+    InstanceVariable ||--o{ DatafileVariableStatistic : "statistics"
+    StudyUnit ||--o{ StudyInstrument : "uses"
+    Instrument ||--o{ StudyInstrument : "associations"
 
     %% Supertype & Infrastructure
     UrnRegistry ||--o{ URNAlias : "canonical_urn"
@@ -503,13 +562,13 @@ graph LR
     end
 
     subgraph Data_Level ["3. Dataset Layer (Physical Variables)"]
-        IV1["<b>InstanceVariable (2007)</b><br/><code>urn:ddi:fr.sciencespo:iv-ess3-lrscale:1.0.0</code><br/><i>Column: 'lrscale'</i>"]
-        IV2["<b>InstanceVariable (2012)</b><br/><code>urn:ddi:fr.sciencespo:iv-cdsp2012-q04:1.0.0</code><br/><i>Column: 'q04_gauche_droite'</i>"]
-        IV3["<b>InstanceVariable (2017)</b><br/><code>urn:ddi:fr.sciencespo:iv-cdsp2017-v12:1.0.0</code><br/><i>Column: 'v12_pol'</i>"]
+        DF1["<b>Datafile (2007)</b><br/><code>urn:ddi:fr.sciencespo:df-ess3:1.0.0</code>"] --> IV1["<b>InstanceVariable (2007)</b><br/><code>urn:ddi:fr.sciencespo:iv-ess3-lrscale:1.0.0</code><br/><i>Column: 'lrscale'</i>"]
+        DF2["<b>Datafile (2012)</b><br/><code>urn:ddi:fr.sciencespo:df-cdsp2012:1.0.0</code>"] --> IV2["<b>InstanceVariable (2012)</b><br/><code>urn:ddi:fr.sciencespo:iv-cdsp2012-q04:1.0.0</code><br/><i>Column: 'q04_gauche_droite'</i>"]
+        DF3["<b>Datafile (2017)</b><br/><code>urn:ddi:fr.sciencespo:df-cdsp2017:1.0.0</code>"] --> IV3["<b>InstanceVariable (2017)</b><br/><code>urn:ddi:fr.sciencespo:iv-cdsp2017-v12:1.0.0</code><br/><i>Column: 'v12_pol'</i>"]
 
-        SU1["<b>StudyUnit</b><br/><i>ESS Round 3 (2007)</i>"] -.->|StudyUnitVariable| IV1
-        SU2["<b>StudyUnit</b><br/><i>Panel Electoral (2012)</i>"] -.->|StudyUnitVariable| IV2
-        SU3["<b>StudyUnit</b><br/><i>Barometre (2017)</i>"] -.->|StudyUnitVariable| IV3
+        SU1["<b>StudyUnit</b><br/><i>ESS Round 3 (2007)</i>"] -->|contains| DF1
+        SU2["<b>StudyUnit</b><br/><i>Panel Electoral (2012)</i>"] -->|contains| DF2
+        SU3["<b>StudyUnit</b><br/><i>Barometre (2017)</i>"] -->|contains| DF3
     end
 
     CV ==>|harmonizes| RV
