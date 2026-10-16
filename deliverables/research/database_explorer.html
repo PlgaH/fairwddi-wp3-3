@@ -1558,7 +1558,7 @@
             📊 Entity Relationship & Dependency Matrix
           </h2>
           <p style="color: var(--text-muted); font-size: 0.875rem;">
-            Cross-reference table mapping all 30 entities, foreign keys (<span style="color: var(--accent-primary); font-weight: 600;">FK</span>), junctions (<span style="color: var(--accent-emerald); font-weight: 600;">JCT</span>), and polymorphic references (<span style="color: var(--accent-amber); font-weight: 600;">REF</span>). Click any cell to jump to the entity details.
+            Cross-reference table mapping all entities, foreign keys (<span style="color: var(--accent-primary); font-weight: 600;">FK</span>), junctions (<span style="color: var(--accent-emerald); font-weight: 600;">JCT</span>), and polymorphic references (<span style="color: var(--accent-amber); font-weight: 600;">REF</span>). Click any cell to jump to the entity details.
           </p>
         </div>
         <div style="overflow-x: auto;">
@@ -1632,7 +1632,7 @@
         ],
         outgoing: [],
         incoming: [
-          { target: "All DDI Entities", type: "Supertype FK (18 Entity Tables PK FK)" },
+          { target: "All DDI Entities", type: "Supertype FK (All DDI Entity Tables PK FK)" },
           { target: "URNAlias", type: "Foreign Key (canonical_urn)" },
           { target: "SemanticRelationship", type: "Foreign Key (subject_urn, object_urn)" },
           { target: "EventLog", type: "Foreign Key (urn)" },
@@ -2237,7 +2237,7 @@
         ddiTag: "<ddi:DatafileVariable>",
         urnPattern: "Surrogate PK (id: BigInt)",
         description: "Junction table linking Datafile to member InstanceVariable columns, with sequence/display ordering.",
-        pos: { x: 580, y: 740 },
+        pos: { x: 580, y: 765 },
         fields: [
           { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
           { name: "datafile_urn", type: "VARCHAR(512)", fk: "Datafile", req: true, notes: "FK -> Datafile.urn" },

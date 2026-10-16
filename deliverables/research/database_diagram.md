@@ -562,9 +562,9 @@ graph LR
     end
 
     subgraph Data_Level ["3. Dataset Layer (Physical Variables)"]
-        DF1["<b>Datafile (2007)</b><br/><code>urn:ddi:fr.sciencespo:df-ess3:1.0.0</code>"] --> IV1["<b>InstanceVariable (2007)</b><br/><code>urn:ddi:fr.sciencespo:iv-ess3-lrscale:1.0.0</code><br/><i>Column: 'lrscale'</i>"]
-        DF2["<b>Datafile (2012)</b><br/><code>urn:ddi:fr.sciencespo:df-cdsp2012:1.0.0</code>"] --> IV2["<b>InstanceVariable (2012)</b><br/><code>urn:ddi:fr.sciencespo:iv-cdsp2012-q04:1.0.0</code><br/><i>Column: 'q04_gauche_droite'</i>"]
-        DF3["<b>Datafile (2017)</b><br/><code>urn:ddi:fr.sciencespo:df-cdsp2017:1.0.0</code>"] --> IV3["<b>InstanceVariable (2017)</b><br/><code>urn:ddi:fr.sciencespo:iv-cdsp2017-v12:1.0.0</code><br/><i>Column: 'v12_pol'</i>"]
+        DF1["<b>Datafile (2007)</b><br/><code>urn:ddi:fr.sciencespo:df-ess3:1.0.0</code>"] --> DV1["<b>DatafileVariable</b><br/><i>order=1</i>"] --> IV1["<b>InstanceVariable (2007)</b><br/><code>urn:ddi:fr.sciencespo:iv-ess3-lrscale:1.0.0</code><br/><i>Column: 'lrscale'</i>"]
+        DF2["<b>Datafile (2012)</b><br/><code>urn:ddi:fr.sciencespo:df-cdsp2012:1.0.0</code>"] --> DV2["<b>DatafileVariable</b><br/><i>order=1</i>"] --> IV2["<b>InstanceVariable (2012)</b><br/><code>urn:ddi:fr.sciencespo:iv-cdsp2012-q04:1.0.0</code><br/><i>Column: 'q04_gauche_droite'</i>"]
+        DF3["<b>Datafile (2017)</b><br/><code>urn:ddi:fr.sciencespo:df-cdsp2017:1.0.0</code>"] --> DV3["<b>DatafileVariable</b><br/><i>order=1</i>"] --> IV3["<b>InstanceVariable (2017)</b><br/><code>urn:ddi:fr.sciencespo:iv-cdsp2017-v12:1.0.0</code><br/><i>Column: 'v12_pol'</i>"]
 
         SU1["<b>StudyUnit</b><br/><i>ESS Round 3 (2007)</i>"] -->|contains| DF1
         SU2["<b>StudyUnit</b><br/><i>Panel Electoral (2012)</i>"] -->|contains| DF2

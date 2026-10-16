@@ -661,18 +661,15 @@ graph LR
         CL["<b>CodeList</b><br/><i>Response Domain</i>"] -.->|uses| RV
     end
     subgraph Dataset_Layer ["Dataset Layer"]
-        DF1["<b>Datafile</b><br/><i>(2007.sav)</i>"] --> IV1["<b>InstanceVariable</b><br/><i>Wave 2007 (q01a)</i>"]
-        DF2["<b>Datafile</b><br/><i>(2012.sav)</i>"] --> IV2["<b>InstanceVariable</b><br/><i>Wave 2012 (v_pol_int)</i>"]
-        SU1["<b>StudyUnit</b><br/><i>(2007)</i>"] -->|contains| DF1
-        SU2["<b>StudyUnit</b><br/><i>(2012)</i>"] -->|contains| DF2
-        IV1 -.-> Freq1["<b>Frequency</b><br/><i>(Stats)</i>"]
-        IV2 -.-> Freq2["<b>Frequency</b><br/><i>(Stats)</i>"]
+        SU1["<b>StudyUnit</b><br/><i>(2007)</i>"] -->|contains| DF1["<b>Datafile</b><br/><i>(2007.sav)</i>"]
+        SU2["<b>StudyUnit</b><br/><i>(2012)</i>"] -->|contains| DF2["<b>Datafile</b><br/><i>(2012.sav)</i>"]
+        DF1 --> DV1["<b>DatafileVariable</b><br/><i>(order=1)</i>"] --> IV1["<b>InstanceVariable</b><br/><i>Wave 2007 (q01a)</i>"]
+        DF2 --> DV2["<b>DatafileVariable</b><br/><i>(order=1)</i>"] --> IV2["<b>InstanceVariable</b><br/><i>Wave 2012 (v_pol_int)</i>"]
+        IV1 -.-> Freq1["<b>DatafileVariableFrequency</b><br/><i>(Stats)</i>"]
+        IV2 -.-> Freq2["<b>DatafileVariableFrequency</b><br/><i>(Stats)</i>"]
+        IV1 -.-> Stat1["<b>DatafileVariableStatistic</b><br/><i>(JSONB)</i>"]
+        IV2 -.-> Stat2["<b>DatafileVariableStatistic</b><br/><i>(JSONB)</i>"]
     end
-
-    CV -->|harmonizes| RV
-    RV -->|instantiated in| IV1
-    RV -->|instantiated in| IV2
-```
 
     CV -->|harmonizes| RV
     RV -->|instantiated in| IV1
@@ -821,8 +818,11 @@ Stores individual broken-down raw element resources extracted during Stage 1 par
 | `QuestionVariable` | `(question_item_urn, represented_variable_urn)`| UNIQUE composite | Question to variable association uniqueness |
 | `Datafile` | `urn` | PRIMARY KEY (B-tree) | Identity lookup & variable grouping |
 | `Datafile` | `study_unit_urn` | B-tree | Study wave datafiles lookup |
-| `Frequency` | `(datafile_urn, instance_variable_urn)` | Composite B-tree | Variable distribution retrieval per datafile |
-| `Frequency` | `(instance_variable_urn, code_value)` | Composite B-tree | Category code frequency lookup |
+| `DatafileVariable` | `(datafile_urn, instance_variable_urn)` | UNIQUE composite | Datafile to variable junction uniqueness |
+| `DatafileVariable` | `(datafile_urn, order)` | Composite B-tree | Ordered column variable retrieval |
+| `DatafileVariableFrequency` | `(datafile_urn, instance_variable_urn)` | Composite B-tree | Variable distribution retrieval per datafile |
+| `DatafileVariableFrequency` | `(instance_variable_urn, code_value)` | Composite B-tree | Category code frequency lookup |
+| `DatafileVariableStatistic` | `(datafile_urn, instance_variable_urn)` | Composite B-tree | Variable descriptive statistics retrieval |
 | `StudyInstrument` | `(study_unit_urn, instrument_urn)` | UNIQUE composite | Study to instrument mapping uniqueness |
 | `EventLog` | `(urn, timestamp)` | Composite B-tree | Chronological audit log lookups by resource URN |
 | `EventLog` | `event_type` | B-tree | Filter audit events by classification |
