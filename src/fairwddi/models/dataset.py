@@ -1,10 +1,9 @@
 """Dataset Layer models for FAIRwDDI.
 
 Includes StudyUnit (survey wave dataset), Datafile (data file entity relating
-to StudyUnit), DatafileVariable (junction with column ordering),
+to StudyUnit), DatafileVariable (junction with column ordering and descriptive statistics JSONB),
 InstanceVariableScheme, InstanceVariable (dataset column realization),
 DatafileVariableFrequency (categorical count statistics),
-DatafileVariableStatistic (descriptive statistics JSONB),
 and StudyInstrument (study unit to instrument junction).
 """
 
@@ -206,6 +205,14 @@ class DatafileVariable(models.Model):
         default=0,
         help_text="Display order or column index of the variable within the datafile.",
     )
+    statistics = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=(
+            "Descriptive summary statistics dictionary for this variable in the datafile "
+            "(e.g. {'mean': 3.4, 'min': 1.0, 'max': 5.0, 'stddev': 1.1, 'valid_cases': 1820})."
+        ),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -277,66 +284,6 @@ class DatafileVariableFrequency(models.Model):
 # Aliases for backward compatibility
 Frequency = DatafileVariableFrequency
 VariableFrequency = DatafileVariableFrequency
-
-
-class DatafileVariableStatistic(models.Model):
-    """Stores descriptive statistics for a continuous or summary variable.
-
-    Captures statistical summary metrics (e.g. mean, median, min, max, stddev, valid/missing cases)
-    for an instance variable within a specific datafile, with optional weighting.
-    The statistics JSONB field holds an object with statistics ID and value pairs.
-    """
-
-    datafile = models.ForeignKey(
-        Datafile,
-        on_delete=models.CASCADE,
-        related_name="statistics",
-        db_column="datafile_urn",
-        help_text="Datafile containing the variable and observations.",
-    )
-    instance_variable = models.ForeignKey(
-        InstanceVariable,
-        on_delete=models.CASCADE,
-        related_name="statistics",
-        db_column="instance_variable_urn",
-        help_text="Instance variable measured.",
-    )
-    statistics = models.JSONField(
-        default=dict,
-        blank=True,
-        help_text=(
-            "Descriptive statistics object mapping statistic ID/type to value "
-            "(e.g. {'mean': 3.4, 'min': 1.0, 'max': 5.0, 'stddev': 1.1})."
-        ),
-    )
-    weight = models.CharField(
-        max_length=256,
-        null=True,
-        blank=True,
-        help_text="Optional weight variable name, URN, or weighting specification.",
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = "request_ddi_datafilevariablestatistic"
-        verbose_name = "Datafile Variable Statistic"
-        verbose_name_plural = "Datafile Variable Statistics"
-        indexes = [
-            models.Index(fields=["datafile", "instance_variable"]),
-        ]
-
-    def __str__(self) -> str:
-        w_str = f" (weight={self.weight})" if self.weight else ""
-        return (
-            f"{self.datafile_id}:{self.instance_variable_id} "
-            f"stats: {list(self.statistics.keys())}{w_str}"
-        )
-
-
-# Aliases for backward compatibility
-VariableStatistic = DatafileVariableStatistic
-DatafileStatistic = DatafileVariableStatistic
 
 
 class StudyInstrument(models.Model):

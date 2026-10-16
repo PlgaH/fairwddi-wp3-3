@@ -28,7 +28,6 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         Datafile,
         DatafileVariable,
         DatafileVariableFrequency,
-        DatafileVariableStatistic,
         EventLog,
         Frequency,
         Group,
@@ -579,16 +578,36 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         },
     )
 
-    # DatafileVariable junctions relating Datafile to InstanceVariables with ordering
+    # DatafileVariable junctions relating Datafile to InstanceVariables with ordering and statistics
     DatafileVariable.objects.get_or_create(
         datafile=datafile_w1,
         instance_variable=iv_w1_q01,
-        defaults={"order": 1},
+        defaults={
+            "order": 1,
+            "statistics": {
+                "mean": 2.14,
+                "stddev": 0.88,
+                "min": 1.0,
+                "max": 4.0,
+                "valid_cases": 935,
+                "missing_cases": 15,
+            },
+        },
     )
     DatafileVariable.objects.get_or_create(
         datafile=datafile_w2,
         instance_variable=iv_w2_q01,
-        defaults={"order": 1},
+        defaults={
+            "order": 1,
+            "statistics": {
+                "mean": 2.22,
+                "stddev": 0.91,
+                "min": 1.0,
+                "max": 4.0,
+                "valid_cases": 1050,
+                "missing_cases": 20,
+            },
+        },
     )
 
     # Frequencies (categorical variable count statistics)
@@ -603,23 +622,6 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         instance_variable=iv_w1_q01,
         code_value="2",
         defaults={"frequency": 510.5, "weight": "poidstot"},
-    )
-
-    # Descriptive statistics (summary metrics JSONB object)
-    DatafileVariableStatistic.objects.get_or_create(
-        datafile=datafile_w1,
-        instance_variable=iv_w1_q01,
-        defaults={
-            "statistics": {
-                "mean": 2.14,
-                "stddev": 0.88,
-                "min": 1.0,
-                "max": 4.0,
-                "valid_cases": 935,
-                "missing_cases": 15,
-            },
-            "weight": "poidstot",
-        },
     )
 
     # StudyInstrument relationship mapping with path
@@ -769,7 +771,6 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         "datafile_variables": DatafileVariable.objects.count(),
         "datafile_variable_frequencies": DatafileVariableFrequency.objects.count(),
         "frequencies": Frequency.objects.count(),
-        "datafile_variable_statistics": DatafileVariableStatistic.objects.count(),
         "study_instruments": StudyInstrument.objects.count(),
         "urn_registries": UrnRegistry.objects.count(),
         "urn_aliases": URNAlias.objects.count(),

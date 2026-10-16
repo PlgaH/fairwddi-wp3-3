@@ -43,10 +43,10 @@ DOCUMENTS_CONFIG = [
         "title": "Target Database Model & PostgreSQL 17 Schema Specification",
         "shortTitle": "Database Model Specification",
         "category": "Research Reports",
-        "badge": "30 Models",
+        "badge": "31 Models",
         "icon": "database",
         "featured": True,
-        "description": "Complete 30-model standard-agnostic PostgreSQL 17 schema, ER diagrams, DDIIdentifiable mixin, staging nodes, and migration path."
+        "description": "Complete 31-model standard-agnostic PostgreSQL 17 schema, ER diagrams, DDIIdentifiable mixin, staging nodes, and migration path."
     },
     {
         "id": "research/database_diagram",

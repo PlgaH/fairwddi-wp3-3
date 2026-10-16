@@ -506,16 +506,31 @@ The Dataset layer represents specific survey data files, data collection instrum
 
 ```mermaid
 graph TD
-    SU["<b>StudyUnit</b><br/><i>(Survey wave / dataset)</i>"] -->|contains| DF["<b>Datafile</b><br/><i>(Physical data file)</i>"]
-    DF -->|contains| DV["<b>DatafileVariable</b><br/><i>(Junction & order)</i>"]
-    DV -->|variable| IV["<b>InstanceVariable</b><br/><i>(Dataset column)</i>"]
-    IVS["<b>InstanceVariableScheme</b>"] -->|contains| IV
-    DF -.->|datafile| DVF["<b>DatafileVariableFrequency</b><br/><i>(Count statistics)</i>"]
+    subgraph Study_Scope ["Study & Collection Scope"]
+        SU["<b>StudyUnit</b><br/><i>(Survey wave / dataset)</i>"]
+        SI["<b>StudyInstrument</b><br/><i>(Junction)</i>"]
+        Inst["<b>Instrument</b><br/><i>(Questionnaire)</i>"]
+    end
+
+    subgraph Physical_Datafiles ["Physical Data Files & Variable Mapping"]
+        DF["<b>Datafile</b><br/><i>(Physical data file)</i>"]
+        DV["<b>DatafileVariable</b><br/><i>(Order & Statistics JSONB)</i>"]
+        IV["<b>InstanceVariable</b><br/><i>(Dataset column)</i>"]
+        IVS["<b>InstanceVariableScheme</b><br/><i>(Grouping scheme)</i>"]
+    end
+
+    subgraph Categorical_Statistics ["Categorical Counts & Frequencies"]
+        DVF["<b>DatafileVariableFrequency</b><br/><i>(Categorical counts)</i>"]
+    end
+
+    SU -->|contains| DF
+    SU -->|uses| SI
+    Inst -->|questionnaire| SI
+    DF -->|contains| DV
+    DV -->|variable| IV
+    IVS -->|contains| IV
+    DF -.->|datafile| DVF
     IV -.->|variable| DVF
-    DF -.->|datafile| DVS["<b>DatafileVariableStatistic</b><br/><i>(Descriptive JSONB)</i>"]
-    IV -.->|variable| DVS
-    SU -->|uses| SI["<b>StudyInstrument</b><br/><i>(Junction)</i>"]
-    Inst["<b>Instrument</b><br/><i>(Questionnaire)</i>"] -->|instrument| SI
 ```
 
 ### 5.1 Table Definitions
@@ -555,7 +570,7 @@ A minimal Datafile entity relating `InstanceVariable` to `StudyUnit` via `Datafi
 ---
 
 #### DatafileVariable
-Junction table relating a `Datafile` to its member `InstanceVariable` columns, with display/column ordering.
+Junction table relating a `Datafile` to its member `InstanceVariable` columns, with display/column ordering and descriptive statistics JSONB.
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
@@ -563,6 +578,7 @@ Junction table relating a `Datafile` to its member `InstanceVariable` columns, w
 | `datafile_urn` | `CharField(512)` | FK → Datafile(urn) | Parent Datafile |
 | `instance_variable_urn` | `CharField(512)` | FK → InstanceVariable(urn) | Member InstanceVariable column |
 | `order` | `IntegerField` | default 0 | Column sequence / display order within datafile |
+| `statistics` | `JSONField` | default `{}` | Descriptive summary statistics key-value pairs (mean, min, max, stddev, valid_cases) |
 | `created_at` | `DateTimeField` | auto | Record creation timestamp |
 | `updated_at` | `DateTimeField` | auto | Record update timestamp |
 
@@ -616,21 +632,6 @@ Stores categorical variable count statistics per response code within a specific
 
 ---
 
-#### DatafileVariableStatistic
-Stores descriptive summary statistics (mean, median, min, max, stddev, valid/missing cases) for an instance variable within a specific `Datafile`, with optional weighting. The `statistics` column holds a JSONB object with statistic ID and value pairs.
-
-| Column | Type | Constraints | Notes |
-| :--- | :--- | :--- | :--- |
-| `id` | `BigAutoField` | PK | Auto-incrementing identifier |
-| `datafile_urn` | `CharField(512)` | FK → Datafile(urn) | Datafile containing the variable observations |
-| `instance_variable_urn` | `CharField(512)` | FK → InstanceVariable(urn) | Instance variable measured |
-| `statistics` | `JSONField` | default `{}` | Descriptive statistics key-value pairs (e.g. `{"mean": 3.4, "min": 1.0, ...}`) |
-| `weight` | `CharField(256)` | nullable | Optional weight variable name, URN, or specification |
-| `created_at` | `DateTimeField` | auto | Record creation timestamp |
-| `updated_at` | `DateTimeField` | auto | Record update timestamp |
-
----
-
 #### StudyInstrument
 Junction capturing the direct relationship between a `StudyUnit` and its data collection `Instrument` with sequencing path.
 
@@ -663,12 +664,10 @@ graph LR
     subgraph Dataset_Layer ["Dataset Layer"]
         SU1["<b>StudyUnit</b><br/><i>(2007)</i>"] -->|contains| DF1["<b>Datafile</b><br/><i>(2007.sav)</i>"]
         SU2["<b>StudyUnit</b><br/><i>(2012)</i>"] -->|contains| DF2["<b>Datafile</b><br/><i>(2012.sav)</i>"]
-        DF1 --> DV1["<b>DatafileVariable</b><br/><i>(order=1)</i>"] --> IV1["<b>InstanceVariable</b><br/><i>Wave 2007 (q01a)</i>"]
-        DF2 --> DV2["<b>DatafileVariable</b><br/><i>(order=1)</i>"] --> IV2["<b>InstanceVariable</b><br/><i>Wave 2012 (v_pol_int)</i>"]
-        IV1 -.-> Freq1["<b>DatafileVariableFrequency</b><br/><i>(Stats)</i>"]
-        IV2 -.-> Freq2["<b>DatafileVariableFrequency</b><br/><i>(Stats)</i>"]
-        IV1 -.-> Stat1["<b>DatafileVariableStatistic</b><br/><i>(JSONB)</i>"]
-        IV2 -.-> Stat2["<b>DatafileVariableStatistic</b><br/><i>(JSONB)</i>"]
+        DF1 --> DV1["<b>DatafileVariable</b><br/><i>(order=1, stats)</i>"] --> IV1["<b>InstanceVariable</b><br/><i>Wave 2007 (q01a)</i>"]
+        DF2 --> DV2["<b>DatafileVariable</b><br/><i>(order=1, stats)</i>"] --> IV2["<b>InstanceVariable</b><br/><i>Wave 2012 (v_pol_int)</i>"]
+        IV1 -.-> Freq1["<b>DatafileVariableFrequency</b><br/><i>(Counts)</i>"]
+        IV2 -.-> Freq2["<b>DatafileVariableFrequency</b><br/><i>(Counts)</i>"]
     end
 
     CV -->|harmonizes| RV
@@ -822,7 +821,6 @@ Stores individual broken-down raw element resources extracted during Stage 1 par
 | `DatafileVariable` | `(datafile_urn, order)` | Composite B-tree | Ordered column variable retrieval |
 | `DatafileVariableFrequency` | `(datafile_urn, instance_variable_urn)` | Composite B-tree | Variable distribution retrieval per datafile |
 | `DatafileVariableFrequency` | `(instance_variable_urn, code_value)` | Composite B-tree | Category code frequency lookup |
-| `DatafileVariableStatistic` | `(datafile_urn, instance_variable_urn)` | Composite B-tree | Variable descriptive statistics retrieval |
 | `StudyInstrument` | `(study_unit_urn, instrument_urn)` | UNIQUE composite | Study to instrument mapping uniqueness |
 | `EventLog` | `(urn, timestamp)` | Composite B-tree | Chronological audit log lookups by resource URN |
 | `EventLog` | `event_type` | B-tree | Filter audit events by classification |

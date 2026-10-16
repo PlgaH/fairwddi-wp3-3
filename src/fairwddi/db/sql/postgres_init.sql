@@ -346,6 +346,7 @@ CREATE TABLE IF NOT EXISTS request_ddi_datafilevariable (
     datafile_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_datafile(urn) ON DELETE CASCADE,
     instance_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instancevariable(urn) ON DELETE CASCADE,
     "order" INTEGER DEFAULT 0,
+    statistics JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT req_ddi_df_iv_unique UNIQUE (datafile_urn, instance_variable_urn)
@@ -367,18 +368,6 @@ CREATE TABLE IF NOT EXISTS request_ddi_datafilevariablefrequency (
 
 CREATE INDEX IF NOT EXISTS idx_req_ddi_dfv_freq_df_iv ON request_ddi_datafilevariablefrequency (datafile_urn, instance_variable_urn);
 CREATE INDEX IF NOT EXISTS idx_req_ddi_dfv_freq_iv_code ON request_ddi_datafilevariablefrequency (instance_variable_urn, code_value);
-
-CREATE TABLE IF NOT EXISTS request_ddi_datafilevariablestatistic (
-    id BIGSERIAL PRIMARY KEY,
-    datafile_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_datafile(urn) ON DELETE CASCADE,
-    instance_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instancevariable(urn) ON DELETE CASCADE,
-    statistics JSONB NOT NULL DEFAULT '{}'::jsonb,
-    weight VARCHAR(256),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_req_ddi_dfv_stat_df_iv ON request_ddi_datafilevariablestatistic (datafile_urn, instance_variable_urn);
 
 -- ----------------------------------------------------------------------------
 -- 6. Event Logging & Resource Lifecycle Audit Trail

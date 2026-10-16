@@ -413,6 +413,10 @@ class DatafileVariableSchema(BaseModel):
     datafile_urn: str = Field(..., description="Datafile canonical URN.")
     instance_variable_urn: str = Field(..., description="InstanceVariable canonical URN.")
     order: int = Field(default=0, description="Column order or sequence within the datafile.")
+    statistics: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Descriptive summary statistics dictionary for the variable in the datafile.",
+    )
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -437,30 +441,6 @@ class DatafileVariableFrequencySchema(BaseModel):
 # Backward-compatibility aliases
 FrequencySchema = DatafileVariableFrequencySchema
 VariableFrequencySchema = DatafileVariableFrequencySchema
-
-
-class DatafileVariableStatisticSchema(BaseModel):
-    """Schema for descriptive statistics (mean, min, max, stddev, etc.)."""
-
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int | None = None
-    datafile_urn: str = Field(..., description="Datafile canonical URN.")
-    instance_variable_urn: str = Field(..., description="InstanceVariable canonical URN.")
-    statistics: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Descriptive statistics object mapping statistic ID/type to value.",
-    )
-    weight: str | None = Field(
-        default=None, description="Optional weight variable name, URN, or specification."
-    )
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
-
-
-# Backward-compatibility aliases
-VariableStatisticSchema = DatafileVariableStatisticSchema
-DatafileStatisticSchema = DatafileVariableStatisticSchema
 
 
 class StudyInstrumentSchema(BaseModel):

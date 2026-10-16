@@ -15,7 +15,6 @@ from fairwddi.schemas import (
     DatafileSchema,
     DatafileVariableFrequencySchema,
     DatafileVariableSchema,
-    DatafileVariableStatisticSchema,
     EventLogSchema,
     FrequencySchema,
     GroupReferenceSchema,
@@ -377,10 +376,13 @@ def test_domain_entity_schemas() -> None:
         datafile_urn="urn:ddi:fr.sciencespo:df-2007:1.0.0",
         instance_variable_urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
         order=2,
+        statistics={"mean": 3.4, "min": 1.0, "max": 5.0, "stddev": 1.1},
     )
     assert df_var_schema.datafile_urn == "urn:ddi:fr.sciencespo:df-2007:1.0.0"
     assert df_var_schema.instance_variable_urn == "urn:ddi:fr.sciencespo:iv-q01a:1.0.0"
     assert df_var_schema.order == 2
+    assert df_var_schema.statistics["mean"] == 3.4
+    assert df_var_schema.statistics["min"] == 1.0
 
     freq_schema = DatafileVariableFrequencySchema(
         datafile_urn="urn:ddi:fr.sciencespo:df-2007:1.0.0",
@@ -401,17 +403,6 @@ def test_domain_entity_schemas() -> None:
         frequency=200.0,
     )
     assert freq_alias_schema.frequency == 200.0
-
-    stat_schema = DatafileVariableStatisticSchema(
-        datafile_urn="urn:ddi:fr.sciencespo:df-2007:1.0.0",
-        instance_variable_urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
-        statistics={"mean": 3.4, "min": 1.0, "max": 5.0, "stddev": 1.1},
-        weight="poidstot",
-    )
-    assert stat_schema.datafile_urn == "urn:ddi:fr.sciencespo:df-2007:1.0.0"
-    assert stat_schema.statistics["mean"] == 3.4
-    assert stat_schema.statistics["min"] == 1.0
-    assert stat_schema.weight == "poidstot"
 
     study_inst_schema = StudyInstrumentSchema(
         study_unit_urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",

@@ -87,11 +87,10 @@ graph TD
     subgraph Dataset_Layer ["4. Dataset Layer (Physical Survey Waves, Files & Columns)"]
         SU["<b>StudyUnit</b><br/><code>urn (PK)</code><br/><i>Survey Wave / Dataset</i>"]:::datasetLayer
         DF["<b>Datafile</b><br/><code>urn (PK)</code><br/><i>Data File</i>"]:::datasetLayer
-        DV["<b>DatafileVariable</b><br/><code>id (PK)</code><br/><i>Column Order Junction</i>"]:::junction
+        DV["<b>DatafileVariable</b><br/><code>id (PK)</code><br/><i>Order & Stats (JSONB) Junction</i>"]:::junction
         IVS["<b>InstanceVariableScheme</b><br/><code>urn (PK)</code>"]:::datasetLayer
         IV["<b>InstanceVariable</b><br/><code>urn (PK)</code><br/><i>Cascade Tier 3 (Physical Column)</i>"]:::datasetLayer
         DVF["<b>DatafileVariableFrequency</b><br/><code>id (PK)</code><br/><i>Count Statistics</i>"]:::datasetLayer
-        DVS["<b>DatafileVariableStatistic</b><br/><code>id (PK)</code><br/><i>Descriptive Stats (JSONB)</i>"]:::datasetLayer
         SI["<b>StudyInstrument</b><br/><code>id (PK)</code>"]:::junction
 
         SU -->|contains| DF
@@ -100,8 +99,6 @@ graph TD
         IVS -->|contains| IV
         DF -.->|datafile| DVF
         IV -.->|variable| DVF
-        DF -.->|datafile| DVS
-        IV -.->|variable| DVS
         SU -->|uses| SI
         Inst -->|instrument| SI
         Grp -.->|polymorphic reference| SU
@@ -403,6 +400,7 @@ erDiagram
         string datafile_urn FK
         string instance_variable_urn FK
         integer order
+        jsonb statistics
         timestamp created_at
         timestamp updated_at
     }
@@ -413,16 +411,6 @@ erDiagram
         string instance_variable_urn FK
         string code_value
         float frequency
-        string weight
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    DatafileVariableStatistic {
-        bigint id PK
-        string datafile_urn FK
-        string instance_variable_urn FK
-        jsonb statistics
         string weight
         timestamp created_at
         timestamp updated_at
@@ -530,8 +518,6 @@ erDiagram
     InstanceVariable ||--o{ DatafileVariable : "datafiles"
     Datafile ||--o{ DatafileVariableFrequency : "measures"
     InstanceVariable ||--o{ DatafileVariableFrequency : "frequencies"
-    Datafile ||--o{ DatafileVariableStatistic : "aggregates"
-    InstanceVariable ||--o{ DatafileVariableStatistic : "statistics"
     StudyUnit ||--o{ StudyInstrument : "uses"
     Instrument ||--o{ StudyInstrument : "associations"
 

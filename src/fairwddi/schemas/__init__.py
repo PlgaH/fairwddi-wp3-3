@@ -18,10 +18,8 @@ from fairwddi.schemas.entities import (
     ConceptualVariableSchemeSchema,
     DataFileSchema,
     DatafileSchema,
-    DatafileStatisticSchema,
     DatafileVariableFrequencySchema,
     DatafileVariableSchema,
-    DatafileVariableStatisticSchema,
     EventLogSchema,
     FrequencySchema,
     GroupReferenceSchema,
@@ -47,7 +45,6 @@ from fairwddi.schemas.entities import (
     URNAliasSchema,
     UrnRegistrySchema,
     VariableFrequencySchema,
-    VariableStatisticSchema,
 )
 
 __all__ = [
@@ -84,9 +81,6 @@ __all__ = [
     "DatafileVariableFrequencySchema",
     "FrequencySchema",
     "VariableFrequencySchema",
-    "DatafileVariableStatisticSchema",
-    "DatafileStatisticSchema",
-    "VariableStatisticSchema",
     "StudyInstrumentSchema",
     "StudyUnitInstrumentSchema",
     "StudyUnitVariableSchema",

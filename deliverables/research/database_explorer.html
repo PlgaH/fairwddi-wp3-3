@@ -335,8 +335,8 @@
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      min-height: 720px;
-      height: calc(100vh - 15rem);
+      min-height: 820px;
+      height: calc(100vh - 12rem);
       position: relative;
       overflow: hidden;
       display: flex;
@@ -1307,7 +1307,7 @@
           </div>
 
           <!-- Interactive SVG Diagram View -->
-          <svg id="svg-diagram-viewport" viewBox="15 15 1560 910" xmlns="http://www.w3.org/2000/svg">
+          <svg id="svg-diagram-viewport" viewBox="15 15 1560 1060" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <marker id="arrow-default" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b"/>
@@ -1354,7 +1354,7 @@
                 <text x="45" y="315" fill="#10b981" font-size="12" font-weight="700" letter-spacing="0.08em">3. REPRESENTATION & INSTRUMENT LAYER</text>
 
                 <!-- Dataset Layer -->
-                <rect x="30" y="660" width="1040" height="250" rx="14" fill="#f59e0b" fill-opacity="0.04" stroke="#f59e0b" stroke-opacity="0.25" stroke-dasharray="4 4" />
+                <rect x="30" y="660" width="1040" height="370" rx="14" fill="#f59e0b" fill-opacity="0.04" stroke="#f59e0b" stroke-opacity="0.25" stroke-dasharray="4 4" />
                 <text x="45" y="685" fill="#f59e0b" font-size="12" font-weight="700" letter-spacing="0.08em">4. DATASET LAYER (PHYSICAL WAVES & VARIABLES)</text>
 
                 <!-- Infrastructure Layer -->
@@ -1362,7 +1362,7 @@
                 <text x="1115" y="55" fill="#06b6d4" font-size="12" font-weight="700" letter-spacing="0.08em">5. INGESTION & STAGING LAYER</text>
 
                 <!-- Audit Layer -->
-                <rect x="1100" y="660" width="460" height="250" rx="14" fill="#ec4899" fill-opacity="0.04" stroke="#ec4899" stroke-opacity="0.25" stroke-dasharray="4 4" />
+                <rect x="1100" y="660" width="460" height="370" rx="14" fill="#ec4899" fill-opacity="0.04" stroke="#ec4899" stroke-opacity="0.25" stroke-dasharray="4 4" />
                 <text x="1115" y="685" fill="#ec4899" font-size="12" font-weight="700" letter-spacing="0.08em">6. EVENT LOGGING & AUDIT TRAIL</text>
               </g>
 
@@ -2181,7 +2181,7 @@
         ddiTag: "<ddi:StudyUnit>",
         urnPattern: "urn:ddi:fr.sciencespo:StudyUnit.su-ess2007:1.0.0",
         description: "A specific survey wave or dataset (renamed from Survey). Contains concrete physical dataset variables.",
-        pos: { x: 60, y: 720 },
+        pos: { x: 55, y: 730 },
         fields: [
           { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical StudyUnit URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual dataset identifier / name" },
@@ -2209,7 +2209,7 @@
         ddiTag: "<ddi:DataFile> / <ddi:PhysicalInstance>",
         urnPattern: "urn:ddi:fr.sciencespo:Datafile.df-ess2007:1.0.0",
         description: "Minimal Datafile entity relating InstanceVariables to StudyUnit (replaces legacy StudyVariable table). A datafile points to a study wave.",
-        pos: { x: 420, y: 720 },
+        pos: { x: 265, y: 730 },
         fields: [
           { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical Datafile URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "study_unit_urn", type: "VARCHAR(512)", fk: "StudyUnit", req: true, notes: "FK -> StudyUnit.urn" },
@@ -2225,8 +2225,7 @@
         ],
         incoming: [
           { target: "DatafileVariable", type: "Foreign Key (DatafileVariable.datafile_urn)" },
-          { target: "DatafileVariableFrequency", type: "Foreign Key (DatafileVariableFrequency.datafile_urn)" },
-          { target: "DatafileVariableStatistic", type: "Foreign Key (DatafileVariableStatistic.datafile_urn)" }
+          { target: "DatafileVariableFrequency", type: "Foreign Key (DatafileVariableFrequency.datafile_urn)" }
         ]
       },
       DatafileVariable: {
@@ -2236,13 +2235,14 @@
         table: "request_ddi_datafilevariable",
         ddiTag: "<ddi:DatafileVariable>",
         urnPattern: "Surrogate PK (id: BigInt)",
-        description: "Junction table linking Datafile to member InstanceVariable columns, with sequence/display ordering.",
-        pos: { x: 580, y: 765 },
+        description: "Junction table linking Datafile to member InstanceVariable columns, with column ordering and descriptive statistics JSONB.",
+        pos: { x: 475, y: 730 },
         fields: [
           { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
           { name: "datafile_urn", type: "VARCHAR(512)", fk: "Datafile", req: true, notes: "FK -> Datafile.urn" },
           { name: "instance_variable_urn", type: "VARCHAR(512)", fk: "InstanceVariable", req: true, notes: "FK -> InstanceVariable.urn" },
           { name: "order", type: "INTEGER", notes: "Column sequence or display order within datafile" },
+          { name: "statistics", type: "JSONB", notes: "Descriptive statistics object mapping metric to value (mean, stddev, min, max, valid_cases)" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
         ],
@@ -2260,7 +2260,7 @@
         ddiTag: "<ddi:VariableScheme> / <ddi:InstanceVariableScheme>",
         urnPattern: "urn:ddi:fr.sciencespo:InstanceVariableScheme.ivs-ess2007:1.0.0",
         description: "Named collection of instance variables for a specific survey wave.",
-        pos: { x: 740, y: 720 },
+        pos: { x: 895, y: 730 },
         fields: [
           { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical InstanceVariableScheme URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual scheme name" },
@@ -2282,7 +2282,7 @@
         ddiTag: "<ddi:Variable> / <ddi:InstanceVariable>",
         urnPattern: "urn:ddi:fr.sciencespo:InstanceVariable.iv-ess2007-q01:1.0.0",
         description: "Physical realization of a variable in a specific dataset column (e.g. q01a). Relates to Datafile via DatafileVariable.",
-        pos: { x: 740, y: 810 },
+        pos: { x: 685, y: 730 },
         fields: [
           { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical InstanceVariable URN (Supertype FK -> UrnRegistry.urn)" },
           { name: "name", type: "JSONB", req: true, notes: "Column name / mnemonic (e.g. 'q01a', 'lrscale')" },
@@ -2301,8 +2301,7 @@
         ],
         incoming: [
           { target: "DatafileVariable", type: "Junction FK (DatafileVariable.instance_variable_urn)" },
-          { target: "DatafileVariableFrequency", type: "Junction FK (DatafileVariableFrequency.instance_variable_urn)" },
-          { target: "DatafileVariableStatistic", type: "Junction FK (DatafileVariableStatistic.instance_variable_urn)" }
+          { target: "DatafileVariableFrequency", type: "Junction FK (DatafileVariableFrequency.instance_variable_urn)" }
         ]
       },
       DatafileVariableFrequency: {
@@ -2313,37 +2312,13 @@
         ddiTag: "<ddi:SummaryStatistic> / <ddi:VariableStatistics>",
         urnPattern: "Surrogate PK (id: BigInt)",
         description: "Stores categorical variable count statistics per response code within a specific Datafile, with optional weighting.",
-        pos: { x: 480, y: 880 },
+        pos: { x: 475, y: 890 },
         fields: [
           { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
           { name: "datafile_urn", type: "VARCHAR(512)", fk: "Datafile", req: true, notes: "FK -> Datafile.urn" },
           { name: "instance_variable_urn", type: "VARCHAR(512)", fk: "InstanceVariable", req: true, notes: "FK -> InstanceVariable.urn" },
           { name: "code_value", type: "VARCHAR(128)", req: true, notes: "Discrete code value as string (e.g. '1', '98')" },
           { name: "frequency", type: "DOUBLE PRECISION", req: true, notes: "Count or frequency statistic" },
-          { name: "weight", type: "VARCHAR(256)", notes: "Optional weight variable name, URN, or specification" },
-          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
-          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
-        ],
-        outgoing: [
-          { target: "Datafile", type: "Foreign Key (datafile_urn)" },
-          { target: "InstanceVariable", type: "Foreign Key (instance_variable_urn)" }
-        ],
-        incoming: []
-      },
-      DatafileVariableStatistic: {
-        layer: "dataset",
-        layerName: "Dataset Layer",
-        base: "Model",
-        table: "request_ddi_datafilevariablestatistic",
-        ddiTag: "<ddi:SummaryStatistic>",
-        urnPattern: "Surrogate PK (id: BigInt)",
-        description: "Stores descriptive summary statistics (JSONB) for an instance variable within a specific Datafile.",
-        pos: { x: 680, y: 880 },
-        fields: [
-          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
-          { name: "datafile_urn", type: "VARCHAR(512)", fk: "Datafile", req: true, notes: "FK -> Datafile.urn" },
-          { name: "instance_variable_urn", type: "VARCHAR(512)", fk: "InstanceVariable", req: true, notes: "FK -> InstanceVariable.urn" },
-          { name: "statistics", type: "JSONB", req: true, notes: "Descriptive statistics object mapping metric to value" },
           { name: "weight", type: "VARCHAR(256)", notes: "Optional weight variable name, URN, or specification" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }
@@ -2362,7 +2337,7 @@
         ddiTag: "<ddi:StudyInstrument>",
         urnPattern: "Surrogate PK (id: BigInt)",
         description: "Junction capturing the direct relationship between a StudyUnit and its data collection Instrument(s) with path.",
-        pos: { x: 60, y: 830 },
+        pos: { x: 55, y: 890 },
         fields: [
           { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
           { name: "study_unit_urn", type: "VARCHAR(512)", fk: "StudyUnit", req: true, notes: "FK -> StudyUnit.urn" },
@@ -2388,7 +2363,7 @@
         ddiTag: "Audit Trail",
         urnPattern: "Surrogate PK (id: BigInt)",
         description: "Generic append-only lifecycle mutation and audit log for any DDI-L resource.",
-        pos: { x: 1140, y: 720 },
+        pos: { x: 1250, y: 790 },
         fields: [
           { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing surrogate ID" },
           { name: "urn", type: "VARCHAR(512)", fk: "UrnRegistry", req: true, idx: true, notes: "Target resource canonical URN (FK -> UrnRegistry.urn)" },
@@ -2568,7 +2543,7 @@
       nodesGroup.innerHTML = "";
       edgesGroup.innerHTML = "";
 
-      const nodeWidth = 150;
+      const nodeWidth = 155;
       const nodeHeight = 60;
 
       // Layer color map
@@ -2656,10 +2631,11 @@
         g.onmouseenter = () => highlightNodeConnections(key);
         g.onmouseleave = () => unhighlightNodeConnections();
 
+        const fontSize = key.length > 22 ? 9.5 : (key.length > 17 ? 10.5 : 12);
         g.innerHTML = `
           <rect width="${nodeWidth}" height="${nodeHeight}" rx="8" fill="${color.bg}" stroke="${color.stroke}" stroke-width="2" />
-          <text x="12" y="24" fill="${color.text}" font-size="12" font-weight="700" font-family="Inter, sans-serif">${key}</text>
-          <text x="12" y="42" fill="#94a3b8" font-size="9" font-family="'Fira Code', monospace">${entity.base}</text>
+          <text x="10" y="24" fill="${color.text}" font-size="${fontSize}" font-weight="700" font-family="Inter, sans-serif">${key}</text>
+          <text x="10" y="42" fill="#94a3b8" font-size="9" font-family="'Fira Code', monospace">${entity.base}</text>
           <circle cx="${nodeWidth - 14}" cy="14" r="4" fill="${color.stroke}" />
         `;
 
@@ -2745,7 +2721,7 @@
         colorClass: "focused-cascade",
         edgeClass: "highlight-cascade",
         marker: "url(#arrow-cascade)",
-        nodes: ["ConceptScheme", "Concept", "ConceptualVariableScheme", "ConceptualVariable", "RepresentedVariableScheme", "RepresentedVariable", "InstanceVariableScheme", "InstanceVariable", "Datafile", "DatafileVariable", "StudyUnit", "DatafileVariableFrequency", "DatafileVariableStatistic"],
+        nodes: ["ConceptScheme", "Concept", "ConceptualVariableScheme", "ConceptualVariable", "RepresentedVariableScheme", "RepresentedVariable", "InstanceVariableScheme", "InstanceVariable", "Datafile", "DatafileVariable", "StudyUnit", "DatafileVariableFrequency"],
         edges: [
           ["Concept", "ConceptScheme"],
           ["ConceptualVariable", "Concept"],
@@ -2758,9 +2734,7 @@
           ["DatafileVariable", "InstanceVariable"],
           ["Datafile", "StudyUnit"],
           ["DatafileVariableFrequency", "Datafile"],
-          ["DatafileVariableFrequency", "InstanceVariable"],
-          ["DatafileVariableStatistic", "Datafile"],
-          ["DatafileVariableStatistic", "InstanceVariable"]
+          ["DatafileVariableFrequency", "InstanceVariable"]
         ]
       },
       response: {
@@ -2908,7 +2882,7 @@
       }, { passive: false });
     }
 
-    function zoomDiagram(factor, focalX = 795, focalY = 470) {
+    function zoomDiagram(factor, focalX = 795, focalY = 530) {
       const newScale = Math.min(Math.max(diagramTransform.scale * factor, 0.5), 3.5);
       const ratio = newScale / diagramTransform.scale;
       diagramTransform.x = focalX - (focalX - diagramTransform.x) * ratio;

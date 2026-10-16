@@ -15,7 +15,6 @@ from fairwddi.models import (
     Datafile,
     DatafileVariable,
     DatafileVariableFrequency,
-    DatafileVariableStatistic,
     EventLog,
     Frequency,
     Group,
@@ -449,14 +448,19 @@ class TestFairwDDIModels(TestCase):
         assert str(datafile) == "bpf_2007.sav"
         assert study_unit.datafiles.count() == 1
 
-        # DatafileVariable junction table relating Datafile to InstanceVariables with ordering
+        # DatafileVariable junction relating Datafile to InstanceVariables
+        # with ordering and descriptive statistics
         df_var = DatafileVariable.objects.create(
             datafile=datafile,
             instance_variable=iv,
             order=1,
+            statistics={"mean": 1.5, "min": 1.0, "max": 2.0, "stddev": 0.5},
         )
         assert df_var.id is not None
         assert df_var.order == 1
+        assert df_var.statistics["mean"] == 1.5
+        assert df_var.statistics["min"] == 1.0
+        assert df_var.statistics["max"] == 2.0
         assert "order=1" in str(df_var)
         assert datafile.instance_variables.count() == 1
         assert iv.datafile == datafile
@@ -486,22 +490,6 @@ class TestFairwDDIModels(TestCase):
         assert "weight=poidstot" in str(freq_weighted)
         assert datafile.frequencies.count() == 2
         assert iv.frequencies.count() == 2
-
-        # DatafileVariableStatistic table storing descriptive statistics (JSONB)
-        stat = DatafileVariableStatistic.objects.create(
-            datafile=datafile,
-            instance_variable=iv,
-            statistics={"mean": 1.5, "min": 1.0, "max": 2.0, "stddev": 0.5},
-            weight="poidstot",
-        )
-        assert stat.id is not None
-        assert stat.statistics["mean"] == 1.5
-        assert stat.statistics["min"] == 1.0
-        assert stat.statistics["max"] == 2.0
-        assert stat.weight == "poidstot"
-        assert "mean" in str(stat)
-        assert datafile.statistics.count() == 1
-        assert iv.statistics.count() == 1
 
         # StudyInstrument table linking StudyUnit to Instrument
         inst = Instrument.objects.create(

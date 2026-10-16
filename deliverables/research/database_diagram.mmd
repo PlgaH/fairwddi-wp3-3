@@ -273,6 +273,7 @@ erDiagram
         string datafile_urn FK "FK -> Datafile.urn"
         string instance_variable_urn FK "FK -> InstanceVariable.urn"
         integer order "Column sequence or display order"
+        jsonb statistics "Descriptive statistics JSONB (mean, min, max, stddev, etc.)"
         timestamp created_at "Creation timestamp"
         timestamp updated_at "Update timestamp"
     }
@@ -283,16 +284,6 @@ erDiagram
         string instance_variable_urn FK "FK -> InstanceVariable.urn"
         string code_value "Discrete categorical response code string"
         float frequency "Frequency count statistic (weighted or unweighted)"
-        string weight "Optional weighting variable or specification"
-        timestamp created_at "Creation timestamp"
-        timestamp updated_at "Update timestamp"
-    }
-
-    DatafileVariableStatistic {
-        bigint id PK "Auto-incrementing surrogate ID"
-        string datafile_urn FK "FK -> Datafile.urn"
-        string instance_variable_urn FK "FK -> InstanceVariable.urn"
-        jsonb statistics "Descriptive statistics JSONB (mean, min, max, stddev, etc.)"
         string weight "Optional weighting variable or specification"
         timestamp created_at "Creation timestamp"
         timestamp updated_at "Update timestamp"
@@ -417,8 +408,6 @@ erDiagram
     InstanceVariable ||--o{ DatafileVariable : "datafiles"
     Datafile ||--o{ DatafileVariableFrequency : "measures"
     InstanceVariable ||--o{ DatafileVariableFrequency : "frequencies"
-    Datafile ||--o{ DatafileVariableStatistic : "aggregates"
-    InstanceVariable ||--o{ DatafileVariableStatistic : "statistics"
     StudyUnit ||--o{ StudyInstrument : "uses"
     Instrument ||--o{ StudyInstrument : "associations"
 

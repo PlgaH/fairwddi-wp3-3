@@ -11,10 +11,8 @@ from fairwddi.models.concept import (
 from fairwddi.models.dataset import (
     DataFile,
     Datafile,
-    DatafileStatistic,
     DatafileVariable,
     DatafileVariableFrequency,
-    DatafileVariableStatistic,
     Frequency,
     InstanceVariable,
     InstanceVariableScheme,
@@ -22,7 +20,6 @@ from fairwddi.models.dataset import (
     StudyUnit,
     StudyUnitInstrument,
     VariableFrequency,
-    VariableStatistic,
 )
 from fairwddi.models.event import (
     EventLog,
@@ -85,9 +82,6 @@ __all__ = [
     "DatafileVariableFrequency",
     "Frequency",
     "VariableFrequency",
-    "DatafileVariableStatistic",
-    "DatafileStatistic",
-    "VariableStatistic",
     "StudyInstrument",
     "StudyUnitInstrument",
     "EventLog",
