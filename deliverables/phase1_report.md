@@ -1,6 +1,6 @@
 # FAIRwDDi WP3-ST3 Phase I: Audit and DDI-L Database Model
 
-**V1.0.0-RC1**
+**V1.0.0**
 
 ## Summary
 
@@ -384,10 +384,9 @@ The tables representing DDI resources typically contain the following fields:
   - A RepresentedVariable through the`QuestionVariable` table
     - It is important to note that in DDI-L, the Question are related to Variable (not RepresentedVariable)
     - This is a difference with the GSIM/DDI-CDI variable cascade (see [GSIM/CDI vs DDI-L Cascade](research/variable_cascade_gsim_cdi_vs_ddi_lifecycle.md))
-    - ***:question: Can we comfirm we want the GSIM/CDI model? Or the DDI-L one? Or both?***
-- **​*:question: A Category can technically be used in more than one scheme. Any use case? Generic Group can be used as well.***
-- **_:question: Do we need to support QuestionGroup (within a QuestionScheme)? Generic Group can be used as well._**
-- **​*:question: How do we want to support QuestionGrid?***
+    - Alignment on GSIM/DDI-CDI is a recommended option 
+- We have elected not to model QuestionGroup in the database. Generic Group can be used for ReQuest purposes.
+- We have elected at this time not to model QuestionGrid. Grouping mechanims could be in the meantime.
 
 ### 3.4 Codes / Categories
 
@@ -397,8 +396,7 @@ The tables representing DDI resources typically contain the following fields:
 - Codes live in a `CodeList` and are not reusable. They reference a Category.
 - Both codes and categories carry a `is_missing` attribute.
 - Hierarchical codes or categories are supported through a `parent_urn` property (DDI-L implements the other way around)
-- **​*:question: A Category can technically be used in more than one scheme. Any use case? Generic Group can be used as well.***
-- :question: **_Do we need to support CategoryGroup (within a CategoryScheme)? Generic Group can be used as well._**
+- We have elected not to model CategoryGroup in the database. Generic Group can be used for ReQuest purposes.
 
 ### 3.5 Variables
 
@@ -408,10 +406,13 @@ The tables representing DDI resources typically contain the following fields:
     - Note that it is based on the variable cascade as defined in GSIM and DDI-CDI (see [GSIM/CDI vs DDI-L Cascade](research/variable_cascade_gsim_cdi_vs_ddi_lifecycle.md))
   - `InstanceVariable` and `InstanceVariableScheme` (this technically replaces the )
 - These variables only carry a small subset of attributes, so they are, at this time, very similar tables. This could be extended.
-  - **_:question:Is this something we want to extend or look into?_**
   - Conceptual variable: can have a concept but has no Unit Type (e.g., Person)
   - Represented variable: only representation used in ReQuest is "code" (as a reference to code list). But this is a narrow view. The Universe is also not taken into consideration (e.g., Students)
   - Instance Variable: just a resource to connect to a StudyUnit (technically through a dataset). The population (e.g., Students in School District A in 2019) and other attributes are not documented (but likely not relevant for ReQuest)
+- We have elected at this time not to model Unit, Universe, and Population and related schemes  associated with the variable cascade
+  - A `universe` property is present in the current ReQuestdatabase, but is a text field in the `BindingSurveyRepresentedVariable` table, which is essentially an InstanceVarible
+  - This is currently populated from DDI-C var/universe property (which would lbe the equiavelnt of Population in the variable cascade)
+  - We will for now store this in the DatafileVariable extended attributes
 - For RepresentedVariable
   - We currently have both a `code_list_urn` and a generic `value_representation` JSONB object that can carry the many options supported by DDI-L
     - If the variable has a CodeRepresentation, the JSON will hold a URN pointing to the CodeList in the database
@@ -419,8 +420,14 @@ The tables representing DDI resources typically contain the following fields:
 
 ### 3.6 StudyUnit
 
-- Minimal table to link variables to a study
-- **​\*:question: We probably want to add Dataset (files) to relate instance variables with studies...**
+- A  StudyUnit table is used at this time to represent studies
+- Unllike in the current version of request, a Datafile exists to capture the relationship between studies and their instance variables
+  - This is the natural relationship betweem variable and studies modelled by all DDI specifications
+  - The term was use to reflect the the relationship with an actual physical file nstance
+  - ThIt is also necessary to be able to store frequencies and statistics
+- The DatafileVariable table links Instancevariables to Dataset
+  - A `statistics` JSONB fields can be used to store optional summary and descriptiove statistics
+- The DatafileFrequency table can be used to store optional frequencies
 
 ### 3.7 Group / GroupItem Tables
 
@@ -440,11 +447,11 @@ The tables representing DDI resources typically contain the following fields:
 
 - As mentioned, there are many different ways in DDI-L to relate different resources with each other, often involving multiple references
 - Modeling all these possibilities would bloat the database with many tables. SQL is not the right technology for such a purpose
-- We instead use shortcut tables to keep the code simple
+- We instead use shortcut tables to keep the code simple. Th includes `StudyInstrument`, `InstrumentQuestion`, `QuestionVariable` and `DatafileVariable`
 
 ### 3.10 Support Tables
 
-- The `UrnRegistry` table provides a unique index for resource URNs and their types/class. Extended attributes can be used for any pr actical purposes (e.g., controlling visibility, indexing status, internal attributes)
+- The `UrnRegistry` table provides a unique index for resource URNs and their types/class. Extended attributes can be used for any practical purposes (e.g., controlling visibility, indexing status, internal attributes).
 - The `SemanticRelationship` table is available to capture non-DDI relantionship between resources
 - An `EventLog` table is available to keep track of the history of events, actions, or notes on the various resources
 - Ingestion tables are work in progress
