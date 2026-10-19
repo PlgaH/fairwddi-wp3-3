@@ -161,7 +161,7 @@ Before computing SHA-256 digests, all text payloads pass through a deterministic
 
 1. **Unicode NFKC Normalization:** `unicodedata.normalize("NFKC", text)`
 2. **Non-Breaking Space Substitution:** Converts `\u00A0`, `\u202F` to standard spaces.
-3. **Typography Standardization:** French quotes (`«`, `»`) $\rightarrow$ `"`, curved apostrophes (`’`) $\rightarrow$ `'`, en-dashes (`–`) $\rightarrow$ `-`.
+3. **Typography Standardization:** French quotes (`«`, `»`) → `"`, curved apostrophes (`’`) → `'`, en-dashes (`–`) → `-`.
 4. **Whitespace Collapsing:** Strips leading/trailing spaces and compresses multiple spaces (`" ".join(text.split())`).
 5. **Sorted Language Keys:** Canonical JSONB arrays/dictionaries sort ISO 639-1 language keys alphabetically (`["en", "fr"]`).
 

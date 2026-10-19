@@ -998,19 +998,90 @@
     `;
   }
 
+  function formatMathFallback(latex, isDisplay) {
+    let s = latex.trim();
+    s = s.replace(/\\text\{([^}]+)\}/g, '$1');
+    s = s.replace(/\\longleftarrow|\\leftarrow/g, ' ⟵ ');
+    s = s.replace(/\\longrightarrow|\\rightarrow/g, ' ⟶ ');
+    s = s.replace(/\\ge/g, '≥');
+    s = s.replace(/\\le/g, '≤');
+    s = s.replace(/\\times/g, '×');
+    s = s.replace(/\\approx/g, '≈');
+    s = s.replace(/\\neq/g, '≠');
+    s = s.replace(/\\sim/g, '~');
+    s = s.replace(/\\\{/g, '{').replace(/\\\}/g, '}');
+    s = s.replace(/\\_/g, '_');
+    s = s.replace(/\\([a-zA-Z]+)/g, '$1');
+    s = s.replace(/\s+/g, ' ').trim();
+    if (isDisplay) {
+      return `<div class="math-block math-display"><span class="math-fallback-formula">${s}</span></div>`;
+    }
+    return `<span class="math-inline math-fallback-formula">${s}</span>`;
+  }
+
+  function renderMath(latex, isDisplay) {
+    if (window.katex) {
+      try {
+        return window.katex.renderToString(latex.trim(), {
+          displayMode: isDisplay,
+          throwOnError: false
+        });
+      } catch (err) {
+        console.warn('KaTeX render error:', err);
+      }
+    }
+    return formatMathFallback(latex, isDisplay);
+  }
+
   function parseMarkdown(md) {
     if (!md) return '';
+
+    // 1. Extract block math $$...$$
+    const mathBlocks = [];
+    let processed = md.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
+      const idx = mathBlocks.length;
+      mathBlocks.push(renderMath(formula, true));
+      return `\n\n@@MATH_BLOCK_${idx}@@\n\n`;
+    });
+
+    // 2. Extract inline math $...$ (avoid escaped \$ or empty $$)
+    const mathInlines = [];
+    processed = processed.replace(/(^|[^\\])\$([^\$\n]+?)\$/g, (match, prefix, formula) => {
+      const idx = mathInlines.length;
+      mathInlines.push(renderMath(formula, false));
+      return `${prefix}@@MATH_INLINE_${idx}@@`;
+    });
 
     let html = '';
     if (window.marked) {
       try {
-        html = window.marked.parse(md);
+        html = window.marked.parse(processed);
       } catch (e) {
-        html = fallbackMarkdownParser(md);
+        html = fallbackMarkdownParser(processed);
       }
     } else {
-      html = fallbackMarkdownParser(md);
+      html = fallbackMarkdownParser(processed);
     }
+
+    // 3. Restore math blocks and inlines
+    html = html.replace(/<p>\s*@@MATH_BLOCK_(\d+)@@\s*<\/p>/g, (m, id) => {
+      const idx = parseInt(id, 10);
+      return mathBlocks[idx] || '';
+    });
+    html = html.replace(/@@MATH_BLOCK_(\d+)@@/g, (m, id) => {
+      const idx = parseInt(id, 10);
+      return mathBlocks[idx] || '';
+    });
+    html = html.replace(/@@MATH_INLINE_(\d+)@@/g, (m, id) => {
+      const idx = parseInt(id, 10);
+      return mathInlines[idx] || '';
+    });
+
+    // Clean up any remaining raw LaTeX arrow escapes in free text
+    html = html.replace(/\\rightarrow/g, '→')
+               .replace(/\\leftarrow/g, '←')
+               .replace(/\\longrightarrow/g, '⟶')
+               .replace(/\\longleftarrow/g, '⟵');
 
     html = html.replace(/<blockquote>\s*<p>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(.*?)(<\/p>[\s\S]*?<\/blockquote>)/gi, (match, type, titleLine, rest) => {
       const typeLower = type.toLowerCase();

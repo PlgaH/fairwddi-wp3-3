@@ -21,7 +21,7 @@ DOCUMENTS_CONFIG = [
         "title": "Phase I Deliverable Report (Rapport d'audit technique et spécifications)",
         "shortTitle": "Phase I Deliverable Report",
         "category": "Deliverables",
-        "badge": "v1.0.0-RC1",
+        "badge": "v1.0.0",
         "icon": "file-text",
         "featured": True,
         "description": "Comprehensive technical audit of the current ReQuest platform and validated standard-agnostic DDI database architecture."
@@ -355,6 +355,14 @@ def build_site_data():
             chunk_text = " ".join(chunk_lines)
             plain_text = re.sub(r'```[\s\S]*?```', ' ', chunk_text)
             plain_text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', plain_text)
+            plain_text = re.sub(r'\$\$([\s\S]*?)\$\$', r' \1 ', plain_text)
+            plain_text = re.sub(r'\$([^\$\n]+)\$', r' \1 ', plain_text)
+            plain_text = re.sub(r'\\text\{([^}]+)\}', r'\1', plain_text)
+            plain_text = re.sub(r'\\(long)?leftarrow', '←', plain_text)
+            plain_text = re.sub(r'\\(long)?rightarrow', '→', plain_text)
+            plain_text = re.sub(r'\\ge', '≥', plain_text)
+            plain_text = re.sub(r'\\le', '≤', plain_text)
+            plain_text = re.sub(r'\\[a-zA-Z]+', '', plain_text)
             plain_text = re.sub(r'[#*`_>|]', ' ', plain_text)
             plain_text = re.sub(r'\s+', ' ', plain_text).strip()
             

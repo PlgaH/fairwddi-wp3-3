@@ -1097,6 +1097,56 @@ input, select, textarea {
   box-shadow: var(--shadow-sm);
 }
 
+/* KaTeX & Mathematical Formula Displays */
+.markdown-body .katex-display {
+  margin: 1.75rem 0;
+  padding: 1.25rem 1.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--brand-primary);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.markdown-body .katex {
+  font-size: 1.1em;
+  color: var(--text-bright);
+}
+
+.markdown-body .math-inline {
+  padding: 0.1em 0.3em;
+}
+
+.markdown-body .math-block.math-display {
+  margin: 1.75rem 0;
+  padding: 1.25rem 1.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--brand-primary);
+  border-radius: var(--radius-md);
+  text-align: center;
+  overflow-x: auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.markdown-body .math-block.math-display .math-fallback-formula {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  letter-spacing: 0.02em;
+}
+
+.markdown-body .math-inline.math-fallback-formula {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--brand-primary);
+  font-weight: 500;
+}
+
 .article-pagination {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -60,10 +60,10 @@ flowchart TD
 | Layer | Technologies & Libraries | Function / Description |
 | :--- | :--- | :--- |
 | **Language & Runtime** | Python 3.9 – 3.13, Node.js (build-time) | Core execution platform |
-| **Web Framework** | Django $\ge$ 6.0, `django-ninja` 1.3.0 | Application routing, ORM, API handling, admin interface |
+| **Web Framework** | Django ≥ 6.0, `django-ninja` 1.3.0 | Application routing, ORM, API handling, admin interface |
 | **Relational Database** | PostgreSQL 17 (Alpine), `psycopg2-binary` | Primary persistence engine with custom ICU collations |
 | **Search Engine** | Elasticsearch 9.4.3, `django-elasticsearch-dsl` 9.0.0 | Full-text, category, and metadata search with highlighting |
-| **Task Queue / ETL** | `django-tasks-db` $\ge$ 0.12.0 | Asynchronous background processing for file imports |
+| **Task Queue / ETL** | `django-tasks-db` ≥ 0.12.0 | Asynchronous background processing for file imports |
 | **XML & File Parsing** | `beautifulsoup4`, `lxml` | DDI Codebook XML parsing (`qstnLit`, `catgry`, `var`) |
 | **Data Import / Export** | `django-import-export` 4.1.1, `requests` | CSV import/export workflows and external metadata fetching |
 | **WSGI & Static Serving** | Gunicorn 26.0.0, WhiteNoise 6.4.0 | Production HTTP gateway and static asset serving |

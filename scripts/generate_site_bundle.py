@@ -34,6 +34,9 @@ INDEX_HTML = """<!DOCTYPE html>
   <!-- Prism Syntax Highlighting -->
   <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
   
+  <!-- KaTeX Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="./site_assets/app.css" />
 </head>
@@ -361,6 +364,7 @@ INDEX_HTML = """<!DOCTYPE html>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 
   <!-- Site Data Manifest & Core Application Engine -->
   <script src="./site_assets/site_data.js"></script>

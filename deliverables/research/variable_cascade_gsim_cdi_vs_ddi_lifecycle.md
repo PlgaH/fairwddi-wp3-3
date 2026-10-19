@@ -25,23 +25,24 @@ The GSIM and DDI-CDI cascade defines three explicit, first-class variable types,
 #### B. Direct Definition vs. Cascade Traversal
 
 - GSIM / DDI-CDI: The cascade is strictly layered and decoupled:
-- $$\text{ConceptualVariable} \longleftarrow \text{RepresentedVariable} \longleftarrow \text{InstanceVariable}$$
+
+$$\text{ConceptualVariable} \longleftarrow \text{RepresentedVariable} \longleftarrow \text{InstanceVariable}$$
 
 - DDI-Lifecycle: While DDI-L supports linking a Variable upward to a RepresentedVariable and ConceptualVariable, doing so is optional. In DDI-L, a standard Variable can directly define its own inline VariableRepresentation (e.g., inline CodeListReference or NumericRepresentation) without referencing a RepresentedVariable at all.
 
 #### C. Physical Binding and Data Location
 
 - GSIM / DDI-CDI: The InstanceVariable is bound logically to a dataset via DataStructure components (like Component or AttributeComponent / MeasureComponent). It focuses on data structures across varied storage models (tabular, multidimensional, or event/graph data).
-- DDI-Lifecycle: Binds the Variable to physical bytes through a separate physical module (p:PhysicalDataProduct \rightarrow PhysicalInstance \rightarrow RecordLayout \rightarrow DataItem). The connection between the logical Variable and its physical column, offset, or delimited position is handled through a VariableReference inside the record layout rather than being an intrinsic property of the variable itself.
+- DDI-Lifecycle: Binds the Variable to physical bytes through a separate physical module (`p:PhysicalDataProduct` → `PhysicalInstance` → `RecordLayout` → `DataItem`). The connection between the logical Variable and its physical column, offset, or delimited position is handled through a VariableReference inside the record layout rather than being an intrinsic property of the variable itself.
 
 #### D. Questionnaire Provenance Binding
 
 - GSIM / DDI-CDI: Keeps survey collection lineage clean and modular via separate process and provenance patterns.
-- DDI-Lifecycle: The DDI-L Variable carries direct, first-class pointers to the survey collection instrument via <r:SourceQuestionReference>, directly linking the variable to the QuestionItem that generated it.
+- DDI-Lifecycle: The DDI-L Variable carries direct, first-class pointers to the survey collection instrument via `<r:SourceQuestionReference>`, directly linking the variable to the QuestionItem that generated it.
 
 ### 3. Summary of the Difference
 
-- GSIM / DDI-CDI enforces an explicit three-class architectural pipeline: ConceptualVariable \rightarrow RepresentedVariable \rightarrow InstanceVariable, optimized for data structures across cross-domain environments.
+- GSIM / DDI-CDI enforces an explicit three-class architectural pipeline: `ConceptualVariable` → `RepresentedVariable` → `InstanceVariable`, optimized for data structures across cross-domain environments.
 - DDI-Lifecycle provides the upper two classes (ConceptualVariable, RepresentedVariable), but uses Variable as its concrete anchor, relying on references to separate Physical Data Product mappings rather than declaring an autonomous InstanceVariable class.
 
 
@@ -60,7 +61,7 @@ QuestionItem ◄───[SourceQuestionReference]─── Variable ───[R
 
 - Variable as the Bridge: The Variable contains a <r:SourceQuestionReference> pointing to the <d:QuestionItem> that collected the data.
 - Simultaneously, that same Variable can contain a <l:RepresentedVariableReference> (or sit in a RepresentedVariableScheme) linking it upward to the reusable RepresentedVariable.
-- This maintains the lineage from instrument question \rightarrow dataset variable \rightarrow abstract represented variable.
+- This maintains the lineage from instrument question → dataset variable → abstract represented variable.
 
 ### 2. Via Shared Concept and Value Representation
 

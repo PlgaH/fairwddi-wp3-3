@@ -428,7 +428,7 @@ flowchart TD
 | Confidence Tier | Criteria | Ingestion Behavior |
 | :--- | :--- | :--- |
 | **High Confidence** *(Auto-Commit)* | • Exact URN match + Exact SHA-256 `content_hash` match.<br>• Clean new URN insertion with valid agency authority. | **100% Automated Execution**: Instantly committed to PostgreSQL and indexed into Elasticsearch. |
-| **Medium Confidence** *(Quarantine Review)* | • **URN Drift**: URN matches an existing entity, but `content_hash` differs.<br>• **Fuzzy Random URN Match**: Auto-generated/random UUID URN with question text matching existing entities at $\ge 90\%$ similarity, but category labels differ. | **Quarantined for QA Review**: Inserted into a `MetadataQuarantine` holding table. Generates an administrative task notification. |
+| **Medium Confidence** *(Quarantine Review)* | • **URN Drift**: URN matches an existing entity, but `content_hash` differs.<br>• **Fuzzy Random URN Match**: Auto-generated/random UUID URN with question text matching existing entities at ≥ 90% similarity, but category labels differ. | **Quarantined for QA Review**: Inserted into a `MetadataQuarantine` holding table. Generates an administrative task notification. |
 | **Low Confidence** *(Validation Error)* | • Invalid URN format, broken XML structure, or missing required DDI-L schemas. | **Pre-flight Rejection**: Returns field-level `ValidationError` instantly. |
 
 #### Archivist QA Dashboard Requirements
