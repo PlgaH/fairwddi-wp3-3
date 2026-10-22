@@ -245,8 +245,6 @@ Example:
 - To support this generically, we use an `extended_attributes` JSON field wherever applicable
 - We recommend embedding a schema definition or URL in the stored JSON ( Self-Describing JSON Document) to identify its content
   - The JSON could be validated against the schema (inside or outside the database)
-  - :question: an ``extended_attributes_schema` column could be used instead. Thoughts?
-  - :question: If we know for sure that all extended attributes must follow the same schema, it can be defined at the table level using a `CHECK` constraint.
 
 _Example: a question coming from DDI-L carrying few extra properties of interest (the question text is already in the table `question_text` field):_
 
@@ -307,7 +305,6 @@ _Example: a question coming from DDI-Codebook with surrounding elements (the que
   - `object_type` and `object_urn` to represent the target
 - The typing fields are needed, as URNs do not inform on the resource type
 - Note that there are no constraints on the content of these fields. It is up to the implementation to manage the
-- **​*:question: Do we want to use the RDF terminology (subject-predicate-object), or prefer something like source-property-target***
 
 Some examples:
 
@@ -377,8 +374,7 @@ The tables representing DDI resources typically contain the following fields:
   - We currently have both a `code_list_urn` and a generic `response_domain` JSONB object that can carry the many options supported by DDI-L
   - If the question has a CodeDomain, the JSON will hold a URN pointing to the CodeList in the database
   - **​*:question: Do you want the flexibility of response domain, or do we only need support for code list? Or both?***
-  - **​*:question: A QuestionItem can also be associated with a have CategoryDomain. Is this a use case we want to support?***
-  - *​**:information_source: Technically, ReQuest does not need variables if only concerned with questions and their representation***
+  - **​*:question: A QuestionItem can also be associated with a CategoryDomain. Is this a use case we want to support?***
 - It can be related to:
   - An Instrument through the `InstrumentQuestion` table
   - A RepresentedVariable through the`QuestionVariable` table
