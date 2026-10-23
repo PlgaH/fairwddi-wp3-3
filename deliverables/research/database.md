@@ -23,7 +23,7 @@ The FAIRwDDI architecture implements a **standard-agnostic, lightweight DDI mode
 
 | Convention | Rule |
 | :--- | :--- |
-| **Supertype Master Registry** | `request_ddi_urnregistry` — master table of all canonical URNs and external URIs (`urn`, `resource_type`, `extended_attributes`). |
+| **Supertype Master Registry** | `request_ddi_urnregistry` — master table of all canonical URNs and external URIs (`urn`, `resource_type`, `status`, `extended_attributes`). |
 | **Primary key (DDI Resources)** | `urn` — `VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE` (Canonical DDI 3.3 / 4.0 URN format). |
 | **Primary key (Junction & Non-DDI)** | `id` — `BigAutoField` / `BIGSERIAL PRIMARY KEY`. |
 | **Parent Scheme Foreign Keys** | `scheme_urn` — `VARCHAR(512) REFERENCES ...(urn)` (maps to `models.ForeignKey(..., db_column="scheme_urn")`). |
@@ -727,6 +727,7 @@ Central master supertype entity table mapping canonical URNs and external URIs t
 | :--- | :--- | :--- | :--- |
 | `urn` | `CharField(512)` | PK | Canonical URN or external identifier/URI (referenced by all entity tables) |
 | `resource_type` | `CharField(64)` | indexed, required | Target entity/resource type (`"QuestionItem"`, `"Category"`, `"Concept"`, etc.) |
+| `status` | `CharField(32)` | indexed, default `"active"` | Publication or lifecycle status (`"active"`, `"deprecated"`, `"draft"`, `"quarantined"`) |
 | `extended_attributes` | `JSONField` | default `[]` | Extensible attributes array of objects |
 | `created_at` | `DateTimeField` | auto | Record creation timestamp |
 | `updated_at` | `DateTimeField` | auto | Record update timestamp |
@@ -825,6 +826,7 @@ Stores individual broken-down raw element resources extracted during Stage 1 par
 | `EventLog` | `(urn, timestamp)` | Composite B-tree | Chronological audit log lookups by resource URN |
 | `EventLog` | `event_type` | B-tree | Filter audit events by classification |
 | `UrnRegistry` | `resource_type` | B-tree | Fast polymorphic resource type filtering |
+| `UrnRegistry` | `status` | B-tree | Fast lifecycle and publication status filtering |
 | `URNAlias` | `alias_urn` | UNIQUE B-tree | Alias resolution during ingestion |
 | `URNAlias` | `canonical_urn` | B-tree | Reverse alias lookup |
 | `MetadataQuarantine`| `resolution` | Partial (where null) | Pending archivist review queue |

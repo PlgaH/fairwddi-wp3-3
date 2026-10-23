@@ -62,6 +62,8 @@ def test_cli_db_export_ddl_stdout() -> None:
     """Test that fairwddi db export-ddl prints valid PostgreSQL DDL SQL."""
     result = runner.invoke(app, ["db", "export-ddl"])
     assert result.exit_code == 0
+    assert "CREATE TABLE IF NOT EXISTS request_ddi_urnregistry" in result.stdout
+    assert "CREATE INDEX IF NOT EXISTS req_ddi_urn_reg_status_idx" in result.stdout
     assert "CREATE TABLE IF NOT EXISTS request_ddi_organization" in result.stdout
     assert "CREATE TABLE IF NOT EXISTS request_ddi_questionitem" in result.stdout
     assert "CREATE TABLE IF NOT EXISTS request_ddi_codelist" in result.stdout

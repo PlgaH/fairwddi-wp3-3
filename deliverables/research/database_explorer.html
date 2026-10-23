@@ -1626,6 +1626,7 @@
         fields: [
           { name: "urn", type: "VARCHAR(512)", pk: true, req: true, notes: "Canonical URN or external identifier/URI (Supertype Primary Key)" },
           { name: "resource_type", type: "VARCHAR(64)", req: true, idx: true, notes: "Target entity type ('QuestionItem', 'Category', 'Concept', etc.)" },
+          { name: "status", type: "VARCHAR(32)", req: true, idx: true, notes: "Publication or lifecycle status ('active', 'deprecated', 'draft', 'quarantined')" },
           { name: "extended_attributes", type: "JSONB", notes: "Extensible attributes array of objects" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Record update timestamp" }

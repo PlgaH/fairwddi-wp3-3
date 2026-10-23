@@ -504,6 +504,10 @@ class UrnRegistrySchema(BaseModel):
         ...,
         description="Target resource type (e.g. 'QuestionItem', 'Category', 'ExternalConcept').",
     )
+    status: str = Field(
+        default="active",
+        description="Publication or lifecycle status (e.g. 'active', 'deprecated').",
+    )
     extended_attributes: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensible attributes list of objects."
     )

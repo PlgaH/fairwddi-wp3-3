@@ -575,7 +575,16 @@ class TestFairwDDIModels(TestCase):
         )
         assert reg.urn == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"
         assert reg.resource_type == "QuestionItem"
+        assert reg.status == "active"
         assert str(reg) == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0 (QuestionItem)"
+
+        # Custom status
+        reg_deprecated = UrnRegistry.objects.create(
+            urn="urn:ddi:fr.sciencespo:qi-legacy:1.0.0",
+            resource_type="QuestionItem",
+            status="deprecated",
+        )
+        assert reg_deprecated.status == "deprecated"
 
         # External non-DDI URN / URI registration
         reg_ext = UrnRegistry.objects.create(
@@ -584,6 +593,7 @@ class TestFairwDDIModels(TestCase):
             extended_attributes=[{"type": "vocabulary", "value": "ELSST"}],
         )
         assert reg_ext.resource_type == "Concept"
+        assert reg_ext.status == "active"
 
         # URNAlias
         alias = URNAlias.objects.create(
@@ -849,6 +859,7 @@ class TestFairwDDIModels(TestCase):
         reg_entry = UrnRegistry.objects.filter(urn=qi.urn).first()
         assert reg_entry is not None
         assert reg_entry.resource_type == "QuestionItem"
+        assert reg_entry.status == "active"
 
         # Creating a Concept should register with resource_type 'Concept'
         cs = ConceptScheme.objects.create(
@@ -863,10 +874,12 @@ class TestFairwDDIModels(TestCase):
         reg_cs = UrnRegistry.objects.filter(urn=cs.urn).first()
         assert reg_cs is not None
         assert reg_cs.resource_type == "ConceptScheme"
+        assert reg_cs.status == "active"
 
         reg_concept = UrnRegistry.objects.filter(urn=concept.urn).first()
         assert reg_concept is not None
         assert reg_concept.resource_type == "Concept"
+        assert reg_concept.status == "active"
 
         # Deleting an entity should clean up its UrnRegistry entry
         qi_urn = qi.urn

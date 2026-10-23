@@ -23,6 +23,12 @@ class UrnRegistry(models.Model):
         db_index=True,
         help_text="Resource/entity type (e.g. 'QuestionItem', 'Category', 'ExternalConcept').",
     )
+    status = models.CharField(
+        max_length=32,
+        default="active",
+        db_index=True,
+        help_text="Publication or lifecycle status (e.g. 'active', 'deprecated').",
+    )
     extended_attributes = models.JSONField(
         default=list,
         blank=True,

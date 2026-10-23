@@ -429,6 +429,7 @@ erDiagram
     UrnRegistry {
         string urn PK
         string resource_type
+        string status
         jsonb extended_attributes
         timestamp created_at
         timestamp updated_at

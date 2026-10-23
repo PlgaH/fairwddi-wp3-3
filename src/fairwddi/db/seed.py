@@ -643,6 +643,7 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         urn=rv_interest.urn,
         defaults={
             "resource_type": "RepresentedVariable",
+            "status": "active",
             "extended_attributes": [{"type": "source", "value": "seed"}],
         },
     )
@@ -650,6 +651,7 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         urn="https://elsst.cessda.eu/id/4/PoliticalAttitudes",
         defaults={
             "resource_type": "Concept",
+            "status": "active",
             "extended_attributes": [{"type": "vocabulary", "value": "ELSST"}],
         },
     )

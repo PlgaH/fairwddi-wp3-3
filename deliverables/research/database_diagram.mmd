@@ -316,6 +316,7 @@ erDiagram
     UrnRegistry {
         string urn PK "Canonical URN or external URI"
         string resource_type "Target entity type (e.g. QuestionItem)"
+        string status "Lifecycle status ('active', 'deprecated', 'quarantined')"
         jsonb extended_attributes "Extensible attributes array"
         timestamp created_at "Creation timestamp"
         timestamp updated_at "Update timestamp"

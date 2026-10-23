@@ -13,12 +13,14 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS request_ddi_urnregistry (
     urn VARCHAR(512) PRIMARY KEY,
     resource_type VARCHAR(64) NOT NULL,
+    status VARCHAR(32) NOT NULL DEFAULT 'active',
     extended_attributes JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS req_ddi_urn_reg_type_idx ON request_ddi_urnregistry (resource_type);
+CREATE INDEX IF NOT EXISTS req_ddi_urn_reg_status_idx ON request_ddi_urnregistry (status);
 
 -- ----------------------------------------------------------------------------
 -- 2. Organizational Hierarchy & Resource Groups

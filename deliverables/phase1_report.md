@@ -447,7 +447,7 @@ The tables representing DDI resources typically contain the following fields:
 
 ### 3.10 Support Tables
 
-- The `UrnRegistry` table provides a unique index for resource URNs and their types/class. Extended attributes can be used for any practical purposes (e.g., controlling visibility, indexing status, internal attributes).
+- The `UrnRegistry` table provides a unique index for resource URNs, their types/class, and publication or lifecycle status (e.g., `'active'`, `'deprecated'`, `'draft'`, `'quarantined'`). Extended attributes can be used for any practical purposes (e.g., controlling visibility, indexing flags, internal attributes).
 - The `SemanticRelationship` table is available to capture non-DDI relantionship between resources
 - An `EventLog` table is available to keep track of the history of events, actions, or notes on the various resources
 - Ingestion tables are work in progress

@@ -528,14 +528,17 @@ def test_urn_registry_schema() -> None:
     )
     assert reg.urn == "urn:ddi:fr.sciencespo:qi-001:1.0.0"
     assert reg.resource_type == "QuestionItem"
+    assert reg.status == "active"
     assert reg.extended_attributes[0]["value"] == "demo"
 
-    # External URI
+    # External URI with custom status
     reg_ext = UrnRegistrySchema(
         urn="https://elsst.cessda.eu/id/4/Politics",
         resource_type="Concept",
+        status="deprecated",
     )
     assert reg_ext.urn == "https://elsst.cessda.eu/id/4/Politics"
+    assert reg_ext.status == "deprecated"
     assert reg_ext.extended_attributes == []
 
 
