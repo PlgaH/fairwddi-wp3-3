@@ -6,21 +6,25 @@ import uuid
 from pathlib import Path
 from typing import Any, Literal
 
-from fairwddi.importer.detector import detect_metadata_format
-from fairwddi.importer.importer import compute_file_sha256
-from fairwddi.importer.profiles import ImportProfile, load_profile
-from fairwddi.importer.streaming import stream_resources
+from fairwddi.ingest.detector import compute_file_sha256, detect_metadata_format
 from fairwddi.ingest.plan import IngestPlan, PlanActionItem, PlanIssue, ReviewGate
+from fairwddi.ingest.profiles import ImportProfile, load_profile
+from fairwddi.ingest.streaming import stream_resources
 
 
 def _check_existing_batch(file_sha256: str) -> int | None:
-    """Check if a file with this SHA-256 is already staged in the database."""
+    """Check if a file with this SHA-256 has already been ingested."""
     try:
-        from fairwddi.models import StagedImport
+        from fairwddi.models import IngestBatch
 
-        for imp in StagedImport.objects.exclude(status="failed").order_by("-id"):
-            if imp.import_options.get("file_sha256") == file_sha256:
-                return imp.id
+        batch = (
+            IngestBatch.objects.filter(file_sha256=file_sha256)
+            .exclude(status__in=["failed", "undone"])
+            .order_by("-id")
+            .first()
+        )
+        if batch:
+            return batch.id
     except Exception:
         pass
     return None
@@ -66,7 +70,7 @@ def run_preflight_check(
     resolved_profile = profile if isinstance(profile, ImportProfile) else load_profile(profile)
     fmt = detect_metadata_format(path)
     file_sha256 = compute_file_sha256(path)
-    existing_import_id = _check_existing_batch(file_sha256)
+    existing_batch_id = _check_existing_batch(file_sha256)
 
     job_id = f"preflight-{path.stem}-{uuid.uuid4().hex[:8]}"
     issues: list[PlanIssue] = []
@@ -77,17 +81,17 @@ def run_preflight_check(
         "serialization": fmt.serialization,
         "flavor": fmt.flavor or "Generic",
         "canonical_slug": fmt.canonical_slug,
-        "already_staged_import_id": existing_import_id,
+        "existing_batch_id": existing_batch_id,
     }
 
-    if existing_import_id is not None:
+    if existing_batch_id is not None:
         issues.append(
             PlanIssue(
                 severity="warning",
                 code="PRE-DUP-001",
                 message=(
-                    f"File with identical SHA-256 is already staged in "
-                    f"StagedImport #{existing_import_id}."
+                    f"File with identical SHA-256 was already ingested in "
+                    f"IngestBatch #{existing_batch_id}."
                 ),
                 requires_review=True,
             )
@@ -278,10 +282,11 @@ def run_preflight_check(
     plan = IngestPlan(
         stage="preflight",
         job_id=job_id,
-        source_file=str(path),
+        source_file=path.name,
+        source_path=str(path),
         file_sha256=file_sha256,
         source_format=fmt.canonical_slug,
-        staged_import_id=existing_import_id,
+        batch_id=existing_batch_id,
         profile=resolved_profile.name,
         summary=summary,
         issues=issues,

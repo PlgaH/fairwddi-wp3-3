@@ -1,12 +1,12 @@
 """Comprehensive tests for the Phase 2 Ingestion & Harmonization Pipeline (`fairwddi.ingest`).
 
 Covers:
-1. Use Case 1: Classic DDI-Codebook -> preflight -> upgrade (ddi4-json/jsonl) -> stage -> promote.
-2. Use Case 2: Multilingual DDI-Codebook (fr/en) -> upgrade -> stage -> promote (JSONB).
-3. Use Case 3: DDI-Lifecycle 3.3 XML & 4.0 JSON -> preflight -> stage -> promote (shortcuts).
-4. Storage Compaction (`cleanup_staged_import`) & Promotion Undo (`undo_promotion`).
+1. Use Case 1: Classic DDI-Codebook -> preflight -> upgrade (ddi4-json/jsonl) -> direct ingest.
+2. Use Case 2: Multilingual DDI-Codebook (fr/en) -> upgrade -> direct ingest (JSONB + frequencies).
+3. Use Case 3: DDI-Lifecycle 3.3 XML & 4.0 JSON -> preflight -> direct ingest (shortcuts).
+4. Lightweight `IngestBatch` receipts & 1-click Rollback (`undo_ingestion`).
 5. Stage 3 Comparison (`discover_candidates`, `compare_batch`) & Harmonization (`plan/apply/undo`).
-6. CLI command groups (`preflight`, `stage`, `promote`, `compare`, `harmonize`, `ingest`).
+6. CLI command groups (`preflight`, `ingest`, `compare`, `harmonize`).
 """
 
 from __future__ import annotations
@@ -19,15 +19,13 @@ from typer.testing import CliRunner
 from fairwddi.cli import app
 from fairwddi.ingest import (
     apply_harmonization,
-    apply_promotion,
-    cleanup_staged_import,
+    apply_ingestion,
     discover_candidates,
     plan_harmonization,
-    plan_promotion,
+    plan_ingestion,
     run_preflight_check,
-    stage_metadata_file,
     undo_harmonization,
-    undo_promotion,
+    undo_ingestion,
     upgrade_ddic_to_ddil,
 )
 from fairwddi.models import (
@@ -37,6 +35,7 @@ from fairwddi.models import (
     Datafile,
     DatafileVariable,
     DatafileVariableFrequency,
+    IngestBatch,
     InstanceVariable,
     Instrument,
     InstrumentQuestion,
@@ -44,8 +43,6 @@ from fairwddi.models import (
     QuestionVariable,
     RepresentedVariable,
     SemanticRelationship,
-    StagedImport,
-    StagedResourceNode,
     StudyInstrument,
     StudyUnit,
 )
@@ -151,12 +148,12 @@ def sample_cso_xml() -> Path:
 
 
 # -----------------------------------------------------------------------------
-# Use Case 1 & 2: DDI-Codebook (Classic & Multilingual) Upgrade, Stage, Promote
+# Use Case 1 & 2: DDI-Codebook (Classic & Multilingual) Upgrade, Ingest & Undo
 # -----------------------------------------------------------------------------
 
 
 @pytest.mark.django_db
-def test_bilingual_ddic_preflight_upgrade_stage_promote_and_undo(
+def test_bilingual_ddic_preflight_upgrade_ingest_and_undo(
     bilingual_ddic_file: Path, tmp_path: Path
 ) -> None:
     out_dir = tmp_path / "out"
@@ -197,19 +194,19 @@ def test_bilingual_ddic_preflight_upgrade_stage_promote_and_undo(
     )
     assert Path(upg_jsonl["output_file"]).exists()
 
-    # 3. Stage the upgraded DDI 4.0 JSONL file
-    stage_res = stage_metadata_file(upg_jsonl["output_file"], profile="request")
-    assert stage_res["status"] == "staged"
-    import_id = stage_res["staged_import_id"]
-    assert import_id is not None
+    # 3. Direct Ingestion Plan (zero DB writes) & Apply into ReQuest core tables
+    ing_plan = plan_ingestion(upg_jsonl["output_file"], profile="request", output_dir=out_dir)
+    assert ing_plan.stage == "ingest"
+    assert ing_plan.is_ready_to_execute() is True
+    assert ing_plan.summary["planned_frequency_rows"] == 4
+    assert IngestBatch.objects.count() == 0
 
-    # 4. Plan & apply promotion
-    promo_plan = plan_promotion(import_id, output_dir=out_dir)
-    assert promo_plan.is_ready_to_execute() is True
-    promo_res = apply_promotion(promo_plan, compact=True)
-    assert promo_res["status"] == "normalized"
-    assert promo_res["created_count"] > 0
-    assert promo_res["compacted_nodes_count"] > 0
+    ing_res = apply_ingestion(ing_plan)
+    assert ing_res["status"] == "completed"
+    batch_id = ing_res["batch_id"]
+    assert batch_id is not None
+    assert ing_res["created_count"] > 0
+    assert ing_res["frequency_rows_count"] == 4
 
     # Verify ReQuest core tables & multilingual JSONB preservation
     assert StudyUnit.objects.count() >= 1
@@ -237,39 +234,40 @@ def test_bilingual_ddic_preflight_upgrade_stage_promote_and_undo(
     assert InstanceVariable.objects.count() == 2
     assert QuestionVariable.objects.count() >= 2
 
-    # Verify Datafile, DatafileVariable (sumStat) & DatafileVariableFrequency (catStat)
+    # Verify Datafile, DatafileVariable (sumStat dict) & DatafileVariableFrequency (bulk SQL rows)
     assert Datafile.objects.count() >= 1
     assert DatafileVariable.objects.count() >= 2
-    assert DatafileVariableFrequency.objects.count() >= 4
+    dfv = DatafileVariable.objects.exclude(statistics={}).first()
+    assert dfv is not None and dfv.statistics.get("valid") == 1180
+    assert DatafileVariableFrequency.objects.count() == 4
 
-    # 5. Undo promotion and verify clean rollback
-    undo_res = undo_promotion(import_id)
-    assert undo_res["status"] == "staged"
+    # 4. Undo ingestion and verify clean cascading rollback (including SQL frequencies)
+    undo_res = undo_ingestion(batch_id)
+    assert undo_res["status"] == "undone"
     assert undo_res["deleted_core_resources_count"] > 0
     assert InstanceVariable.objects.count() == 0
-    assert StagedImport.objects.get(id=import_id).status == "staged"
+    assert DatafileVariableFrequency.objects.count() == 0
+    assert IngestBatch.objects.get(id=batch_id).status == "undone"
 
 
 # -----------------------------------------------------------------------------
-# Use Case 3: DDI-Lifecycle 3.3 XML -> Stage -> Promote (InstrumentQuestion)
+# Use Case 3: DDI-Lifecycle 3.3 XML -> Direct Ingest (InstrumentQuestion)
 # -----------------------------------------------------------------------------
 
 
 @pytest.mark.django_db
-def test_ddil33_preflight_stage_promote_and_instrument_shortcuts(
-    sample_cso_xml: Path, tmp_path: Path
-) -> None:
+def test_ddil33_preflight_ingest_and_instrument_shortcuts(sample_cso_xml: Path) -> None:
     plan = run_preflight_check(sample_cso_xml)
     assert plan.summary["specification"] == "DDI-L"
     assert "quality_score" in plan.summary
     assert "quality_grade" in plan.summary
 
-    stage_res = stage_metadata_file(sample_cso_xml, profile="request", force_reload=True)
-    import_id = stage_res["staged_import_id"]
-    assert import_id is not None
-
-    promo_res = apply_promotion(import_id, auto_approve=True)
-    assert promo_res["created_count"] > 0
+    ing_res = apply_ingestion(
+        sample_cso_xml, profile="request", force_reload=True, auto_approve=True
+    )
+    batch_id = ing_res["batch_id"]
+    assert batch_id is not None
+    assert ing_res["created_count"] > 0
     assert Category.objects.count() > 0
     assert CodeList.objects.count() > 0
     assert QuestionItem.objects.count() > 0
@@ -277,12 +275,9 @@ def test_ddil33_preflight_stage_promote_and_instrument_shortcuts(
     assert StudyInstrument.objects.count() >= 1
     assert InstrumentQuestion.objects.count() > 0
 
-    # Test storage compaction on the promoted batch
-    compact_res = cleanup_staged_import(import_id=import_id, compact_only=True)
-    assert compact_res["mode"] == "compacted"
-    assert compact_res["compacted_nodes_count"] > 0
-    sample_node = StagedResourceNode.objects.filter(staged_import_id=import_id).first()
-    assert sample_node is not None and sample_node.raw_value == {"_compacted": True}
+    undo_res = undo_ingestion(batch_id)
+    assert undo_res["status"] == "undone"
+    assert InstrumentQuestion.objects.count() == 0
 
 
 # -----------------------------------------------------------------------------
@@ -299,7 +294,6 @@ def test_compare_discover_and_harmonize_with_undo(tmp_path: Path) -> None:
         identifier="study_w1",
         version="1.0.0",
         name="Wave 1",
-        label={"fr": "Vague 1"},
     )
     StudyUnit.objects.create(
         urn="urn:ddi:fr.cdsp:study_w2:1.0.0",
@@ -307,10 +301,9 @@ def test_compare_discover_and_harmonize_with_undo(tmp_path: Path) -> None:
         identifier="study_w2",
         version="1.0.0",
         name="Wave 2",
-        label={"fr": "Vague 2"},
     )
 
-    # Wave 1 has FR only; Wave 2 has FR + EN (MULTILINGUAL_OVERLAP)
+    # Wave 1 has FR + EN; Wave 2 has FR only (MULTILINGUAL_OVERLAP)
     Category.objects.create(
         urn="urn:ddi:fr.cdsp:cat_w1_yes:1.0.0",
         agency="fr.cdsp",
@@ -403,7 +396,7 @@ def test_cli_pipeline_and_subcommands(
     assert res_check.exit_code == 0
     assert "Preflight Readiness Check" in res_check.stdout
 
-    # 2. fairwddi ingest run (end-to-end with --auto-approve and --compact)
+    # 2. fairwddi ingest run (end-to-end preflight -> upgrade -> direct ingest)
     res_run = runner.invoke(
         app,
         [
@@ -413,22 +406,21 @@ def test_cli_pipeline_and_subcommands(
             "--output-dir",
             str(out_dir),
             "--auto-approve",
-            "--compact",
             "--force-reload",
         ],
     )
     assert res_run.exit_code == 0
     assert "completed" in res_run.stdout
 
-    staged = StagedImport.objects.latest("id")
+    batch = IngestBatch.objects.latest("id")
 
     # 3. fairwddi compare batch & discover
-    res_cmp = runner.invoke(app, ["compare", "batch", str(staged.id)])
+    res_cmp = runner.invoke(app, ["compare", "batch", str(batch.id)])
     assert res_cmp.exit_code == 0
     res_disc = runner.invoke(app, ["compare", "discover", "--threshold", "0.5"])
     assert res_disc.exit_code == 0
 
-    # 4. fairwddi promote undo
-    res_undo = runner.invoke(app, ["promote", "undo", str(staged.id)])
+    # 4. fairwddi ingest undo
+    res_undo = runner.invoke(app, ["ingest", "undo", str(batch.id)])
     assert res_undo.exit_code == 0
     assert "Rolled back Batch" in res_undo.stdout

@@ -347,12 +347,12 @@ def discover_candidates(
         resource_type: Optional filter ('Category', 'CodeList', 'QuestionItem',
                        'RepresentedVariable'). If None, searches across all 4 core types.
         study_urn: Optional StudyUnit URN to scope source candidates to.
-        batch_id: Optional StagedImport ID to scope source candidates to.
+        batch_id: Optional IngestBatch ID to scope source candidates to.
         query: Optional substring filter on URN or text/label.
         threshold: Minimum similarity confidence score (0.0 to 1.0, default 0.75).
         limit: Maximum number of ranked candidate pairs to return.
     """
-    from fairwddi.models import InstanceVariable, StagedResourceNode
+    from fairwddi.models import IngestBatch, InstanceVariable
 
     target_types = (
         [resource_type]
@@ -362,15 +362,10 @@ def discover_candidates(
 
     scoped_urns: set[str] | None = None
     if batch_id is not None:
-        scoped_urns = set(
-            StagedResourceNode.objects.filter(staged_import_id=batch_id)
-            .exclude(canonical_urn__isnull=True)
-            .values_list("canonical_urn", flat=True)
-        ) | set(
-            StagedResourceNode.objects.filter(staged_import_id=batch_id).values_list(
-                "raw_urn", flat=True
-            )
-        )
+        batch = IngestBatch.objects.filter(id=batch_id).first()
+        if not batch:
+            raise ValueError(f"IngestBatch #{batch_id} does not exist.")
+        scoped_urns = set(batch.created_urns or []) | set(batch.reused_urns or [])
     elif study_urn is not None:
         iv_rvs = set(
             InstanceVariable.objects.filter(datafiles__study_unit_id=study_urn)
@@ -403,18 +398,18 @@ def discover_candidates(
 
 
 def compare_batch(
-    import_id: int,
+    batch_id: int,
     threshold: float = 0.75,
     output_dir: str | Path | None = None,
 ) -> IngestPlan:
-    """Compare resources from a StagedImport batch against the bank and return a Compare Plan."""
-    from fairwddi.models import StagedImport
+    """Compare resources from an IngestBatch against the bank and return a Compare Plan."""
+    from fairwddi.models import IngestBatch
 
-    staged_import = StagedImport.objects.filter(id=import_id).first()
-    if not staged_import:
-        raise ValueError(f"StagedImport #{import_id} does not exist.")
+    batch = IngestBatch.objects.filter(id=batch_id).first()
+    if not batch:
+        raise ValueError(f"IngestBatch #{batch_id} does not exist.")
 
-    candidates = discover_candidates(batch_id=import_id, threshold=threshold, limit=500)
+    candidates = discover_candidates(batch_id=batch_id, threshold=threshold, limit=500)
     actions: list[PlanActionItem] = []
     by_match_type: dict[str, int] = {}
 
@@ -437,13 +432,13 @@ def compare_batch(
             )
         )
 
-    job_id = f"compare-batch-{import_id}-{uuid.uuid4().hex[:6]}"
+    job_id = f"compare-batch-{batch_id}-{uuid.uuid4().hex[:6]}"
     plan = IngestPlan(
         stage="compare",
         job_id=job_id,
-        source_file=staged_import.file_name,
-        source_format=staged_import.source_format,
-        staged_import_id=import_id,
+        source_file=batch.file_name,
+        source_format=batch.source_format,
+        batch_id=batch_id,
         summary={
             "total_candidates": len(candidates),
             "threshold": threshold,
@@ -456,8 +451,8 @@ def compare_batch(
     if output_dir is not None:
         out_dir = Path(output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
-        stem = Path(staged_import.file_name).stem
-        plan.to_yaml(out_dir / f"{stem}.batch{import_id}.compare.plan.yaml")
-        plan.to_markdown(out_dir / f"{stem}.batch{import_id}.compare.report.md")
+        stem = Path(batch.file_name).stem
+        plan.to_yaml(out_dir / f"{stem}.batch{batch_id}.compare.plan.yaml")
+        plan.to_markdown(out_dir / f"{stem}.batch{batch_id}.compare.report.md")
 
     return plan

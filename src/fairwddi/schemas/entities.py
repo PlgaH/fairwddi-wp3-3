@@ -550,35 +550,21 @@ class MetadataQuarantineSchema(BaseModel):
     created_at: datetime | None = None
 
 
-class StagedResourceNodeSchema(BaseModel):
-    """Schema for Stage 1 broken-down raw element node."""
-
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int | None = None
-    staged_import_id: int
-    resource_type: str
-    raw_urn: str
-    raw_value: dict[str, Any]
-    canonical_urn: str | None = None
-    status: str = "staged"
-    created_at: datetime | None = None
-
-
-class StagedImportSchema(BaseModel):
-    """Schema for file upload and batch import job."""
+class IngestBatchSchema(BaseModel):
+    """Schema for a lightweight file ingestion batch receipt."""
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int | None = None
     source_format: str
     file_name: str
+    file_sha256: str
     file_path: str | None = None
-    import_options: dict[str, Any] = Field(default_factory=dict)
-    total_resources: int = 0
-    processed_resources: int = 0
-    status: str = "staged"
-    import_task_id: str | None = None
+    status: str = "completed"
+    options: dict[str, Any] = Field(default_factory=dict)
+    created_urns: list[str] = Field(default_factory=list)
+    reused_urns: list[str] = Field(default_factory=list)
+    created_aliases: list[str] = Field(default_factory=list)
+    stats: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime | None = None
-    processed_at: datetime | None = None
-    nodes: list[StagedResourceNodeSchema] = Field(default_factory=list)
+    updated_at: datetime | None = None

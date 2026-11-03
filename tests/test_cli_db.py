@@ -68,7 +68,7 @@ def test_cli_db_export_ddl_stdout() -> None:
     assert "CREATE TABLE IF NOT EXISTS request_ddi_questionitem" in result.stdout
     assert "CREATE TABLE IF NOT EXISTS request_ddi_codelist" in result.stdout
     assert "CREATE TABLE IF NOT EXISTS request_ddi_studyunit" in result.stdout
-    assert "CREATE TABLE IF NOT EXISTS request_ddi_stagedresourcenode" in result.stdout
+    assert "CREATE TABLE IF NOT EXISTS request_ddi_ingestbatch" in result.stdout
 
 
 def test_cli_db_export_ddl_file() -> None:

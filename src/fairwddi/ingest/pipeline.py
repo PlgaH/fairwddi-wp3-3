@@ -6,9 +6,8 @@ from pathlib import Path
 from typing import Any
 
 from fairwddi.ingest.harmonizer import apply_harmonization, plan_harmonization
+from fairwddi.ingest.loader import apply_ingestion, plan_ingestion
 from fairwddi.ingest.preflight import run_preflight_check, upgrade_ddic_to_ddil
-from fairwddi.ingest.promoter import apply_promotion, plan_promotion
-from fairwddi.ingest.staging import stage_metadata_file
 
 
 def run_ingestion_pipeline(
@@ -17,9 +16,8 @@ def run_ingestion_pipeline(
     output_dir: str | Path | None = None,
     agency: str | None = None,
     id_strategy: str = "hierarchical",
-    stage_only: bool = False,
+    plan_only: bool = False,
     harmonize: bool = False,
-    compact_after_promote: bool = False,
     force_reload: bool = False,
     auto_approve: bool = False,
 ) -> dict[str, Any]:
@@ -27,9 +25,10 @@ def run_ingestion_pipeline(
 
     Stages:
     1. Preflight check (and explicit DDI-C -> DDI-L 4.0 upgrade on disk if input is DDI-C).
-    2. Stage into StagedImport + StagedResourceNode.
-    3. Plan & apply core promotion (unless stage_only=True).
-    4. Optional comparison & harmonization (when harmonize=True).
+    2. Direct Ingestion Plan (`plan_ingestion`) with zero DB writes.
+    3. Direct Ingestion Apply (`apply_ingestion`) into ReQuest core tables + `IngestBatch` receipt
+       (unless `plan_only=True`).
+    4. Optional comparison & harmonization (when `harmonize=True`).
     """
     src_path = Path(file_path).resolve()
     preflight_plan = run_preflight_check(
@@ -49,7 +48,7 @@ def run_ingestion_pipeline(
             "preflight_plan": preflight_plan,
         }
 
-    target_stage_file = src_path
+    target_ingest_file = src_path
     upgrade_result: dict[str, Any] | None = None
     if preflight_plan.summary.get("specification") == "DDI-C":
         upgrade_out = (
@@ -63,48 +62,47 @@ def run_ingestion_pipeline(
             id_strategy=id_strategy,
             harmonize_codes=True,
         )
-        target_stage_file = Path(upgrade_result["output_file"])
+        target_ingest_file = Path(upgrade_result["output_file"])
 
-    stage_result = stage_metadata_file(
-        file_path=target_stage_file,
+    ingest_plan = plan_ingestion(
+        file_path=target_ingest_file,
+        profile=profile,
+        output_dir=output_dir,
+        force_reload=force_reload,
+        auto_approve=auto_approve,
+    )
+    if plan_only:
+        return {
+            "status": "planned_only",
+            "stage": "ingest",
+            "job_id": ingest_plan.job_id,
+            "upgrade_result": upgrade_result,
+            "ingest_plan": ingest_plan,
+        }
+
+    if not ingest_plan.is_ready_to_execute(auto_approve=auto_approve):
+        return {
+            "status": "halted_at_ingest_plan",
+            "stage": "ingest",
+            "job_id": ingest_plan.job_id,
+            "pending_review_count": ingest_plan.pending_review_count,
+            "error_count": ingest_plan.error_count,
+            "upgrade_result": upgrade_result,
+            "ingest_plan": ingest_plan,
+        }
+
+    ingest_result = apply_ingestion(
+        ingest_plan,
         profile=profile,
         force_reload=force_reload,
-    )
-    import_id = stage_result.get("staged_import_id")
-    if stage_only or import_id is None:
-        return {
-            "status": "staged_only",
-            "stage": "stage",
-            "staged_import_id": import_id,
-            "upgrade_result": upgrade_result,
-            "stage_result": stage_result,
-        }
-
-    promo_plan = plan_promotion(
-        import_id=import_id,
-        output_dir=output_dir,
         auto_approve=auto_approve,
     )
-    if not promo_plan.is_ready_to_execute(auto_approve=auto_approve):
-        return {
-            "status": "halted_at_promote_plan",
-            "stage": "promote",
-            "staged_import_id": import_id,
-            "job_id": promo_plan.job_id,
-            "pending_review_count": promo_plan.pending_review_count,
-            "promote_plan": promo_plan,
-        }
-
-    promo_result = apply_promotion(
-        promo_plan,
-        auto_approve=auto_approve,
-        compact=compact_after_promote,
-    )
+    batch_id = ingest_result.get("batch_id")
 
     harmonize_result: dict[str, Any] | None = None
-    if harmonize:
+    if harmonize and batch_id is not None:
         harm_plan = plan_harmonization(
-            import_id=import_id,
+            batch_id=batch_id,
             output_dir=output_dir,
             auto_approve=auto_approve,
         )
@@ -114,16 +112,15 @@ def run_ingestion_pipeline(
             return {
                 "status": "halted_at_harmonize_plan",
                 "stage": "harmonize",
-                "staged_import_id": import_id,
-                "promote_result": promo_result,
+                "batch_id": batch_id,
+                "ingest_result": ingest_result,
                 "harmonize_plan": harm_plan,
             }
 
     return {
         "status": "completed",
-        "staged_import_id": import_id,
+        "batch_id": batch_id,
         "upgrade_result": upgrade_result,
-        "stage_result": stage_result,
-        "promote_result": promo_result,
+        "ingest_result": ingest_result,
         "harmonize_result": harmonize_result,
     }

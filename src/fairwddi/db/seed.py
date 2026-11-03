@@ -31,6 +31,7 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         EventLog,
         Frequency,
         Group,
+        IngestBatch,
         InstanceVariable,
         InstanceVariableScheme,
         Instrument,
@@ -42,8 +43,6 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         RepresentedVariable,
         RepresentedVariableScheme,
         SemanticRelationship,
-        StagedImport,
-        StagedResourceNode,
         StudyInstrument,
         StudyUnit,
         URNAlias,
@@ -666,29 +665,18 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         },
     )
 
-    staged_import, _ = StagedImport.objects.get_or_create(
+    IngestBatch.objects.get_or_create(
         file_name="ddi_l_4_closer_sample.json",
         defaults={
             "source_format": "ddi-l:4.0:json",
-            "status": "staged",
-            "import_options": {
+            "file_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "status": "completed",
+            "options": {
                 "source_system": "CLOSER",
                 "target_agency": agency,
             },
-            "total_resources": 1,
-            "processed_resources": 0,
-        },
-    )
-
-    StagedResourceNode.objects.get_or_create(
-        staged_import=staged_import,
-        raw_urn="urn:closer:raw:item-001",
-        defaults={
-            "resource_type": "QuestionItem",
-            "raw_value": {
-                "question_text": [{"lang": "en", "value": "Are you interested in politics?"}]
-            },
-            "status": "staged",
+            "created_urns": [rv_interest.urn],
+            "stats": {"represented_variables": 1},
         },
     )
 
@@ -776,7 +764,7 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
         "study_instruments": StudyInstrument.objects.count(),
         "urn_registries": UrnRegistry.objects.count(),
         "urn_aliases": URNAlias.objects.count(),
-        "staged_nodes": StagedResourceNode.objects.count(),
+        "ingest_batches": IngestBatch.objects.count(),
         "event_logs": EventLog.objects.count(),
         "semantic_relationships": SemanticRelationship.objects.count(),
     }

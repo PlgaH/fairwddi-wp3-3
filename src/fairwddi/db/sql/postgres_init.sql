@@ -421,33 +421,23 @@ CREATE TABLE IF NOT EXISTS request_ddi_metadataquarantine (
 
 CREATE INDEX IF NOT EXISTS req_ddi_mq_resolution_idx ON request_ddi_metadataquarantine (resolution);
 
-CREATE TABLE IF NOT EXISTS request_ddi_stagedimport (
+CREATE TABLE IF NOT EXISTS request_ddi_ingestbatch (
     id BIGSERIAL PRIMARY KEY,
     source_format VARCHAR(64) NOT NULL,
     file_name VARCHAR(512) NOT NULL,
-    file_path VARCHAR(512),
-    import_options JSONB NOT NULL DEFAULT '{}'::jsonb,
-    total_resources INT NOT NULL DEFAULT 0,
-    processed_resources INT NOT NULL DEFAULT 0,
-    status VARCHAR(32) NOT NULL DEFAULT 'staged',
-    import_task_id VARCHAR(255),
+    file_sha256 VARCHAR(64) NOT NULL,
+    file_path VARCHAR(1024),
+    status VARCHAR(32) NOT NULL DEFAULT 'completed',
+    options JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_urns JSONB NOT NULL DEFAULT '[]'::jsonb,
+    reused_urns JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_aliases JSONB NOT NULL DEFAULT '[]'::jsonb,
+    stats JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    processed_at TIMESTAMPTZ
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS request_ddi_stagedresourcenode (
-    id BIGSERIAL PRIMARY KEY,
-    staged_import_id BIGINT NOT NULL REFERENCES request_ddi_stagedimport(id) ON DELETE CASCADE,
-    resource_type VARCHAR(64) NOT NULL,
-    raw_urn VARCHAR(512) NOT NULL,
-    raw_value JSONB NOT NULL,
-    canonical_urn VARCHAR(512) REFERENCES request_ddi_urnregistry(urn) ON DELETE SET NULL,
-    status VARCHAR(32) NOT NULL DEFAULT 'staged',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS req_ddi_srn_res_type_idx ON request_ddi_stagedresourcenode (resource_type);
-CREATE INDEX IF NOT EXISTS req_ddi_srn_raw_urn_idx ON request_ddi_stagedresourcenode (raw_urn);
-CREATE INDEX IF NOT EXISTS req_ddi_srn_canon_urn_idx ON request_ddi_stagedresourcenode (canonical_urn);
+CREATE INDEX IF NOT EXISTS req_ddi_ib_sha256_idx ON request_ddi_ingestbatch (file_sha256);
+CREATE INDEX IF NOT EXISTS req_ddi_ib_status_idx ON request_ddi_ingestbatch (status);
 
 COMMIT;

@@ -19,6 +19,7 @@ from fairwddi.schemas import (
     FrequencySchema,
     GroupReferenceSchema,
     GroupSchema,
+    IngestBatchSchema,
     InstanceVariableSchema,
     InstanceVariableSchemeSchema,
     InstrumentQuestionSchema,
@@ -32,8 +33,6 @@ from fairwddi.schemas import (
     RepresentedVariableSchema,
     RepresentedVariableSchemeSchema,
     SemanticRelationshipSchema,
-    StagedImportSchema,
-    StagedResourceNodeSchema,
     StudyInstrumentSchema,
     StudyUnitSchema,
     StudyUnitVariableSchema,
@@ -429,25 +428,18 @@ def test_domain_entity_schemas() -> None:
     assert event_schema.event_type == "indexed"
     assert event_schema.event_data["cluster"] == "node-1"
 
-    import_schema = StagedImportSchema(
-        source_format="ddi_l_3.3",
+    batch_schema = IngestBatchSchema(
+        source_format="ddi-l:3.3:xml",
         file_name="sample.xml",
-        import_options={"agency": "fr.sciencespo"},
-        total_resources=5,
+        file_sha256="b" * 64,
+        options={"agency": "fr.sciencespo"},
+        created_urns=["urn:ddi:fr.sciencespo:qi-001:1.0.0"],
+        stats={"QuestionItem": 5},
     )
-    assert import_schema.source_format == "ddi_l_3.3"
-    assert import_schema.import_options["agency"] == "fr.sciencespo"
-    assert import_schema.total_resources == 5
-
-    staged_node = StagedResourceNodeSchema(
-        staged_import_id=1,
-        resource_type="QuestionItem",
-        raw_urn="raw:qstn:001",
-        raw_value={"question_text": [{"lang": "fr", "value": "Test question"}]},
-    )
-    assert staged_node.raw_urn == "raw:qstn:001"
-    assert staged_node.staged_import_id == 1
-    assert staged_node.status == "staged"
+    assert batch_schema.source_format == "ddi-l:3.3:xml"
+    assert batch_schema.status == "completed"
+    assert batch_schema.options["agency"] == "fr.sciencespo"
+    assert batch_schema.stats["QuestionItem"] == 5
 
 
 def test_schema_urn_helpers() -> None:

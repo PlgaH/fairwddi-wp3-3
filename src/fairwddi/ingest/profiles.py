@@ -1,4 +1,4 @@
-"""Import profile definitions and YAML/JSON loader for FAIRwDDI.
+"""Ingestion profile definitions and YAML/JSON loader for FAIRwDDI.
 
 Governs resource filtering, referential integrity traversal, and duplicate/drift strategies.
 """
@@ -14,11 +14,11 @@ from pydantic import BaseModel, Field
 
 
 class ImportStrategies(BaseModel):
-    """Collision and duplicate resolution strategies for an import session."""
+    """Collision and duplicate resolution strategies for an ingestion session."""
 
     on_duplicate_file: Literal["skip", "force_reload", "fail"] = Field(
         default="skip",
-        description="Action when exact same file (matching SHA-256) is imported again.",
+        description="Action when exact same file (matching SHA-256) is ingested again.",
     )
     on_existing_resource: Literal["insert_new_only", "fail", "replace"] = Field(
         default="insert_new_only",
@@ -31,7 +31,7 @@ class ImportStrategies(BaseModel):
 
 
 class ImportProfile(BaseModel):
-    """Configuration profile defining resource filtering and collision rules for metadata import."""
+    """Configuration profile defining resource filtering and collision rules for ingestion."""
 
     name: str = Field(..., description="Unique profile identifier.")
     description: str = Field(
@@ -39,11 +39,11 @@ class ImportProfile(BaseModel):
     )
     include_types: list[str] = Field(
         default_factory=list,
-        description="List of target resource types to stage. If empty, all types are included.",
+        description="List of target resource types to ingest. If empty, all types are included.",
     )
     exclude_types: list[str] = Field(
         default_factory=list,
-        description="Hard blocklist of resource types to never stage, even if referenced.",
+        description="Hard blocklist of resource types to never ingest, even if referenced.",
     )
     include_referenced_resources: bool = Field(
         default=True,
@@ -55,27 +55,15 @@ class ImportProfile(BaseModel):
     )
 
     def should_include(self, resource_type: str, is_referenced: bool = False) -> bool:
-        """Evaluate if a resource type should be included for staging.
-
-        Precedence rules:
-        1. If in exclude_types: Always False (hard block).
-        2. If include_types is empty: True (include all).
-        3. If in include_types: True.
-        4. If is_referenced and include_referenced_resources: True.
-        5. Otherwise: False.
-        """
+        """Evaluate if a resource type should be included for ingestion."""
         if resource_type in self.exclude_types:
             return False
-
         if not self.include_types:
             return True
-
         if resource_type in self.include_types:
             return True
-
         if is_referenced and self.include_referenced_resources:
             return True
-
         return False
 
 
@@ -101,15 +89,7 @@ def _find_profile_file(name_or_path: str | Path) -> Path | None:
 
 
 def load_profile(name_or_path: str | Path | None = None) -> ImportProfile:
-    """Load an ImportProfile from a YAML/JSON file or preset name.
-
-    Args:
-        name_or_path: Profile preset name (e.g. 'request', 'all_ddi') or file path.
-                      Defaults to 'request'.
-
-    Returns:
-        Configured ImportProfile instance.
-    """
+    """Load an ImportProfile from a YAML/JSON file or preset name (default: 'request')."""
     target = name_or_path or "request"
     profile_path = _find_profile_file(target)
 
@@ -159,20 +139,6 @@ def load_profile(name_or_path: str | Path | None = None) -> ImportProfile:
                 "ConceptualVariableScheme",
                 "VariableGroup",
                 "VariableScheme",
-                "Concept",
-                "ConceptGroup",
-                "ConceptScheme",
-                "ConceptualComponent",
-                "Universe",
-                "UniverseScheme",
-                "StudyUnit",
-                "Group",
-                "DataCollection",
-                "DataRelationship",
-                "Organization",
-                "OrganizationScheme",
-            ],
-            exclude_types=[
                 "Instrument",
                 "InstrumentScheme",
                 "ControlConstructScheme",
@@ -180,10 +146,24 @@ def load_profile(name_or_path: str | Path | None = None) -> ImportProfile:
                 "IfThenElse",
                 "Loop",
                 "ComputationItem",
+                "Concept",
+                "ConceptGroup",
+                "ConceptScheme",
+                "ConceptualComponent",
+                "Universe",
+                "UniverseScheme",
+                "StudyUnit",
+                "PhysicalInstance",
+                "Group",
+                "DataCollection",
+                "DataRelationship",
+                "Organization",
+                "OrganizationScheme",
+            ],
+            exclude_types=[
                 "Archive",
                 "DDIInstance",
                 "ResourcePackage",
-                "PhysicalInstance",
                 "PhysicalDataSet",
                 "Methodology",
                 "ProcessingEvent",

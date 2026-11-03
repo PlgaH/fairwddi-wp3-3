@@ -1,7 +1,7 @@
 """Review-gated Plan and Report models for the FAIRwDDI multi-stage ingestion pipeline.
 
 Modeled after the dartfx-ddi i18n MergePlan & ReviewGate pattern, every stage
-(preflight, stage, promote, compare, harmonize) can emit a deterministic YAML plan
+(preflight, ingest, compare, harmonize) can emit a deterministic YAML plan
 and a human-readable Markdown report.
 """
 
@@ -52,7 +52,7 @@ class PlanActionItem(BaseModel):
     """Planned or executed operation on a resource or pair of resources."""
 
     id: str
-    stage: Literal["preflight", "stage", "promote", "compare", "harmonize"]
+    stage: Literal["preflight", "ingest", "compare", "harmonize"]
     action: Literal[
         "create",
         "reuse",
@@ -79,15 +79,16 @@ class IngestPlan(BaseModel):
     """Serializable, review-gated execution plan and report for any ingestion stage."""
 
     plan_version: str = "1.0"
-    stage: Literal["preflight", "stage", "promote", "compare", "harmonize"]
+    stage: Literal["preflight", "ingest", "compare", "harmonize"]
     job_id: str
     created_at: str = Field(
         default_factory=lambda: datetime.now(UTC).isoformat(),
     )
     source_file: str | None = None
+    source_path: str | None = None
     file_sha256: str | None = None
     source_format: str | None = None
-    staged_import_id: int | None = None
+    batch_id: int | None = None
     profile: str = "request"
     summary: dict[str, Any] = Field(default_factory=dict)
     review_gate: ReviewGate = Field(default_factory=ReviewGate)
@@ -182,8 +183,8 @@ class IngestPlan(BaseModel):
             lines.append(f"- **Detected Format:** `{self.source_format}`")
         if self.file_sha256:
             lines.append(f"- **File SHA-256:** `{self.file_sha256}`")
-        if self.staged_import_id is not None:
-            lines.append(f"- **Staged Import Batch ID:** `#{self.staged_import_id}`")
+        if self.batch_id is not None:
+            lines.append(f"- **Ingest Batch ID:** `#{self.batch_id}`")
 
         if self.summary:
             lines.extend(["", "## Summary Metrics", "", "| Metric | Value |", "| :--- | :--- |"])

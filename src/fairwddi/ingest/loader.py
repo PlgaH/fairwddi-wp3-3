@@ -1,15 +1,9 @@
-"""Stage 2b (Promotion & Undo): Promote staged DDI resources into ReQuest core tables.
+"""Stage 2 (Direct Ingestion & Undo): Stream DDI files directly into ReQuest core tables.
 
-Handles:
-- Deterministic URN parsing and normalization
-- Multi-algorithm content hash computation
-- Duplicate and content-drift detection against UrnRegistry & URNAlias
-- ReQuest model shortcut resolution:
-  * Variable -> RepresentedVariable + InstanceVariable
-  * QuestionItem <-> RepresentedVariable (via QuestionVariable)
-  * Instrument -> Sequence -> QuestionConstruct -> QuestionItem (InstrumentQuestion/StudyInstrument)
-  * PhysicalInstance / Variable stats -> Datafile + DatafileVariable + DatafileVariableFrequency
-- Transactional batch rollback (`undo_promotion`) via EventLog provenance
+Replaces intermediate database staging (`StagedResourceNode`) with direct file-to-core-tables
+streaming, review-gated YAML plans (`plan_ingestion`), bulk SQL frequency insertion
+(`DatafileVariableFrequency`), and lightweight `IngestBatch` receipts for duplicate-file
+prevention and 1-click rollback (`undo_ingestion`).
 """
 
 from __future__ import annotations
@@ -23,8 +17,10 @@ from typing import Any
 
 from django.db import transaction
 
+from fairwddi.ingest.detector import compute_file_sha256, detect_metadata_format
 from fairwddi.ingest.plan import IngestPlan, PlanActionItem, PlanIssue, ReviewGate
-from fairwddi.ingest.staging import cleanup_staged_import
+from fairwddi.ingest.profiles import ImportProfile, load_profile
+from fairwddi.ingest.streaming import RawResourceNode, stream_resources
 from fairwddi.utils.normalize_string import normalize_string
 
 
@@ -47,7 +43,6 @@ def parse_ddi_urn(urn: str, default_agency: str = "fr.cdsp") -> tuple[str, str, 
             version = "1.0.0"
             return f"urn:ddi:{agency}:{identifier}:{version}", agency, identifier, version
 
-    # Fallback synthesis for non-standard URN strings
     safe_id = re.sub(r"[^A-Za-z0-9_.\-]", "_", cleaned) or f"item_{uuid.uuid4().hex[:8]}"
     canonical = f"urn:ddi:{default_agency}:{safe_id}:1.0.0"
     return canonical, default_agency, safe_id, "1.0.0"
@@ -77,11 +72,11 @@ def _extract_multilingual(val: Any, default_lang: str = "en") -> dict[str, str] 
                 or node.get("lang")
                 or node.get("@lang")
                 or node.get("@xml:lang")
+                or node.get("xml:lang")
                 or current_lang
             )
             lang = str(lang).split("-")[0].lower() if lang else default_lang
 
-            # Direct value keys
             for k in (
                 "value",
                 "@value",
@@ -98,7 +93,6 @@ def _extract_multilingual(val: Any, default_lang: str = "en") -> dict[str, str] 
                         result[lang] = cleaned
                     return
 
-            # Nested text structures (e.g. DDI 4 DynamicText / LiteralText or DDI 3.3 String)
             for k in (
                 "String",
                 "string",
@@ -133,7 +127,7 @@ def _extract_first_string(val: Any) -> str | None:
     if ml:
         return next(iter(ml.values()))
     if isinstance(val, str) and val.strip():
-        return normalize_string(val)
+        return val.strip()
     if isinstance(val, dict):
         for k in (
             "StringValue",
@@ -232,16 +226,181 @@ def compute_resource_hashes(
     return hashes
 
 
-def _normalize_staged_node(
+def _extract_variable_stats_and_frequencies(
+    raw_value: dict[str, Any], uaps: dict[str, str]
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Extract summary statistics dict and category frequency rows from DDI-L 4 or DDI-C."""
+    summary_stats: dict[str, Any] = {}
+    frequencies: list[dict[str, Any]] = []
+
+    # 1. DDI-L 4 user attributes (from upgraded DDI-C or DDI 4)
+    if "ddi:summary_statistics" in uaps:
+        try:
+            parsed_stats = json.loads(uaps["ddi:summary_statistics"])
+            if isinstance(parsed_stats, dict):
+                summary_stats.update(parsed_stats)
+            elif isinstance(parsed_stats, list):
+                for s in parsed_stats:
+                    if isinstance(s, dict) and s.get("type"):
+                        val = s.get("value")
+                        try:
+                            summary_stats[str(s["type"])] = float(val) if val is not None else None
+                        except (ValueError, TypeError):
+                            summary_stats[str(s["type"])] = val
+        except Exception:
+            pass
+
+    if "ddi:category_statistics" in uaps:
+        try:
+            cat_stats = json.loads(uaps["ddi:category_statistics"])
+            if isinstance(cat_stats, list):
+                for cs in cat_stats:
+                    if isinstance(cs, dict) and cs.get("type") in ("freq", None):
+                        try:
+                            freq_val = float(cs.get("value", 0.0))
+                        except (ValueError, TypeError):
+                            continue
+                        frequencies.append(
+                            {
+                                "code_value": str(cs.get("code_value", ""))[:128],
+                                "frequency": freq_val,
+                                "weight": cs.get("weight_var"),
+                            }
+                        )
+        except Exception:
+            pass
+
+    # 2. Direct DDI-Codebook inline `sumStat` and `catgry.catStat`
+    if not summary_stats and "sumStat" in raw_value:
+        raw_sums = raw_value["sumStat"]
+        if isinstance(raw_sums, dict):
+            raw_sums = [raw_sums]
+        for s in raw_sums if isinstance(raw_sums, list) else []:
+            if isinstance(s, dict):
+                s_type = s.get("@type") or s.get("type")
+                s_val = s.get("content") or s.get("#text")
+                if s_type and s_val is not None:
+                    try:
+                        summary_stats[str(s_type)] = float(s_val)
+                    except (ValueError, TypeError):
+                        summary_stats[str(s_type)] = s_val
+
+    if not frequencies and "catgry" in raw_value:
+        raw_cats = raw_value["catgry"]
+        if isinstance(raw_cats, dict):
+            raw_cats = [raw_cats]
+        for cat in raw_cats if isinstance(raw_cats, list) else []:
+            if not isinstance(cat, dict):
+                continue
+            c_val_raw = cat.get("catValu")
+            c_val = _extract_first_string(c_val_raw) or ""
+            cat_stats = cat.get("catStat") or []
+            if isinstance(cat_stats, dict):
+                cat_stats = [cat_stats]
+            for cs in cat_stats if isinstance(cat_stats, list) else []:
+                if isinstance(cs, dict):
+                    cs_type = cs.get("@type") or cs.get("type") or "freq"
+                    if cs_type == "freq":
+                        raw_f = cs.get("content") or cs.get("#text")
+                        if raw_f is not None:
+                            try:
+                                frequencies.append(
+                                    {
+                                        "code_value": str(c_val)[:128],
+                                        "frequency": float(raw_f),
+                                        "weight": cs.get("@wgtd") or cs.get("wgt-var"),
+                                    }
+                                )
+                            except (ValueError, TypeError):
+                                pass
+
+    return summary_stats, frequencies
+
+
+def _extract_ddil33_variable_statistics(
+    raw_value: dict[str, Any],
+) -> tuple[str | None, dict[str, Any], list[dict[str, Any]]]:
+    """Parse a DDI-L 3.3 `VariableStatistics` element into (var_urn, summary_dict, freq_list)."""
+    var_ref_urn = _extract_ref_urn(
+        raw_value.get("VariableReference") or raw_value.get("variable_reference")
+    )
+    if var_ref_urn:
+        var_ref_urn = parse_ddi_urn(var_ref_urn)[0]
+
+    summary_stats: dict[str, Any] = {}
+    frequencies: list[dict[str, Any]] = []
+
+    sum_items = raw_value.get("SummaryStatistic") or raw_value.get("summary_statistic") or []
+    if isinstance(sum_items, dict):
+        sum_items = [sum_items]
+    for s in sum_items if isinstance(sum_items, list) else []:
+        if isinstance(s, dict):
+            s_type = _extract_first_string(
+                s.get("TypeOfSummaryStatistic") or s.get("type_of_summary_statistic")
+            )
+            stat_entry = s.get("Statistic") or s.get("statistic") or s
+            s_val = _extract_first_string(stat_entry)
+            if s_type and s_val is not None:
+                try:
+                    summary_stats[s_type] = float(s_val)
+                except (ValueError, TypeError):
+                    summary_stats[s_type] = s_val
+
+    cat_items = (
+        raw_value.get("UnfilteredCategoryStatistics")
+        or raw_value.get("FilteredCategoryStatistics")
+        or raw_value.get("CategoryStatistics")
+        or []
+    )
+    if isinstance(cat_items, dict):
+        cat_items = [cat_items]
+    for block in cat_items if isinstance(cat_items, list) else []:
+        if not isinstance(block, dict):
+            continue
+        inner = block.get("StatisticsCategory") or block.get("CategoryStatistic") or [block]
+        if isinstance(inner, dict):
+            inner = [inner]
+        for entry in inner if isinstance(inner, list) else []:
+            if not isinstance(entry, dict):
+                continue
+            code_val = _extract_first_string(entry.get("CategoryValue") or entry.get("CodeValue"))
+            cs_list = entry.get("CategoryStatistic") or [entry]
+            if isinstance(cs_list, dict):
+                cs_list = [cs_list]
+            for cs in cs_list if isinstance(cs_list, list) else []:
+                if not isinstance(cs, dict):
+                    continue
+                cs_type = _extract_first_string(
+                    cs.get("TypeOfCategoryStatistic") or cs.get("type_of_category_statistic")
+                )
+                if cs_type and "freq" not in cs_type.lower() and "count" not in cs_type.lower():
+                    continue
+                stat_node = cs.get("Statistic") or cs.get("Value") or cs
+                f_str = _extract_first_string(stat_node)
+                if code_val is not None and f_str is not None:
+                    try:
+                        frequencies.append(
+                            {
+                                "code_value": str(code_val)[:128],
+                                "frequency": float(f_str),
+                                "weight": None,
+                            }
+                        )
+                    except (ValueError, TypeError):
+                        pass
+
+    return var_ref_urn, summary_stats, frequencies
+
+
+def _normalize_node(
     resource_type: str,
     raw_urn: str,
     raw_value: dict[str, Any],
 ) -> dict[str, Any]:
-    """Extract normalized fields for a staged resource node regardless of DDI 4/3.3/2.5 origin."""
+    """Extract normalized fields for an incoming resource node across DDI 4/3.3/2.5."""
     canonical_urn, agency, identifier, version = parse_ddi_urn(raw_urn)
     uaps = _extract_user_attributes(raw_value)
 
-    # Extract name & label (supporting snake_case DDI 4 dicts and PascalCase XML dicts)
     name_ml = (
         _extract_multilingual(raw_value.get("VariableName") or raw_value.get("variable_name"))
         or _extract_multilingual(
@@ -282,7 +441,6 @@ def _normalize_staged_node(
         raw_value.get("description") or raw_value.get("Description") or raw_value.get("txt")
     )
 
-    # Category from DDI-C raw wrapper
     if (
         resource_type == "Category"
         and "category" in raw_value
@@ -299,7 +457,6 @@ def _normalize_staged_node(
             cat_inner.get("description") or cat_inner.get("Description") or cat_inner.get("txt")
         )
 
-    # QuestionItem specifics
     question_text_ml = None
     interviewer_instr_ml = None
     if resource_type == "QuestionItem":
@@ -314,7 +471,6 @@ def _normalize_staged_node(
             except Exception:
                 interviewer_instr_ml = {"en": uaps["ddi:interviewer_instructions"]}
 
-    # CodeList codes
     codes_list: list[dict[str, Any]] = []
     if resource_type == "CodeList":
         raw_codes = raw_value.get("Code") or raw_value.get("code") or []
@@ -337,7 +493,6 @@ def _normalize_staged_node(
                     "is_missing": False,
                 }
             )
-        # DDI-C raw wrapper fallback
         if (
             not codes_list
             and "categories" in raw_value
@@ -357,11 +512,13 @@ def _normalize_staged_node(
                     }
                 )
 
-    # Variable specifics
     codelist_urn = None
     question_urns: list[str] = []
     concept_urn = None
     value_rep: dict[str, Any] | None = None
+    summary_stats: dict[str, Any] = {}
+    frequencies: list[dict[str, Any]] = []
+
     if resource_type in ("Variable", "RepresentedVariable", "InstanceVariable"):
         var_rep = raw_value.get("VariableRepresentation") or raw_value.get("Representation") or {}
         if isinstance(var_rep, dict):
@@ -374,9 +531,6 @@ def _normalize_staged_node(
                 )
                 if not codelist_urn:
                     value_rep = val_rep_inner
-        if not codelist_urn and "catgry" in raw_value:
-            # DDI-C raw variable
-            pass
         if codelist_urn:
             codelist_urn = parse_ddi_urn(codelist_urn)[0]
 
@@ -385,8 +539,7 @@ def _normalize_staged_node(
         )
         question_urns = [parse_ddi_urn(u)[0] for u in q_refs]
         if not question_urns and "qstn" in raw_value:
-            qstn_data = raw_value["qstn"]
-            question_text_ml = _extract_multilingual(qstn_data)
+            question_text_ml = _extract_multilingual(raw_value["qstn"])
 
         c_ref = _extract_ref_urn(
             raw_value.get("ConceptReference") or raw_value.get("ConceptualVariableReference")
@@ -394,7 +547,8 @@ def _normalize_staged_node(
         if c_ref:
             concept_urn = parse_ddi_urn(c_ref)[0]
 
-    # StudyUnit specifics
+        summary_stats, frequencies = _extract_variable_stats_and_frequencies(raw_value, uaps)
+
     citation_ml = None
     abstract_ml = None
     if resource_type == "StudyUnit":
@@ -444,6 +598,8 @@ def _normalize_staged_node(
         "question_urns": question_urns,
         "concept_urn": concept_urn,
         "value_representation": value_rep,
+        "summary_stats": summary_stats,
+        "frequencies": frequencies,
         "citation": citation_ml,
         "abstract": abstract_ml,
         "user_attributes": uaps,
@@ -451,8 +607,7 @@ def _normalize_staged_node(
     }
 
 
-# Resource types that map directly to ReQuest database tables
-PROMOTABLE_RESOURCE_TYPES = {
+CORE_RESOURCE_TYPES = {
     "CategoryScheme",
     "Category",
     "CodeListScheme",
@@ -543,19 +698,37 @@ def _get_existing_content_hash(urn: str) -> str | None:
     return None
 
 
-def plan_promotion(
-    import_id: int,
+def _find_active_batch_by_sha256(file_sha256: str) -> Any | None:
+    from fairwddi.models import IngestBatch
+
+    return (
+        IngestBatch.objects.filter(file_sha256=file_sha256)
+        .exclude(status__in=["failed", "undone"])
+        .order_by("-id")
+        .first()
+    )
+
+
+def plan_ingestion(
+    file_path: str | Path,
+    profile: str | Path | ImportProfile = "request",
     output_dir: str | Path | None = None,
+    force_reload: bool = False,
     auto_approve: bool = False,
 ) -> IngestPlan:
-    """Build a review-gated Promotion Plan (`IngestPlan(stage='promote')`) for a staged batch."""
-    from fairwddi.models import StagedImport, StagedResourceNode, UrnRegistry
+    """Stream a metadata file in memory and build a review-gated Ingestion Plan (zero DB writes)."""
+    from fairwddi.models import UrnRegistry
 
-    staged_import = StagedImport.objects.filter(id=import_id).first()
-    if not staged_import:
-        raise ValueError(f"StagedImport #{import_id} does not exist.")
+    path = Path(file_path).resolve()
+    if not path.exists():
+        raise FileNotFoundError(f"Metadata file not found: {path}")
 
-    nodes = list(StagedResourceNode.objects.filter(staged_import=staged_import).order_by("id"))
+    resolved_profile = profile if isinstance(profile, ImportProfile) else load_profile(profile)
+    fmt = detect_metadata_format(path)
+    file_sha256 = compute_file_sha256(path)
+    existing_batch = None if force_reload else _find_active_batch_by_sha256(file_sha256)
+
+    nodes = list(stream_resources(path, resolved_profile, format_info=fmt))
     existing_urns = set(UrnRegistry.objects.values_list("urn", flat=True))
 
     actions: list[PlanActionItem] = []
@@ -567,16 +740,41 @@ def plan_promotion(
         "quarantine": 0,
         "skip": 0,
     }
+    planned_frequency_rows = 0
+    planned_summary_stat_vars = 0
+
+    if existing_batch is not None:
+        issues.append(
+            PlanIssue(
+                severity="warning",
+                code="ING-DUP-001",
+                message=(
+                    f"File with identical SHA-256 was already ingested in "
+                    f"IngestBatch #{existing_batch.id}. Pass --force-reload to re-ingest."
+                ),
+                requires_review=True,
+            )
+        )
 
     for idx, node in enumerate(nodes, start=1):
         r_type = node.resource_type
-        if r_type not in PROMOTABLE_RESOURCE_TYPES:
+        if r_type == "VariableStatistics":
+            _, s_dict, f_list = _extract_ddil33_variable_statistics(node.raw_value)
+            if s_dict:
+                planned_summary_stat_vars += 1
+            planned_frequency_rows += len(f_list)
+            continue
+
+        if r_type not in CORE_RESOURCE_TYPES:
             action_counts["skip"] += 1
             continue
 
-        norm = _normalize_staged_node(r_type, node.raw_urn, node.raw_value)
+        norm = _normalize_node(r_type, node.raw_urn, node.raw_value)
         c_urn = norm["canonical_urn"]
         c_hash = norm["hashes"]["content"]
+        if norm["summary_stats"]:
+            planned_summary_stat_vars += 1
+        planned_frequency_rows += len(norm["frequencies"])
 
         if c_urn in existing_urns:
             existing_hash = _get_existing_content_hash(c_urn)
@@ -596,11 +794,11 @@ def plan_promotion(
                 issues.append(
                     PlanIssue(
                         severity="warning",
-                        code="PROM-DRIFT-001",
+                        code="ING-DRIFT-001",
                         resource_type=r_type,
                         resource_urn=c_urn,
                         message=notes,
-                        requires_review=True,
+                        requires_review=False,
                     )
                 )
         else:
@@ -626,8 +824,8 @@ def plan_promotion(
         action_counts[act_type] += 1
         actions.append(
             PlanActionItem(
-                id=f"prom-{idx:04d}",
-                stage="promote",
+                id=f"ing-{idx:04d}",
+                stage="ingest",
                 action=act_type,  # type: ignore[arg-type]
                 resource_type=r_type,
                 source_urn=node.raw_urn,
@@ -635,7 +833,7 @@ def plan_promotion(
                 confidence=1.0,
                 requires_review=req_review,
                 details={
-                    "node_id": node.id,
+                    "raw_urn": node.raw_urn,
                     "canonical_urn": c_urn,
                     "content_hash": c_hash,
                     "name": norm["name"],
@@ -644,17 +842,21 @@ def plan_promotion(
             )
         )
 
-    job_id = f"promote-batch-{import_id}-{uuid.uuid4().hex[:6]}"
+    job_id = f"ingest-{path.stem}-{uuid.uuid4().hex[:6]}"
     plan = IngestPlan(
-        stage="promote",
+        stage="ingest",
         job_id=job_id,
-        source_file=staged_import.file_name,
-        source_format=staged_import.source_format,
-        file_sha256=staged_import.import_options.get("file_sha256"),
-        staged_import_id=import_id,
+        source_file=path.name,
+        source_path=str(path),
+        source_format=fmt.canonical_slug,
+        file_sha256=file_sha256,
+        batch_id=existing_batch.id if existing_batch else None,
+        profile=resolved_profile.name,
         summary={
-            "total_staged_nodes": len(nodes),
-            "promotable_actions": len(actions),
+            "streamed_nodes": len(nodes),
+            "planned_actions": len(actions),
+            "planned_frequency_rows": planned_frequency_rows,
+            "planned_summary_stat_variables": planned_summary_stat_vars,
             **action_counts,
         },
         issues=issues,
@@ -667,25 +869,51 @@ def plan_promotion(
     if output_dir is not None:
         out_dir = Path(output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
-        stem = Path(staged_import.file_name).stem
-        plan.to_yaml(out_dir / f"{stem}.batch{import_id}.promote.plan.yaml")
-        plan.to_markdown(out_dir / f"{stem}.batch{import_id}.promote.report.md")
+        plan.to_yaml(out_dir / f"{path.stem}.ingest.plan.yaml")
+        plan.to_markdown(out_dir / f"{path.stem}.ingest.report.md")
 
     return plan
 
 
-def apply_promotion(
-    import_id_or_plan: int | str | Path | IngestPlan,
+def _extract_datafile_attributes(
+    raw_val: dict[str, Any], pi_norm: dict[str, Any]
+) -> tuple[str, list[dict[str, Any]]]:
+    """Extract filename and extended attributes from a PhysicalInstance or DDI-C fileDscr."""
+    pi_uaps = pi_norm["user_attributes"]
+    raw_file_txt = raw_val.get("fileTxt")
+    if isinstance(raw_file_txt, list) and raw_file_txt:
+        raw_file_txt = raw_file_txt[0]
+    file_txt = raw_file_txt if isinstance(raw_file_txt, dict) else {}
+    ddic_fname = _extract_first_string(file_txt.get("fileName")) if file_txt else None
+    f_name = pi_uaps.get("ddi:file_name") or ddic_fname or pi_norm["name"]
+    ext_attrs: list[dict[str, Any]] = [{"type": "file_name", "value": f_name}]
+
+    f_id = pi_uaps.get("ddi:file_id") or raw_val.get("@ID") or raw_val.get("ID")
+    if f_id:
+        ext_attrs.append({"type": "file_id", "value": str(f_id)})
+
+    raw_dimensns = file_txt.get("dimensns")
+    if isinstance(raw_dimensns, list) and raw_dimensns:
+        raw_dimensns = raw_dimensns[0]
+    dimensns = raw_dimensns if isinstance(raw_dimensns, dict) else {}
+    case_cnt = pi_uaps.get("ddi:case_count") or _extract_first_string(dimensns.get("caseQnty"))
+    if case_cnt and str(case_cnt).isdigit():
+        ext_attrs.append({"type": "case_count", "value": int(case_cnt)})
+
+    var_cnt = pi_uaps.get("ddi:var_count") or _extract_first_string(dimensns.get("varQnty"))
+    if var_cnt and str(var_cnt).isdigit():
+        ext_attrs.append({"type": "variable_count", "value": int(var_cnt)})
+
+    return str(f_name)[:255], ext_attrs
+
+
+def apply_ingestion(
+    file_or_plan: str | Path | IngestPlan,
+    profile: str | Path | ImportProfile = "request",
+    force_reload: bool = False,
     auto_approve: bool = False,
-    compact: bool = False,
 ) -> dict[str, Any]:
-    """Execute Stage 2b promotion of a staged batch into the ReQuest core database tables.
-
-    Enforces the review gate if any drift/quarantine items require review.
-    Records full batch provenance in EventLog to support `undo_promotion(import_id)`.
-    """
-    from django.utils import timezone
-
+    """Stream a metadata file into ReQuest core tables and record an IngestBatch receipt."""
     from fairwddi.models import (
         Category,
         CategoryScheme,
@@ -698,7 +926,7 @@ def apply_promotion(
         Datafile,
         DatafileVariable,
         DatafileVariableFrequency,
-        EventLog,
+        IngestBatch,
         InstanceVariable,
         Instrument,
         InstrumentQuestion,
@@ -708,8 +936,6 @@ def apply_promotion(
         QuestionVariable,
         RepresentedVariable,
         RepresentedVariableScheme,
-        StagedImport,
-        StagedResourceNode,
         StudyInstrument,
         StudyUnit,
         URNAlias,
@@ -718,54 +944,85 @@ def apply_promotion(
         VariableScheme,
     )
 
-    if isinstance(import_id_or_plan, IngestPlan):
-        plan = import_id_or_plan
-    elif isinstance(import_id_or_plan, int) or (
-        isinstance(import_id_or_plan, str) and import_id_or_plan.isdigit()
-    ):
-        plan = plan_promotion(int(import_id_or_plan), auto_approve=auto_approve)
+    if isinstance(file_or_plan, IngestPlan):
+        plan = file_or_plan
     else:
-        plan = IngestPlan.from_yaml(import_id_or_plan)
+        candidate_path = Path(file_or_plan)
+        if candidate_path.name.endswith((".plan.yaml", ".plan.yml")):
+            plan = IngestPlan.from_yaml(candidate_path)
+        else:
+            plan = plan_ingestion(
+                candidate_path,
+                profile=profile,
+                force_reload=force_reload,
+                auto_approve=auto_approve,
+            )
+
+    if not plan.source_path:
+        raise ValueError("Ingestion plan is missing `source_path` to stream.")
+
+    src_path = Path(plan.source_path)
+    if not src_path.exists():
+        raise FileNotFoundError(f"Source file referenced by plan not found: {src_path}")
+
+    current_sha = compute_file_sha256(src_path)
+    if plan.file_sha256 and current_sha != plan.file_sha256:
+        raise ValueError(
+            f"SHA-256 mismatch for '{src_path.name}': file changed since plan generation."
+        )
+
+    existing_batch = _find_active_batch_by_sha256(current_sha)
+    if existing_batch is not None and not force_reload:
+        return {
+            "job_id": plan.job_id,
+            "batch_id": existing_batch.id,
+            "status": "already_ingested",
+            "created_count": 0,
+            "reused_count": len(existing_batch.reused_urns or []),
+            "alias_count": 0,
+            "quarantine_count": 0,
+            "frequency_rows_count": 0,
+        }
 
     if not plan.is_ready_to_execute(auto_approve=auto_approve):
         raise PermissionError(
-            f"Promotion plan '{plan.job_id}' has {plan.pending_review_count} pending review "
+            f"Ingestion plan '{plan.job_id}' has {plan.pending_review_count} pending review "
             f"item(s) and {plan.error_count} error(s). Approve the plan YAML "
             f"(review_gate.approved: true) or pass --auto-approve."
         )
 
-    import_id = plan.staged_import_id
-    if import_id is None:
-        raise ValueError("Promotion plan is missing staged_import_id.")
+    if existing_batch is not None and force_reload:
+        undo_ingestion(existing_batch.id)
 
-    staged_import = StagedImport.objects.filter(id=import_id).first()
-    if not staged_import:
-        raise ValueError(f"StagedImport #{import_id} does not exist.")
+    resolved_profile = (
+        profile if isinstance(profile, ImportProfile) else load_profile(plan.profile or profile)
+    )
+    fmt = detect_metadata_format(src_path)
+    nodes = list(stream_resources(src_path, resolved_profile, format_info=fmt))
 
-    nodes = list(StagedResourceNode.objects.filter(staged_import=staged_import).order_by("id"))
-    nodes_by_type: dict[str, list[StagedResourceNode]] = {}
+    nodes_by_type: dict[str, list[RawResourceNode]] = {}
     for n in nodes:
         nodes_by_type.setdefault(n.resource_type, []).append(n)
 
-    action_by_node_id: dict[int, PlanActionItem] = {}
-    for act in plan.actions:
-        nid = act.details.get("node_id")
-        if isinstance(nid, int):
-            action_by_node_id[nid] = act
+    action_by_source_urn: dict[str, PlanActionItem] = {act.source_urn: act for act in plan.actions}
 
     created_urns: list[str] = []
     reused_urns: list[str] = []
     created_aliases: list[str] = []
     quarantine_ids: list[int] = []
     urn_remap: dict[str, str] = {}
+    entity_counts: dict[str, int] = {}
+
+    def _inc(entity_name: str, amount: int = 1) -> None:
+        if amount > 0:
+            entity_counts[entity_name] = entity_counts.get(entity_name, 0) + amount
 
     def _register_or_check(
-        node: StagedResourceNode,
+        node: RawResourceNode,
         norm: dict[str, Any],
     ) -> tuple[str, str]:
-        """Return (action_taken, resolved_canonical_urn) for a node."""
         c_urn = norm["canonical_urn"]
-        act = action_by_node_id.get(node.id)
+        act = action_by_source_urn.get(node.raw_urn)
         act_type = act.action if act else "create"
 
         if act_type == "quarantine":
@@ -778,12 +1035,9 @@ def apply_promotion(
                 incoming_content_hash=norm["hashes"]["content"][:64],
                 incoming_content=node.raw_value,
                 conflict_type="hash_mismatch",
-                source_file=staged_import.file_name,
+                source_file=src_path.name,
             )
             quarantine_ids.append(mq.id)
-            node.status = "quarantined"
-            node.canonical_urn = c_urn
-            node.save(update_fields=["status", "canonical_urn"])
             return "quarantine", c_urn
 
         if act_type == "alias" and act and act.target_urn:
@@ -795,28 +1049,24 @@ def apply_promotion(
                     alias_urn=node.raw_urn,
                     canonical_urn=target,
                     entity_type=node.resource_type,
-                    source_file=staged_import.file_name,
+                    source_file=src_path.name,
                 )
                 created_aliases.append(node.raw_urn)
-            node.status = "normalized"
-            node.canonical_urn = target
-            node.save(update_fields=["status", "canonical_urn"])
             return "alias", target
 
         if UrnRegistry.objects.filter(urn=c_urn).exists():
             reused_urns.append(c_urn)
-            node.status = "normalized"
-            node.canonical_urn = c_urn
-            node.save(update_fields=["status", "canonical_urn"])
             return "reuse", c_urn
 
         return "create", c_urn
 
     with transaction.atomic():
-        # 1. StudyUnit (ensure at least one StudyUnit exists for dataset-level entities)
+        # 1. StudyUnit & Datafile (PhysicalInstance)
         primary_study: StudyUnit | None = None
+        primary_datafile: Datafile | None = None
+
         for node in nodes_by_type.get("StudyUnit", []):
-            norm = _normalize_staged_node("StudyUnit", node.raw_urn, node.raw_value)
+            norm = _normalize_node("StudyUnit", node.raw_urn, node.raw_value)
             status, c_urn = _register_or_check(node, norm)
             if status == "create":
                 primary_study = StudyUnit.objects.create(
@@ -827,13 +1077,11 @@ def apply_promotion(
                     hashes=norm["hashes"],
                 )
                 created_urns.append(c_urn)
-                node.status = "normalized"
-                node.canonical_urn = c_urn
-                node.save(update_fields=["status", "canonical_urn"])
+                _inc("StudyUnit")
             else:
                 primary_study = StudyUnit.objects.filter(urn=c_urn).first() or primary_study
 
-            # Also check for embedded PhysicalInstanceReference on StudyUnit
+            # Embedded PhysicalInstanceReference on StudyUnit (DDI 4 JSON)
             pi_refs = node.raw_value.get("PhysicalInstanceReference") or []
             if isinstance(pi_refs, dict):
                 pi_refs = [pi_refs]
@@ -843,23 +1091,11 @@ def apply_promotion(
                         pi_dict.get("URN")
                         or f"urn:ddi:{norm['agency']}:{pi_dict.get('ID')}:{norm['version']}"
                     )
-                    pi_norm = _normalize_staged_node("PhysicalInstance", str(pi_urn_raw), pi_dict)
+                    pi_norm = _normalize_node("PhysicalInstance", str(pi_urn_raw), pi_dict)
                     pi_c_urn = pi_norm["canonical_urn"]
                     if primary_study and not Datafile.objects.filter(urn=pi_c_urn).exists():
-                        pi_uaps = pi_norm["user_attributes"]
-                        f_name = pi_uaps.get("ddi:file_name") or pi_norm["name"]
-                        ext_attrs: list[dict[str, Any]] = [{"type": "file_name", "value": f_name}]
-                        if pi_uaps.get("ddi:file_id"):
-                            ext_attrs.append({"type": "file_id", "value": pi_uaps["ddi:file_id"]})
-                        if pi_uaps.get("ddi:case_count", "").isdigit():
-                            ext_attrs.append(
-                                {"type": "case_count", "value": int(pi_uaps["ddi:case_count"])}
-                            )
-                        if pi_uaps.get("ddi:var_count", "").isdigit():
-                            ext_attrs.append(
-                                {"type": "variable_count", "value": int(pi_uaps["ddi:var_count"])}
-                            )
-                        Datafile.objects.create(
+                        f_name, ext_attrs = _extract_datafile_attributes(pi_dict, pi_norm)
+                        primary_datafile = Datafile.objects.create(
                             urn=pi_c_urn,
                             name=f_name,
                             description=pi_norm["label"],
@@ -868,20 +1104,41 @@ def apply_promotion(
                             hashes=pi_norm["hashes"],
                         )
                         created_urns.append(pi_c_urn)
+                        _inc("Datafile")
 
         if primary_study is None and (
             nodes_by_type.get("Variable") or nodes_by_type.get("InstanceVariable")
         ):
-            # Synthesize a fallback StudyUnit for fragment files lacking an explicit StudyUnit
-            fallback_urn = f"urn:ddi:fr.cdsp:study_batch_{import_id}:1.0.0"
+            fallback_urn = f"urn:ddi:fr.cdsp:study_{current_sha[:10]}:1.0.0"
             primary_study = StudyUnit.objects.filter(urn=fallback_urn).first()
             if not primary_study:
                 primary_study = StudyUnit.objects.create(
                     urn=fallback_urn,
-                    name=Path(staged_import.file_name).stem,
-                    title={"en": Path(staged_import.file_name).stem},
+                    name=src_path.stem[:255],
+                    title={"en": src_path.stem},
                 )
                 created_urns.append(fallback_urn)
+                _inc("StudyUnit")
+
+        # Standalone PhysicalInstance nodes (JSONL, DDI-L 3.3 XML, or DDI-C fileDscr)
+        for node in nodes_by_type.get("PhysicalInstance", []):
+            pi_norm = _normalize_node("PhysicalInstance", node.raw_urn, node.raw_value)
+            status, pi_c_urn = _register_or_check(node, pi_norm)
+            if status == "create" and primary_study:
+                f_name, ext_attrs = _extract_datafile_attributes(node.raw_value, pi_norm)
+                df_obj = Datafile.objects.create(
+                    urn=pi_c_urn,
+                    name=f_name,
+                    description=pi_norm["label"],
+                    study_unit=primary_study,
+                    extended_attributes=ext_attrs,
+                    hashes=pi_norm["hashes"],
+                )
+                primary_datafile = primary_datafile or df_obj
+                created_urns.append(pi_c_urn)
+                _inc("Datafile")
+            elif primary_datafile is None:
+                primary_datafile = Datafile.objects.filter(urn=pi_c_urn).first()
 
         # 2. Schemes
         scheme_models = {
@@ -895,7 +1152,7 @@ def apply_promotion(
         }
         for s_type, s_cls in scheme_models.items():
             for node in nodes_by_type.get(s_type, []):
-                norm = _normalize_staged_node(s_type, node.raw_urn, node.raw_value)
+                norm = _normalize_node(s_type, node.raw_urn, node.raw_value)
                 status, c_urn = _register_or_check(node, norm)
                 if status == "create":
                     s_cls.objects.create(
@@ -904,13 +1161,11 @@ def apply_promotion(
                         description=norm["description"],
                     )
                     created_urns.append(c_urn)
-                    node.status = "normalized"
-                    node.canonical_urn = c_urn
-                    node.save(update_fields=["status", "canonical_urn"])
+                    _inc(s_type)
 
         # 3. Concept & ConceptualVariable
         for node in nodes_by_type.get("Concept", []):
-            norm = _normalize_staged_node("Concept", node.raw_urn, node.raw_value)
+            norm = _normalize_node("Concept", node.raw_urn, node.raw_value)
             status, c_urn = _register_or_check(node, norm)
             if status == "create":
                 Concept.objects.create(
@@ -920,12 +1175,10 @@ def apply_promotion(
                     hashes=norm["hashes"],
                 )
                 created_urns.append(c_urn)
-                node.status = "normalized"
-                node.canonical_urn = c_urn
-                node.save(update_fields=["status", "canonical_urn"])
+                _inc("Concept")
 
         for node in nodes_by_type.get("ConceptualVariable", []):
-            norm = _normalize_staged_node("ConceptualVariable", node.raw_urn, node.raw_value)
+            norm = _normalize_node("ConceptualVariable", node.raw_urn, node.raw_value)
             status, c_urn = _register_or_check(node, norm)
             if status == "create":
                 concept_obj = (
@@ -942,13 +1195,11 @@ def apply_promotion(
                     hashes=norm["hashes"],
                 )
                 created_urns.append(c_urn)
-                node.status = "normalized"
-                node.canonical_urn = c_urn
-                node.save(update_fields=["status", "canonical_urn"])
+                _inc("ConceptualVariable")
 
         # 4. Categories
         for node in nodes_by_type.get("Category", []):
-            norm = _normalize_staged_node("Category", node.raw_urn, node.raw_value)
+            norm = _normalize_node("Category", node.raw_urn, node.raw_value)
             status, c_urn = _register_or_check(node, norm)
             if status == "create":
                 cat_ext: list[dict[str, Any]] = []
@@ -962,13 +1213,11 @@ def apply_promotion(
                     hashes=norm["hashes"],
                 )
                 created_urns.append(c_urn)
-                node.status = "normalized"
-                node.canonical_urn = c_urn
-                node.save(update_fields=["status", "canonical_urn"])
+                _inc("Category")
 
         # 5. CodeLists & CodeItems
         for node in nodes_by_type.get("CodeList", []):
-            norm = _normalize_staged_node("CodeList", node.raw_urn, node.raw_value)
+            norm = _normalize_node("CodeList", node.raw_urn, node.raw_value)
             status, c_urn = _register_or_check(node, norm)
             if status == "create":
                 cl_obj = CodeList.objects.create(
@@ -978,6 +1227,7 @@ def apply_promotion(
                     hashes=norm["hashes"],
                 )
                 created_urns.append(c_urn)
+                _inc("CodeList")
                 for c_entry in norm["codes"]:
                     cat_u = c_entry.get("category_urn")
                     if cat_u:
@@ -995,13 +1245,11 @@ def apply_promotion(
                             )
                             if ci_created:
                                 created_urns.append(ci_obj.urn)
-                node.status = "normalized"
-                node.canonical_urn = c_urn
-                node.save(update_fields=["status", "canonical_urn"])
+                                _inc("Code")
 
         # 6. QuestionItems
         for node in nodes_by_type.get("QuestionItem", []):
-            norm = _normalize_staged_node("QuestionItem", node.raw_urn, node.raw_value)
+            norm = _normalize_node("QuestionItem", node.raw_urn, node.raw_value)
             status, c_urn = _register_or_check(node, norm)
             if status == "create":
                 qi_ext: list[dict[str, Any]] = []
@@ -1024,13 +1272,11 @@ def apply_promotion(
                     hashes=norm["hashes"],
                 )
                 created_urns.append(c_urn)
-                node.status = "normalized"
-                node.canonical_urn = c_urn
-                node.save(update_fields=["status", "canonical_urn"])
+                _inc("QuestionItem")
 
         # 7. Explicit RepresentedVariables
         for node in nodes_by_type.get("RepresentedVariable", []):
-            norm = _normalize_staged_node("RepresentedVariable", node.raw_urn, node.raw_value)
+            norm = _normalize_node("RepresentedVariable", node.raw_urn, node.raw_value)
             status, c_urn = _register_or_check(node, norm)
             if status == "create":
                 cl_u = (
@@ -1055,6 +1301,7 @@ def apply_promotion(
                     hashes=norm["hashes"],
                 )
                 created_urns.append(c_urn)
+                _inc("RepresentedVariable")
                 for idx, q_u in enumerate(norm["question_urns"], start=1):
                     resolved_q_u = urn_remap.get(q_u, q_u)
                     q_obj = QuestionItem.objects.filter(urn=resolved_q_u).first()
@@ -1064,13 +1311,10 @@ def apply_promotion(
                             represented_variable=rv_obj,
                             defaults={"order": idx},
                         )
-                node.status = "normalized"
-                node.canonical_urn = c_urn
-                node.save(update_fields=["status", "canonical_urn"])
 
         # 8. VariableGroups
         for node in nodes_by_type.get("VariableGroup", []):
-            norm = _normalize_staged_node("VariableGroup", node.raw_urn, node.raw_value)
+            norm = _normalize_node("VariableGroup", node.raw_urn, node.raw_value)
             status, c_urn = _register_or_check(node, norm)
             if status == "create":
                 vg_refs = (
@@ -1087,14 +1331,42 @@ def apply_promotion(
                     hashes=norm["hashes"],
                 )
                 created_urns.append(c_urn)
-                node.status = "normalized"
-                node.canonical_urn = c_urn
-                node.save(update_fields=["status", "canonical_urn"])
+                _inc("VariableGroup")
 
-        # 9. Variables & InstanceVariables (resolving the Variable Cascade + Datafile shortcuts)
+        # 9. Variables & InstanceVariables + Direct Bulk SQL Frequency Insertion
+        freq_rows_to_insert: list[DatafileVariableFrequency] = []
+        iv_by_urn: dict[str, InstanceVariable] = {}
+
+        def _ensure_datafile(agency: str, version: str, file_id: str = "F1") -> Datafile | None:
+            nonlocal primary_datafile
+            if primary_datafile is not None:
+                return primary_datafile
+            if primary_study is None:
+                return None
+            existing_df = Datafile.objects.filter(study_unit=primary_study).first()
+            if existing_df:
+                primary_datafile = existing_df
+                return existing_df
+            df_urn = f"urn:ddi:{agency}:df_{primary_study.identifier}_{file_id}:{version}"
+            df_obj = Datafile.objects.filter(urn=df_urn).first()
+            if not df_obj:
+                df_obj = Datafile.objects.create(
+                    urn=df_urn,
+                    name=file_id[:255],
+                    study_unit=primary_study,
+                    extended_attributes=[
+                        {"type": "file_id", "value": file_id},
+                        {"type": "file_name", "value": file_id},
+                    ],
+                )
+                created_urns.append(df_urn)
+                _inc("Datafile")
+            primary_datafile = df_obj
+            return df_obj
+
         for var_type in ("Variable", "InstanceVariable"):
             for var_order, node in enumerate(nodes_by_type.get(var_type, []), start=1):
-                norm = _normalize_staged_node(var_type, node.raw_urn, node.raw_value)
+                norm = _normalize_node(var_type, node.raw_urn, node.raw_value)
                 status, c_urn = _register_or_check(node, norm)
                 if status in ("quarantine", "alias"):
                     continue
@@ -1105,14 +1377,14 @@ def apply_promotion(
                     else None
                 )
                 cl_obj = CodeList.objects.filter(urn=cl_u).first() if cl_u else None
-                if cl_obj is None and "catgry" in node.raw_value:
-                    # Fallback lookup for DDI-C raw codelist
-                    for ref_u in node.raw_value.get("_referenced_urns", []):
-                        cl_obj = CodeList.objects.filter(urn=urn_remap.get(ref_u, ref_u)).first()
+                if cl_obj is None and node.referenced_urns:
+                    for ref_u in node.referenced_urns:
+                        parsed_ref = parse_ddi_urn(ref_u)[0]
+                        resolved_ref = urn_remap.get(parsed_ref, parsed_ref)
+                        cl_obj = CodeList.objects.filter(urn=resolved_ref).first()
                         if cl_obj:
                             break
 
-                # Synthesize or reuse a RepresentedVariable in the Variable Cascade
                 rv_payload = {
                     "label": norm["label"],
                     "codelist_urn": cl_obj.urn if cl_obj else None,
@@ -1140,8 +1412,8 @@ def apply_promotion(
                             hashes=rv_hashes,
                         )
                         created_urns.append(rv_urn)
+                        _inc("RepresentedVariable")
 
-                # If DDI-C variable had inline question text without a separate QuestionItem node
                 if not norm["question_urns"] and norm["question_text"] and rv_obj:
                     q_hashes = compute_resource_hashes(
                         "QuestionItem",
@@ -1164,6 +1436,7 @@ def apply_promotion(
                                 hashes=q_hashes,
                             )
                             created_urns.append(q_urn)
+                            _inc("QuestionItem")
                     if q_obj:
                         QuestionVariable.objects.get_or_create(
                             question_item=q_obj,
@@ -1171,7 +1444,6 @@ def apply_promotion(
                             defaults={"order": 1},
                         )
 
-                # Link explicit QuestionItems to RepresentedVariable via QuestionVariable shortcut
                 if rv_obj:
                     for idx, q_u in enumerate(norm["question_urns"], start=1):
                         resolved_q_u = urn_remap.get(q_u, q_u)
@@ -1183,7 +1455,6 @@ def apply_promotion(
                                 defaults={"order": idx},
                             )
 
-                # Create or reuse InstanceVariable
                 if status == "create" and primary_study:
                     su_ext = [{"type": "study_unit_urn", "value": primary_study.urn}]
                     iv_obj = InstanceVariable.objects.create(
@@ -1196,80 +1467,88 @@ def apply_promotion(
                         hashes=norm["hashes"],
                     )
                     created_urns.append(c_urn)
-                    node.status = "normalized"
-                    node.canonical_urn = c_urn
-                    node.save(update_fields=["status", "canonical_urn"])
+                    _inc("InstanceVariable")
                 else:
                     iv_obj = InstanceVariable.objects.filter(urn=c_urn).first()
 
-                # Populate DatafileVariable & DatafileVariableFrequency if statistics exist
+                if iv_obj:
+                    iv_by_urn[c_urn] = iv_obj
+
                 uaps = norm["user_attributes"]
-                if (
-                    iv_obj
-                    and primary_study
-                    and (
-                        "ddi:summary_statistics" in uaps
-                        or "ddi:category_statistics" in uaps
-                        or "ddi:file_id" in uaps
+                has_df_link = bool(
+                    norm["summary_stats"]
+                    or norm["frequencies"]
+                    or "ddi:file_id" in uaps
+                    or node.raw_value.get("@files")
+                    or primary_datafile is not None
+                )
+                if iv_obj and primary_study and has_df_link:
+                    file_id = (
+                        uaps.get("ddi:file_id")
+                        or str(node.raw_value.get("@files") or "F1").split()[0]
                     )
-                ):
-                    file_id = uaps.get("ddi:file_id") or "F1"
-                    df_obj = Datafile.objects.filter(study_unit=primary_study).first()
-                    if not df_obj:
-                        df_urn = (
-                            f"urn:ddi:{norm['agency']}:"
-                            f"df_{primary_study.identifier}_{file_id}:{norm['version']}"
+                    df_obj = _ensure_datafile(norm["agency"], norm["version"], file_id=file_id)
+                    if df_obj:
+                        _, dfv_created = DatafileVariable.objects.update_or_create(
+                            datafile=df_obj,
+                            instance_variable=iv_obj,
+                            defaults={
+                                "order": var_order,
+                                "statistics": norm["summary_stats"] or {},
+                            },
                         )
-                        df_obj = Datafile.objects.filter(urn=df_urn).first()
-                        if not df_obj:
-                            df_obj = Datafile.objects.create(
-                                urn=df_urn,
-                                name=file_id[:255],
-                                study_unit=primary_study,
-                                extended_attributes=[
-                                    {"type": "file_id", "value": file_id},
-                                    {"type": "file_name", "value": file_id},
-                                ],
+                        if dfv_created:
+                            _inc("DatafileVariable")
+
+                        for freq_entry in norm["frequencies"]:
+                            freq_rows_to_insert.append(
+                                DatafileVariableFrequency(
+                                    datafile=df_obj,
+                                    instance_variable=iv_obj,
+                                    code_value=freq_entry["code_value"],
+                                    frequency=freq_entry["frequency"],
+                                    weight=freq_entry["weight"],
+                                )
                             )
-                            created_urns.append(df_urn)
 
-                    stats_payload = {}
-                    if "ddi:summary_statistics" in uaps:
-                        try:
-                            stats_payload = json.loads(uaps["ddi:summary_statistics"])
-                        except Exception:
-                            stats_payload = {}
+        # Direct DDI-L 3.3 VariableStatistics -> SQL DatafileVariable & DatafileVariableFrequency
+        for vs_node in nodes_by_type.get("VariableStatistics", []):
+            var_u, s_dict, f_list = _extract_ddil33_variable_statistics(vs_node.raw_value)
+            if not var_u:
+                continue
+            resolved_var_u = urn_remap.get(var_u, var_u)
+            iv_obj = (
+                iv_by_urn.get(resolved_var_u)
+                or InstanceVariable.objects.filter(urn=resolved_var_u).first()
+            )
+            if iv_obj and primary_study:
+                df_obj = _ensure_datafile(iv_obj.agency, iv_obj.version)
+                if df_obj:
+                    if s_dict:
+                        DatafileVariable.objects.update_or_create(
+                            datafile=df_obj,
+                            instance_variable=iv_obj,
+                            defaults={"statistics": s_dict},
+                        )
+                    for freq_entry in f_list:
+                        freq_rows_to_insert.append(
+                            DatafileVariableFrequency(
+                                datafile=df_obj,
+                                instance_variable=iv_obj,
+                                code_value=freq_entry["code_value"],
+                                frequency=freq_entry["frequency"],
+                                weight=freq_entry["weight"],
+                            )
+                        )
 
-                    DatafileVariable.objects.get_or_create(
-                        datafile=df_obj,
-                        instance_variable=iv_obj,
-                        defaults={
-                            "order": var_order,
-                            "statistics": stats_payload or {},
-                        },
-                    )
-
-                    if "ddi:category_statistics" in uaps:
-                        try:
-                            cat_stats = json.loads(uaps["ddi:category_statistics"])
-                            for cs in cat_stats:
-                                if isinstance(cs, dict) and cs.get("type") in ("freq", None):
-                                    DatafileVariableFrequency.objects.get_or_create(
-                                        datafile=df_obj,
-                                        instance_variable=iv_obj,
-                                        code_value=str(cs.get("code_value", ""))[:100],
-                                        weight=cs.get("weight_var"),
-                                        defaults={
-                                            "frequency": float(cs.get("value", 0.0)),
-                                        },
-                                    )
-                        except Exception:
-                            pass
+        if freq_rows_to_insert:
+            DatafileVariableFrequency.objects.bulk_create(freq_rows_to_insert, batch_size=1000)
+            _inc("DatafileVariableFrequency", len(freq_rows_to_insert))
 
         # 10. Instruments, StudyInstrument & InstrumentQuestion shortcut tables
         primary_instrument: Instrument | None = None
         for node in nodes_by_type.get("Instrument", []):
-            norm = _normalize_staged_node("Instrument", node.raw_urn, node.raw_value)
+            norm = _normalize_node("Instrument", node.raw_urn, node.raw_value)
             status, c_urn = _register_or_check(node, norm)
             if status == "create":
                 primary_instrument = Instrument.objects.create(
@@ -1280,9 +1559,7 @@ def apply_promotion(
                     hashes=norm["hashes"],
                 )
                 created_urns.append(c_urn)
-                node.status = "normalized"
-                node.canonical_urn = c_urn
-                node.save(update_fields=["status", "canonical_urn"])
+                _inc("Instrument")
             else:
                 primary_instrument = (
                     Instrument.objects.filter(urn=c_urn).first() or primary_instrument
@@ -1294,7 +1571,6 @@ def apply_promotion(
                     instrument=primary_instrument,
                 )
 
-        # Flatten QuestionConstruct nodes into InstrumentQuestion shortcut rows
         qc_nodes = nodes_by_type.get("QuestionConstruct", [])
         if qc_nodes and primary_study and primary_instrument is None:
             inst_urn = (
@@ -1309,6 +1585,7 @@ def apply_promotion(
                     label=primary_study.label,
                 )
                 created_urns.append(inst_urn)
+                _inc("Instrument")
             StudyInstrument.objects.get_or_create(
                 study_unit=primary_study,
                 instrument=primary_instrument,
@@ -1325,7 +1602,7 @@ def apply_promotion(
                     q_c_urn = urn_remap.get(q_c_urn, q_c_urn)
                     q_obj = QuestionItem.objects.filter(urn=q_c_urn).first()
                     if q_obj:
-                        InstrumentQuestion.objects.get_or_create(
+                        _, iq_created = InstrumentQuestion.objects.get_or_create(
                             instrument=primary_instrument,
                             question_item=q_obj,
                             defaults={
@@ -1333,94 +1610,81 @@ def apply_promotion(
                                 "order": qc_order,
                             },
                         )
-                qc_node.status = "normalized"
-                qc_node.canonical_urn = parse_ddi_urn(qc_node.raw_urn)[0]
-                qc_node.save(update_fields=["status", "canonical_urn"])
+                        if iq_created:
+                            _inc("InstrumentQuestion")
 
-        # Mark remaining structural/routing nodes (Sequence, etc.) as normalized
-        for node in nodes:
-            if node.status == "staged":
-                node.status = "normalized"
-                node.canonical_urn = parse_ddi_urn(node.raw_urn)[0]
-                node.save(update_fields=["status", "canonical_urn"])
-
-        # Update StagedImport batch status
-        normalized_cnt = StagedResourceNode.objects.filter(
-            staged_import=staged_import, status="normalized"
-        ).count()
-        staged_import.processed_resources = normalized_cnt
-        staged_import.processed_at = timezone.now()
-        staged_import.status = "quarantined" if quarantine_ids else "normalized"
-        staged_import.save(update_fields=["processed_resources", "processed_at", "status"])
-
-        # Record batch promotion in EventLog for Undo
-        anchor_urn = created_urns[0] if created_urns else (reused_urns[0] if reused_urns else None)
-        if anchor_urn and UrnRegistry.objects.filter(urn=anchor_urn).exists():
-            EventLog.objects.create(
-                urn=anchor_urn,
-                event_type="promoted",
-                event_data={
-                    "job_type": "promote",
-                    "job_id": plan.job_id,
-                    "staged_import_id": import_id,
-                    "created_urns": created_urns,
-                    "reused_urns": reused_urns,
-                    "created_aliases": created_aliases,
-                    "quarantine_ids": quarantine_ids,
-                },
-            )
-
-    compacted_res = None
-    if compact:
-        compacted_res = cleanup_staged_import(import_id=import_id, compact_only=True)
+        # 11. Record lightweight IngestBatch receipt (1 row per file, zero per-node bloat)
+        batch_status = "quarantined" if quarantine_ids else "completed"
+        batch = IngestBatch.objects.create(
+            source_format=fmt.canonical_slug,
+            file_name=src_path.name,
+            file_sha256=current_sha,
+            file_path=str(src_path),
+            status=batch_status,
+            options={
+                "job_id": plan.job_id,
+                "profile": resolved_profile.name,
+                "quarantine_ids": quarantine_ids,
+            },
+            created_urns=created_urns,
+            reused_urns=reused_urns,
+            created_aliases=created_aliases,
+            stats=entity_counts,
+        )
 
     return {
         "job_id": plan.job_id,
-        "staged_import_id": import_id,
-        "status": staged_import.status,
+        "batch_id": batch.id,
+        "status": batch.status,
         "created_count": len(created_urns),
         "reused_count": len(reused_urns),
         "alias_count": len(created_aliases),
         "quarantine_count": len(quarantine_ids),
-        "compacted_nodes_count": compacted_res["compacted_nodes_count"] if compacted_res else 0,
+        "frequency_rows_count": len(freq_rows_to_insert),
+        "stats": entity_counts,
     }
 
 
-def undo_promotion(import_id: int, force: bool = False) -> dict[str, Any]:
-    """Roll back a promoted StagedImport batch using EventLog provenance.
+def undo_ingestion(batch_id: int) -> dict[str, Any]:
+    """Roll back an IngestBatch in a single atomic transaction.
 
-    Deletes UrnRegistry records created exclusively by `import_id` (which cascades cleanly
-    to all child DDI tables and shortcut tables), removes URNAlias and MetadataQuarantine
-    records created by the batch, and resets StagedImport and StagedResourceNode statuses
-    back to `'staged'`.
+    Deletes UrnRegistry records created exclusively by `batch_id` (cascading cleanly
+    to all child DDI tables, shortcut tables, and `DatafileVariableFrequency`),
+    removes `URNAlias` and `MetadataQuarantine` rows created by the batch, and marks
+    the `IngestBatch` receipt as `'undone'`.
     """
     from fairwddi.models import (
-        EventLog,
+        Category,
+        CategoryScheme,
+        Code,
+        CodeList,
+        Concept,
+        ConceptScheme,
+        ConceptualVariable,
+        ConceptualVariableScheme,
+        Datafile,
+        IngestBatch,
+        InstanceVariable,
+        Instrument,
         MetadataQuarantine,
-        StagedImport,
-        StagedResourceNode,
+        QuestionItem,
+        QuestionScheme,
+        RepresentedVariable,
+        RepresentedVariableScheme,
+        StudyUnit,
         URNAlias,
         UrnRegistry,
+        VariableGroup,
+        VariableScheme,
     )
 
-    staged_import = StagedImport.objects.filter(id=import_id).first()
-    if not staged_import:
-        raise ValueError(f"StagedImport #{import_id} does not exist.")
+    batch = IngestBatch.objects.filter(id=batch_id).first()
+    if not batch:
+        raise ValueError(f"IngestBatch #{batch_id} does not exist.")
 
-    # Find EventLog entries for this staged_import_id
-    promo_logs = [
-        ev
-        for ev in EventLog.objects.filter(event_type="promoted").order_by("-id")
-        if isinstance(ev.event_data, dict) and ev.event_data.get("staged_import_id") == import_id
-    ]
-
-    created_urns: list[str] = []
-    created_aliases: list[str] = []
-    quarantine_ids: list[int] = []
-    for ev in promo_logs:
-        created_urns.extend(ev.event_data.get("created_urns", []))
-        created_aliases.extend(ev.event_data.get("created_aliases", []))
-        quarantine_ids.extend(ev.event_data.get("quarantine_ids", []))
+    created_urns = list(batch.created_urns or [])
+    created_aliases = list(batch.created_aliases or [])
+    quarantine_ids = list((batch.options or {}).get("quarantine_ids", []))
 
     with transaction.atomic():
         if created_aliases:
@@ -1432,27 +1696,6 @@ def undo_promotion(import_id: int, force: bool = False) -> dict[str, Any]:
         deleted_urns_count = 0
         if created_urns:
             created_urns_set = set(created_urns)
-            from fairwddi.models import (
-                Category,
-                CategoryScheme,
-                Code,
-                CodeList,
-                Concept,
-                ConceptScheme,
-                ConceptualVariable,
-                ConceptualVariableScheme,
-                Datafile,
-                InstanceVariable,
-                Instrument,
-                QuestionItem,
-                QuestionScheme,
-                RepresentedVariable,
-                RepresentedVariableScheme,
-                StudyUnit,
-                VariableGroup,
-                VariableScheme,
-            )
-
             for m_cls in (
                 Code,
                 Datafile,
@@ -1479,24 +1722,63 @@ def undo_promotion(import_id: int, force: bool = False) -> dict[str, Any]:
             deleted_urns_count = qs.count()
             qs.delete()
 
-        # Delete the promo event log rows
-        for ev in promo_logs:
-            ev.delete()
-
-        # Reset staged nodes back to 'staged'
-        reset_nodes = StagedResourceNode.objects.filter(staged_import=staged_import).update(
-            status="staged",
-            canonical_urn=None,
-        )
-        staged_import.status = "staged"
-        staged_import.processed_resources = 0
-        staged_import.processed_at = None
-        staged_import.save(update_fields=["status", "processed_resources", "processed_at"])
+        batch.status = "undone"
+        batch.save(update_fields=["status", "updated_at"])
 
     return {
-        "staged_import_id": import_id,
-        "status": "staged",
+        "batch_id": batch.id,
+        "status": batch.status,
         "deleted_core_resources_count": deleted_urns_count,
         "deleted_aliases_count": len(created_aliases),
-        "reset_staged_nodes_count": reset_nodes,
+    }
+
+
+def list_ingest_batches(status: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
+    """Return a summary list of IngestBatch receipts ordered newest first."""
+    from fairwddi.models import IngestBatch
+
+    qs = IngestBatch.objects.order_by("-id")
+    if status:
+        qs = qs.filter(status=status)
+
+    results: list[dict[str, Any]] = []
+    for b in qs[:limit]:
+        results.append(
+            {
+                "id": b.id,
+                "file_name": b.file_name,
+                "source_format": b.source_format,
+                "status": b.status,
+                "created_count": len(b.created_urns or []),
+                "reused_count": len(b.reused_urns or []),
+                "alias_count": len(b.created_aliases or []),
+                "stats": b.stats or {},
+                "created_at": b.created_at.isoformat() if b.created_at else None,
+            }
+        )
+    return results
+
+
+def get_ingest_batch_status(batch_id: int) -> dict[str, Any]:
+    """Return full status and statistics for a single IngestBatch receipt."""
+    from fairwddi.models import IngestBatch
+
+    b = IngestBatch.objects.filter(id=batch_id).first()
+    if not b:
+        raise ValueError(f"IngestBatch #{batch_id} does not exist.")
+
+    return {
+        "id": b.id,
+        "file_name": b.file_name,
+        "file_path": b.file_path,
+        "file_sha256": b.file_sha256,
+        "source_format": b.source_format,
+        "status": b.status,
+        "options": b.options or {},
+        "created_count": len(b.created_urns or []),
+        "reused_count": len(b.reused_urns or []),
+        "alias_count": len(b.created_aliases or []),
+        "stats": b.stats or {},
+        "created_at": b.created_at.isoformat() if b.created_at else None,
+        "updated_at": b.updated_at.isoformat() if b.updated_at else None,
     }

@@ -1,7 +1,8 @@
 """Streaming parsers and resource extractors for DDI metadata formats.
 
-Streams DDI-Lifecycle 3.x XML, DDI-Lifecycle 4.0 JSON, and DDI-Codebook 2.5 XML
-in constant O(1) memory, extracting structured JSON dictionary payloads.
+Streams DDI-Lifecycle 3.x XML, DDI-Lifecycle 4.0 JSON/JSONL, and DDI-Codebook 2.5 XML
+in constant O(1) memory, yielding structured in-memory `RawResourceNode` payloads
+directly to preflight and core ingestion without intermediate database staging.
 """
 
 from __future__ import annotations
@@ -15,12 +16,12 @@ from typing import Any, Self
 from lxml import etree
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from fairwddi.importer.detector import MetadataFormatInfo, detect_metadata_format
-from fairwddi.importer.profiles import ImportProfile
+from fairwddi.ingest.detector import MetadataFormatInfo, detect_metadata_format
+from fairwddi.ingest.profiles import ImportProfile
 
 
 class RawResourceNode(BaseModel):
-    """Individual extracted metadata element prior to database staging."""
+    """Individual extracted metadata element yielded during streaming."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
 
@@ -47,24 +48,17 @@ class RawResourceNode(BaseModel):
 
 
 def xml_to_json_dict(elem: Any) -> Any:
-    """Recursively convert an lxml XML element to a clean structured JSON dict or scalar.
-
-    Strips XML namespaces, extracts attributes prefixed with '@', collapses single-item
-    children while maintaining arrays for repeated tags, and simplifies text leaves.
-    """
+    """Recursively convert an lxml XML element to a clean structured JSON dict or scalar."""
     result: dict[str, Any] = {}
 
-    # Extract attributes
     for k, v in elem.attrib.items():
         attr_name = etree.QName(k).localname if "}" in k else k
         if "lang" in k.lower():
             attr_name = "xml:lang"
         result[f"@{attr_name}"] = v
 
-    # Extract text content
     text = elem.text.strip() if elem.text and elem.text.strip() else None
 
-    # Group child elements by tag name to support single items vs. lists
     children_by_tag: dict[str, list[Any]] = {}
     for child in elem:
         c_tag = etree.QName(child).localname
@@ -79,7 +73,6 @@ def xml_to_json_dict(elem: Any) -> Any:
         else:
             result[c_tag] = items
 
-    # Simplify leaf nodes with only text and no attributes/children
     if not elem.attrib and not children_by_tag:
         return text or ""
 
@@ -90,15 +83,7 @@ def xml_to_json_dict(elem: Any) -> Any:
 
 
 def resource_to_json(resource: Any) -> dict[str, Any]:
-    """Serialize any metadata resource (model instance, XML element, or dict) to a clean JSON dict.
-
-    Priority:
-    1. If object provides a .to_json() method, invoke it.
-    2. If object provides a .model_dump() method (Pydantic v2), invoke it.
-    3. If object provides a .dict() method (Pydantic v1), invoke it.
-    4. If object is already a dict, return as-is.
-    5. If object is an lxml XML Element, convert via xml_to_json_dict.
-    """
+    """Serialize any metadata resource (model instance, XML element, or dict) to a JSON dict."""
     if hasattr(resource, "to_json") and callable(resource.to_json):
         res = resource.to_json()
         if isinstance(res, str):
@@ -222,6 +207,8 @@ DDI_IDENTIFIABLE_RESOURCE_TAGS = {
     "Universe",
     "UniverseScheme",
     "StudyUnit",
+    "PhysicalInstance",
+    "VariableStatistics",
     "Group",
     "DataCollection",
     "DataRelationship",
@@ -232,7 +219,6 @@ DDI_IDENTIFIABLE_RESOURCE_TAGS = {
 
 def stream_ddi_l_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawResourceNode]:
     """Stream DDI-Lifecycle 3.x XML files element-by-element using iterparse."""
-    # Detect if document uses <Fragment> container architecture
     has_fragments = False
     for _event, elem in etree.iterparse(file_path, events=("start",)):
         tag = etree.QName(elem).localname
@@ -411,13 +397,25 @@ def stream_ddi_c_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawRes
 
     study_id = "stdy-001"
     stdy_dscr = data.get("stdyDscr")
+    if isinstance(stdy_dscr, list) and stdy_dscr:
+        stdy_dscr = stdy_dscr[0]
     if stdy_dscr and isinstance(stdy_dscr, dict):
-        titl_stmt = stdy_dscr.get("citation", {}).get("titlStmt", {})
-        id_no = titl_stmt.get("IDNo")
+        citation = stdy_dscr.get("citation", {})
+        if isinstance(citation, list) and citation:
+            citation = citation[0]
+        titl_stmt = citation.get("titlStmt", {}) if isinstance(citation, dict) else {}
+        if isinstance(titl_stmt, list) and titl_stmt:
+            titl_stmt = titl_stmt[0]
+        id_no = titl_stmt.get("IDNo") if isinstance(titl_stmt, dict) else None
         if isinstance(id_no, list) and id_no:
-            study_id = id_no[0].get("#text", "stdy-001")
-        else:
-            study_id = "stdy-001"
+            first_id = id_no[0]
+            study_id = (
+                first_id.get("content") or first_id.get("#text") or "stdy-001"
+                if isinstance(first_id, dict)
+                else str(first_id)
+            )
+        elif isinstance(id_no, dict):
+            study_id = id_no.get("content") or id_no.get("#text") or "stdy-001"
         yield RawResourceNode(
             resource_type="StudyUnit",
             raw_urn=f"urn:ddi:codebook:study:{study_id}:1.0.0",
@@ -425,7 +423,19 @@ def stream_ddi_c_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawRes
             referenced_urns=set(),
         )
 
-    # Variables & Categories
+    file_dscr_list = data.get("fileDscr", [])
+    if isinstance(file_dscr_list, dict):
+        file_dscr_list = [file_dscr_list]
+    for idx, f_dscr in enumerate(file_dscr_list, start=1):
+        if isinstance(f_dscr, dict):
+            f_id = f_dscr.get("@ID") or f_dscr.get("ID") or f"F{idx}"
+            yield RawResourceNode(
+                resource_type="PhysicalInstance",
+                raw_urn=f"urn:ddi:codebook:file:{study_id}:{f_id}:1.0.0",
+                raw_value=f_dscr,
+                referenced_urns=set(),
+            )
+
     data_dscr_list = data.get("dataDscr", [])
     if isinstance(data_dscr_list, dict):
         data_dscr_list = [data_dscr_list]
@@ -444,7 +454,6 @@ def stream_ddi_c_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawRes
             if isinstance(categories, dict):
                 categories = [categories]
 
-            # Yield Categories and CodeList for this variable
             if categories:
                 cl_urn = f"urn:ddi:codebook:codelist:{study_id}:{var_name}:1.0.0"
                 refs.add(cl_urn)
@@ -452,6 +461,10 @@ def stream_ddi_c_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawRes
                 cat_refs = []
                 for idx, cat in enumerate(categories):
                     cat_val = cat.get("catValu", f"cat-{idx + 1}")
+                    if isinstance(cat_val, list) and cat_val:
+                        cat_val = cat_val[0]
+                    if isinstance(cat_val, dict):
+                        cat_val = cat_val.get("content") or cat_val.get("#text") or f"cat-{idx + 1}"
                     cat_urn = f"urn:ddi:codebook:cat:{study_id}:{var_name}-{cat_val}:1.0.0"
                     cat_refs.append(cat_urn)
                     yield RawResourceNode(
@@ -468,7 +481,6 @@ def stream_ddi_c_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawRes
                     referenced_urns=set(cat_refs),
                 )
 
-            # Yield Variable
             yield RawResourceNode(
                 resource_type="Variable",
                 raw_urn=var_urn,

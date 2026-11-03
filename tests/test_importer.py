@@ -1,4 +1,6 @@
-"""Tests for the Stage 1 Metadata Importer subsystem."""
+"""Tests for `fairwddi.ingest` format detection, profiles, streaming, and direct loader."""
+
+from __future__ import annotations
 
 from pathlib import Path
 
@@ -6,16 +8,27 @@ import pytest
 from typer.testing import CliRunner
 
 from fairwddi.cli import app
-from fairwddi.importer import (
+from fairwddi.ingest import (
     ImportProfile,
     ImportStrategies,
+    apply_ingestion,
+    compute_resource_hashes,
     detect_metadata_format,
-    import_metadata_file,
+    get_ingest_batch_status,
     list_available_profiles,
+    list_ingest_batches,
     load_profile,
+    plan_ingestion,
     stream_resources,
+    undo_ingestion,
 )
-from fairwddi.models import MetadataQuarantine, StagedImport, StagedResourceNode
+from fairwddi.models import (
+    Category,
+    DatafileVariableFrequency,
+    IngestBatch,
+    InstanceVariable,
+    MetadataQuarantine,
+)
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -97,6 +110,7 @@ def test_load_profile_request() -> None:
     assert "Instruction" in profile.include_types
     assert "Instrument" in profile.include_types
     assert "Sequence" in profile.include_types
+    assert "PhysicalInstance" in profile.include_types
     assert "ControlConstructScheme" in profile.include_types
     assert "VariableStatistics" in profile.exclude_types
     assert "Archive" in profile.exclude_types
@@ -105,6 +119,7 @@ def test_load_profile_request() -> None:
     assert profile.should_include("VariableStatistics") is False
     assert profile.should_include("Archive") is False
     assert profile.should_include("Instrument") is True
+    assert profile.should_include("PhysicalInstance") is True
     assert profile.should_include("Sequence") is True
     assert profile.should_include("QuestionItem") is True
     assert profile.should_include("UnlistedResource", is_referenced=False) is False
@@ -160,393 +175,168 @@ def test_stream_resources_ddic_xml(sample_fsd_ddic: Path) -> None:
     assert "Variable" in types
     assert "Category" in types
     assert "CodeList" in types
+    assert "PhysicalInstance" in types
 
 
 # -----------------------------------------------------------------------------
-# Database Import & Staging Tests
+# Direct Ingestion Plan, Apply, Duplicate Skip, Quarantine & Batch Receipts
 # -----------------------------------------------------------------------------
 
 
 @pytest.mark.django_db
-def test_import_metadata_file_dry_run(sample_fsd_ddic: Path) -> None:
-    initial_imports = StagedImport.objects.count()
-    initial_nodes = StagedResourceNode.objects.count()
+def test_plan_ingestion_zero_db_writes(sample_fsd_ddic: Path, tmp_path: Path) -> None:
+    initial_batches = IngestBatch.objects.count()
+    initial_vars = InstanceVariable.objects.count()
 
-    summary = import_metadata_file(
-        file_path=sample_fsd_ddic,
-        profile="request",
-        dry_run=True,
-    )
+    plan = plan_ingestion(sample_fsd_ddic, profile="request", output_dir=tmp_path)
 
-    assert summary["status"] == "dry_run_success"
-    assert summary["total_staged"] > 0
-    assert summary["staged_import_id"] is None
-    assert StagedImport.objects.count() == initial_imports
-    assert StagedResourceNode.objects.count() == initial_nodes
+    assert plan.stage == "ingest"
+    assert plan.summary["streamed_nodes"] > 100
+    assert plan.summary["create"] > 0
+    assert (tmp_path / f"{sample_fsd_ddic.stem}.ingest.plan.yaml").exists()
+    assert (tmp_path / f"{sample_fsd_ddic.stem}.ingest.report.md").exists()
+    assert IngestBatch.objects.count() == initial_batches
+    assert InstanceVariable.objects.count() == initial_vars
 
 
 @pytest.mark.django_db
-def test_import_metadata_file_with_progress_callback(sample_fsd_ddic: Path) -> None:
-    events: list[tuple[str, int, int | None, str | None]] = []
+def test_apply_ingestion_live_duplicate_skip_and_force_reload(sample_fsd_ddic: Path) -> None:
+    # 1. First direct ingestion into core tables + IngestBatch receipt
+    res1 = apply_ingestion(sample_fsd_ddic, profile="request", auto_approve=True)
+    assert res1["status"] == "completed"
+    batch_id = res1["batch_id"]
+    assert batch_id is not None
+    assert res1["created_count"] > 0
+    assert res1["frequency_rows_count"] > 0
+    assert IngestBatch.objects.filter(id=batch_id, status="completed").exists()
+    assert DatafileVariableFrequency.objects.count() == res1["frequency_rows_count"]
 
-    def callback(stage: str, current: int, total: int | None, msg: str | None) -> None:
-        events.append((stage, current, total, msg))
+    # 2. Re-ingesting identical file triggers SHA-256 duplicate skip
+    res2 = apply_ingestion(sample_fsd_ddic, profile="request", auto_approve=True)
+    assert res2["status"] == "already_ingested"
+    assert res2["batch_id"] == batch_id
 
-    summary = import_metadata_file(
-        file_path=sample_fsd_ddic,
-        profile="request",
-        dry_run=True,
-        progress_callback=callback,
-    )
+    # 3. Force reload rolls back old batch and creates a fresh receipt
+    res3 = apply_ingestion(sample_fsd_ddic, profile="request", force_reload=True, auto_approve=True)
+    assert res3["status"] == "completed"
+    assert res3["batch_id"] != batch_id
+    assert IngestBatch.objects.get(id=batch_id).status == "undone"
+    assert IngestBatch.objects.get(id=res3["batch_id"]).status == "completed"
 
-    assert summary["status"] == "dry_run_success"
-    stages = [e[0] for e in events]
-    assert "parse" in stages or "parse_done" in stages
-    assert "stage_done" in stages
+    # 4. Batch listing and status helpers
+    batches = list_ingest_batches(status="completed")
+    assert any(b["id"] == res3["batch_id"] for b in batches)
+    info = get_ingest_batch_status(res3["batch_id"])
+    assert info["file_name"] == sample_fsd_ddic.name
+    assert info["stats"]["InstanceVariable"] > 0
 
-
-@pytest.mark.django_db
-def test_import_metadata_file_live_and_duplicate_skip(
-    sample_fsd_ddic: Path, tmp_path: Path
-) -> None:
-    log_dir = tmp_path / "test_logs"
-
-    # 1. First live import
-    summary1 = import_metadata_file(
-        file_path=sample_fsd_ddic,
-        profile="request",
-        log_dir=log_dir,
-    )
-
-    assert summary1["status"] == "staged"
-    import_id = summary1["staged_import_id"]
-    assert import_id is not None
-    assert summary1["total_staged"] == 487
-    assert StagedImport.objects.filter(id=import_id).exists()
-    assert StagedResourceNode.objects.filter(staged_import_id=import_id).count() == 487
-
-    # Verify session log was written
-    log_path = Path(summary1["log_file"])
-    assert log_path.exists()
-    log_content = log_path.read_text(encoding="utf-8")
-    assert "FAIRwDDI METADATA IMPORT SESSION" in log_content
-    assert "Total Resources Staged: 487" in log_content
-
-    # 2. Re-importing same file triggers duplicate skip
-    summary2 = import_metadata_file(
-        file_path=sample_fsd_ddic,
-        profile="request",
-        log_dir=log_dir,
-    )
-    assert summary2["status"] == "already_staged"
-    assert summary2["staged_import_id"] == import_id
-
-    # 3. Force reload replaces staged import
-    summary3 = import_metadata_file(
-        file_path=sample_fsd_ddic,
-        profile="request",
-        force_reload=True,
-        log_dir=log_dir,
-    )
-    assert summary3["status"] == "staged"
-    assert summary3["staged_import_id"] != import_id
+    # 5. Clean undo removes created core resources and frequencies
+    undo_res = undo_ingestion(res3["batch_id"])
+    assert undo_res["status"] == "undone"
+    assert InstanceVariable.objects.count() == 0
+    assert DatafileVariableFrequency.objects.count() == 0
 
 
 @pytest.mark.django_db
-def test_content_drift_quarantine(sample_fsd_ddic: Path, tmp_path: Path) -> None:
-    # 1. Create initial staged node
-    staged_import = StagedImport.objects.create(
-        source_format="ddi-c:2.5:xml",
-        file_name=sample_fsd_ddic.name,
-        import_options={"file_sha256": "initial_hash"},
-        status="staged",
-    )
-    test_urn = "urn:ddi:codebook:var:stdy-001:q1:1.0.0"
-    StagedResourceNode.objects.create(
-        staged_import=staged_import,
-        resource_type="Variable",
-        raw_urn=test_urn,
-        raw_value={"label": "Original question text"},
-        status="staged",
-    )
-
-    # 2. Import a synthetic profile with drift quarantine
-    custom_profile = ImportProfile(
-        name="test_drift_profile",
-        include_types=["Variable"],
-        strategies=ImportStrategies(
-            on_duplicate_file="force_reload",
-            on_content_drift="quarantine",
+def test_content_drift_quarantine_during_direct_ingestion(tmp_path: Path) -> None:
+    # Seed an existing Category with a specific canonical URN and content hash
+    existing_urn = "urn:ddi:fr.cdsp:cat_drift_01:1.0.0"
+    Category.objects.create(
+        urn=existing_urn,
+        name="CAT_DRIFT",
+        label={"en": "Original Category Label"},
+        hashes=compute_resource_hashes(
+            "Category", {"name": "CAT_DRIFT", "label": {"en": "Original Category Label"}}
         ),
     )
 
-    # Re-run import
-    import_metadata_file(
-        file_path=sample_fsd_ddic,
-        profile=custom_profile,
-        log_dir=tmp_path / "drift_logs",
+    # Create a minimal DDI 4 JSON file carrying the SAME URN with drifted label text
+    drift_json = tmp_path / "drift_test.json"
+    drift_json.write_text(
+        """{
+          "items": [
+            {
+              "$type": "Category",
+              "URN": "urn:ddi:fr.cdsp:cat_drift_01:1.0.0",
+              "Agency": "fr.cdsp",
+              "ID": "cat_drift_01",
+              "Version": "1.0.0",
+              "CategoryName": [{"String": {"language": "en", "value": "CAT_DRIFT"}}],
+              "Label": [{"Content": {"language": "en", "value": "Modified Category Label"}}]
+            }
+          ]
+        }""",
+        encoding="utf-8",
     )
 
-    quarantined = MetadataQuarantine.objects.filter(incoming_urn=test_urn)
-    if quarantined.exists():
-        assert quarantined.first().conflict_type == "staged_urn_drift"
+    custom_profile = ImportProfile(
+        name="drift_profile",
+        include_types=["Category"],
+        strategies=ImportStrategies(on_content_drift="quarantine"),
+    )
+
+    # 1. Plan flags ING-DRIFT-001 and requires review
+    plan = plan_ingestion(drift_json, profile=custom_profile)
+    assert plan.summary["quarantine"] == 1
+    assert plan.pending_review_count == 1
+    assert not plan.is_ready_to_execute(auto_approve=False)
+
+    # 2. Apply with auto_approve records MetadataQuarantine without overwriting Category
+    res = apply_ingestion(plan, profile=custom_profile, auto_approve=True)
+    assert res["status"] == "quarantined"
+    assert res["quarantine_count"] == 1
+    assert MetadataQuarantine.objects.filter(incoming_urn=existing_urn).exists()
+    assert Category.objects.get(urn=existing_urn).label == {"en": "Original Category Label"}
+
+    # 3. Undo cleans up quarantine record
+    undo_ingestion(res["batch_id"])
+    assert not MetadataQuarantine.objects.filter(incoming_urn=existing_urn).exists()
 
 
 # -----------------------------------------------------------------------------
-# CLI Command Tests
+# CLI Command Tests (`preflight profiles`, `ingest plan/apply/list/status/undo`)
 # -----------------------------------------------------------------------------
 
 
-def test_cli_import_list_profiles(runner: CliRunner) -> None:
-    result = runner.invoke(app, ["import", "list-profiles"])
+def test_cli_preflight_profiles(runner: CliRunner) -> None:
+    result = runner.invoke(app, ["preflight", "profiles"])
     assert result.exit_code == 0
     assert "Available Import Profiles" in result.stdout
     assert "request" in result.stdout
 
 
 @pytest.mark.django_db
-def test_cli_import_file_dry_run(runner: CliRunner, sample_fsd_ddic: Path) -> None:
-    result = runner.invoke(app, ["import", "file", str(sample_fsd_ddic), "--dry-run"])
-    assert result.exit_code == 0
-    assert "Metadata Import Summary" in result.stdout
-    assert "DDI-C 2.5" in result.stdout
-    assert "Total Resources Staged" in result.stdout
-
-
-@pytest.mark.django_db
-def test_cli_import_file_live_and_status(runner: CliRunner, sample_fsd_ddic: Path) -> None:
-    result = runner.invoke(app, ["import", "file", str(sample_fsd_ddic), "--force-reload"])
-    assert result.exit_code == 0
-    assert "Stage 1 import completed successfully." in result.stdout
-
-    staged = StagedImport.objects.latest("id")
-    status_result = runner.invoke(app, ["import", "status", str(staged.id)])
-    assert status_result.exit_code == 0
-    assert f"Staged Import #{staged.id}" in status_result.stdout
-
-    log_result = runner.invoke(app, ["import", "log", str(staged.id)])
-    assert log_result.exit_code == 0
-    assert "FAIRwDDI METADATA IMPORT SESSION" in log_result.stdout
-
-
-@pytest.mark.django_db
-def test_delete_staged_import_unharmonized(sample_fsd_ddic: Path, tmp_path: Path) -> None:
-    from fairwddi.importer import delete_staged_import
-
-    summary = import_metadata_file(
-        file_path=sample_fsd_ddic,
-        profile="request",
-        log_dir=tmp_path / "del_logs",
+def test_cli_ingest_plan_apply_list_status_and_undo(
+    runner: CliRunner, sample_fsd_ddic: Path, tmp_path: Path
+) -> None:
+    # 1. fairwddi ingest plan (zero DB writes)
+    plan_res = runner.invoke(
+        app, ["ingest", "plan", str(sample_fsd_ddic), "--output-dir", str(tmp_path)]
     )
-    import_id = summary["staged_import_id"]
-    assert StagedImport.objects.filter(id=import_id).exists()
-    assert StagedResourceNode.objects.filter(staged_import_id=import_id).count() == 487
+    assert plan_res.exit_code == 0
+    assert "Ingestion Plan" in plan_res.stdout
+    assert IngestBatch.objects.count() == 0
 
-    del_res = delete_staged_import(import_id=import_id, delete_log_file=True)
-    assert del_res["staged_import_id"] == import_id
-    assert del_res["deleted_nodes_count"] == 487
-    assert not StagedImport.objects.filter(id=import_id).exists()
-    assert not StagedResourceNode.objects.filter(staged_import_id=import_id).exists()
+    # 2. fairwddi ingest apply
+    plan_yaml = tmp_path / f"{sample_fsd_ddic.stem}.ingest.plan.yaml"
+    apply_res = runner.invoke(app, ["ingest", "apply", str(plan_yaml), "--auto-approve"])
+    assert apply_res.exit_code == 0
+    assert "Ingestion Completed" in apply_res.stdout
 
+    batch = IngestBatch.objects.latest("id")
 
-@pytest.mark.django_db
-def test_delete_staged_import_protected_normalized() -> None:
-    from fairwddi.importer import ProtectedImportError, delete_staged_import
-
-    staged_import = StagedImport.objects.create(
-        source_format="ddi-l:3.3:xml",
-        file_name="protected_wave1.xml",
-        status="staged",
-    )
-    StagedResourceNode.objects.create(
-        staged_import=staged_import,
-        resource_type="QuestionItem",
-        raw_urn="urn:raw:item-001",
-        canonical_urn="urn:ddi:fr.cdsp:QuestionItem:qi-001:1.0.0",
-        raw_value={"text": "Normalized question"},
-        status="normalized",
-    )
-
-    # Deletion without force must raise ProtectedImportError
-    with pytest.raises(ProtectedImportError) as exc_info:
-        delete_staged_import(staged_import.id, force=False)
-
-    assert exc_info.value.import_id == staged_import.id
-    assert exc_info.value.normalized_count >= 1
-
-    # Deletion with force must succeed
-    del_res = delete_staged_import(staged_import.id, force=True)
-    assert del_res["was_forced"] is True
-    assert not StagedImport.objects.filter(id=staged_import.id).exists()
-
-
-@pytest.mark.django_db
-def test_delete_staged_import_protected_urnalias() -> None:
-    from fairwddi.importer import ProtectedImportError, delete_staged_import
-    from fairwddi.models import URNAlias
-
-    staged_import = StagedImport.objects.create(
-        source_format="ddi-l:3.3:xml",
-        file_name="aliased_wave2.xml",
-        status="staged",
-    )
-    test_raw_urn = "urn:closer:variable-999"
-    StagedResourceNode.objects.create(
-        staged_import=staged_import,
-        resource_type="Variable",
-        raw_urn=test_raw_urn,
-        raw_value={"text": "Aliased variable"},
-        status="staged",
-    )
-    URNAlias.objects.create(
-        alias_urn=test_raw_urn,
-        canonical_urn="urn:ddi:fr.cdsp:Variable:var-999:1.0.0",
-        entity_type="Variable",
-    )
-
-    # Deletion blocked due to URNAlias dependency
-    with pytest.raises(ProtectedImportError) as exc_info:
-        delete_staged_import(staged_import.id, force=False)
-
-    assert exc_info.value.alias_count == 1
-
-    # Force delete succeeds
-    del_res = delete_staged_import(staged_import.id, force=True)
-    assert del_res["was_forced"] is True
-
-
-@pytest.mark.django_db
-def test_cli_import_delete(runner: CliRunner, sample_fsd_ddic: Path) -> None:
-    import_metadata_file(
-        file_path=sample_fsd_ddic,
-        profile="request",
-        force_reload=True,
-    )
-    staged = StagedImport.objects.latest("id")
-
-    # 1. Cancelled deletion
-    result_cancel = runner.invoke(app, ["import", "delete", str(staged.id)], input="n\n")
-    assert result_cancel.exit_code == 0
-    assert "Deletion cancelled" in result_cancel.stdout
-    assert StagedImport.objects.filter(id=staged.id).exists()
-
-    # 2. Confirmed deletion via interactive input
-    result_confirm = runner.invoke(app, ["import", "delete", str(staged.id)], input="y\n")
-    assert result_confirm.exit_code == 0
-    assert f"Deleted StagedImport #{staged.id}" in result_confirm.stdout
-    assert not StagedImport.objects.filter(id=staged.id).exists()
-
-
-@pytest.mark.django_db
-def test_import_statistics_and_query_helpers(sample_fsd_ddic: Path) -> None:
-    from fairwddi.importer import (
-        get_import_statistics,
-        list_staged_imports,
-        query_staged_resources,
-    )
-
-    summary = import_metadata_file(
-        file_path=sample_fsd_ddic,
-        profile="request",
-        force_reload=True,
-    )
-    import_id = summary["staged_import_id"]
-
-    # 1. Statistics
-    stats = get_import_statistics(import_id)
-    assert stats["staged_import_id"] == import_id
-    assert stats["total_resources"] == 487
-    assert stats["normalized_count"] == 0
-    assert stats["normalization_progress_pct"] == 0.0
-    assert "Variable" in stats["counts_by_type"]
-    assert "Category" in stats["counts_by_type"]
-    assert "staged" in stats["counts_by_status"]
-    assert stats["cross_tab"]["Variable"]["staged"] > 0
-
-    # 2. List imports
-    imports = list_staged_imports(status="staged")
-    assert len(imports) >= 1
-    assert any(i["id"] == import_id for i in imports)
-
-    # 3. Query resources
-    query_res = query_staged_resources(
-        import_id=import_id,
-        resource_type="Variable",
-        limit=10,
-    )
-    assert query_res["total_count"] > 0
-    assert len(query_res["results"]) <= 10
-    assert all(r["resource_type"] == "Variable" for r in query_res["results"])
-
-    # Query with search substring
-    first_urn = query_res["results"][0]["raw_urn"]
-    search_res = query_staged_resources(import_id=import_id, search=first_urn)
-    assert search_res["total_count"] >= 1
-
-
-@pytest.mark.django_db
-def test_cli_import_list_stats_query(runner: CliRunner, sample_fsd_ddic: Path) -> None:
-    import_metadata_file(
-        file_path=sample_fsd_ddic,
-        profile="request",
-        force_reload=True,
-    )
-    staged = StagedImport.objects.latest("id")
-
-    # CLI list
-    list_res = runner.invoke(app, ["import", "list"])
+    # 3. fairwddi ingest list & status
+    list_res = runner.invoke(app, ["ingest", "list"])
     assert list_res.exit_code == 0
-    assert f"#{staged.id}" in list_res.stdout
+    assert f"#{batch.id}" in list_res.stdout
 
-    # CLI stats
-    stats_res = runner.invoke(app, ["import", "stats", str(staged.id)])
-    assert stats_res.exit_code == 0
-    assert f"Import #{staged.id} Statistics" in stats_res.stdout
-    assert "Normalization Progress" in stats_res.stdout
+    status_res = runner.invoke(app, ["ingest", "status", str(batch.id)])
+    assert status_res.exit_code == 0
+    assert f"IngestBatch #{batch.id}" in status_res.stdout
+    assert "Ingested Entities Breakdown" in status_res.stdout
 
-    # CLI query
-    query_res = runner.invoke(
-        app,
-        ["import", "query", "--import-id", str(staged.id), "--type", "Variable", "--limit", "5"],
-    )
-    assert query_res.exit_code == 0
-    assert "Staged Resource Query Results" in query_res.stdout
-    assert "Variable" in query_res.stdout
-
-    # CLI stats JSON
-    stats_json_res = runner.invoke(app, ["import", "stats", str(staged.id), "--format", "json"])
-    assert stats_json_res.exit_code == 0
-    assert '"staged_import_id":' in stats_json_res.stdout
-    assert '"total_resources": 487' in stats_json_res.stdout
-
-    # CLI stats Markdown
-    stats_md_res = runner.invoke(app, ["import", "stats", str(staged.id), "--format", "markdown"])
-    assert stats_md_res.exit_code == 0
-    assert "Import #" in stats_md_res.stdout
-    assert "High-Level Summary" in stats_md_res.stdout
-
-
-@pytest.mark.django_db
-def test_import_statistics_json_and_markdown_rendering(sample_fsd_ddic: Path) -> None:
-    from fairwddi.importer import (
-        get_import_statistics_as_json,
-        get_import_statistics_as_markdown,
-    )
-
-    summary = import_metadata_file(
-        file_path=sample_fsd_ddic,
-        profile="request",
-        force_reload=True,
-    )
-    import_id = summary["staged_import_id"]
-
-    # Test JSON output
-    json_out = get_import_statistics_as_json(import_id)
-    assert f'"staged_import_id": {import_id}' in json_out
-    assert '"total_resources": 487' in json_out
-
-    # Test Markdown output via Jinja2
-    md_out = get_import_statistics_as_markdown(import_id)
-    assert f"# Import #{import_id} Statistics Report" in md_out
-    assert "| **Total Staged Resources** | 487 |" in md_out
-    assert "| **Variable** | 74 | 74 | 0 | 0 |" in md_out
+    # 4. fairwddi ingest undo
+    undo_res = runner.invoke(app, ["ingest", "undo", str(batch.id)])
+    assert undo_res.exit_code == 0
+    assert f"Rolled back Batch #{batch.id}" in undo_res.stdout
+    assert IngestBatch.objects.get(id=batch.id).status == "undone"

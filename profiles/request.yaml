@@ -68,6 +68,7 @@ include_types:
   - Universe
   - UniverseScheme
   - StudyUnit
+  - PhysicalInstance
   - Group
   - DataCollection
   - DataRelationship
@@ -81,7 +82,6 @@ exclude_types:
   - Archive
   - DDIInstance
   - ResourcePackage
-  - PhysicalInstance
   - PhysicalDataSet
   - Methodology
   - ProcessingEvent

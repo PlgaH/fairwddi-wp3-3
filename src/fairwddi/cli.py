@@ -24,14 +24,6 @@ db_app = typer.Typer(
 )
 app.add_typer(db_app, name="db")
 
-import_app = typer.Typer(
-    name="import",
-    help="Metadata document import, staging, profiles, and logs (legacy alias for stage).",
-    no_args_is_help=True,
-    hidden=True,
-)
-app.add_typer(import_app, name="import")
-
 preflight_app = typer.Typer(
     name="preflight",
     help="Stage 1: Preflight readiness checks, profile QA, URN audits, and DDI-C upgrades.",
@@ -39,19 +31,12 @@ preflight_app = typer.Typer(
 )
 app.add_typer(preflight_app, name="preflight")
 
-stage_app = typer.Typer(
-    name="stage",
-    help="Stage 2a: Load DDI-Lifecycle metadata into staging, inspect, and compact storage.",
+ingest_app = typer.Typer(
+    name="ingest",
+    help="Stage 2: Direct file-to-core-tables ingestion, batch receipts, and undo.",
     no_args_is_help=True,
 )
-app.add_typer(stage_app, name="stage")
-
-promote_app = typer.Typer(
-    name="promote",
-    help="Stage 2b: Plan, apply, and undo promotion of staged resources into ReQuest core tables.",
-    no_args_is_help=True,
-)
-app.add_typer(promote_app, name="promote")
+app.add_typer(ingest_app, name="ingest")
 
 compare_app = typer.Typer(
     name="compare",
@@ -66,13 +51,6 @@ harmonize_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(harmonize_app, name="harmonize")
-
-ingest_app = typer.Typer(
-    name="ingest",
-    help="End-to-end convenience pipeline orchestrating preflight, stage, promote, and harmonize.",
-    no_args_is_help=True,
-)
-app.add_typer(ingest_app, name="ingest")
 
 console = Console()
 
@@ -538,547 +516,8 @@ def db_check_vocab(
 
 
 # -----------------------------------------------------------------------------
-# Metadata Import Subcommands
-# -----------------------------------------------------------------------------
-
-
-@import_app.command("file")
-def import_file_cmd(
-    file_path: str = typer.Argument(
-        ...,
-        help="Path to metadata document file to import (e.g. .ddi33.xml, .ddi40.json, .ddic.xml).",
-    ),
-    profile: str = typer.Option(
-        "request",
-        "--profile",
-        "-p",
-        help="Profile preset name (request, all_ddi) or path to custom YAML/JSON profile.",
-    ),
-    format_override: str | None = typer.Option(
-        None,
-        "--format",
-        "-f",
-        help="Explicit format override (e.g. 'ddi-l:3.3:xml', 'ddi-c:2.5:xml').",
-    ),
-    dry_run: bool = typer.Option(
-        False,
-        "--dry-run",
-        help="Parse and validate without committing records to the database.",
-    ),
-    force_reload: bool = typer.Option(
-        False,
-        "--force-reload",
-        "-r",
-        help="Force re-importing even if this exact file was previously staged.",
-    ),
-    batch_size: int = typer.Option(
-        1000,
-        "--batch-size",
-        help="Database bulk insertion batch size.",
-    ),
-    show_progress: bool = typer.Option(
-        True,
-        "--progress/--no-progress",
-        help="Show real-time progress bar during extraction and database staging.",
-    ),
-) -> None:
-    """Import and stage a metadata document into StagedImport and StagedResourceNode."""
-    from rich.progress import (
-        BarColumn,
-        MofNCompleteColumn,
-        Progress,
-        SpinnerColumn,
-        TaskProgressColumn,
-        TextColumn,
-        TimeElapsedColumn,
-        TimeRemainingColumn,
-    )
-
-    from fairwddi.importer import import_metadata_file
-
-    configure_django_for_cli()
-
-    path = Path(file_path)
-    if not path.exists():
-        console.print(f"[bold red]Error:[/bold red] File not found: [cyan]{path}[/cyan]")
-        raise typer.Exit(code=1)
-
-    console.print(
-        f"[dim]Processing metadata file [cyan]{path.name}[/cyan] "
-        f"with profile [yellow]{profile}[/yellow]...[/dim]"
-    )
-
-    if show_progress:
-        with Progress(
-            SpinnerColumn(style="bold cyan"),
-            TextColumn("[bold cyan]{task.description}[/bold cyan]"),
-            BarColumn(bar_width=35, complete_style="green", finished_style="bold green"),
-            TaskProgressColumn(),
-            MofNCompleteColumn(),
-            TimeElapsedColumn(),
-            TimeRemainingColumn(),
-            console=console,
-            transient=False,
-        ) as progress:
-            parse_task = progress.add_task("[cyan]Streaming & parsing document...", total=None)
-            stage_task = progress.add_task(
-                "[yellow]Staging resources to database...", total=None, visible=False
-            )
-
-            def on_progress(
-                stage: str, current: int, total: int | None, message: str | None
-            ) -> None:
-                if stage == "parse":
-                    desc = f"[cyan]Parsing fragments...[/cyan] [dim]({current:,} items)[/dim]"
-                    progress.update(parse_task, completed=current, description=desc)
-                elif stage == "parse_done":
-                    desc = f"[bold green]Parsed {current:,} resource fragments[/bold green]"
-                    progress.update(parse_task, total=current, completed=current, description=desc)
-                    progress.update(
-                        stage_task,
-                        visible=True,
-                        total=current,
-                        completed=0,
-                        description="[yellow]Filtering & staging to database...[/yellow]",
-                    )
-                elif stage == "stage":
-                    desc = f"[yellow]Staging...[/yellow] [dim]({message or ''})[/dim]"
-                    progress.update(stage_task, completed=current, total=total, description=desc)
-                elif stage == "stage_done":
-                    desc = f"[bold green]Staged {current:,} resources into db[/bold green]"
-                    progress.update(stage_task, completed=current, total=total, description=desc)
-
-            try:
-                summary = import_metadata_file(
-                    file_path=path,
-                    profile=profile,
-                    source_format=format_override,
-                    batch_size=batch_size,
-                    dry_run=dry_run,
-                    force_reload=force_reload,
-                    progress_callback=on_progress,
-                )
-            except Exception as exc:
-                console.print(f"[bold red]Import Error:[/bold red] {exc}")
-                raise typer.Exit(code=1) from exc
-    else:
-        try:
-            summary = import_metadata_file(
-                file_path=path,
-                profile=profile,
-                source_format=format_override,
-                batch_size=batch_size,
-                dry_run=dry_run,
-                force_reload=force_reload,
-            )
-        except Exception as exc:
-            console.print(f"[bold red]Import Error:[/bold red] {exc}")
-            raise typer.Exit(code=1) from exc
-
-    if summary.get("status") == "already_staged":
-        console.print(f"[bold yellow]Notice:[/bold yellow] {summary.get('message')}")
-        console.print(
-            f"[dim]Staged Import ID:[/dim] [cyan]#{summary.get('staged_import_id')}[/cyan]"
-        )
-        return
-
-    fmt = summary.get("format_info", {})
-    mode_tag = " [bold yellow][DRY RUN][/bold yellow]" if dry_run else ""
-    table = Table(
-        title=f"Metadata Import Summary{mode_tag} [{summary.get('file_name')}]",
-        border_style="green" if not dry_run else "yellow",
-    )
-    table.add_column("Metric / Property", style="bold cyan")
-    table.add_column("Value", style="yellow")
-
-    if summary.get("staged_import_id"):
-        table.add_row("Staged Import ID", f"#{summary.get('staged_import_id')}")
-    spec_desc = f"{fmt.get('specification')} {fmt.get('version')} ({fmt.get('serialization')})"
-    table.add_row("Detected Specification", spec_desc)
-    table.add_row("Producer Flavor", fmt.get("flavor") or "Generic")
-    table.add_row("Active Profile", summary.get("profile", ""))
-    table.add_row("Total Resources Staged", f"{summary.get('total_staged', 0):,}")
-    table.add_row("Skipped Duplicates", f"{summary.get('skipped_duplicates', 0):,}")
-    table.add_row("Quarantined Drift Items", f"{summary.get('quarantined_count', 0):,}")
-    table.add_row("Elapsed Time", f"{summary.get('elapsed_seconds', 0):.3f}s")
-    table.add_row("Throughput", f"{summary.get('throughput_per_sec', 0):.1f} resources/sec")
-    if summary.get("log_file"):
-        table.add_row("Session Audit Log", str(summary.get("log_file")))
-
-    console.print(table)
-
-    if summary.get("counts_by_type"):
-        counts_table = Table(title="Staged Nodes by Resource Type", border_style="cyan")
-        counts_table.add_column("Resource Type", style="bold green")
-        counts_table.add_column("Count", justify="right", style="yellow")
-        for r_type, count in sorted(
-            summary["counts_by_type"].items(), key=lambda x: x[1], reverse=True
-        ):
-            counts_table.add_row(r_type, f"{count:,}")
-        console.print(counts_table)
-
-    console.print("[bold green]Stage 1 import completed successfully.[/bold green]")
-
-
-@import_app.command("list-profiles")
-def import_list_profiles() -> None:
-    """List available import profiles and their configuration rules."""
-    from fairwddi.importer import list_available_profiles
-
-    profiles = list_available_profiles()
-    if not profiles:
-        console.print("[yellow]No YAML/JSON profiles found in profiles/ directory.[/yellow]")
-        return
-
-    table = Table(title="Available Import Profiles", border_style="cyan")
-    table.add_column("Profile Name", style="bold green")
-    table.add_column("Description", style="white")
-    table.add_column("Include Types", justify="right", style="yellow")
-    table.add_column("Exclude Types", justify="right", style="red")
-    table.add_column("Resolve Refs", justify="center", style="cyan")
-
-    for p in profiles:
-        inc = str(p["include_types_count"]) if p["include_types_count"] > 0 else "ALL"
-        exc = str(p["exclude_types_count"]) if p["exclude_types_count"] > 0 else "None"
-        refs = "✓" if p["include_referenced_resources"] else "✗"
-        table.add_row(p["name"], p["description"], inc, exc, refs)
-
-    console.print(table)
-
-
-@import_app.command("list")
-def import_list_cmd(
-    status: str | None = typer.Option(None, "--status", "-s", help="Filter by status."),
-    source_format: str | None = typer.Option(None, "--format", help="Filter by format substring."),
-    limit: int = typer.Option(20, "--limit", "-n", help="Max imports to list."),
-) -> None:
-    """List staged imports with status and resource counts."""
-    from fairwddi.importer import list_staged_imports
-
-    configure_django_for_cli()
-    imports = list_staged_imports(status=status, source_format=source_format, limit=limit)
-    if not imports:
-        console.print("[yellow]No staged imports found matching criteria.[/yellow]")
-        return
-
-    table = Table(title="Staged Imports", border_style="cyan")
-    table.add_column("ID", style="bold cyan", justify="right")
-    table.add_column("File Name", style="bold green")
-    table.add_column("Format", style="white")
-    table.add_column("Status", style="yellow")
-    table.add_column("Total Resources", justify="right", style="magenta")
-    table.add_column("Created At", style="dim")
-
-    for imp in imports:
-        table.add_row(
-            f"#{imp['id']}",
-            imp["file_name"],
-            imp["source_format"],
-            imp["status"],
-            f"{imp['total_resources']:,}",
-            str(imp["created_at"] or "")[:19],
-        )
-    console.print(table)
-
-
-@import_app.command("stats")
-def import_stats_cmd(
-    import_id: int = typer.Argument(..., help="StagedImport primary key ID."),
-    format_type: str = typer.Option(
-        "table",
-        "--format",
-        "-f",
-        help="Output format: 'table', 'json', 'markdown' (or 'md').",
-    ),
-    output_path: Path | None = typer.Option(
-        None,
-        "--output",
-        "-o",
-        help="Optional file path to write output to.",
-    ),
-) -> None:
-    """Display comprehensive statistics, normalization metrics, and cross-tabulation."""
-    from rich.markdown import Markdown
-
-    from fairwddi.importer import (
-        get_import_statistics,
-        render_statistics_json,
-        render_statistics_markdown,
-    )
-
-    configure_django_for_cli()
-    try:
-        stats = get_import_statistics(import_id)
-    except Exception as exc:
-        console.print(f"[bold red]Error:[/bold red] {exc}")
-        raise typer.Exit(code=1) from exc
-
-    fmt = format_type.lower()
-    if fmt == "json":
-        json_text = render_statistics_json(stats, indent=2)
-        if output_path:
-            output_path.write_text(json_text, encoding="utf-8")
-            console.print(
-                f"[bold green]Saved JSON statistics to [cyan]{output_path}[/cyan][/bold green]"
-            )
-        else:
-            console.print(json_text)
-        return
-
-    if fmt in ("markdown", "md"):
-        md_text = render_statistics_markdown(stats)
-        if output_path:
-            output_path.write_text(md_text, encoding="utf-8")
-            console.print(
-                f"[bold green]Saved Markdown report to [cyan]{output_path}[/cyan][/bold green]"
-            )
-        else:
-            console.print(Markdown(md_text))
-        return
-
-    # Default: Rich Table output
-    table = Table(
-        title=f"Import #{stats['staged_import_id']} Statistics [{stats['file_name']}]",
-        border_style="cyan",
-    )
-    table.add_column("Metric / Indicator", style="bold cyan")
-    table.add_column("Value", style="yellow")
-
-    table.add_row("Status", stats["status"])
-    table.add_row("Source Format", stats["source_format"])
-    table.add_row("Total Staged Resources", f"{stats['total_resources']:,}")
-    table.add_row("Normalized Resources", f"{stats['normalized_count']:,}")
-    table.add_row("Normalization Progress", f"{stats['normalization_progress_pct']}%")
-    table.add_row("Downstream URN Aliases", f"{stats['alias_count']:,}")
-    table.add_row("Quarantined Collisions", f"{stats['quarantine_count']:,}")
-    table.add_row("Created At", str(stats["created_at"]))
-
-    console.print(table)
-
-    if stats["counts_by_type"]:
-        counts_table = Table(title="Resource Types & Status Cross-Tabulation", border_style="green")
-        counts_table.add_column("Resource Type", style="bold green")
-        counts_table.add_column("Total", justify="right", style="magenta")
-        counts_table.add_column("Staged", justify="right", style="cyan")
-        counts_table.add_column("Normalized", justify="right", style="yellow")
-        counts_table.add_column("Quarantined", justify="right", style="red")
-
-        for r_type, total in stats["counts_by_type"].items():
-            breakdown = stats["cross_tab"].get(r_type, {})
-            staged = str(breakdown.get("staged", 0))
-            norm = str(breakdown.get("normalized", 0))
-            quar = str(breakdown.get("quarantined", 0))
-            counts_table.add_row(r_type, f"{total:,}", staged, norm, quar)
-
-        console.print(counts_table)
-
-
-@import_app.command("query")
-def import_query_cmd(
-    import_id: int | None = typer.Option(
-        None, "--import-id", "-i", help="Filter by StagedImport ID."
-    ),
-    resource_type: str | None = typer.Option(None, "--type", "-t", help="Filter by resource type."),
-    status: str | None = typer.Option(None, "--status", "-s", help="Filter by status."),
-    search: str | None = typer.Option(None, "--search", "-q", help="Search URN substring."),
-    limit: int = typer.Option(20, "--limit", "-n", help="Max records to display."),
-    show_json: bool = typer.Option(False, "--show-json", help="Display raw JSON value preview."),
-) -> None:
-    """Query, filter, and inspect staged resource nodes."""
-    import json
-
-    from fairwddi.importer import query_staged_resources
-
-    configure_django_for_cli()
-    res = query_staged_resources(
-        import_id=import_id,
-        resource_type=resource_type,
-        status=status,
-        search=search,
-        limit=limit,
-    )
-
-    console.print(
-        f"[dim]Found [bold cyan]{res['total_count']:,}[/bold cyan] matching nodes "
-        f"(displaying {len(res['results'])}):[/dim]"
-    )
-    if not res["results"]:
-        return
-
-    table = Table(title="Staged Resource Query Results", border_style="cyan")
-    table.add_column("ID", style="bold cyan", justify="right")
-    table.add_column("Import", style="dim", justify="right")
-    table.add_column("Resource Type", style="bold green")
-    table.add_column("Raw URN", style="yellow")
-    table.add_column("Status", style="magenta")
-
-    for node in res["results"]:
-        table.add_row(
-            str(node["id"]),
-            f"#{node['staged_import_id']}",
-            node["resource_type"],
-            node["raw_urn"],
-            node["status"],
-        )
-    console.print(table)
-
-    if show_json:
-        for node in res["results"][:3]:
-            console.print(
-                Panel(
-                    json.dumps(node["raw_value"], indent=2),
-                    title=f"Payload for Node #{node['id']} [{node['resource_type']}]",
-                    border_style="green",
-                )
-            )
-
-
-@import_app.command("status")
-def import_status_cmd(
-    import_id: int = typer.Argument(..., help="StagedImport primary key ID."),
-) -> None:
-    """Display status and breakdown for a specific staged import job."""
-    configure_django_for_cli()
-    from fairwddi.models import StagedImport, StagedResourceNode
-
-    staged_import = StagedImport.objects.filter(id=import_id).first()
-    if not staged_import:
-        console.print(f"[bold red]Error:[/bold red] StagedImport #{import_id} not found.")
-        raise typer.Exit(code=1)
-
-    table = Table(
-        title=f"Staged Import #{staged_import.id} [{staged_import.file_name}]",
-        border_style="cyan",
-    )
-    table.add_column("Attribute", style="bold cyan")
-    table.add_column("Value", style="yellow")
-
-    table.add_row("Status", staged_import.status)
-    table.add_row("Source Format", staged_import.source_format)
-    table.add_row("Total Resources", str(staged_import.total_resources))
-    table.add_row("Processed Resources", str(staged_import.processed_resources))
-    table.add_row("Created At", str(staged_import.created_at))
-    if staged_import.processed_at:
-        table.add_row("Processed At", str(staged_import.processed_at))
-    log_file = staged_import.import_options.get("log_file")
-    if log_file:
-        table.add_row("Session Log File", str(log_file))
-
-    console.print(table)
-
-    nodes = StagedResourceNode.objects.filter(staged_import=staged_import)
-    if nodes.exists():
-        from django.db.models import Count
-
-        counts = (
-            nodes.values("resource_type", "status").annotate(total=Count("id")).order_by("-total")
-        )
-        breakdown_table = Table(title="Staged Resource Nodes Breakdown", border_style="green")
-        breakdown_table.add_column("Resource Type", style="bold green")
-        breakdown_table.add_column("Status", style="cyan")
-        breakdown_table.add_column("Count", justify="right", style="yellow")
-
-        for row in counts:
-            breakdown_table.add_row(row["resource_type"], row["status"], str(row["total"]))
-        console.print(breakdown_table)
-
-
-@import_app.command("log")
-def import_log_cmd(
-    import_id: int = typer.Argument(..., help="StagedImport primary key ID."),
-) -> None:
-    """Display the session log for a specific staged import job."""
-    configure_django_for_cli()
-    from fairwddi.models import StagedImport
-
-    staged_import = StagedImport.objects.filter(id=import_id).first()
-    if not staged_import:
-        console.print(f"[bold red]Error:[/bold red] StagedImport #{import_id} not found.")
-        raise typer.Exit(code=1)
-
-    log_file_str = staged_import.import_options.get("log_file")
-    if not log_file_str:
-        console.print(f"[yellow]No log file recorded for StagedImport #{import_id}.[/yellow]")
-        return
-
-    log_path = Path(log_file_str)
-    if not log_path.exists():
-        console.print(
-            f"[bold red]Error:[/bold red] Log file not found on disk: [cyan]{log_path}[/cyan]"
-        )
-        raise typer.Exit(code=1)
-
-    log_content = log_path.read_text(encoding="utf-8")
-    panel = Panel(log_content, title=f"Log: {log_path.name}", border_style="cyan")
-    console.print(panel)
-
-
-@import_app.command("delete")
-def import_delete_cmd(
-    import_id: int = typer.Argument(..., help="StagedImport primary key ID to delete."),
-    yes: bool = typer.Option(
-        False,
-        "--yes",
-        "-y",
-        help="Skip confirmation prompt and proceed with deletion.",
-    ),
-    force: bool = typer.Option(
-        False,
-        "--force",
-        "-f",
-        help="Force deletion even if resources have been normalized or referenced downstream.",
-    ),
-    delete_log: bool = typer.Option(
-        False,
-        "--delete-log",
-        help="Also delete the session audit log file from disk.",
-    ),
-) -> None:
-    configure_django_for_cli()
-    from fairwddi.importer import ProtectedImportError, delete_staged_import
-    from fairwddi.models import StagedImport
-
-    staged_import = StagedImport.objects.filter(id=import_id).first()
-    if not staged_import:
-        console.print(f"[bold red]Error:[/bold red] StagedImport #{import_id} not found.")
-        raise typer.Exit(code=1)
-
-    if not yes:
-        confirmed = typer.confirm(
-            f"Are you sure you want to delete StagedImport #{import_id} "
-            f"('{staged_import.file_name}', {staged_import.total_resources:,} nodes)?",
-            default=False,
-        )
-        if not confirmed:
-            console.print("[dim]Deletion cancelled.[/dim]")
-            raise typer.Exit()
-
-    try:
-        res = delete_staged_import(import_id=import_id, force=force, delete_log_file=delete_log)
-    except ProtectedImportError as exc:
-        console.print(f"[bold red]Deletion Blocked:[/bold red] {exc}")
-        console.print(
-            f"[yellow]Normalized resources:[/yellow] {exc.normalized_count} | "
-            f"[yellow]Downstream URN aliases:[/yellow] {exc.alias_count}"
-        )
-        console.print("[dim]Use --force / -f to override dependency checks and force delete.[/dim]")
-        raise typer.Exit(code=1) from exc
-    except Exception as exc:
-        console.print(f"[bold red]Error:[/bold red] {exc}")
-        raise typer.Exit(code=1) from exc
-
-    console.print(
-        f"[bold green]Deleted StagedImport #{res['staged_import_id']}[/bold green] "
-        f"([cyan]{res['file_name']}[/cyan]): "
-        f"removed [yellow]{res['deleted_nodes_count']:,}[/yellow] staged node(s)."
-    )
-    if res["log_file_deleted"]:
-        console.print("[dim]Session audit log file removed from disk.[/dim]")
-
-
-# -----------------------------------------------------------------------------
 # Phase 2 Multi-Stage Ingestion CLI Groups
-# (preflight, stage, promote, compare, harmonize, ingest)
+# (preflight, ingest, compare, harmonize)
 # -----------------------------------------------------------------------------
 
 
@@ -1193,112 +632,110 @@ def preflight_upgrade_cmd(
     console.print(table)
 
 
-# Stage 2a subcommands
-stage_app.command("load")(import_file_cmd)
-stage_app.command("list")(import_list_cmd)
-stage_app.command("status")(import_status_cmd)
-stage_app.command("stats")(import_stats_cmd)
-stage_app.command("query")(import_query_cmd)
-stage_app.command("profiles")(import_list_profiles)
+@preflight_app.command("profiles")
+def preflight_profiles_cmd() -> None:
+    """List available import profiles and their configuration rules."""
+    from fairwddi.ingest.profiles import list_available_profiles
 
+    profiles = list_available_profiles()
+    if not profiles:
+        console.print("[yellow]No YAML/JSON profiles found in profiles/ directory.[/yellow]")
+        return
 
-@stage_app.command("cleanup")
-def stage_cleanup_cmd(
-    import_id: int | None = typer.Argument(
-        None, help="Optional StagedImport ID. Omit to compact all promoted batches."
-    ),
-    delete_batch: bool = typer.Option(
-        False,
-        "--delete",
-        help="Permanently delete the batch instead of compacting JSONB payloads.",
-    ),
-    force: bool = typer.Option(False, "--force", "-f", help="Force deletion of promoted batch."),
-) -> None:
-    """Compact `raw_value` JSONB payloads on promoted nodes (or delete a batch)."""
-    from fairwddi.ingest.staging import cleanup_staged_import
+    table = Table(title="Available Import Profiles", border_style="cyan")
+    table.add_column("Profile Name", style="bold green")
+    table.add_column("Description", style="white")
+    table.add_column("Include Types", justify="right", style="yellow")
+    table.add_column("Exclude Types", justify="right", style="red")
+    table.add_column("Resolve Refs", justify="center", style="cyan")
 
-    configure_django_for_cli()
-    try:
-        res = cleanup_staged_import(
-            import_id=import_id,
-            compact_only=not delete_batch,
-            force=force,
-        )
-    except Exception as exc:
-        console.print(f"[bold red]Cleanup Error:[/bold red] {exc}")
-        raise typer.Exit(code=1) from exc
+    for p in profiles:
+        inc = str(p["include_types_count"]) if p["include_types_count"] > 0 else "ALL"
+        exc = str(p["exclude_types_count"]) if p["exclude_types_count"] > 0 else "None"
+        refs = "✓" if p["include_referenced_resources"] else "✗"
+        table.add_row(p["name"], p["description"], inc, exc, refs)
 
-    if res["mode"] == "compacted":
-        console.print(
-            f"[bold green]Compacted [yellow]{res['compacted_nodes_count']:,}[/yellow] "
-            f"promoted staging node(s) (lineage preserved for undo).[/bold green]"
-        )
-    else:
-        console.print(
-            f"[bold green]Deleted StagedImport #{res['staged_import_id']} "
-            f"({res['deleted_nodes_count']:,} nodes).[/bold green]"
-        )
-
-
-@promote_app.command("plan")
-def promote_plan_cmd(
-    import_id: int = typer.Argument(..., help="StagedImport batch ID to plan promotion for."),
-    output_dir: Path | None = typer.Option(
-        None, "--output-dir", "-o", help="Directory to write .promote.plan.yaml & .report.md."
-    ),
-    auto_approve: bool = typer.Option(False, "--auto-approve", help="Approve review gate."),
-) -> None:
-    """Generate a review-gated Promotion Plan (.promote.plan.yaml & .report.md) for a batch."""
-    from fairwddi.ingest.promoter import plan_promotion
-
-    configure_django_for_cli()
-    try:
-        plan = plan_promotion(
-            import_id=import_id,
-            output_dir=output_dir,
-            auto_approve=auto_approve,
-        )
-    except Exception as exc:
-        console.print(f"[bold red]Promote Plan Error:[/bold red] {exc}")
-        raise typer.Exit(code=1) from exc
-
-    table = Table(title=f"Promotion Plan [{plan.job_id}]", border_style="cyan")
-    table.add_column("Action / Metric", style="bold cyan")
-    table.add_column("Count", justify="right", style="yellow")
-    for k, v in plan.summary.items():
-        table.add_row(str(k), str(v))
-    table.add_row("Pending Review Items", str(plan.pending_review_count))
     console.print(table)
 
 
-@promote_app.command("apply")
-def promote_apply_cmd(
-    batch_or_plan: str = typer.Argument(
-        ..., help="StagedImport batch ID (int) or path to a .promote.plan.yaml file."
+@ingest_app.command("plan")
+def ingest_plan_cmd(
+    file_path: str = typer.Argument(
+        ..., help="Path to DDI-Lifecycle (.xml/.json/.jsonl) or DDI-Codebook (.xml) file."
+    ),
+    profile: str = typer.Option("request", "--profile", "-p", help="Import profile."),
+    output_dir: Path | None = typer.Option(
+        None, "--output-dir", "-o", help="Directory to write .ingest.plan.yaml & .report.md."
+    ),
+    force_reload: bool = typer.Option(
+        False, "--force-reload", help="Plan reload even if file SHA-256 was already ingested."
+    ),
+    auto_approve: bool = typer.Option(False, "--auto-approve", help="Approve review gate."),
+) -> None:
+    """Generate a zero-write Ingestion Plan (.ingest.plan.yaml & .report.md) for a metadata file."""
+    from fairwddi.ingest.loader import plan_ingestion
+
+    configure_django_for_cli()
+    try:
+        plan = plan_ingestion(
+            file_path=file_path,
+            profile=profile,
+            output_dir=output_dir,
+            force_reload=force_reload,
+            auto_approve=auto_approve,
+        )
+    except Exception as exc:
+        console.print(f"[bold red]Ingest Plan Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    table = Table(title=f"Ingestion Plan [{plan.job_id}]", border_style="cyan")
+    table.add_column("Action / Metric", style="bold cyan")
+    table.add_column("Count", justify="right", style="yellow")
+    table.add_row("Source Format", str(plan.source_format))
+    for k, v in plan.summary.items():
+        table.add_row(str(k), str(v))
+    table.add_row("Pending Review Items", str(plan.pending_review_count))
+    table.add_row("Errors", str(plan.error_count))
+    console.print(table)
+
+
+@ingest_app.command("apply")
+def ingest_apply_cmd(
+    file_or_plan: str = typer.Argument(
+        ..., help="Path to metadata file or approved .ingest.plan.yaml file."
+    ),
+    profile: str = typer.Option("request", "--profile", "-p", help="Import profile."),
+    force_reload: bool = typer.Option(
+        False, "--force-reload", help="Re-ingest even if file SHA-256 was already ingested."
     ),
     auto_approve: bool = typer.Option(
         False, "--auto-approve", help="Bypass review gate for pending drift/quarantine items."
     ),
-    compact: bool = typer.Option(
-        False, "--compact", help="Compact staged JSONB payloads immediately after promotion."
-    ),
 ) -> None:
-    """Promote staged resources into ReQuest core tables (resolving cascade & shortcuts)."""
-    from fairwddi.ingest.promoter import apply_promotion
+    """Stream metadata directly into ReQuest core tables and record an IngestBatch receipt."""
+    from fairwddi.ingest.loader import apply_ingestion
 
     configure_django_for_cli()
     try:
-        res = apply_promotion(
-            import_id_or_plan=batch_or_plan,
+        res = apply_ingestion(
+            file_or_plan=file_or_plan,
+            profile=profile,
+            force_reload=force_reload,
             auto_approve=auto_approve,
-            compact=compact,
         )
     except Exception as exc:
-        console.print(f"[bold red]Promote Apply Error:[/bold red] {exc}")
+        console.print(f"[bold red]Ingest Apply Error:[/bold red] {exc}")
         raise typer.Exit(code=1) from exc
 
+    if res["status"] == "already_ingested":
+        console.print(
+            f"[bold yellow]Notice:[/bold yellow] File already ingested in "
+            f"[cyan]Batch #{res['batch_id']}[/cyan]. Use --force-reload to replace."
+        )
+        return
+
     table = Table(
-        title=f"Promotion Completed [Batch #{res['staged_import_id']}]",
+        title=f"Ingestion Completed [Batch #{res['batch_id']}]",
         border_style="green",
     )
     table.add_column("Metric", style="bold cyan")
@@ -1309,48 +746,171 @@ def promote_apply_cmd(
     table.add_row("Reused Existing Resources", f"{res['reused_count']:,}")
     table.add_row("Registered URN Aliases", f"{res['alias_count']:,}")
     table.add_row("Quarantined Drift Items", f"{res['quarantine_count']:,}")
-    if compact:
-        table.add_row("Compacted Staged Nodes", f"{res['compacted_nodes_count']:,}")
+    table.add_row("Inserted Frequency Rows", f"{res['frequency_rows_count']:,}")
     console.print(table)
 
 
-@promote_app.command("undo")
-def promote_undo_cmd(
-    import_id: int = typer.Argument(..., help="StagedImport batch ID to roll back."),
-    force: bool = typer.Option(False, "--force", "-f", help="Force rollback."),
+@ingest_app.command("run")
+def ingest_run_cmd(
+    file_path: str = typer.Argument(..., help="Path to DDI-C or DDI-L metadata file to ingest."),
+    profile: str = typer.Option("request", "--profile", "-p", help="Import profile."),
+    output_dir: Path | None = typer.Option(
+        None, "--output-dir", "-o", help="Directory for stage plans, upgraded files, and reports."
+    ),
+    agency: str | None = typer.Option(None, "--agency", help="Agency override for DDI-C upgrade."),
+    id_strategy: str = typer.Option("hierarchical", "--id-strategy", help="ID strategy."),
+    plan_only: bool = typer.Option(
+        False, "--plan-only", help="Stop after generating the preflight & ingestion plans."
+    ),
+    harmonize: bool = typer.Option(
+        False, "--harmonize", help="Also run comparison and harmonization after ingestion."
+    ),
+    force_reload: bool = typer.Option(
+        False, "--force-reload", help="Force reload if already ingested."
+    ),
+    auto_approve: bool = typer.Option(
+        False, "--auto-approve", help="Auto-approve review gates across stages."
+    ),
 ) -> None:
-    """Roll back a promoted batch, removing created core entities and resetting staging status."""
-    from fairwddi.ingest.promoter import undo_promotion
+    """Run the end-to-end ingestion pipeline (preflight -> upgrade -> ingest -> harmonize)."""
+    from fairwddi.ingest.pipeline import run_ingestion_pipeline
 
     configure_django_for_cli()
     try:
-        res = undo_promotion(import_id=import_id, force=force)
+        res = run_ingestion_pipeline(
+            file_path=file_path,
+            profile=profile,
+            output_dir=output_dir,
+            agency=agency,
+            id_strategy=id_strategy,
+            plan_only=plan_only,
+            harmonize=harmonize,
+            force_reload=force_reload,
+            auto_approve=auto_approve,
+        )
     except Exception as exc:
-        console.print(f"[bold red]Promote Undo Error:[/bold red] {exc}")
+        console.print(f"[bold red]Ingestion Pipeline Error:[/bold red] {exc}")
         raise typer.Exit(code=1) from exc
 
     console.print(
-        f"[bold green]Rolled back Batch #{res['staged_import_id']}:[/bold green] "
-        f"removed [yellow]{res['deleted_core_resources_count']:,}[/yellow] core resource(s), "
-        f"[yellow]{res['deleted_aliases_count']:,}[/yellow] alias(es), and reset "
-        f"[cyan]{res['reset_staged_nodes_count']:,}[/cyan] staged node(s)."
+        f"[bold green]Ingestion Pipeline Status:[/bold green] [cyan]{res['status']}[/cyan]"
     )
+    if res.get("batch_id"):
+        console.print(f"[dim]Ingest Batch ID:[/dim] [yellow]#{res['batch_id']}[/yellow]")
+
+
+@ingest_app.command("undo")
+def ingest_undo_cmd(
+    batch_id: int = typer.Argument(..., help="IngestBatch ID to roll back."),
+) -> None:
+    """Roll back an IngestBatch, removing created core resources, frequencies, and aliases."""
+    from fairwddi.ingest.loader import undo_ingestion
+
+    configure_django_for_cli()
+    try:
+        res = undo_ingestion(batch_id=batch_id)
+    except Exception as exc:
+        console.print(f"[bold red]Ingest Undo Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    console.print(
+        f"[bold green]Rolled back Batch #{res['batch_id']}:[/bold green] "
+        f"removed [yellow]{res['deleted_core_resources_count']:,}[/yellow] core resource(s) "
+        f"and [yellow]{res['deleted_aliases_count']:,}[/yellow] alias(es)."
+    )
+
+
+@ingest_app.command("list")
+def ingest_list_cmd(
+    status: str | None = typer.Option(None, "--status", "-s", help="Filter by batch status."),
+    limit: int = typer.Option(50, "--limit", "-n", help="Max batches to list."),
+) -> None:
+    """List IngestBatch receipts with status and resource counts."""
+    from fairwddi.ingest.loader import list_ingest_batches
+
+    configure_django_for_cli()
+    batches = list_ingest_batches(status=status, limit=limit)
+    if not batches:
+        console.print("[yellow]No ingestion batches found matching criteria.[/yellow]")
+        return
+
+    table = Table(title="Ingestion Batches", border_style="cyan")
+    table.add_column("ID", style="bold cyan", justify="right")
+    table.add_column("File Name", style="bold green")
+    table.add_column("Format", style="white")
+    table.add_column("Status", style="yellow")
+    table.add_column("Created", justify="right", style="magenta")
+    table.add_column("Reused", justify="right", style="cyan")
+    table.add_column("Aliases", justify="right", style="blue")
+    table.add_column("Created At", style="dim")
+
+    for b in batches:
+        table.add_row(
+            f"#{b['id']}",
+            b["file_name"],
+            b["source_format"],
+            b["status"],
+            f"{b['created_count']:,}",
+            f"{b['reused_count']:,}",
+            f"{b['alias_count']:,}",
+            str(b["created_at"] or "")[:19],
+        )
+    console.print(table)
+
+
+@ingest_app.command("status")
+def ingest_status_cmd(
+    batch_id: int = typer.Argument(..., help="IngestBatch ID to inspect."),
+) -> None:
+    """Display status and per-entity statistics for a specific IngestBatch receipt."""
+    from fairwddi.ingest.loader import get_ingest_batch_status
+
+    configure_django_for_cli()
+    try:
+        info_dict = get_ingest_batch_status(batch_id=batch_id)
+    except Exception as exc:
+        console.print(f"[bold red]Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    table = Table(
+        title=f"IngestBatch #{info_dict['id']} [{info_dict['file_name']}]",
+        border_style="cyan",
+    )
+    table.add_column("Attribute", style="bold cyan")
+    table.add_column("Value", style="yellow")
+    table.add_row("Status", info_dict["status"])
+    table.add_row("Source Format", info_dict["source_format"])
+    table.add_row("File SHA-256", info_dict["file_sha256"][:24] + "...")
+    table.add_row("Created Core Resources", f"{info_dict['created_count']:,}")
+    table.add_row("Reused Existing Resources", f"{info_dict['reused_count']:,}")
+    table.add_row("Registered URN Aliases", f"{info_dict['alias_count']:,}")
+    table.add_row("Created At", str(info_dict["created_at"] or ""))
+    console.print(table)
+
+    stats = info_dict.get("stats") or {}
+    if stats:
+        s_table = Table(title="Ingested Entities Breakdown", border_style="green")
+        s_table.add_column("Entity / Table", style="bold green")
+        s_table.add_column("Count", justify="right", style="yellow")
+        for entity_name, count in sorted(stats.items()):
+            s_table.add_row(entity_name, f"{count:,}")
+        console.print(s_table)
 
 
 @compare_app.command("batch")
 def compare_batch_cmd(
-    import_id: int = typer.Argument(..., help="StagedImport batch ID to compare against the bank."),
+    batch_id: int = typer.Argument(..., help="IngestBatch ID to compare against the bank."),
     threshold: float = typer.Option(0.75, "--threshold", "-t", help="Minimum similarity score."),
     output_dir: Path | None = typer.Option(
         None, "--output-dir", "-o", help="Directory to write .compare.plan.yaml & .report.md."
     ),
 ) -> None:
-    """Compare resources from a specific batch against existing ReQuest bank entities."""
+    """Compare resources from a specific IngestBatch against existing ReQuest bank entities."""
     from fairwddi.ingest.comparator import compare_batch
 
     configure_django_for_cli()
     try:
-        plan = compare_batch(import_id=import_id, threshold=threshold, output_dir=output_dir)
+        plan = compare_batch(batch_id=batch_id, threshold=threshold, output_dir=output_dir)
     except Exception as exc:
         console.print(f"[bold red]Compare Error:[/bold red] {exc}")
         raise typer.Exit(code=1) from exc
@@ -1370,7 +930,7 @@ def compare_discover_cmd(
         help="Filter by type: Category, CodeList, QuestionItem, RepresentedVariable.",
     ),
     study_urn: str | None = typer.Option(None, "--study", "-s", help="Scope to StudyUnit URN."),
-    batch_id: int | None = typer.Option(None, "--batch-id", "-b", help="Scope to StagedImport ID."),
+    batch_id: int | None = typer.Option(None, "--batch-id", "-b", help="Scope to IngestBatch ID."),
     query: str | None = typer.Option(None, "--query", "-q", help="Substring filter."),
     threshold: float = typer.Option(0.75, "--threshold", help="Minimum similarity confidence."),
     limit: int = typer.Option(50, "--limit", "-n", help="Max candidate pairs to return."),
@@ -1415,8 +975,10 @@ def compare_discover_cmd(
 
 @harmonize_app.command("plan")
 def harmonize_plan_cmd(
-    batch_id: int | None = typer.Option(None, "--batch-id", "-b", help="Scope to StagedImport ID."),
+    batch_id: int | None = typer.Option(None, "--batch-id", "-b", help="Scope to IngestBatch ID."),
     resource_type: str | None = typer.Option(None, "--type", "-t", help="Filter by resource type."),
+    study_urn: str | None = typer.Option(None, "--study", "-s", help="Scope to StudyUnit URN."),
+    query: str | None = typer.Option(None, "--query", "-q", help="Substring filter."),
     threshold: float = typer.Option(0.75, "--threshold", help="Similarity threshold."),
     output_dir: Path | None = typer.Option(
         None, "--output-dir", "-o", help="Directory to write .harmonize.plan.yaml & .report.md."
@@ -1428,8 +990,10 @@ def harmonize_plan_cmd(
 
     configure_django_for_cli()
     plan = plan_harmonization(
-        import_id=batch_id,
+        batch_id=batch_id,
         resource_type=resource_type,
+        study_urn=study_urn,
+        query=query,
         threshold=threshold,
         output_dir=output_dir,
         auto_approve=auto_approve,
@@ -1484,59 +1048,6 @@ def harmonize_undo_cmd(
         f"restored {res['restored_targets']} resource(s), "
         f"removed {res['removed_aliases']} alias(es)."
     )
-
-
-@ingest_app.command("run")
-def ingest_run_cmd(
-    file_path: str = typer.Argument(..., help="Path to DDI-C or DDI-L metadata file to ingest."),
-    profile: str = typer.Option("request", "--profile", "-p", help="Import profile."),
-    output_dir: Path | None = typer.Option(
-        None, "--output-dir", "-o", help="Directory for stage plans, upgraded files, and reports."
-    ),
-    agency: str | None = typer.Option(None, "--agency", help="Agency override for DDI-C upgrade."),
-    id_strategy: str = typer.Option("hierarchical", "--id-strategy", help="ID strategy."),
-    stage_only: bool = typer.Option(False, "--stage-only", help="Stop after staging."),
-    harmonize: bool = typer.Option(
-        False, "--harmonize", help="Also run comparison and harmonization after promotion."
-    ),
-    compact: bool = typer.Option(
-        False, "--compact", help="Compact staged JSONB payloads after promotion."
-    ),
-    force_reload: bool = typer.Option(
-        False, "--force-reload", help="Force reload if already staged."
-    ),
-    auto_approve: bool = typer.Option(
-        False, "--auto-approve", help="Auto-approve review gates across stages."
-    ),
-) -> None:
-    """Run the end-to-end ingestion pipeline (preflight -> upgrade -> stage -> promote)."""
-    from fairwddi.ingest.pipeline import run_ingestion_pipeline
-
-    configure_django_for_cli()
-    try:
-        res = run_ingestion_pipeline(
-            file_path=file_path,
-            profile=profile,
-            output_dir=output_dir,
-            agency=agency,
-            id_strategy=id_strategy,
-            stage_only=stage_only,
-            harmonize=harmonize,
-            compact_after_promote=compact,
-            force_reload=force_reload,
-            auto_approve=auto_approve,
-        )
-    except Exception as exc:
-        console.print(f"[bold red]Ingestion Pipeline Error:[/bold red] {exc}")
-        raise typer.Exit(code=1) from exc
-
-    console.print(
-        f"[bold green]Ingestion Pipeline Status:[/bold green] [cyan]{res['status']}[/cyan]"
-    )
-    if res.get("staged_import_id"):
-        console.print(
-            f"[dim]Staged Import Batch ID:[/dim] [yellow]#{res['staged_import_id']}[/yellow]"
-        )
 
 
 if __name__ == "__main__":

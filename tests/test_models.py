@@ -18,6 +18,7 @@ from fairwddi.models import (
     EventLog,
     Frequency,
     Group,
+    IngestBatch,
     InstanceVariable,
     InstanceVariableScheme,
     Instrument,
@@ -30,8 +31,6 @@ from fairwddi.models import (
     RepresentedVariable,
     RepresentedVariableScheme,
     SemanticRelationship,
-    StagedImport,
-    StagedResourceNode,
     StudyInstrument,
     StudyUnit,
     URNAlias,
@@ -565,8 +564,8 @@ class TestFairwDDIModels(TestCase):
         assert cat_raw.object_id == "raw:closer:qi:1234"
         assert cat_raw.version == "1.0.0"
 
-    def test_infrastructure_and_staging_layer(self) -> None:
-        """Test URNAlias, MetadataQuarantine, StagedImport, and StagedResourceNode."""
+    def test_infrastructure_and_ingestbatch_layer(self) -> None:
+        """Test URNAlias, MetadataQuarantine, and IngestBatch."""
         # UrnRegistry
         reg = UrnRegistry.objects.create(
             urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
@@ -618,22 +617,18 @@ class TestFairwDDIModels(TestCase):
         assert quarantine.conflict_type == "hash_mismatch"
         assert quarantine.resolution is None
 
-        # StagedImport & StagedResourceNode
-        staged_import = StagedImport.objects.create(
+        # IngestBatch lightweight receipt
+        batch = IngestBatch.objects.create(
             source_format="ddi-l:4.0:json",
             file_name="closer_sample.json",
-            import_options={"agency": "fr.sciencespo", "strict": True},
-            total_resources=1,
-            processed_resources=0,
+            file_sha256="a" * 64,
+            options={"agency": "fr.sciencespo", "profile": "request"},
+            created_urns=["urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"],
+            stats={"QuestionItem": 1},
         )
-        node = StagedResourceNode.objects.create(
-            staged_import=staged_import,
-            resource_type="QuestionItem",
-            raw_urn="urn:closer:qi:999",
-            raw_value={"question_text": [{"lang": "en", "value": "Are you employed?"}]},
-        )
-        assert staged_import.nodes.count() == 1
-        assert node.staged_import == staged_import
+        assert batch.status == "completed"
+        assert batch.created_urns == ["urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"]
+        assert "closer_sample.json" in str(batch)
 
     def test_semantic_relationship_triple(self) -> None:
         """Test SemanticRelationship model, RDF triple structure, constraints, and queries."""

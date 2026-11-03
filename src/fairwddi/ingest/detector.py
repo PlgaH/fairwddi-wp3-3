@@ -1,4 +1,4 @@
-"""Metadata format detection for FAIRwDDI.
+"""Metadata format detection and file SHA-256 fingerprinting for FAIRwDDI.
 
 Detects specifications (DDI-Lifecycle, DDI-Codebook, DDI-CDI), versions,
 serializations, and archive flavors (Colectica, Nesstar, etc.).
@@ -6,6 +6,7 @@ serializations, and archive flavors (Colectica, Nesstar, etc.).
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Literal
@@ -22,7 +23,7 @@ class MetadataFormatInfo(BaseModel):
     specification: Literal["DDI-L", "DDI-C", "DDI-CDI", "Unknown"] = Field(
         ..., description="Metadata specification family."
     )
-    version: str = Field(..., description="Specification version (e.g. '3.3', '3.2', '2.5').")
+    version: str = Field(..., description="Specification version (e.g. '4.0', '3.3', '2.5').")
     serialization: Literal["xml", "json", "jsonl", "json-ld", "turtle", "csv", "unknown"] = Field(
         ..., description="Serialization format."
     )
@@ -33,19 +34,21 @@ class MetadataFormatInfo(BaseModel):
         default=None, description="Root XML element localname or top-level JSON type."
     )
     canonical_slug: str = Field(
-        ..., description="Normalized format slug for StagedImport.source_format."
+        ..., description="Normalized format slug for IngestBatch.source_format."
     )
 
 
+def compute_file_sha256(file_path: str | Path) -> str:
+    """Compute SHA-256 digest of a file in streaming chunks."""
+    hasher = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+
 def detect_metadata_format(file_path: str | Path) -> MetadataFormatInfo:
-    """Detect metadata specification, version, serialization, and flavor from a file.
-
-    Args:
-        file_path: Absolute or relative path to the metadata file.
-
-    Returns:
-        MetadataFormatInfo instance with detailed format attributes.
-    """
+    """Detect metadata specification, version, serialization, and flavor from a file."""
     path = Path(file_path)
     if not path.exists():
         raise FileNotFoundError(f"Metadata file not found: {path}")
@@ -53,17 +56,13 @@ def detect_metadata_format(file_path: str | Path) -> MetadataFormatInfo:
     suffix = path.suffix.lower()
     name = path.name.lower()
 
-    # 1. JSON / JSONL / JSON-LD files
     if suffix == ".jsonl" or name.endswith(".jsonl"):
         return _detect_jsonl_format(path)
     if suffix in (".json", ".jsonld") or ".json" in name:
         return _detect_json_format(path)
-
-    # 2. XML files
     if suffix in (".xml", ".ddic", ".ddi33", ".ddi40") or ".xml" in name:
         return _detect_xml_format(path)
 
-    # 3. Fallback / Unknown
     return MetadataFormatInfo(
         specification="Unknown",
         version="unknown",
@@ -82,7 +81,6 @@ def _detect_json_format(path: Path) -> MetadataFormatInfo:
             data = json.load(f)
 
         if isinstance(data, dict):
-            # Check for DDI-CDI JSON-LD
             context = data.get("@context", "")
             if isinstance(context, str) and "cdi" in context.lower():
                 return MetadataFormatInfo(
@@ -94,7 +92,6 @@ def _detect_json_format(path: Path) -> MetadataFormatInfo:
                     canonical_slug="ddi-cdi:1.0:jsonld",
                 )
 
-            # Check for DDI 4 / Colectica JSON items
             if "items" in data or "$type" in data:
                 items = data.get("items", [])
                 root_type = (
@@ -115,7 +112,6 @@ def _detect_json_format(path: Path) -> MetadataFormatInfo:
                     root_tag_or_type=root_type or "ResourcePackage",
                     canonical_slug="ddi-l:4.0:json",
                 )
-
     except Exception:
         pass
 
@@ -173,7 +169,6 @@ def _detect_xml_format(path: Path) -> MetadataFormatInfo:
             nsmap = dict(elem.nsmap)
             break
 
-        # Check DDI-Codebook
         if root_tag == "codeBook" or (root_ns and "codebook" in root_ns.lower()):
             version = "2.5"
             if root_ns and "2_1" in root_ns:
@@ -192,7 +187,6 @@ def _detect_xml_format(path: Path) -> MetadataFormatInfo:
                 canonical_slug=f"ddi-c:{version}:xml",
             )
 
-        # Check DDI-Lifecycle 3.3
         ns_values = " ".join(str(v) for v in nsmap.values())
         if "3_3" in ns_values or "3.3" in str(path) or ".ddi33." in path.name:
             flavor = (
@@ -211,7 +205,6 @@ def _detect_xml_format(path: Path) -> MetadataFormatInfo:
                 canonical_slug="ddi-l:3.3:xml",
             )
 
-        # Check DDI-Lifecycle 3.2
         if "3_2" in ns_values or "3.2" in str(path):
             return MetadataFormatInfo(
                 specification="DDI-L",
@@ -222,7 +215,6 @@ def _detect_xml_format(path: Path) -> MetadataFormatInfo:
                 canonical_slug="ddi-l:3.2:xml",
             )
 
-        # Check DDI-Lifecycle 4.0 XML
         if "4_0" in ns_values or ".ddi40." in path.name:
             return MetadataFormatInfo(
                 specification="DDI-L",
@@ -233,7 +225,6 @@ def _detect_xml_format(path: Path) -> MetadataFormatInfo:
                 canonical_slug="ddi-l:4.0:xml",
             )
 
-        # Check DDI-CDI XML
         if "cdi" in ns_values.lower() or (root_ns and "cdi" in root_ns.lower()):
             return MetadataFormatInfo(
                 specification="DDI-CDI",
@@ -243,7 +234,6 @@ def _detect_xml_format(path: Path) -> MetadataFormatInfo:
                 root_tag_or_type=root_tag,
                 canonical_slug="ddi-cdi:1.0:xml",
             )
-
     except Exception:
         pass
 

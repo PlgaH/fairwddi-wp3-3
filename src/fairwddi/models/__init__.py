@@ -25,9 +25,8 @@ from fairwddi.models.event import (
     EventLog,
 )
 from fairwddi.models.infrastructure import (
+    IngestBatch,
     MetadataQuarantine,
-    StagedImport,
-    StagedResourceNode,
     URNAlias,
     UrnRegistry,
 )
@@ -95,6 +94,5 @@ __all__ = [
     "UrnRegistry",
     "URNAlias",
     "MetadataQuarantine",
-    "StagedImport",
-    "StagedResourceNode",
+    "IngestBatch",
 ]

@@ -25,6 +25,7 @@ def wipe_database() -> dict[str, int]:
         DatafileVariableFrequency,
         EventLog,
         Group,
+        IngestBatch,
         InstanceVariable,
         InstanceVariableScheme,
         Instrument,
@@ -37,8 +38,6 @@ def wipe_database() -> dict[str, int]:
         RepresentedVariable,
         RepresentedVariableScheme,
         SemanticRelationship,
-        StagedImport,
-        StagedResourceNode,
         StudyInstrument,
         StudyUnit,
         URNAlias,
@@ -75,8 +74,7 @@ def wipe_database() -> dict[str, int]:
         ("urn_aliases", URNAlias),
         ("urn_registries", UrnRegistry),
         ("metadata_quarantine", MetadataQuarantine),
-        ("staged_nodes", StagedResourceNode),
-        ("staged_imports", StagedImport),
+        ("ingest_batches", IngestBatch),
     ]
 
     deleted_counts: dict[str, int] = {}

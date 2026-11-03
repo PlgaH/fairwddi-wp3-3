@@ -1,6 +1,6 @@
-"""Infrastructure, Provenance, Quarantine, and Staging Layer models for FAIRwDDI.
+"""Infrastructure, Provenance, Quarantine, and Batch Receipt models for FAIRwDDI.
 
-Includes UrnRegistry, URNAlias, MetadataQuarantine, StagedImport, and StagedResourceNode.
+Includes UrnRegistry, URNAlias, MetadataQuarantine, and IngestBatch.
 """
 
 from django.db import models
@@ -162,105 +162,74 @@ class MetadataQuarantine(models.Model):
         return f"Quarantine: {self.entity_type} ({self.incoming_urn}) - {self.conflict_type}"
 
 
-class StagedImport(models.Model):
-    """Stores metadata about uploaded file bundles and batch import jobs."""
+class IngestBatch(models.Model):
+    """Lightweight receipt tracking a completed or rolled-back file ingestion batch.
+
+    Stores one summary row per ingested file (zero per-node JSONB duplication) to
+    prevent duplicate file ingestion via SHA-256, track batch statistics, and support
+    instant transactional rollback (`undo_ingestion`).
+    """
 
     source_format = models.CharField(
         max_length=64,
         help_text=(
-            "Source format: 'ddi-l:3.3:xml', 'ddi-l:4.0:json', 'ddi-c:2.5:xml', 'croissant', 'csv'."
+            "Source format slug: 'ddi-l:4.0:json', 'ddi-l:4.0:jsonl', "
+            "'ddi-l:3.3:xml', 'ddi-c:2.5:xml'."
         ),
     )
     file_name = models.CharField(
         max_length=512,
-        help_text="Original uploaded filename.",
+        help_text="Original or upgraded filename ingested.",
     )
-    file_path = models.FileField(
-        upload_to="raw_imports/",
-        null=True,
-        blank=True,
-        help_text="File storage path for large XML/JSON/CSV file payloads.",
-    )
-    import_options = models.JSONField(
-        default=dict,
-        blank=True,
-        help_text="Lightweight batch configuration and options passed with the upload.",
-    )
-    total_resources = models.IntegerField(
-        default=0,
-        help_text="Total staged resource nodes extracted from the payload.",
-    )
-    processed_resources = models.IntegerField(
-        default=0,
-        help_text="Count of successfully processed resource nodes.",
-    )
-    status = models.CharField(
-        max_length=32,
-        default="staged",
-        help_text="Status: 'staged', 'normalized', 'quarantined', 'failed'.",
-    )
-    import_task_id = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        help_text="Link to background task queue.",
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    processed_at = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        db_table = "request_ddi_stagedimport"
-        verbose_name = "Staged Import"
-        verbose_name_plural = "Staged Imports"
-
-    def __str__(self) -> str:
-        return f"Import #{self.pk}: {self.file_name} ({self.source_format})"
-
-
-class StagedResourceNode(models.Model):
-    """Stores individual broken-down raw element resources from Stage 1 parsing.
-
-    Enables granular resource-level normalization, selective re-normalization,
-    and native DDI-L 4 JSON / COGS model object ingestion.
-    """
-
-    staged_import = models.ForeignKey(
-        StagedImport,
-        on_delete=models.CASCADE,
-        related_name="nodes",
-        help_text="Parent staged import bundle.",
-    )
-    resource_type = models.CharField(
+    file_sha256 = models.CharField(
         max_length=64,
         db_index=True,
-        help_text="DDI entity type (e.g. 'QuestionItem', 'CodeList', 'Category', 'StudyUnit').",
+        help_text="SHA-256 digest of the ingested file for duplicate prevention.",
     )
-    raw_urn = models.CharField(
-        max_length=512,
-        db_index=True,
-        help_text="Raw external URN or local identifier from the source file.",
-    )
-    raw_value = models.JSONField(
-        help_text="Pre-normalized raw JSON dictionary of fields/attributes.",
-    )
-    canonical_urn = models.CharField(
-        max_length=512,
+    file_path = models.CharField(
+        max_length=1024,
         null=True,
         blank=True,
-        db_index=True,
-        help_text="Resolved canonical database URN after normalization.",
+        help_text="Resolved path to the ingested metadata file on disk.",
     )
     status = models.CharField(
         max_length=32,
-        default="staged",
-        help_text="Status: 'staged', 'normalized', 'quarantined', 'failed'.",
+        default="completed",
+        db_index=True,
+        help_text="Batch status: 'completed', 'quarantined', 'undone', 'failed'.",
+    )
+    options = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Batch configuration, job_id, profile, and options.",
+    )
+    created_urns = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Ordered list of canonical URNs created exclusively by this batch.",
+    )
+    reused_urns = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of pre-existing canonical URNs reused during this batch.",
+    )
+    created_aliases = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of alias_urn values registered in URNAlias by this batch.",
+    )
+    stats = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Summary counts of created entities, shortcuts, and frequencies.",
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "request_ddi_stagedresourcenode"
-        verbose_name = "Staged Resource Node"
-        verbose_name_plural = "Staged Resource Nodes"
+        db_table = "request_ddi_ingestbatch"
+        verbose_name = "Ingest Batch"
+        verbose_name_plural = "Ingest Batches"
 
     def __str__(self) -> str:
-        return f"{self.resource_type}: {self.raw_urn} ({self.status})"
+        return f"Batch #{self.pk}: {self.file_name} ({self.status})"

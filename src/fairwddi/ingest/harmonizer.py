@@ -16,12 +16,12 @@ from typing import Any
 from django.db import transaction
 
 from fairwddi.ingest.comparator import discover_candidates
+from fairwddi.ingest.loader import compute_resource_hashes
 from fairwddi.ingest.plan import IngestPlan, PlanActionItem, ReviewGate
-from fairwddi.ingest.promoter import compute_resource_hashes
 
 
 def plan_harmonization(
-    import_id: int | None = None,
+    batch_id: int | None = None,
     resource_type: str | None = None,
     study_urn: str | None = None,
     query: str | None = None,
@@ -33,7 +33,7 @@ def plan_harmonization(
     candidates = discover_candidates(
         resource_type=resource_type,
         study_urn=study_urn,
-        batch_id=import_id,
+        batch_id=batch_id,
         query=query,
         threshold=threshold,
         limit=500,
@@ -62,12 +62,12 @@ def plan_harmonization(
             )
         )
 
-    scope_tag = f"batch{import_id}" if import_id is not None else (resource_type or "bank").lower()
+    scope_tag = f"batch{batch_id}" if batch_id is not None else (resource_type or "bank").lower()
     job_id = f"harmonize-{scope_tag}-{uuid.uuid4().hex[:6]}"
     plan = IngestPlan(
         stage="harmonize",
         job_id=job_id,
-        staged_import_id=import_id,
+        batch_id=batch_id,
         summary={
             "total_candidates": len(actions),
             "threshold": threshold,
