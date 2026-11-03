@@ -1,5 +1,7 @@
 # Project
 ddi/
+tmp/
+temp/
 
 # Environment & Secrets (keep .env.example tracked)
 .env

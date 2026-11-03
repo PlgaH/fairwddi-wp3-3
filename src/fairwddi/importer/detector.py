@@ -23,7 +23,7 @@ class MetadataFormatInfo(BaseModel):
         ..., description="Metadata specification family."
     )
     version: str = Field(..., description="Specification version (e.g. '3.3', '3.2', '2.5').")
-    serialization: Literal["xml", "json", "json-ld", "turtle", "csv", "unknown"] = Field(
+    serialization: Literal["xml", "json", "jsonl", "json-ld", "turtle", "csv", "unknown"] = Field(
         ..., description="Serialization format."
     )
     flavor: str | None = Field(
@@ -53,7 +53,9 @@ def detect_metadata_format(file_path: str | Path) -> MetadataFormatInfo:
     suffix = path.suffix.lower()
     name = path.name.lower()
 
-    # 1. JSON / JSON-LD files
+    # 1. JSON / JSONL / JSON-LD files
+    if suffix == ".jsonl" or name.endswith(".jsonl"):
+        return _detect_jsonl_format(path)
     if suffix in (".json", ".jsonld") or ".json" in name:
         return _detect_json_format(path)
 
@@ -123,6 +125,38 @@ def _detect_json_format(path: Path) -> MetadataFormatInfo:
         serialization="json",
         flavor=None,
         canonical_slug="json:unknown",
+    )
+
+
+def _detect_jsonl_format(path: Path) -> MetadataFormatInfo:
+    """Inspect JSON Lines (.jsonl) file contents to detect DDI 4.0 JSONL."""
+    try:
+        with open(path, encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                data = json.loads(stripped)
+                if isinstance(data, dict) and ("$type" in data or "ResourceType" in data):
+                    root_type = data.get("$type") or data.get("ResourceType")
+                    return MetadataFormatInfo(
+                        specification="DDI-L",
+                        version="4.0",
+                        serialization="jsonl",
+                        flavor="Generic",
+                        root_tag_or_type=root_type or "Resource",
+                        canonical_slug="ddi-l:4.0:jsonl",
+                    )
+                break
+    except Exception:
+        pass
+
+    return MetadataFormatInfo(
+        specification="Unknown",
+        version="unknown",
+        serialization="jsonl",
+        flavor=None,
+        canonical_slug="jsonl:unknown",
     )
 
 

@@ -59,6 +59,15 @@ class StudyUnit(DDIResource):
             return self.title[0].get("value", self.urn)
         return self.urn
 
+    @property
+    def label(self) -> object:
+        """Convenience alias for StudyUnit.title."""
+        return self.title
+
+    @label.setter
+    def label(self, value: object) -> None:
+        self.title = value
+
 
 class Datafile(DDIResource):
     """A minimal Datafile entity relating InstanceVariables to a StudyUnit.
@@ -96,6 +105,41 @@ class Datafile(DDIResource):
     def study(self) -> StudyUnit:
         """Alias returning parent StudyUnit."""
         return self.study_unit
+
+    @property
+    def file_name(self) -> str | None:
+        """Return physical file_name from extended_attributes or name."""
+        if isinstance(self.extended_attributes, list):
+            for item in self.extended_attributes:
+                if isinstance(item, dict) and item.get("type") == "file_name":
+                    return str(item.get("value"))
+        if isinstance(self.name, str):
+            return self.name
+        return None
+
+    @property
+    def case_count(self) -> int | None:
+        """Return case_count stored in extended_attributes."""
+        if isinstance(self.extended_attributes, list):
+            for item in self.extended_attributes:
+                if isinstance(item, dict) and item.get("type") == "case_count":
+                    try:
+                        return int(item["value"])
+                    except (KeyError, TypeError, ValueError):
+                        return None
+        return None
+
+    @property
+    def variable_count(self) -> int | None:
+        """Return variable_count stored in extended_attributes."""
+        if isinstance(self.extended_attributes, list):
+            for item in self.extended_attributes:
+                if isinstance(item, dict) and item.get("type") == "variable_count":
+                    try:
+                        return int(item["value"])
+                    except (KeyError, TypeError, ValueError):
+                        return None
+        return None
 
     def __str__(self) -> str:
         if isinstance(self.name, list) and self.name:
@@ -182,6 +226,18 @@ class InstanceVariable(DDIResource):
         """Associate primary Datafile via DatafileVariable junction."""
         if df is not None and self.pk:
             DatafileVariable.objects.get_or_create(datafile=df, instance_variable=self)
+
+    @property
+    def study_unit(self) -> StudyUnit | None:
+        """Resolve associated StudyUnit via Datafile or extended_attributes."""
+        df = self.datafile
+        if df is not None:
+            return df.study_unit
+        if isinstance(self.extended_attributes, list):
+            for item in self.extended_attributes:
+                if isinstance(item, dict) and item.get("type") == "study_unit_urn":
+                    return StudyUnit.objects.filter(urn=item.get("value")).first()
+        return None
 
 
 class DatafileVariable(models.Model):

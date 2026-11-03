@@ -26,10 +26,53 @@ app.add_typer(db_app, name="db")
 
 import_app = typer.Typer(
     name="import",
-    help="Metadata document import, staging, profiles, and logs.",
+    help="Metadata document import, staging, profiles, and logs (legacy alias for stage).",
     no_args_is_help=True,
+    hidden=True,
 )
 app.add_typer(import_app, name="import")
+
+preflight_app = typer.Typer(
+    name="preflight",
+    help="Stage 1: Preflight readiness checks, profile QA, URN audits, and DDI-C upgrades.",
+    no_args_is_help=True,
+)
+app.add_typer(preflight_app, name="preflight")
+
+stage_app = typer.Typer(
+    name="stage",
+    help="Stage 2a: Load DDI-Lifecycle metadata into staging, inspect, and compact storage.",
+    no_args_is_help=True,
+)
+app.add_typer(stage_app, name="stage")
+
+promote_app = typer.Typer(
+    name="promote",
+    help="Stage 2b: Plan, apply, and undo promotion of staged resources into ReQuest core tables.",
+    no_args_is_help=True,
+)
+app.add_typer(promote_app, name="promote")
+
+compare_app = typer.Typer(
+    name="compare",
+    help="Stage 3a: Compare batches against ReQuest bank and discover harmonization candidates.",
+    no_args_is_help=True,
+)
+app.add_typer(compare_app, name="compare")
+
+harmonize_app = typer.Typer(
+    name="harmonize",
+    help="Stage 3b: Plan, apply, and undo review-gated resource harmonization.",
+    no_args_is_help=True,
+)
+app.add_typer(harmonize_app, name="harmonize")
+
+ingest_app = typer.Typer(
+    name="ingest",
+    help="End-to-end convenience pipeline orchestrating preflight, stage, promote, and harmonize.",
+    no_args_is_help=True,
+)
+app.add_typer(ingest_app, name="ingest")
 
 console = Console()
 
@@ -1031,6 +1074,469 @@ def import_delete_cmd(
     )
     if res["log_file_deleted"]:
         console.print("[dim]Session audit log file removed from disk.[/dim]")
+
+
+# -----------------------------------------------------------------------------
+# Phase 2 Multi-Stage Ingestion CLI Groups
+# (preflight, stage, promote, compare, harmonize, ingest)
+# -----------------------------------------------------------------------------
+
+
+@preflight_app.command("check")
+def preflight_check_cmd(
+    file_path: str = typer.Argument(..., help="Path to incoming DDI-C or DDI-L metadata file."),
+    profile: str = typer.Option("request", "--profile", "-p", help="Profile preset or YAML path."),
+    output_dir: Path | None = typer.Option(
+        None, "--output-dir", "-o", help="Directory to write .preflight.plan.yaml & .report.md."
+    ),
+    auto_approve: bool = typer.Option(
+        False, "--auto-approve", help="Mark the preflight review gate as approved."
+    ),
+) -> None:
+    """Inspect a DDI-C or DDI-L file for readiness, profile compliance, URNs, and links."""
+    from fairwddi.ingest.preflight import run_preflight_check
+
+    configure_django_for_cli()
+    try:
+        plan = run_preflight_check(
+            file_path=file_path,
+            profile=profile,
+            output_dir=output_dir,
+            auto_approve=auto_approve,
+        )
+    except Exception as exc:
+        console.print(f"[bold red]Preflight Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    status_color = "green" if plan.is_ready_to_execute() else "yellow"
+    table = Table(
+        title=f"Preflight Readiness Check [{Path(file_path).name}]",
+        border_style=status_color,
+    )
+    table.add_column("Property / Metric", style="bold cyan")
+    table.add_column("Value", style="yellow")
+    table.add_row("Job ID", plan.job_id)
+    table.add_row("Detected Format", str(plan.source_format))
+    table.add_row("File SHA-256", str(plan.file_sha256)[:24] + "...")
+    table.add_row("Ready to Proceed", "YES" if plan.is_ready_to_execute() else "PENDING REVIEW")
+    table.add_row("Errors / Warnings", f"{plan.error_count} / {plan.warning_count}")
+    for k, v in plan.summary.items():
+        if not isinstance(v, (dict, list)):
+            table.add_row(str(k), str(v))
+    console.print(table)
+
+    if plan.issues:
+        iss_table = Table(title="Preflight Findings", border_style="yellow")
+        iss_table.add_column("Severity", style="bold")
+        iss_table.add_column("Code", style="cyan")
+        iss_table.add_column("Message", style="white")
+        for iss in plan.issues:
+            iss_table.add_row(iss.severity.upper(), iss.code, iss.message)
+        console.print(iss_table)
+
+
+@preflight_app.command("upgrade")
+def preflight_upgrade_cmd(
+    file_path: str = typer.Argument(..., help="Path to DDI-Codebook (.xml) file to upgrade."),
+    output: Path | None = typer.Option(
+        None, "--output", "-o", help="Explicit output path for upgraded DDI-L file."
+    ),
+    format_type: str = typer.Option(
+        "ddi4-json",
+        "--format",
+        "-f",
+        help="Target DDI-L format: ddi4-json, ddi4-jsonl, ddi4-xml, ddi33-xml.",
+    ),
+    agency: str | None = typer.Option(None, "--agency", "-a", help="Override DDI agency ID."),
+    version: str | None = typer.Option(None, "--version", help="Override DDI version."),
+    identifier: str | None = typer.Option(None, "--identifier", help="Override study ID."),
+    id_strategy: str = typer.Option(
+        "hierarchical",
+        "--id-strategy",
+        help="ID strategy: hierarchical, content_hash, prefix, original, uuid, sequential.",
+    ),
+    harmonize_codes: bool = typer.Option(
+        True,
+        "--harmonize-codes/--no-harmonize-codes",
+        help="Deduplicate identical categories and code lists during upgrade.",
+    ),
+) -> None:
+    """Explicitly upgrade a classic or multilingual DDI-Codebook file to DDI-Lifecycle on disk."""
+    from fairwddi.ingest.preflight import upgrade_ddic_to_ddil
+
+    try:
+        res = upgrade_ddic_to_ddil(
+            file_path=file_path,
+            output_path=output,
+            output_format=format_type,  # type: ignore[arg-type]
+            agency=agency,
+            version=version,
+            identifier=identifier,
+            id_strategy=id_strategy,
+            harmonize_codes=harmonize_codes,
+        )
+    except Exception as exc:
+        console.print(f"[bold red]Upgrade Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    table = Table(title="DDI-C to DDI-L Upgrade Summary", border_style="green")
+    table.add_column("Metric", style="bold cyan")
+    table.add_column("Value", style="yellow")
+    table.add_row("Output DDI-L File", res["output_file"])
+    table.add_row("Upgrade Report", res["report_file"])
+    table.add_row("Agency / Version", f"{res['agency']} / {res['version']}")
+    table.add_row("Variables", f"{res['variable_count']:,}")
+    table.add_row("CodeLists (Deduplicated)", f"{res['codelist_count']:,}")
+    table.add_row("Categories (Deduplicated)", f"{res['category_count']:,}")
+    table.add_row("Questions", f"{res['question_count']:,}")
+    table.add_row("Physical Instances", f"{res['physical_instance_count']:,}")
+    console.print(table)
+
+
+# Stage 2a subcommands
+stage_app.command("load")(import_file_cmd)
+stage_app.command("list")(import_list_cmd)
+stage_app.command("status")(import_status_cmd)
+stage_app.command("stats")(import_stats_cmd)
+stage_app.command("query")(import_query_cmd)
+stage_app.command("profiles")(import_list_profiles)
+
+
+@stage_app.command("cleanup")
+def stage_cleanup_cmd(
+    import_id: int | None = typer.Argument(
+        None, help="Optional StagedImport ID. Omit to compact all promoted batches."
+    ),
+    delete_batch: bool = typer.Option(
+        False,
+        "--delete",
+        help="Permanently delete the batch instead of compacting JSONB payloads.",
+    ),
+    force: bool = typer.Option(False, "--force", "-f", help="Force deletion of promoted batch."),
+) -> None:
+    """Compact `raw_value` JSONB payloads on promoted nodes (or delete a batch)."""
+    from fairwddi.ingest.staging import cleanup_staged_import
+
+    configure_django_for_cli()
+    try:
+        res = cleanup_staged_import(
+            import_id=import_id,
+            compact_only=not delete_batch,
+            force=force,
+        )
+    except Exception as exc:
+        console.print(f"[bold red]Cleanup Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    if res["mode"] == "compacted":
+        console.print(
+            f"[bold green]Compacted [yellow]{res['compacted_nodes_count']:,}[/yellow] "
+            f"promoted staging node(s) (lineage preserved for undo).[/bold green]"
+        )
+    else:
+        console.print(
+            f"[bold green]Deleted StagedImport #{res['staged_import_id']} "
+            f"({res['deleted_nodes_count']:,} nodes).[/bold green]"
+        )
+
+
+@promote_app.command("plan")
+def promote_plan_cmd(
+    import_id: int = typer.Argument(..., help="StagedImport batch ID to plan promotion for."),
+    output_dir: Path | None = typer.Option(
+        None, "--output-dir", "-o", help="Directory to write .promote.plan.yaml & .report.md."
+    ),
+    auto_approve: bool = typer.Option(False, "--auto-approve", help="Approve review gate."),
+) -> None:
+    """Generate a review-gated Promotion Plan (.promote.plan.yaml & .report.md) for a batch."""
+    from fairwddi.ingest.promoter import plan_promotion
+
+    configure_django_for_cli()
+    try:
+        plan = plan_promotion(
+            import_id=import_id,
+            output_dir=output_dir,
+            auto_approve=auto_approve,
+        )
+    except Exception as exc:
+        console.print(f"[bold red]Promote Plan Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    table = Table(title=f"Promotion Plan [{plan.job_id}]", border_style="cyan")
+    table.add_column("Action / Metric", style="bold cyan")
+    table.add_column("Count", justify="right", style="yellow")
+    for k, v in plan.summary.items():
+        table.add_row(str(k), str(v))
+    table.add_row("Pending Review Items", str(plan.pending_review_count))
+    console.print(table)
+
+
+@promote_app.command("apply")
+def promote_apply_cmd(
+    batch_or_plan: str = typer.Argument(
+        ..., help="StagedImport batch ID (int) or path to a .promote.plan.yaml file."
+    ),
+    auto_approve: bool = typer.Option(
+        False, "--auto-approve", help="Bypass review gate for pending drift/quarantine items."
+    ),
+    compact: bool = typer.Option(
+        False, "--compact", help="Compact staged JSONB payloads immediately after promotion."
+    ),
+) -> None:
+    """Promote staged resources into ReQuest core tables (resolving cascade & shortcuts)."""
+    from fairwddi.ingest.promoter import apply_promotion
+
+    configure_django_for_cli()
+    try:
+        res = apply_promotion(
+            import_id_or_plan=batch_or_plan,
+            auto_approve=auto_approve,
+            compact=compact,
+        )
+    except Exception as exc:
+        console.print(f"[bold red]Promote Apply Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    table = Table(
+        title=f"Promotion Completed [Batch #{res['staged_import_id']}]",
+        border_style="green",
+    )
+    table.add_column("Metric", style="bold cyan")
+    table.add_column("Value", justify="right", style="yellow")
+    table.add_row("Job ID", res["job_id"])
+    table.add_row("Batch Status", res["status"])
+    table.add_row("Created Core Resources", f"{res['created_count']:,}")
+    table.add_row("Reused Existing Resources", f"{res['reused_count']:,}")
+    table.add_row("Registered URN Aliases", f"{res['alias_count']:,}")
+    table.add_row("Quarantined Drift Items", f"{res['quarantine_count']:,}")
+    if compact:
+        table.add_row("Compacted Staged Nodes", f"{res['compacted_nodes_count']:,}")
+    console.print(table)
+
+
+@promote_app.command("undo")
+def promote_undo_cmd(
+    import_id: int = typer.Argument(..., help="StagedImport batch ID to roll back."),
+    force: bool = typer.Option(False, "--force", "-f", help="Force rollback."),
+) -> None:
+    """Roll back a promoted batch, removing created core entities and resetting staging status."""
+    from fairwddi.ingest.promoter import undo_promotion
+
+    configure_django_for_cli()
+    try:
+        res = undo_promotion(import_id=import_id, force=force)
+    except Exception as exc:
+        console.print(f"[bold red]Promote Undo Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    console.print(
+        f"[bold green]Rolled back Batch #{res['staged_import_id']}:[/bold green] "
+        f"removed [yellow]{res['deleted_core_resources_count']:,}[/yellow] core resource(s), "
+        f"[yellow]{res['deleted_aliases_count']:,}[/yellow] alias(es), and reset "
+        f"[cyan]{res['reset_staged_nodes_count']:,}[/cyan] staged node(s)."
+    )
+
+
+@compare_app.command("batch")
+def compare_batch_cmd(
+    import_id: int = typer.Argument(..., help="StagedImport batch ID to compare against the bank."),
+    threshold: float = typer.Option(0.75, "--threshold", "-t", help="Minimum similarity score."),
+    output_dir: Path | None = typer.Option(
+        None, "--output-dir", "-o", help="Directory to write .compare.plan.yaml & .report.md."
+    ),
+) -> None:
+    """Compare resources from a specific batch against existing ReQuest bank entities."""
+    from fairwddi.ingest.comparator import compare_batch
+
+    configure_django_for_cli()
+    try:
+        plan = compare_batch(import_id=import_id, threshold=threshold, output_dir=output_dir)
+    except Exception as exc:
+        console.print(f"[bold red]Compare Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    console.print(
+        f"[bold green]Comparison complete ({plan.job_id}):[/bold green] "
+        f"found [yellow]{len(plan.actions):,}[/yellow] candidate pair(s)."
+    )
+
+
+@compare_app.command("discover")
+def compare_discover_cmd(
+    resource_type: str | None = typer.Option(
+        None,
+        "--type",
+        "-t",
+        help="Filter by type: Category, CodeList, QuestionItem, RepresentedVariable.",
+    ),
+    study_urn: str | None = typer.Option(None, "--study", "-s", help="Scope to StudyUnit URN."),
+    batch_id: int | None = typer.Option(None, "--batch-id", "-b", help="Scope to StagedImport ID."),
+    query: str | None = typer.Option(None, "--query", "-q", help="Substring filter."),
+    threshold: float = typer.Option(0.75, "--threshold", help="Minimum similarity confidence."),
+    limit: int = typer.Option(50, "--limit", "-n", help="Max candidate pairs to return."),
+) -> None:
+    """Discover harmonization candidate pairs across the ReQuest question bank."""
+    from fairwddi.ingest.comparator import discover_candidates
+
+    configure_django_for_cli()
+    candidates = discover_candidates(
+        resource_type=resource_type,
+        study_urn=study_urn,
+        batch_id=batch_id,
+        query=query,
+        threshold=threshold,
+        limit=limit,
+    )
+    if not candidates:
+        console.print("[yellow]No harmonization candidates found matching criteria.[/yellow]")
+        return
+
+    table = Table(
+        title=f"Discovered Harmonization Candidates ({len(candidates)})",
+        border_style="cyan",
+    )
+    table.add_column("Type", style="bold green")
+    table.add_column("Match Tier", style="magenta")
+    table.add_column("Conf", justify="right", style="yellow")
+    table.add_column("Action", style="cyan")
+    table.add_column("Source URN", style="white")
+    table.add_column("Target URN", style="white")
+    for c in candidates:
+        table.add_row(
+            c["resource_type"],
+            c["match_type"],
+            f"{c['confidence']:.2f}",
+            c["recommended_action"],
+            c["source_urn"],
+            c["target_urn"],
+        )
+    console.print(table)
+
+
+@harmonize_app.command("plan")
+def harmonize_plan_cmd(
+    batch_id: int | None = typer.Option(None, "--batch-id", "-b", help="Scope to StagedImport ID."),
+    resource_type: str | None = typer.Option(None, "--type", "-t", help="Filter by resource type."),
+    threshold: float = typer.Option(0.75, "--threshold", help="Similarity threshold."),
+    output_dir: Path | None = typer.Option(
+        None, "--output-dir", "-o", help="Directory to write .harmonize.plan.yaml & .report.md."
+    ),
+    auto_approve: bool = typer.Option(False, "--auto-approve", help="Approve review gate."),
+) -> None:
+    """Generate a review-gated Harmonization Plan (.harmonize.plan.yaml & .report.md)."""
+    from fairwddi.ingest.harmonizer import plan_harmonization
+
+    configure_django_for_cli()
+    plan = plan_harmonization(
+        import_id=batch_id,
+        resource_type=resource_type,
+        threshold=threshold,
+        output_dir=output_dir,
+        auto_approve=auto_approve,
+    )
+    console.print(
+        f"[bold green]Generated Harmonization Plan [cyan]{plan.job_id}[/cyan]:[/bold green] "
+        f"[yellow]{len(plan.actions)}[/yellow] action(s), "
+        f"[yellow]{plan.pending_review_count}[/yellow] pending review."
+    )
+
+
+@harmonize_app.command("apply")
+def harmonize_apply_cmd(
+    plan_file: Path = typer.Argument(..., help="Path to .harmonize.plan.yaml file to apply."),
+    auto_approve: bool = typer.Option(
+        False, "--auto-approve", help="Execute even if review gate is not marked approved."
+    ),
+) -> None:
+    """Apply an approved Harmonization Plan (multilingual merges, URN aliases, semantic links)."""
+    from fairwddi.ingest.harmonizer import apply_harmonization
+
+    configure_django_for_cli()
+    try:
+        res = apply_harmonization(plan_file, auto_approve=auto_approve)
+    except Exception as exc:
+        console.print(f"[bold red]Harmonize Apply Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    console.print(
+        f"[bold green]Applied Harmonization Job [cyan]{res['job_id']}[/cyan]:[/bold green] "
+        f"merged={res['merged_multilingual_count']}, aliased={res['aliased_count']}, "
+        f"semantic_links={res['semantic_links_created']}."
+    )
+
+
+@harmonize_app.command("undo")
+def harmonize_undo_cmd(
+    job_id: str = typer.Argument(..., help="Harmonization job_id to revert."),
+) -> None:
+    """Revert an applied Harmonization Job using EventLog snapshots."""
+    from fairwddi.ingest.harmonizer import undo_harmonization
+
+    configure_django_for_cli()
+    try:
+        res = undo_harmonization(job_id)
+    except Exception as exc:
+        console.print(f"[bold red]Harmonize Undo Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    console.print(
+        f"[bold green]Reverted Harmonization Job [cyan]{res['job_id']}[/cyan]:[/bold green] "
+        f"restored {res['restored_targets']} resource(s), "
+        f"removed {res['removed_aliases']} alias(es)."
+    )
+
+
+@ingest_app.command("run")
+def ingest_run_cmd(
+    file_path: str = typer.Argument(..., help="Path to DDI-C or DDI-L metadata file to ingest."),
+    profile: str = typer.Option("request", "--profile", "-p", help="Import profile."),
+    output_dir: Path | None = typer.Option(
+        None, "--output-dir", "-o", help="Directory for stage plans, upgraded files, and reports."
+    ),
+    agency: str | None = typer.Option(None, "--agency", help="Agency override for DDI-C upgrade."),
+    id_strategy: str = typer.Option("hierarchical", "--id-strategy", help="ID strategy."),
+    stage_only: bool = typer.Option(False, "--stage-only", help="Stop after staging."),
+    harmonize: bool = typer.Option(
+        False, "--harmonize", help="Also run comparison and harmonization after promotion."
+    ),
+    compact: bool = typer.Option(
+        False, "--compact", help="Compact staged JSONB payloads after promotion."
+    ),
+    force_reload: bool = typer.Option(
+        False, "--force-reload", help="Force reload if already staged."
+    ),
+    auto_approve: bool = typer.Option(
+        False, "--auto-approve", help="Auto-approve review gates across stages."
+    ),
+) -> None:
+    """Run the end-to-end ingestion pipeline (preflight -> upgrade -> stage -> promote)."""
+    from fairwddi.ingest.pipeline import run_ingestion_pipeline
+
+    configure_django_for_cli()
+    try:
+        res = run_ingestion_pipeline(
+            file_path=file_path,
+            profile=profile,
+            output_dir=output_dir,
+            agency=agency,
+            id_strategy=id_strategy,
+            stage_only=stage_only,
+            harmonize=harmonize,
+            compact_after_promote=compact,
+            force_reload=force_reload,
+            auto_approve=auto_approve,
+        )
+    except Exception as exc:
+        console.print(f"[bold red]Ingestion Pipeline Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    console.print(
+        f"[bold green]Ingestion Pipeline Status:[/bold green] [cyan]{res['status']}[/cyan]"
+    )
+    if res.get("staged_import_id"):
+        console.print(
+            f"[dim]Staged Import Batch ID:[/dim] [yellow]#{res['staged_import_id']}[/yellow]"
+        )
 
 
 if __name__ == "__main__":

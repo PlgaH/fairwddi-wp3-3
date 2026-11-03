@@ -43,6 +43,7 @@ from fairwddi.models.representation import (
     Category,
     CategoryScheme,
     Code,
+    CodeItem,
     CodeList,
     QuestionItem,
     QuestionScheme,
@@ -51,12 +52,16 @@ from fairwddi.models.representation import (
     RepresentedVariableScheme,
 )
 
+VariableGroup = Group
+VariableScheme = InstanceVariableScheme
+
 __all__ = [
     "DDIIdentifiable",
     "DDIScheme",
     "DDIResource",
     "Organization",
     "Group",
+    "VariableGroup",
     "ConceptScheme",
     "Concept",
     "ConceptualVariableScheme",
@@ -71,6 +76,7 @@ __all__ = [
     "Category",
     "CodeList",
     "Code",
+    "CodeItem",
     "RepresentedVariableScheme",
     "RepresentedVariable",
     "StudyUnit",
@@ -78,6 +84,7 @@ __all__ = [
     "DataFile",
     "DatafileVariable",
     "InstanceVariableScheme",
+    "VariableScheme",
     "InstanceVariable",
     "DatafileVariableFrequency",
     "Frequency",

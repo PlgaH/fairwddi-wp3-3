@@ -59,6 +59,12 @@ class DDIIdentifiable(models.Model):
                 return parts[2]
         return os.getenv("DDI_AGENCY", "fr.sciencespo")
 
+    @agency.setter
+    def agency(self, value: str) -> None:
+        """Allow setting or overriding agency component."""
+        if not self.urn:
+            self.urn = f"urn:ddi:{value}:unassigned:1.0.0"
+
     @property
     def identifier(self) -> str:
         """Parse the full ID component (e.g. 'ID' or 'MaintainableID.ObjectID')."""
@@ -70,6 +76,13 @@ class DDIIdentifiable(models.Model):
                 # Legacy 5-colon format: urn:ddi:agency:maintainable:object:version
                 return f"{parts[3]}.{parts[4]}"
         return self.urn or ""
+
+    @identifier.setter
+    def identifier(self, value: str) -> None:
+        """Allow setting or overriding identifier component."""
+        if not self.urn:
+            agency = os.getenv("DDI_AGENCY", "fr.sciencespo")
+            self.urn = f"urn:ddi:{agency}:{value}:1.0.0"
 
     @property
     def maintainable_id(self) -> str | None:
@@ -109,6 +122,11 @@ class DDIIdentifiable(models.Model):
             if len(parts) >= 6:
                 return parts[5]
         return "1.0.0"
+
+    @version.setter
+    def version(self, value: str) -> None:
+        """Allow setting or overriding version component."""
+        pass
 
     def save(self, *args, **kwargs) -> None:
         """Ensure a canonical URN is present and registered before saving."""

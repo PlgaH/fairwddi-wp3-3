@@ -90,6 +90,70 @@ class QuestionItem(DDIResource):
             return self.question_text[0].get("value", self.urn)
         return self.urn
 
+    @property
+    def interviewer_instructions(self) -> Any:
+        """Return interviewer instructions stored in extended_attributes or response_domain."""
+        if isinstance(self.extended_attributes, list):
+            for item in self.extended_attributes:
+                if isinstance(item, dict) and item.get("type") == "interviewer_instructions":
+                    return item.get("value")
+        if (
+            isinstance(self.response_domain, dict)
+            and "interviewer_instructions" in self.response_domain
+        ):
+            return self.response_domain["interviewer_instructions"]
+        return None
+
+    @interviewer_instructions.setter
+    def interviewer_instructions(self, value: Any) -> None:
+        ext = list(self.extended_attributes) if isinstance(self.extended_attributes, list) else []
+        ext = [
+            item
+            for item in ext
+            if not (isinstance(item, dict) and item.get("type") == "interviewer_instructions")
+        ]
+        if value is not None:
+            ext.append({"type": "interviewer_instructions", "value": value})
+        self.extended_attributes = ext
+
+    @property
+    def label(self) -> Any:
+        """Return label from extended_attributes or question_text."""
+        if isinstance(self.extended_attributes, list):
+            for item in self.extended_attributes:
+                if isinstance(item, dict) and item.get("type") == "label":
+                    return item.get("value")
+        return self.question_text
+
+    @label.setter
+    def label(self, value: Any) -> None:
+        ext = list(self.extended_attributes) if isinstance(self.extended_attributes, list) else []
+        ext = [item for item in ext if not (isinstance(item, dict) and item.get("type") == "label")]
+        if value is not None:
+            ext.append({"type": "label", "value": value})
+        self.extended_attributes = ext
+
+    @property
+    def description(self) -> Any:
+        """Return description from extended_attributes if present."""
+        if isinstance(self.extended_attributes, list):
+            for item in self.extended_attributes:
+                if isinstance(item, dict) and item.get("type") == "description":
+                    return item.get("value")
+        return None
+
+    @description.setter
+    def description(self, value: Any) -> None:
+        ext = list(self.extended_attributes) if isinstance(self.extended_attributes, list) else []
+        ext = [
+            item
+            for item in ext
+            if not (isinstance(item, dict) and item.get("type") == "description")
+        ]
+        if value is not None:
+            ext.append({"type": "description", "value": value})
+        self.extended_attributes = ext
+
 
 class CategoryScheme(DDIScheme):
     """Named collection of reusable categories (maps to DDI-L CategoryScheme)."""
@@ -168,6 +232,27 @@ class Category(DDIResource):
             return self.label[0].get("value", self.urn)
         return self.urn
 
+    @property
+    def description(self) -> Any:
+        """Return description from extended_attributes if present."""
+        if isinstance(self.extended_attributes, list):
+            for item in self.extended_attributes:
+                if isinstance(item, dict) and item.get("type") == "description":
+                    return item.get("value")
+        return None
+
+    @description.setter
+    def description(self, value: Any) -> None:
+        ext = list(self.extended_attributes) if isinstance(self.extended_attributes, list) else []
+        ext = [
+            item
+            for item in ext
+            if not (isinstance(item, dict) and item.get("type") == "description")
+        ]
+        if value is not None:
+            ext.append({"type": "description", "value": value})
+        self.extended_attributes = ext
+
 
 class CodeList(DDIResource):
     """Structural set of response codes linked to categories."""
@@ -198,6 +283,15 @@ class CodeList(DDIResource):
         db_table = "request_ddi_codelist"
         verbose_name = "Code List"
         verbose_name_plural = "Code Lists"
+
+    @property
+    def label(self) -> Any:
+        """Convenience alias returning description or name."""
+        return self.description or self.name
+
+    @label.setter
+    def label(self, value: Any) -> None:
+        self.description = value
 
 
 class Code(DDIIdentifiable):
@@ -280,6 +374,19 @@ class Code(DDIIdentifiable):
 
     def __str__(self) -> str:
         return f"{self.code_value}: {self.category_id}"
+
+    @property
+    def value(self) -> str | None:
+        """Convenience alias for Code.code_value."""
+        return self.code_value
+
+    @value.setter
+    def value(self, val: str | None) -> None:
+        self.code_value = val
+
+
+# Alias for DDI terminology glossary compatibility
+CodeItem = Code
 
 
 class RepresentedVariableScheme(DDIScheme):

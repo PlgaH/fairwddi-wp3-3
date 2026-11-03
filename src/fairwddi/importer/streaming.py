@@ -309,13 +309,76 @@ def stream_ddi_l_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawRes
             del elem.getparent()[0]
 
 
+def _flatten_nested_ddi4_dict(root_item: dict[str, Any]) -> list[dict[str, Any]]:
+    """Unpack nested DDI 4.0 RC1 resources from a root StudyUnit or ResourcePackage dict."""
+    flattened: list[dict[str, Any]] = []
+    seen_urns: set[str] = set()
+
+    def _visit(node: Any) -> None:
+        if isinstance(node, list):
+            for child in node:
+                _visit(child)
+            return
+        if not isinstance(node, dict):
+            return
+        r_type = node.get("$type") or node.get("ResourceType")
+        is_substantive = bool(
+            r_type
+            and r_type in DDI_IDENTIFIABLE_RESOURCE_TAGS
+            and len(
+                node.keys()
+                - {"$type", "ResourceType", "URN", "urn", "Agency", "ID", "Version", "TypeOfObject"}
+            )
+            > 0
+        )
+        for k, v in node.items():
+            if k.endswith("Reference") and isinstance(v, (dict, list)):
+                _visit(v)
+        if is_substantive:
+            urn = node.get("URN") or node.get("urn") or node.get("ID") or node.get("id")
+            if not urn or urn not in seen_urns:
+                if urn:
+                    seen_urns.add(str(urn))
+                flattened.append(node)
+
+    _visit(root_item)
+    return flattened or [root_item]
+
+
+def _dict_to_resource_node(item: dict[str, Any]) -> RawResourceNode:
+    """Convert a DDI 4.0 JSON dict into a RawResourceNode."""
+    r_type = item.get("$type") or item.get("ResourceType") or "Resource"
+    urn = item.get("URN") or item.get("urn")
+    if not urn:
+        item_id = item.get("ID") or item.get("id")
+        agency = item.get("Agency") or "unknown.agency"
+        version = str(item.get("Version", "1"))
+        if item_id:
+            urn = f"urn:ddi:{agency}:{item_id}:{version}"
+        else:
+            urn = f"urn:ddi:anonymous:{r_type.lower()}-{id(item)}:1.0.0"
+
+    refs = extract_referenced_urns_from_json(item)
+    raw_dict = resource_to_json(item)
+
+    return RawResourceNode(
+        resource_type=r_type,
+        raw_urn=urn.strip(),
+        raw_value=raw_dict,
+        referenced_urns=refs,
+    )
+
+
 def stream_ddi_l_json(file_path: Path, profile: ImportProfile) -> Iterator[RawResourceNode]:
     """Stream DDI-Lifecycle 4.0 / Colectica JSON files item by item."""
     with open(file_path, encoding="utf-8", errors="ignore") as f:
         data = json.load(f)
 
     if isinstance(data, dict):
-        items = data.get("items", [])
+        if "items" in data and isinstance(data["items"], list):
+            items = data["items"]
+        else:
+            items = _flatten_nested_ddi4_dict(data)
     elif isinstance(data, list):
         items = data
     else:
@@ -324,27 +387,19 @@ def stream_ddi_l_json(file_path: Path, profile: ImportProfile) -> Iterator[RawRe
     for item in items:
         if not isinstance(item, dict):
             continue
+        yield _dict_to_resource_node(item)
 
-        r_type = item.get("$type") or item.get("ResourceType") or "Resource"
-        urn = item.get("URN") or item.get("urn")
-        if not urn:
-            item_id = item.get("ID") or item.get("id")
-            agency = item.get("Agency") or "unknown.agency"
-            version = str(item.get("Version", "1"))
-            if item_id:
-                urn = f"urn:ddi:{agency}:{item_id}:{version}"
-            else:
-                urn = f"urn:ddi:anonymous:{r_type.lower()}-{id(item)}:1.0.0"
 
-        refs = extract_referenced_urns_from_json(item)
-        raw_dict = resource_to_json(item)
-
-        yield RawResourceNode(
-            resource_type=r_type,
-            raw_urn=urn.strip(),
-            raw_value=raw_dict,
-            referenced_urns=refs,
-        )
+def stream_ddi_l_jsonl(file_path: Path, profile: ImportProfile) -> Iterator[RawResourceNode]:
+    """Stream DDI-Lifecycle 4.0 JSON Lines (.jsonl) files in O(1) memory."""
+    with open(file_path, encoding="utf-8", errors="ignore") as f:
+        for line in f:
+            stripped = line.strip()
+            if not stripped:
+                continue
+            item = json.loads(stripped)
+            if isinstance(item, dict):
+                yield _dict_to_resource_node(item)
 
 
 def stream_ddi_c_xml(file_path: Path, profile: ImportProfile) -> Iterator[RawResourceNode]:
@@ -431,6 +486,8 @@ def stream_resources(
     resolved_format = format_info or detect_metadata_format(file_path)
 
     if resolved_format.specification == "DDI-L":
+        if resolved_format.serialization == "jsonl":
+            return stream_ddi_l_jsonl(file_path, profile)
         if resolved_format.serialization == "json":
             return stream_ddi_l_json(file_path, profile)
         return stream_ddi_l_xml(file_path, profile)
@@ -438,6 +495,8 @@ def stream_resources(
     if resolved_format.specification == "DDI-C":
         return stream_ddi_c_xml(file_path, profile)
 
+    if resolved_format.serialization == "jsonl":
+        return stream_ddi_l_jsonl(file_path, profile)
     if resolved_format.serialization in ("json", "json-ld"):
         return stream_ddi_l_json(file_path, profile)
 
