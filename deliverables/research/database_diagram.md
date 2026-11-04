@@ -108,18 +108,16 @@ graph TD
     CV ==>|Harmonizes Concept| RV
     RV ==>|Instantiated In Column| IV
 
-    %% 5. Infrastructure & Staging Layer
-    subgraph Infrastructure_Layer ["5. Infrastructure, Staging & Ingestion Layer"]
-        StagedImp["<b>StagedImport</b><br/><code>id (PK)</code><br/><i>Batch Ingestion Job</i>"]:::infraLayer
-        StagedNode["<b>StagedResourceNode</b><br/><code>id (PK)</code><br/><i>Extracted Raw Node</i>"]:::infraLayer
+    %% 5. Infrastructure & Ingestion Layer
+    subgraph Infrastructure_Layer ["5. Infrastructure & Ingestion Layer"]
+        IngBatch["<b>IngestBatch</b><br/><code>id (PK)</code><br/><i>Ingestion Batch Receipt</i>"]:::infraLayer
         UrnReg["<b>UrnRegistry</b><br/><code>urn (PK)</code><br/><i>Universal Type Crosswalk</i>"]:::infraLayer
         UrnAlias["<b>URNAlias</b><br/><code>id (PK)</code><br/><i>Alias -> Canonical Map</i>"]:::infraLayer
         MetaQuar["<b>MetadataQuarantine</b><br/><code>id (PK)</code><br/><i>Archivist Drift Review</i>"]:::infraLayer
 
-        StagedImp -->|parses to| StagedNode
-        StagedNode -.->|resolves canonical| UrnReg
-        StagedNode -.->|links external URN| UrnAlias
-        StagedNode -.->|flags collision/drift| MetaQuar
+        IngBatch -.->|registers URNs| UrnReg
+        IngBatch -.->|registers aliases| UrnAlias
+        IngBatch -.->|flags collision/drift| MetaQuar
     end
 
     %% 6. Audit Layer
@@ -462,29 +460,20 @@ erDiagram
         timestamp created_at
     }
 
-    StagedImport {
+    IngestBatch {
         bigint id PK
         string source_format
         string file_name
+        string file_sha256
         string file_path
-        jsonb import_options
-        integer total_resources
-        integer processed_resources
         string status
-        string import_task_id
+        jsonb options
+        jsonb created_urns
+        jsonb reused_urns
+        jsonb created_aliases
+        jsonb stats
         timestamp created_at
-        timestamp processed_at
-    }
-
-    StagedResourceNode {
-        bigint id PK
-        bigint staged_import_id FK
-        string resource_type
-        string raw_urn
-        jsonb raw_value
-        string canonical_urn
-        string status
-        timestamp created_at
+        timestamp updated_at
     }
 
     %% Relationships
@@ -526,7 +515,6 @@ erDiagram
     UrnRegistry ||--o{ URNAlias : "canonical_urn"
     UrnRegistry ||--o{ SemanticRelationship : "triples"
     UrnRegistry ||--o{ EventLog : "logged_for"
-    StagedImport ||--o{ StagedResourceNode : "extracts"
 ```
 
 ---

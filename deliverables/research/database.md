@@ -709,12 +709,12 @@ The Ingestion layer provides a crash-proof, streaming staging pipeline for multi
 
 ```mermaid
 graph LR
-    Source["<b>Metadata Source File</b><br/><i>(DDI-L, DDI-C, Croissant, CSV)</i>"] --> Stage1["<b>StagedImport</b><br/><i>(Batch upload)</i>"]
-    Stage1 --> Stage2["<b>StagedResourceNode</b><br/><i>(Raw parsed resources)</i>"]
-    Stage2 --> Normalizer["<b>Normalization & Deduplication</b><br/><i>(URN & SHA-256 fingerprinting)</i>"]
+    Source["<b>Metadata Source File</b><br/><i>(DDI-L, DDI-C, Croissant, CSV)</i>"] --> Ingest["<b>Ingestion Pipeline</b><br/><i>(Streaming Direct Ingest)</i>"]
+    Ingest --> Normalizer["<b>Normalization & Deduplication</b><br/><i>(URN & SHA-256 fingerprinting)</i>"]
     Normalizer -->|Exact / Fingerprint Match| DB[("<b>Target DDI Tables</b><br/><i>(PostgreSQL)</i>")]
     Normalizer -->|External URN Alias| UA["<b>URNAlias</b>"]
     Normalizer -->|Collision / Drift| MQ["<b>MetadataQuarantine</b><br/><i>(Archivist Review)</i>"]
+    Ingest -.-> Batch["<b>IngestBatch</b><br/><i>(Audit Receipt & Rollback)</i>"]
     DB -.-> Log["<b>EventLog</b><br/><i>(Lifecycle audit)</i>"]
 ```
 
@@ -771,38 +771,24 @@ Holds incoming metadata that requires archivist review due to URN collisions or 
 
 ---
 
-#### StagedImport
-Stores metadata and parameters for uploaded metadata file bundles and batch import jobs.
+#### IngestBatch
+Lightweight receipt tracking a completed or rolled-back file ingestion batch (`request_ddi_ingestbatch`). Stores one summary row per ingested file (zero per-node JSONB duplication) to prevent duplicate file ingestion via SHA-256, track batch statistics, and support instant transactional rollback (`undo_ingestion`).
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
-| `id` | `BigAutoField` | PK | Auto-incrementing import ID |
-| `source_format` | `CharField(64)` | required | `"ddi-l:3.3:xml"`, `"ddi-l:4.0:json"`, `"ddi-c:2.5:xml"`, `"croissant"`, `"csv"` |
-| `file_name` | `CharField(512)` | required | Original uploaded filename |
-| `file_path` | `FileField` | nullable | File storage path |
-| `import_options` | `JSONField` | default `{}` | Batch configuration metadata |
-| `total_resources` | `IntegerField` | default 0 | Total staged resource nodes |
-| `processed_resources`| `IntegerField` | default 0 | Processed resource count |
-| `status` | `CharField(32)` | default `"staged"` | `"staged"`, `"normalized"`, `"quarantined"`, `"failed"` |
-| `import_task_id` | `CharField(255)` | nullable | Background queue ID |
-| `created_at` | `DateTimeField` | auto | Record creation timestamp |
-| `processed_at` | `DateTimeField` | nullable | Completion timestamp |
-
----
-
-#### StagedResourceNode
-Stores individual broken-down raw element resources extracted during Stage 1 parsing.
-
-| Column | Type | Constraints | Notes |
-| :--- | :--- | :--- | :--- |
-| `id` | `BigAutoField` | PK | Auto-incrementing node ID |
-| `staged_import_id` | `BigInt` | FK → StagedImport | Parent staged import bundle |
-| `resource_type` | `CharField(64)` | db_index | `"QuestionItem"`, `"CodeList"`, `"Category"`, `"StudyUnit"`, etc. |
-| `raw_urn` | `CharField(512)` | db_index | Raw external URN from source file |
-| `raw_value` | `JSONField` | required | Pre-normalized raw JSON payload |
-| `canonical_urn` | `CharField(512)` | nullable, db_index | Resolved canonical database URN |
-| `status` | `CharField(32)` | default `"staged"` | `"staged"`, `"normalized"`, `"quarantined"`, `"failed"` |
-| `created_at` | `DateTimeField` | auto | Record creation timestamp |
+| `id` | `BigAutoField` | PK | Auto-incrementing batch receipt ID |
+| `source_format` | `CharField(64)` | required | Format slug (`"ddi-l:4.0:json"`, `"ddi-l:4.0:jsonl"`, `"ddi-l:3.3:xml"`, `"ddi-c:2.5:xml"`) |
+| `file_name` | `CharField(512)` | required | Original or upgraded filename ingested |
+| `file_sha256` | `CharField(64)` | indexed, required | SHA-256 digest of ingested file for duplicate prevention |
+| `file_path` | `CharField(1024)` | nullable | Resolved path to metadata file on disk |
+| `status` | `CharField(32)` | indexed, default `"completed"` | `"completed"`, `"quarantined"`, `"undone"`, `"failed"` |
+| `options` | `JSONField` | default `{}` | Batch configuration, job_id, profile, and options |
+| `created_urns` | `JSONField` | default `[]` | Ordered list of canonical URNs created exclusively by this batch |
+| `reused_urns` | `JSONField` | default `[]` | List of pre-existing canonical URNs reused during this batch |
+| `created_aliases` | `JSONField` | default `[]` | List of alias_urn values registered in URNAlias by this batch |
+| `stats` | `JSONField` | default `{}` | Summary counts of created entities, shortcuts, and frequencies |
+| `created_at` | `DateTimeField` | auto | Batch execution timestamp |
+| `updated_at` | `DateTimeField` | auto | Last update timestamp |
 
 ---
 
@@ -830,4 +816,5 @@ Stores individual broken-down raw element resources extracted during Stage 1 par
 | `URNAlias` | `alias_urn` | UNIQUE B-tree | Alias resolution during ingestion |
 | `URNAlias` | `canonical_urn` | B-tree | Reverse alias lookup |
 | `MetadataQuarantine`| `resolution` | Partial (where null) | Pending archivist review queue |
-| `StagedResourceNode`| `raw_urn`, `canonical_urn` | B-tree | Fast node matching |
+| `IngestBatch` | `file_sha256` | B-tree | Fast duplicate file detection |
+| `IngestBatch` | `status` | B-tree | Filter batches by lifecycle status |

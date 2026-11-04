@@ -349,29 +349,20 @@ erDiagram
         timestamp created_at "Creation timestamp"
     }
 
-    StagedImport {
+    IngestBatch {
         bigint id PK "Auto-incrementing surrogate ID"
-        string source_format "Format: ddi-l:3.3:xml, ddi-c:2.5:xml, croissant, csv"
-        string file_name "Original uploaded filename"
-        string file_path "Storage file path"
-        jsonb import_options "Batch configuration metadata"
-        integer total_resources "Total staged resource nodes"
-        integer processed_resources "Processed resource count"
-        string status "Status: staged, normalized, quarantined, failed"
-        string import_task_id "Background task ID"
-        timestamp created_at "Creation timestamp"
-        timestamp processed_at "Completion timestamp"
-    }
-
-    StagedResourceNode {
-        bigint id PK "Auto-incrementing surrogate ID"
-        bigint staged_import_id FK "FK -> StagedImport.id"
-        string resource_type "Entity type (QuestionItem, CodeList, etc.)"
-        string raw_urn "Raw external URN from source"
-        jsonb raw_value "Pre-normalized raw payload"
-        string canonical_urn "Resolved canonical URN"
-        string status "Status: staged, normalized, quarantined, failed"
-        timestamp created_at "Creation timestamp"
+        string source_format "Format slug: ddi-l:4.0:json, ddi-c:2.5:xml"
+        string file_name "Original or upgraded filename"
+        string file_sha256 "SHA-256 digest of ingested file"
+        string file_path "Resolved file path on disk"
+        string status "Status: completed, quarantined, undone, failed"
+        jsonb options "Batch configuration and options"
+        jsonb created_urns "Canonical URNs created by batch"
+        jsonb reused_urns "Pre-existing canonical URNs reused"
+        jsonb created_aliases "Aliases registered by batch"
+        jsonb stats "Summary counts of created entities"
+        timestamp created_at "Batch execution timestamp"
+        timestamp updated_at "Update timestamp"
     }
 
     %% ==========================================
@@ -416,4 +407,3 @@ erDiagram
     UrnRegistry ||--o{ URNAlias : "canonical_urn"
     UrnRegistry ||--o{ SemanticRelationship : "triples"
     UrnRegistry ||--o{ EventLog : "logged_for"
-    StagedImport ||--o{ StagedResourceNode : "extracts"

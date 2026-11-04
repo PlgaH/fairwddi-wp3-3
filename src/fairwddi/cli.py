@@ -622,13 +622,36 @@ def preflight_upgrade_cmd(
     table.add_column("Metric", style="bold cyan")
     table.add_column("Value", style="yellow")
     table.add_row("Output DDI-L File", res["output_file"])
+    if res.get("stats_file"):
+        table.add_row("Statistics DDI-L File", res["stats_file"])
     table.add_row("Upgrade Report", res["report_file"])
     table.add_row("Agency / Version", f"{res['agency']} / {res['version']}")
     table.add_row("Variables", f"{res['variable_count']:,}")
-    table.add_row("CodeLists (Deduplicated)", f"{res['codelist_count']:,}")
-    table.add_row("Categories (Deduplicated)", f"{res['category_count']:,}")
+
+    cl_text = f"{res['codelist_count']:,}"
+    if res.get("codelist_duplicates_removed", 0) > 0:
+        cl_rem = res["codelist_duplicates_removed"]
+        cl_pct = res.get("codelist_reduction_pct", 0.0)
+        cl_text += f" ({cl_rem:,} duplicates removed, {cl_pct:.1f}% reduction)"
+    table.add_row("CodeLists (Deduplicated)", cl_text)
+
+    cat_text = f"{res['category_count']:,}"
+    if res.get("category_duplicates_removed", 0) > 0:
+        cat_rem = res["category_duplicates_removed"]
+        cat_pct = res.get("category_reduction_pct", 0.0)
+        cat_text += f" ({cat_rem:,} duplicates removed, {cat_pct:.1f}% reduction)"
+    table.add_row("Categories (Deduplicated)", cat_text)
+
     table.add_row("Questions", f"{res['question_count']:,}")
     table.add_row("Physical Instances", f"{res['physical_instance_count']:,}")
+    if res.get("variable_statistics_count", 0) > 0:
+        vs_cnt = res["variable_statistics_count"]
+        f_cnt = res.get("total_frequencies_count", 0)
+        s_cnt = res.get("total_summary_statistics_count", 0)
+        table.add_row(
+            "Variable Statistics",
+            f"{vs_cnt:,} ({f_cnt:,} frequencies, {s_cnt:,} summary stats)",
+        )
     console.print(table)
 
 

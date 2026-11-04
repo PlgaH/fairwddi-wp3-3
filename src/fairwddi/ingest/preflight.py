@@ -49,6 +49,45 @@ def _resolve_external_urns_in_db(external_urns: set[str]) -> tuple[set[str], set
         return set(), set(external_urns)
 
 
+def _resolve_ddic_profile(profile_arg: str | Path | ImportProfile | None) -> Path | str:
+    """Resolve the validation profile to use for DDI-Codebook profiling."""
+    name = (
+        profile_arg.name
+        if isinstance(profile_arg, ImportProfile)
+        else (str(profile_arg) if profile_arg else "request")
+    )
+
+    # 1. Direct path check
+    direct_path = Path(name)
+    if direct_path.is_file():
+        return direct_path
+
+    # 2. Check candidate directories for custom DDI-C profile files
+    candidate_dirs = [
+        Path.cwd() / "profiles",
+        Path(__file__).parent.parent.parent.parent / "profiles",
+        Path.cwd(),
+    ]
+    suffixes = [".ddic.yaml", ".ddic.yml", ".yaml", ".yml"]
+    for c_dir in candidate_dirs:
+        for sfx in suffixes:
+            cand = c_dir / f"{name}{sfx}"
+            if cand.is_file():
+                return cand
+        if name.endswith(".ddic"):
+            base = name[:-5]
+            for sfx in suffixes:
+                cand = c_dir / f"{base}{sfx}"
+                if cand.is_file():
+                    return cand
+
+    # 3. Built-in DDI-C profiles in dartfx-ddi
+    if name.lower() in ("recommended", "cdif", "schema"):
+        return name.lower()
+
+    return "recommended"
+
+
 def run_preflight_check(
     file_path: str | Path,
     profile: str | Path | ImportProfile = "request",
@@ -114,7 +153,8 @@ def run_preflight_check(
             from dartfx.ddi.ddicodebook.profiler import analyze_ddic_profile
 
             cb = codebook.loadxml(str(path))
-            ddic_prof = analyze_ddic_profile(path)
+            ddic_profile_ref = _resolve_ddic_profile(profile)
+            ddic_prof = analyze_ddic_profile(path, profile=ddic_profile_ref)
             langs = list(ddic_prof.summary.languages.keys())
             is_multilingual = len(langs) > 1
             var_count = len(cb.search_variables())
@@ -131,7 +171,35 @@ def run_preflight_check(
                 }
             )
 
-            if var_count == 0:
+            if hasattr(ddic_prof, "quality") and ddic_prof.quality:
+                summary.update(
+                    {
+                        "quality_score": ddic_prof.quality.overall_score,
+                        "quality_grade": ddic_prof.quality.grade,
+                        "profile_id": ddic_prof.quality.profile_id,
+                        "profile_name": ddic_prof.quality.profile_name,
+                    }
+                )
+                for qf in ddic_prof.quality.findings:
+                    sev_str = (
+                        qf.severity.value
+                        if hasattr(qf.severity, "value")
+                        else str(qf.severity)
+                    )
+                    sev_norm: Literal["error", "warning", "info"] = (
+                        "error"
+                        if sev_str == "error"
+                        else ("warning" if sev_str == "warning" else "info")
+                    )
+                    issues.append(
+                        PlanIssue(
+                            severity=sev_norm,
+                            code=qf.rule_id,
+                            message=qf.message,
+                            requires_review=(sev_norm == "error"),
+                        )
+                    )
+            elif var_count == 0:
                 issues.append(
                     PlanIssue(
                         severity="warning",
@@ -368,6 +436,20 @@ def upgrade_ddic_to_ddil(
     target_path.write_text(content, encoding="utf-8")
     summary = converter.get_summary()
 
+    # Dedicated secondary file for empirical frequencies & summary statistics
+    stats_file: Path | None = None
+    has_stats = summary.get("variable_statistics_count", 0) > 0
+    if output_format in ("ddi4-json", "ddi4-jsonl") and has_stats:
+        stats_name = (
+            target_path.name.replace(".ddi40.jsonl", ".stats.ddi40.json")
+            .replace(".ddi40.json", ".stats.ddi40.json")
+        )
+        stats_file = target_path.with_name(stats_name)
+        if stats_file == target_path:
+            stats_file = target_path.with_suffix(".stats.ddi40.json")
+        stats_content = converter.to_ddi4_stats_json(indent=2)
+        stats_file.write_text(stats_content, encoding="utf-8")
+
     # Build upgrade report
     rep_file = (
         Path(report_path).resolve()
@@ -379,26 +461,74 @@ def upgrade_ddic_to_ddil(
         "",
         f"- **Source DDI-C File:** `{src_path}`",
         f"- **Output DDI-L File:** `{target_path}`",
-        f"- **Target Format:** `{output_format}`",
-        f"- **ID Strategy:** `{id_strategy}`",
-        f"- **CodeList Harmonization:** `{harmonize_codes}`",
-        f"- **Resolved Agency:** `{summary['agency']}`",
-        f"- **Version:** `{summary['version']}`",
-        f"- **Study ID:** `{summary['codebook_id']}`",
-        f"- **Study Title:** {summary['title']}",
-        "",
-        "## Converted Resource Counts",
-        "",
-        "| Resource Type | Count |",
-        "| :--- | ---: |",
-        f"| `Variable` | {summary['variable_count']:,} |",
-        f"| `CodeList` | {summary['codelist_count']:,} |",
-        f"| `Category` | {summary['category_count']:,} |",
-        f"| `QuestionItem` | {summary['question_count']:,} |",
-        f"| `VariableGroup` | {summary['variable_group_count']:,} |",
-        f"| `PhysicalInstance` | {summary['physical_instance_count']:,} |",
-        "",
     ]
+    if stats_file:
+        report_lines.append(f"- **Statistics DDI-L File:** `{stats_file}`")
+
+    raw_cl = summary.get("raw_codelist_count", summary["codelist_count"])
+    cl_rem = summary.get("codelist_duplicates_removed", 0)
+    cl_pct = summary.get("codelist_reduction_pct", 0.0)
+
+    raw_cat = summary.get("raw_category_count", summary["category_count"])
+    cat_rem = summary.get("category_duplicates_removed", 0)
+    cat_pct = summary.get("category_reduction_pct", 0.0)
+
+    v_cnt = summary["variable_count"]
+    q_cnt = summary["question_count"]
+    vg_cnt = summary["variable_group_count"]
+    pi_cnt = summary["physical_instance_count"]
+
+    report_lines.extend(
+        [
+            f"- **Target Format:** `{output_format}`",
+            f"- **ID Strategy:** `{id_strategy}`",
+            f"- **CodeList Harmonization:** `{harmonize_codes}`",
+            f"- **Resolved Agency:** `{summary['agency']}`",
+            f"- **Version:** `{summary['version']}`",
+            f"- **Study ID:** `{summary['codebook_id']}`",
+            f"- **Study Title:** {summary['title']}",
+            "",
+            "## Converted Resource Counts & Deduplication",
+            "",
+            "| Resource Type | Raw Count | Deduplicated Count | Duplicates Removed | Reduction |",
+            "| :--- | ---: | ---: | ---: | ---: |",
+            f"| `CodeList` | {raw_cl:,} | {summary['codelist_count']:,} | "
+            f"{cl_rem:,} | {cl_pct:.1f}% |",
+            f"| `Category` | {raw_cat:,} | {summary['category_count']:,} | "
+            f"{cat_rem:,} | {cat_pct:.1f}% |",
+            f"| `Variable` | {v_cnt:,} | {v_cnt:,} | 0 | 0.0% |",
+            f"| `QuestionItem` | {q_cnt:,} | {q_cnt:,} | 0 | 0.0% |",
+            f"| `VariableGroup` | {vg_cnt:,} | {vg_cnt:,} | 0 | 0.0% |",
+            f"| `PhysicalInstance` | {pi_cnt:,} | {pi_cnt:,} | 0 | 0.0% |",
+            "",
+        ]
+    )
+
+    if stats_file:
+        vs_cnt = summary.get("variable_statistics_count", 0)
+        f_cnt = summary.get("total_frequencies_count", 0)
+        s_cnt = summary.get("total_summary_statistics_count", 0)
+        arch_note = (
+            "> **Architecture Note:** In accordance with standard DDI 4.0 and DDI-Lifecycle "
+            "principles, variable definitions, question items, and code lists represent reusable, "
+            "survey-agnostic metadata. Empirical observation statistics (frequencies, weighted "
+            "counts, and numeric summaries) are dataset-specific and are preserved in a dedicated "
+            "secondary DDI 4.0 file (`*.stats.ddi40.json`) containing native `VariableStatistics` "
+            "structures linked to parent variable URNs."
+        )
+        report_lines.extend(
+            [
+                "## Empirical Observation Statistics",
+                "",
+                f"- **Dedicated Secondary File:** `{stats_file}`",
+                f"- **Variables with Statistics:** {vs_cnt:,}",
+                f"- **Total Category Frequencies:** {f_cnt:,}",
+                f"- **Total Summary Statistics:** {s_cnt:,}",
+                "",
+                arch_note,
+                "",
+            ]
+        )
     if converter.document.diagnostics:
         report_lines.extend(
             [
@@ -420,6 +550,7 @@ def upgrade_ddic_to_ddil(
     return {
         "source_file": str(src_path),
         "output_file": str(target_path),
+        "stats_file": str(stats_file) if stats_file else None,
         "report_file": str(rep_file),
         "output_format": output_format,
         "id_strategy": id_strategy,

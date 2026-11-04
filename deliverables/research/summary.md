@@ -60,12 +60,12 @@ flowchart TD
 
 ### A. Database Schema & Domain Model ([`deliverables/research/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md))
 
-1. **28-Model Standard-Agnostic PostgreSQL Core (with SQLite Dev/Test Parity):**
+1. **30-Model Standard-Agnostic PostgreSQL Core (with SQLite Dev/Test Parity):**
    - **Concept Layer:** `ConceptScheme`, `Concept` (generic vocabulary URI anchor, parent hierarchy, notations), `ConceptualVariableScheme`, `ConceptualVariable`, `SemanticRelationship`.
    - **Representation & Instrument Layer:** `QuestionScheme`, `QuestionItem`, `CategoryScheme`, `Category`, `CodeList`, `Code`, `RepresentedVariableScheme`, `RepresentedVariable`, `QuestionVariable`, `Instrument`, `InstrumentQuestion`.
-   - **Dataset Layer:** `StudyUnit` (renamed from `Survey`), `InstanceVariableScheme`, `InstanceVariable` (renamed from `BindingSurveyRepresentedVariable`), `StudyUnitVariable`.
+   - **Dataset Layer:** `StudyUnit` (renamed from `Survey`), `InstanceVariableScheme`, `InstanceVariable` (renamed from `BindingSurveyRepresentedVariable`), `Datafile`, `DatafileVariable`, `DatafileVariableFrequency`, `StudyInstrument`.
    - **Organization & Grouping Layer:** `Organization`, `Group`.
-   - **Infrastructure & Staging Layer:** `UrnRegistry`, `URNAlias`, `MetadataQuarantine`, `StagedImport`, `StagedResourceNode`, `EventLog`.
+   - **Infrastructure & Ingestion Layer:** `UrnRegistry`, `URNAlias`, `MetadataQuarantine`, `IngestBatch`, `EventLog`.
 2. **`DDIIdentifiable` Abstract Mixin:** Universal identification mixin providing `urn`, `agency`, `ddi_identifier`, `version`, `content_hash` (primary SHA-256 digest), and `content_hashes` (JSONB multi-algorithm digests).
 3. **Structured `QuestionItem` Breakdown:** Extracted from `RepresentedVariable` into explicit multilingual JSONB fields: `question_text` (literal question wording), `pre_question_text` (introductory preamble/routing), `post_question_text` (transition text), and `interviewer_instructions` (guidance).
 4. **Decoupled Structural `CodeList`:** Decouples numerical code values (e.g. Code `1`) from response text labels (`Category`). `CodeList` URN is derived purely from structural code-category mappings independent of list title.
@@ -123,7 +123,7 @@ flowchart TD
 | Deliverable File | Path | Key Contents |
 | :--- | :--- | :--- |
 | **Phase I Audit Report** | [`deliverables/phase1_report.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/phase1_report.md) | Official Phase I summary report, legacy ReQuest audit, and validated target DDI-L architecture. |
-| **Database Schema** | [`deliverables/research/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md) | Complete 28-model PostgreSQL 17 schema, ER diagrams, `DDIIdentifiable` mixin, `StagedImport` & `StagedResourceNode`, index strategy, zero-data-loss migration path. |
+| **Database Schema** | [`deliverables/research/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md) | Complete 30-model PostgreSQL 17 schema, ER diagrams, `DDIIdentifiable` mixin, `IngestBatch` receipts, index strategy, zero-data-loss migration path. |
 | **Normalization Engine** | [`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md) | 4-phase cascade, standard-agnostic core, 2-stage ingestion pipeline, multi-standard format adapters, multilingual 3-tier strategy, architectural complexity evaluation. |
 | **Hashing Specification** | [`deliverables/research/hashing_algorithms.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/hashing_algorithms.md) | Master resource-algorithm table, Simple vs. Compound hashing, shortened hash URN strategy, `CategorySet` / `CodeList` set hashing, Preferred Algorithm pattern, worked examples, BLAKE3 benchmark. |
 | **Glossary & Terminology** | [`deliverables/research/glossary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/glossary.md) | Authoritative domain reference mapping DDI-L entities, URN classifications (Authoritative vs. Random vs. Canonical vs. Alias), hashing terminology, ELSST thesaurus, and staging concepts. |

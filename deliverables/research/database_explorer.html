@@ -1416,12 +1416,12 @@
           </div>
 
           <div class="filter-group">
-            <button class="filter-chip active" onclick="filterLayer('all', this)">All (30)</button>
+            <button class="filter-chip active" onclick="filterLayer('all', this)">All (32)</button>
             <button class="filter-chip" onclick="filterLayer('org', this)">Org (2)</button>
             <button class="filter-chip" onclick="filterLayer('concept', this)">Concept (5)</button>
             <button class="filter-chip" onclick="filterLayer('rep', this)">Rep (13)</button>
-            <button class="filter-chip" onclick="filterLayer('dataset', this)">Dataset (4)</button>
-            <button class="filter-chip" onclick="filterLayer('infra', this)">Infra (5)</button>
+            <button class="filter-chip" onclick="filterLayer('dataset', this)">Dataset (7)</button>
+            <button class="filter-chip" onclick="filterLayer('infra', this)">Infra (4)</button>
             <button class="filter-chip" onclick="filterLayer('audit', this)">Audit (1)</button>
           </div>
 
@@ -1637,8 +1637,7 @@
           { target: "URNAlias", type: "Foreign Key (canonical_urn)" },
           { target: "SemanticRelationship", type: "Foreign Key (subject_urn, object_urn)" },
           { target: "EventLog", type: "Foreign Key (urn)" },
-          { target: "MetadataQuarantine", type: "Foreign Key (existing_urn)" },
-          { target: "StagedResourceNode", type: "Foreign Key (canonical_urn)" }
+          { target: "MetadataQuarantine", type: "Foreign Key (existing_urn)" }
         ]
       },
 
@@ -2432,56 +2431,31 @@
         ],
         incoming: []
       },
-      StagedImport: {
+      IngestBatch: {
         layer: "infra",
         layerName: "Infrastructure & Ingestion",
         base: "Model",
-        table: "request_ddi_stagedimport",
-        ddiTag: "Batch Staging",
+        table: "request_ddi_ingestbatch",
+        ddiTag: "Batch Receipt",
         urnPattern: "Surrogate PK (id: BigInt)",
-        description: "Stores metadata and parameters for uploaded metadata file bundles and streaming batch import jobs.",
-        pos: { x: 1140, y: 410 },
+        description: "Stores lightweight receipts tracking completed or rolled-back file ingestion batches with SHA-256 duplicate prevention.",
+        pos: { x: 1140, y: 460 },
         fields: [
-          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing import job ID" },
-          { name: "source_format", type: "VARCHAR(64)", req: true, notes: "Format ('ddi-l:3.3:xml', 'ddi-c:2.5:xml', 'croissant', 'csv')" },
-          { name: "file_name", type: "VARCHAR(512)", req: true, notes: "Original uploaded filename" },
-          { name: "file_path", type: "VARCHAR(512)", notes: "File storage path" },
-          { name: "import_options", type: "JSONB", notes: "Batch configuration metadata JSON" },
-          { name: "total_resources", type: "INTEGER", notes: "Total staged resource nodes (default 0)" },
-          { name: "processed_resources", type: "INTEGER", notes: "Processed count (default 0)" },
-          { name: "status", type: "VARCHAR(32)", notes: "Status: 'staged', 'normalized', 'quarantined', 'failed'" },
-          { name: "import_task_id", type: "VARCHAR(255)", notes: "Background task ID" },
-          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" },
-          { name: "processed_at", type: "TIMESTAMP", notes: "Completion timestamp" }
+          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing batch receipt ID" },
+          { name: "source_format", type: "VARCHAR(64)", req: true, notes: "Format slug ('ddi-l:4.0:json', 'ddi-c:2.5:xml', etc.)" },
+          { name: "file_name", type: "VARCHAR(512)", req: true, notes: "Original or upgraded filename ingested" },
+          { name: "file_sha256", type: "VARCHAR(64)", req: true, idx: true, notes: "SHA-256 digest of ingested file" },
+          { name: "file_path", type: "VARCHAR(1024)", notes: "Resolved file path on disk" },
+          { name: "status", type: "VARCHAR(32)", idx: true, notes: "Status: 'completed', 'quarantined', 'undone', 'failed'" },
+          { name: "options", type: "JSONB", notes: "Batch configuration, job_id, profile, and options" },
+          { name: "created_urns", type: "JSONB", notes: "Ordered list of canonical URNs created exclusively by batch" },
+          { name: "reused_urns", type: "JSONB", notes: "List of pre-existing canonical URNs reused during batch" },
+          { name: "created_aliases", type: "JSONB", notes: "List of alias_urn values registered in URNAlias" },
+          { name: "stats", type: "JSONB", notes: "Summary counts of created entities, shortcuts, and frequencies" },
+          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Batch execution timestamp" },
+          { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Last update timestamp" }
         ],
         outgoing: [],
-        incoming: [
-          { target: "StagedResourceNode", type: "Foreign Key (StagedResourceNode.staged_import_id)" }
-        ]
-      },
-      StagedResourceNode: {
-        layer: "infra",
-        layerName: "Infrastructure & Ingestion",
-        base: "Model",
-        table: "request_ddi_stagedresourcenode",
-        ddiTag: "Staging Node",
-        urnPattern: "Surrogate PK (id: BigInt)",
-        description: "Stores individual broken-down raw element resources extracted during Stage 1 parsing.",
-        pos: { x: 1140, y: 510 },
-        fields: [
-          { name: "id", type: "BIGSERIAL", pk: true, req: true, notes: "Auto-incrementing node ID" },
-          { name: "staged_import_id", type: "BIGINT", fk: "StagedImport", req: true, notes: "FK -> StagedImport.id" },
-          { name: "resource_type", type: "VARCHAR(64)", req: true, idx: true, notes: "Target entity type ('QuestionItem', 'CodeList', etc.)" },
-          { name: "raw_urn", type: "VARCHAR(512)", idx: true, notes: "Raw external URN from source file" },
-          { name: "raw_value", type: "JSONB", req: true, notes: "Pre-normalized raw payload" },
-          { name: "canonical_urn", type: "VARCHAR(512)", fk: "UrnRegistry", idx: true, notes: "Resolved canonical database URN (FK -> UrnRegistry.urn)" },
-          { name: "status", type: "VARCHAR(32)", notes: "Status: 'staged', 'normalized', 'quarantined', 'failed'" },
-          { name: "created_at", type: "TIMESTAMP", req: true, notes: "Record creation timestamp" }
-        ],
-        outgoing: [
-          { target: "StagedImport", type: "Foreign Key (staged_import_id)" },
-          { target: "UrnRegistry", type: "Foreign Key (canonical_urn)" }
-        ],
         incoming: []
       }
     };
@@ -2756,17 +2730,15 @@
         ]
       },
       ingestion: {
-        title: "Streaming Ingestion, Aliasing & Quarantine",
+        title: "Direct Ingestion, Aliasing & Quarantine",
         icon: "📥",
         colorClass: "focused-ingestion",
         edgeClass: "highlight-ingestion",
         marker: "url(#arrow-ingestion)",
-        nodes: ["StagedImport", "StagedResourceNode", "UrnRegistry", "URNAlias", "MetadataQuarantine", "EventLog"],
+        nodes: ["IngestBatch", "UrnRegistry", "URNAlias", "MetadataQuarantine", "EventLog"],
         edges: [
-          ["StagedResourceNode", "StagedImport"],
           ["URNAlias", "UrnRegistry"],
           ["MetadataQuarantine", "UrnRegistry"],
-          ["StagedResourceNode", "UrnRegistry"],
           ["EventLog", "UrnRegistry"]
         ]
       }

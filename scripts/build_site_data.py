@@ -43,10 +43,10 @@ DOCUMENTS_CONFIG = [
         "title": "Target Database Model & PostgreSQL 17 Schema Specification",
         "shortTitle": "Database Model Specification",
         "category": "Research Reports",
-        "badge": "31 Models",
+        "badge": "30 Models",
         "icon": "database",
         "featured": True,
-        "description": "Complete 31-model standard-agnostic PostgreSQL 17 schema, ER diagrams, DDIIdentifiable mixin, staging nodes, and migration path."
+        "description": "Complete 30-model standard-agnostic PostgreSQL 17 schema, ER diagrams, DDIIdentifiable mixin, IngestBatch receipts, and migration path."
     },
     {
         "id": "research/database_diagram",
@@ -113,6 +113,39 @@ DOCUMENTS_CONFIG = [
         "icon": "help-circle",
         "featured": False,
         "description": "Architectural analysis of the 6 canonical relationship paths connecting variables, questions, instruments, and studies."
+    },
+    {
+        "id": "research/ingestion_architecture",
+        "file": "deliverables/research/ingestion_architecture.md",
+        "title": "Phase 2 Direct Ingestion Architecture Specification",
+        "shortTitle": "Direct Ingestion Architecture",
+        "category": "Research Reports",
+        "badge": "Phase 2 Pipeline",
+        "icon": "upload-cloud",
+        "featured": True,
+        "description": "Technical specification for the direct file-to-core ingestion pipeline, preflight readiness checks, and IngestBatch receipts."
+    },
+    {
+        "id": "research/ingestion_workflows",
+        "file": "deliverables/research/ingestion_workflows.md",
+        "title": "Phase 2 Ingestion Workflows & Operational Guide",
+        "shortTitle": "Ingestion Workflows",
+        "category": "Research Reports",
+        "badge": "Workflows 1-3",
+        "icon": "play-circle",
+        "featured": True,
+        "description": "Step-by-step operational workflows for classic DDI-Codebook, multilingual DDI-C, and complex DDI-Lifecycle 3.3 files."
+    },
+    {
+        "id": "research/ingestion_troubleshooting_and_qa",
+        "file": "deliverables/research/ingestion_troubleshooting_and_qa.md",
+        "title": "QA & Troubleshooting Guide — Phase 2 Ingestion Issues",
+        "shortTitle": "Ingestion QA & Troubleshooting",
+        "category": "Research Reports",
+        "badge": "Safety Gates",
+        "icon": "alert-triangle",
+        "featured": False,
+        "description": "Quality assurance safety gates, diagnostic procedures for preflight errors, duplicate collision handling, and rollback."
     },
     {
         "id": "research/cli_user_guide",

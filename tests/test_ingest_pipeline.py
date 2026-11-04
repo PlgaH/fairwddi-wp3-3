@@ -424,3 +424,87 @@ def test_cli_pipeline_and_subcommands(
     res_undo = runner.invoke(app, ["ingest", "undo", str(batch.id)])
     assert res_undo.exit_code == 0
     assert "Rolled back Batch" in res_undo.stdout
+
+
+@pytest.mark.django_db
+def test_ddic_custom_profile_variables_and_questions(tmp_path: Path) -> None:
+    """Verify request.ddic.yaml enforces variable presence and warns on missing questions."""
+    # 1. Codebook with NO variables -> Must produce an ERROR
+    no_vars_xml = tmp_path / "no_vars.ddic.xml"
+    no_vars_xml.write_text(
+        """<?xml version="1.0" encoding="utf-8"?>
+<codeBook xmlns="ddi:codebook:2_5" version="2.5" ID="STUDY_001">
+  <stdyDscr>
+    <citation>
+      <titlStmt>
+        <titl>Empty Study Without Variables</titl>
+      </titlStmt>
+    </citation>
+  </stdyDscr>
+  <dataDscr/>
+</codeBook>""",
+        encoding="utf-8",
+    )
+    plan_no_vars = run_preflight_check(no_vars_xml, profile="request")
+    assert plan_no_vars.summary["profile_id"] == "request.ddic"
+    var_err = [i for i in plan_no_vars.issues if i.code == "request.ddic.variables_required"]
+    assert len(var_err) == 1
+    assert var_err[0].severity == "error"
+
+    # 2. Codebook with variables but NO questions -> Must produce a WARNING
+    vars_no_qstn_xml = tmp_path / "vars_no_qstn.ddic.xml"
+    vars_no_qstn_xml.write_text(
+        """<?xml version="1.0" encoding="utf-8"?>
+<codeBook xmlns="ddi:codebook:2_5" version="2.5" ID="STUDY_002">
+  <stdyDscr>
+    <citation>
+      <titlStmt>
+        <titl>Study With Variables but No Questions</titl>
+      </titlStmt>
+    </citation>
+  </stdyDscr>
+  <dataDscr>
+    <var ID="V1" name="AGE">
+      <labl>Age of respondent</labl>
+    </var>
+  </dataDscr>
+</codeBook>""",
+        encoding="utf-8",
+    )
+    plan_no_qstn = run_preflight_check(vars_no_qstn_xml, profile="request")
+    assert plan_no_qstn.summary["profile_id"] == "request.ddic"
+    # Variables required passed (no error)
+    assert not any(i.code == "request.ddic.variables_required" for i in plan_no_qstn.issues)
+    # Questions recommended produced warning
+    qstn_warn = [i for i in plan_no_qstn.issues if i.code == "request.ddic.questions_recommended"]
+    assert len(qstn_warn) == 1
+    assert qstn_warn[0].severity == "warning"
+
+    # 3. Codebook with both variables and questions -> Both pass
+    vars_with_qstn_xml = tmp_path / "vars_with_qstn.ddic.xml"
+    vars_with_qstn_xml.write_text(
+        """<?xml version="1.0" encoding="utf-8"?>
+<codeBook xmlns="ddi:codebook:2_5" version="2.5" ID="STUDY_003">
+  <stdyDscr>
+    <citation>
+      <titlStmt>
+        <titl>Complete Question-Bank Study</titl>
+      </titlStmt>
+    </citation>
+  </stdyDscr>
+  <dataDscr>
+    <var ID="V1" name="AGE">
+      <labl>Age of respondent</labl>
+      <qstn ID="Q1">
+        <qstnLit>How old are you?</qstnLit>
+      </qstn>
+    </var>
+  </dataDscr>
+</codeBook>""",
+        encoding="utf-8",
+    )
+    plan_complete = run_preflight_check(vars_with_qstn_xml, profile="request")
+    assert plan_complete.summary["profile_id"] == "request.ddic"
+    assert not any(i.code == "request.ddic.variables_required" for i in plan_complete.issues)
+    assert not any(i.code == "request.ddic.questions_recommended" for i in plan_complete.issues)
+

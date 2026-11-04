@@ -1,0 +1,72 @@
+# SPDX-FileCopyrightText: 2026 Centre des Données Socio-Politiques (CDSP)
+# SPDX-License-Identifier: MIT
+
+profile:
+  id: request.ddic
+  name: CDSP ReQuest DDI-Codebook Profile
+  description: >-
+    Quality and completeness validation profile governing DDI-Codebook (2.5/2.6)
+    readiness for CDSP ReQuest question-bank ingestion and upgrade to DDI-Lifecycle.
+  version: "1.0"
+  target_standard: "DDI-C 2.5"
+
+rules:
+  # ===========================================================================
+  # 1. Study-Level Metadata & Citation Core
+  # ===========================================================================
+  - id: request.ddic.study_title
+    target: codeBook/stdyDscr/citation/titlStmt/titl
+    rule: required
+    message: "DDI-Codebook has no study title (<titl> in <titlStmt>)."
+
+  - id: request.ddic.missing_id
+    target: codeBook/@ID
+    rule: required
+    message: "Codebook root element has no @ID attribute."
+
+  - id: request.ddic.missing_filedscr
+    target: codeBook/fileDscr
+    rule: min_count
+    min_count: 1
+    severity: error
+    message: "Codebook has no data file description (<fileDscr>)."
+
+  # ===========================================================================
+  # 2. Variable Cascade & Question Bank Requirements
+  # ===========================================================================
+  # Core Requirement: Presence of variables (<var>)
+  - id: request.ddic.variables_required
+    target: codeBook/dataDscr/var
+    rule: min_count
+    min_count: 1
+    severity: error
+    message: >-
+      DDI-Codebook contains no variables (<var>). At least one variable is
+      required for ReQuest question-bank ingestion.
+
+  # Core Requirement: Warning if there are no questions (<qstn>)
+  - id: request.ddic.questions_recommended
+    target: codeBook/dataDscr/var/qstn
+    rule: min_count
+    min_count: 1
+    severity: warning
+    message: >-
+      DDI-Codebook contains no question text (<qstn>) across variables.
+      ReQuest is a question bank and relies on question wording for search,
+      concept linking, and cross-survey harmonization.
+
+  # ===========================================================================
+  # 3. Variable-Level Completeness & Best Practices
+  # ===========================================================================
+  - id: request.ddic.variable_missing_name
+    context: codeBook/dataDscr/var
+    target: "@name"
+    rule: required
+    message: "Variable (<var>) is missing a @name attribute."
+
+  - id: request.ddic.variable_missing_label
+    context: codeBook/dataDscr/var
+    target: labl
+    rule: recommended
+    severity: warning
+    message: "Variable (<var>) has no label (<labl>)."

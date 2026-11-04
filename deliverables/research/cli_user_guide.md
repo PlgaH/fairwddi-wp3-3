@@ -193,8 +193,7 @@ uv run fairwddi db status
 │ UrnRegistry               │ request_ddi_urnregistry           │            0 │
 │ URNAlias                  │ request_ddi_urnalias              │            1 │
 │ MetadataQuarantine        │ request_ddi_metadataquarantine    │            0 │
-│ StagedImport              │ request_ddi_stagedimport          │            1 │
-│ StagedResourceNode        │ request_ddi_stagedresourcenode    │            1 │
+│ IngestBatch               │ request_ddi_ingestbatch           │            0 │
 │ Instrument                │ request_ddi_instrument            │            1 │
 │ InstrumentQuestion        │ request_ddi_instrumentquestion    │            1 │
 │ Organization              │ request_ddi_organization          │            1 │
