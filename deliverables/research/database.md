@@ -29,7 +29,7 @@ The FAIRwDDI architecture implements a **standard-agnostic, lightweight DDI mode
 | **Parent Scheme Foreign Keys** | `scheme_urn` — `VARCHAR(512) REFERENCES ...(urn)` (maps to `models.ForeignKey(..., db_column="scheme_urn")`). |
 | **Inter-Resource Foreign Keys** | `*_urn` — `VARCHAR(512) REFERENCES ...(urn)` (e.g. `study_unit_urn`, `represented_variable_urn`, `conceptual_variable_urn`, `question_item_urn`, `code_list_urn`, `category_urn`, `instrument_urn`). |
 | **Polymorphic Foreign Keys** | `VARCHAR(512) REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE` (used in `URNAlias.canonical_urn`, `SemanticRelationship.subject_urn/object_urn`, `EventLog.urn`). |
-| **Canonical URN Format** | Colon-separated: `urn:ddi:agency[.sub-agency]:ID:Version`.<br>• Agency-scoped: `urn:ddi:fr.sciencespo:V321:1.0.0`<br>• Maintainable-scoped: `urn:ddi:fr.sciencespo:MaintainableID.ObjectID:1.0.0` |
+| **Canonical URN Format** | Colon-separated: `urn:ddi:agency[.sub-agency]:ID:Version`.<br>• Agency-scoped: `urn:ddi:fr.cdsp:V321:1.0.0`<br>• Maintainable-scoped: `urn:ddi:fr.cdsp:MaintainableID.ObjectID:1.0.0` |
 | **Unified Hashes** | `hashes` (`JSONB`) — unified key-value mapping of hash algorithm types to digests (e.g. `{"sha256": "...", "canonical_nfkc": "..."}`). |
 | **Extended Attributes** | `extended_attributes` (`JSONB`) — array of objects capturing flexible provider/specification attributes (intent, interviewer guidance, notes, value domains, inclusion/exclusion) without SQL schema bloat. |
 | **Multilingual Text** | `JSONB` array of objects: `[{"lang": "fr", "value": "...", "type": "literal"}]`. Extensible attributes supported. |
@@ -58,7 +58,7 @@ class DDIIdentifiable(models.Model):
     def save(self, *args, **kwargs) -> None:
         """Ensure canonical URN is generated and pre-registered in UrnRegistry supertype table."""
         if not self.urn:
-            agency = os.getenv("DDI_AGENCY", "fr.sciencespo")
+            agency = os.getenv("DDI_AGENCY", "fr.cdsp")
             primary_hash = None
             hashes_val = getattr(self, "hashes", None)
             if isinstance(hashes_val, dict):

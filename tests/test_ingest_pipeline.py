@@ -507,4 +507,3 @@ def test_ddic_custom_profile_variables_and_questions(tmp_path: Path) -> None:
     assert plan_complete.summary["profile_id"] == "request.ddic"
     assert not any(i.code == "request.ddic.variables_required" for i in plan_complete.issues)
     assert not any(i.code == "request.ddic.questions_recommended" for i in plan_complete.issues)
-

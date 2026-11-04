@@ -170,7 +170,7 @@ class DDIIdentifiableSchema(BaseModel):
             parts = self.urn.split(":")
             if len(parts) >= 3:
                 return parts[2]
-        return os.getenv("DDI_AGENCY", "fr.sciencespo")
+        return os.getenv("DDI_AGENCY", "fr.cdsp")
 
     @property
     def identifier(self) -> str:

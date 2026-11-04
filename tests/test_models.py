@@ -45,7 +45,7 @@ class TestFairwDDIModels(TestCase):
     def setUp(self) -> None:
         """Set up foundational records."""
         self.organization = Organization.objects.create(
-            urn="urn:ddi:fr.sciencespo:Organization.CDSP:1.0.0",
+            urn="urn:ddi:fr.cdsp:Organization.CDSP:1.0.0",
             name=[
                 {"lang": "fr", "value": "Centre de Données Socio-Politiques"},
                 {"lang": "en", "value": "Center for Socio-Political Data"},
@@ -57,26 +57,26 @@ class TestFairwDDIModels(TestCase):
             ],
         )
         self.group = Group.objects.create(
-            urn="urn:ddi:fr.sciencespo:group-bpf:1.0.0",
+            urn="urn:ddi:fr.cdsp:group-bpf:1.0.0",
             name=[{"lang": "fr", "value": "Baromètre Politique Français"}],
             description=[{"lang": "fr", "value": "Série d'enquêtes électorales"}],
             group_type="study_series",
             references=[
-                {"resource_type": "StudyUnit", "urn": "urn:ddi:fr.sciencespo:su-bpf-2007-w01:1.0.0"}
+                {"resource_type": "StudyUnit", "urn": "urn:ddi:fr.cdsp:su-bpf-2007-w01:1.0.0"}
             ],
             hashes={"sha256": "group_hash_001"},
         )
 
     def test_organization_and_group(self) -> None:
         """Test Organization and generic Group resources."""
-        assert self.organization.pk == "urn:ddi:fr.sciencespo:Organization.CDSP:1.0.0"
-        assert self.organization.agency == "fr.sciencespo"
+        assert self.organization.pk == "urn:ddi:fr.cdsp:Organization.CDSP:1.0.0"
+        assert self.organization.agency == "fr.cdsp"
         assert self.organization.organization_type == "distributor"
         assert str(self.organization) == "Centre de Données Socio-Politiques"
         assert len(self.organization.extended_attributes) == 2
 
-        assert self.group.pk == "urn:ddi:fr.sciencespo:group-bpf:1.0.0"
-        assert self.group.agency == "fr.sciencespo"
+        assert self.group.pk == "urn:ddi:fr.cdsp:group-bpf:1.0.0"
+        assert self.group.agency == "fr.cdsp"
         assert self.group.identifier == "group-bpf"
         assert self.group.version == "1.0.0"
         assert self.group.group_type == "study_series"
@@ -88,14 +88,14 @@ class TestFairwDDIModels(TestCase):
     def test_concept_layer_and_skos_hierarchy(self) -> None:
         """Test ConceptScheme, Concept, hierarchy, and ConceptualVariableScheme."""
         concept_scheme = ConceptScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:cs-thesaurus:1.0.0",
+            urn="urn:ddi:fr.cdsp:cs-thesaurus:1.0.0",
             name=[{"lang": "fr", "value": "Schéma de concepts"}],
         )
-        assert concept_scheme.pk == "urn:ddi:fr.sciencespo:cs-thesaurus:1.0.0"
+        assert concept_scheme.pk == "urn:ddi:fr.cdsp:cs-thesaurus:1.0.0"
         assert str(concept_scheme) == "Schéma de concepts"
 
         parent_concept = Concept.objects.create(
-            urn="urn:ddi:fr.sciencespo:concept-pol:1.0.0",
+            urn="urn:ddi:fr.cdsp:concept-pol:1.0.0",
             scheme=concept_scheme,
             uri="https://elsst.cessda.eu/id/4/Politics",
             vocabulary="ELSST",
@@ -107,7 +107,7 @@ class TestFairwDDIModels(TestCase):
             extended_attributes=[{"type": "scope", "value": "core"}],
         )
         child_concept = Concept.objects.create(
-            urn="urn:ddi:fr.sciencespo:concept-pol-att:1.0.0",
+            urn="urn:ddi:fr.cdsp:concept-pol-att:1.0.0",
             scheme=concept_scheme,
             uri="https://elsst.cessda.eu/id/4/PoliticalAttitudes",
             vocabulary="ELSST",
@@ -117,7 +117,7 @@ class TestFairwDDIModels(TestCase):
             concept_type="concept",
             hashes={"sha256": "concept_pol_att_hash"},
         )
-        assert parent_concept.pk == "urn:ddi:fr.sciencespo:concept-pol:1.0.0"
+        assert parent_concept.pk == "urn:ddi:fr.cdsp:concept-pol:1.0.0"
         assert str(parent_concept) == "Politique"
         assert parent_concept.vocabulary == "ELSST"
         assert parent_concept.scheme == concept_scheme
@@ -128,24 +128,24 @@ class TestFairwDDIModels(TestCase):
 
         # ConceptualVariableScheme
         cv_scheme = ConceptualVariableScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:cvs-pol:1.0.0",
+            urn="urn:ddi:fr.cdsp:cvs-pol:1.0.0",
             name=[{"lang": "fr", "value": "Schéma de variables conceptuelles"}],
         )
-        assert cv_scheme.pk == "urn:ddi:fr.sciencespo:cvs-pol:1.0.0"
+        assert cv_scheme.pk == "urn:ddi:fr.cdsp:cvs-pol:1.0.0"
         assert str(cv_scheme) == "Schéma de variables conceptuelles"
 
         # ConceptualVariable with URN PK and hashes
         cv = ConceptualVariable.objects.create(
             scheme=cv_scheme,
             concept=child_concept,
-            urn="urn:ddi:fr.sciencespo:cv-fr-001:1.0.0",
+            urn="urn:ddi:fr.cdsp:cv-fr-001:1.0.0",
             name=[{"lang": "fr", "value": "INTERET_POL"}],
             label=[{"lang": "fr", "value": "Intérêt pour la politique"}],
             description=[{"lang": "fr", "value": "Mesure du niveau d'intérêt politique"}],
             hashes={"sha256": "abc111", "v1_strict": "abc111"},
             extended_attributes=[{"type": "domain", "value": "attitudes"}],
         )
-        assert cv.pk == "urn:ddi:fr.sciencespo:cv-fr-001:1.0.0"
+        assert cv.pk == "urn:ddi:fr.cdsp:cv-fr-001:1.0.0"
         assert str(cv) == "INTERET_POL"
         assert cv.scheme == cv_scheme
         assert cv_scheme.conceptual_variables.count() == 1
@@ -157,13 +157,13 @@ class TestFairwDDIModels(TestCase):
         """Test QuestionScheme, QuestionItem, Category & Code hierarchy, and QuestionVariable."""
         # QuestionScheme
         qs = QuestionScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:qs-pol:1.0.0",
+            urn="urn:ddi:fr.cdsp:qs-pol:1.0.0",
             name=[{"lang": "fr", "value": "Schéma de questions politiques"}],
         )
 
         # QuestionItem linked to QuestionScheme
         qi = QuestionItem.objects.create(
-            urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
+            urn="urn:ddi:fr.cdsp:qi-fr-001:1.0.0",
             scheme=qs,
             question_text=[
                 {"lang": "fr", "value": "Diriez-vous que vous vous intéressez à la politique ?"},
@@ -174,7 +174,7 @@ class TestFairwDDIModels(TestCase):
                 {"type": "interviewer_instructions", "value": "Lire les options de réponse."}
             ],
         )
-        assert qi.pk == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"
+        assert qi.pk == "urn:ddi:fr.cdsp:qi-fr-001:1.0.0"
         assert qi.scheme == qs
         assert qs.questions.count() == 1
         assert qi.question_text[0]["lang"] == "fr"
@@ -182,25 +182,25 @@ class TestFairwDDIModels(TestCase):
 
         # CategoryScheme
         cat_scheme = CategoryScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:cs-fr-interest:1.0.0",
+            urn="urn:ddi:fr.cdsp:cs-fr-interest:1.0.0",
             name=[{"lang": "fr", "value": "Échelle d'intérêt politique"}],
         )
 
         # Concept anchor for category
         cat_concept = Concept.objects.create(
-            urn="urn:ddi:fr.sciencespo:concept-yes:1.0.0",
+            urn="urn:ddi:fr.cdsp:concept-yes:1.0.0",
             label=[{"lang": "fr", "value": "Accord positif"}],
         )
 
         # Categories with parent hierarchy belonging to CategoryScheme
         cat_parent = Category.objects.create(
-            urn="urn:ddi:fr.sciencespo:cat-pol-general:1.0.0",
+            urn="urn:ddi:fr.cdsp:cat-pol-general:1.0.0",
             scheme=cat_scheme,
             order=0,
             label=[{"lang": "fr", "value": "Échelle d'accord général"}],
         )
         cat_yes = Category.objects.create(
-            urn="urn:ddi:fr.sciencespo:cat-fr-yes:1.0.0",
+            urn="urn:ddi:fr.cdsp:cat-fr-yes:1.0.0",
             scheme=cat_scheme,
             concept=cat_concept,
             order=1,
@@ -209,7 +209,7 @@ class TestFairwDDIModels(TestCase):
             hashes={"sha256": "cat_yes_hash"},
         )
         cat_no = Category.objects.create(
-            urn="urn:ddi:fr.sciencespo:cat-fr-no:1.0.0",
+            urn="urn:ddi:fr.cdsp:cat-fr-no:1.0.0",
             scheme=cat_scheme,
             order=2,
             is_missing=False,
@@ -221,7 +221,7 @@ class TestFairwDDIModels(TestCase):
             hashes={"sha256": "cat_no_hash"},
         )
         cat_nsp = Category.objects.create(
-            urn="urn:ddi:fr.sciencespo:cat-fr-nsp:1.0.0",
+            urn="urn:ddi:fr.cdsp:cat-fr-nsp:1.0.0",
             scheme=cat_scheme,
             order=3,
             is_missing=True,
@@ -239,7 +239,7 @@ class TestFairwDDIModels(TestCase):
 
         # CodeList & Codes with parent hierarchy
         code_list = CodeList.objects.create(
-            urn="urn:ddi:fr.sciencespo:cl-fr-001:1.0.0",
+            urn="urn:ddi:fr.cdsp:cl-fr-001:1.0.0",
             name=[{"lang": "fr", "value": "Codes intérêt"}],
             scheme=cat_scheme,
             hashes={"sha256": "cl_hash_001"},
@@ -289,7 +289,7 @@ class TestFairwDDIModels(TestCase):
 
         # QuestionItem with numeric response_domain
         qi_numeric = QuestionItem.objects.create(
-            urn="urn:ddi:fr.sciencespo:qi-fr-numeric:1.0.0",
+            urn="urn:ddi:fr.cdsp:qi-fr-numeric:1.0.0",
             scheme=qs,
             name=[{"lang": "fr", "value": "QI_AGE"}],
             response_domain={
@@ -305,15 +305,15 @@ class TestFairwDDIModels(TestCase):
 
         # RepresentedVariableScheme
         rv_scheme = RepresentedVariableScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:rvs-pol:1.0.0",
+            urn="urn:ddi:fr.cdsp:rvs-pol:1.0.0",
             name=[{"lang": "fr", "value": "Schéma de variables représentées"}],
         )
-        assert rv_scheme.pk == "urn:ddi:fr.sciencespo:rvs-pol:1.0.0"
+        assert rv_scheme.pk == "urn:ddi:fr.cdsp:rvs-pol:1.0.0"
         assert str(rv_scheme) == "Schéma de variables représentées"
 
         # ConceptualVariable
         cv = ConceptualVariable.objects.create(
-            urn="urn:ddi:fr.sciencespo:cv-002:1.0.0",
+            urn="urn:ddi:fr.cdsp:cv-002:1.0.0",
             label=[{"lang": "fr", "value": "Intérêt politique"}],
         )
 
@@ -323,7 +323,7 @@ class TestFairwDDIModels(TestCase):
             conceptual_variable=cv,
             code_list=code_list,
             value_representation={"type": "code", "code_list_urn": code_list.urn},
-            urn="urn:ddi:fr.sciencespo:rv-fr-001:1.0.0",
+            urn="urn:ddi:fr.cdsp:rv-fr-001:1.0.0",
             name=[{"lang": "fr", "value": "RV_INTERET_POL"}],
             label=[{"lang": "fr", "value": "Intérêt politique RV"}],
             description=[{"lang": "fr", "value": "Description de la variable représentée"}],
@@ -347,7 +347,7 @@ class TestFairwDDIModels(TestCase):
                 "min": 0,
                 "max": 100,
             },
-            urn="urn:ddi:fr.sciencespo:rv-fr-numeric:1.0.0",
+            urn="urn:ddi:fr.cdsp:rv-fr-numeric:1.0.0",
             name=[{"lang": "fr", "value": "RV_AGE_NUMERIC"}],
             label=[{"lang": "fr", "value": "Âge en années"}],
         )
@@ -370,14 +370,14 @@ class TestFairwDDIModels(TestCase):
     def test_instrument_and_question_association(self) -> None:
         """Test Instrument and InstrumentQuestion junction."""
         instrument = Instrument.objects.create(
-            urn="urn:ddi:fr.sciencespo:inst-bpf-2007:1.0.0",
+            urn="urn:ddi:fr.cdsp:inst-bpf-2007:1.0.0",
             name=[{"lang": "fr", "value": "Questionnaire BPF 2007"}],
             label=[{"lang": "fr", "value": "Questionnaire Principal"}],
             hashes={"sha256": "inst_hash_001"},
             extended_attributes=[{"type": "collection_mode", "value": "CAPI"}],
         )
         qi = QuestionItem.objects.create(
-            urn="urn:ddi:fr.sciencespo:qi-inst-test:1.0.0",
+            urn="urn:ddi:fr.cdsp:qi-inst-test:1.0.0",
             question_text=[{"lang": "fr", "value": "Question Test"}],
         )
         iq = InstrumentQuestion.objects.create(
@@ -386,7 +386,7 @@ class TestFairwDDIModels(TestCase):
             path="/Instrument/Sequence/POL/Q1",
             order=1,
         )
-        assert instrument.pk == "urn:ddi:fr.sciencespo:inst-bpf-2007:1.0.0"
+        assert instrument.pk == "urn:ddi:fr.cdsp:inst-bpf-2007:1.0.0"
         assert instrument.question_associations.count() == 1
         assert iq.path == "/Instrument/Sequence/POL/Q1"
         assert iq.order == 1
@@ -394,26 +394,26 @@ class TestFairwDDIModels(TestCase):
     def test_dataset_layer_and_cascade(self) -> None:
         """Test StudyUnit, InstanceVariableScheme, InstanceVariable, cascade."""
         study_unit = StudyUnit.objects.create(
-            urn="urn:ddi:fr.sciencespo:su-bpf-2007-1:1.0.0",
+            urn="urn:ddi:fr.cdsp:su-bpf-2007-1:1.0.0",
             title=[{"lang": "fr", "value": "BPF Vague 1 (2007)"}],
             external_ref="10.7303/cdsp-bpf2007-1",
             year=2007,
         )
 
         cv = ConceptualVariable.objects.create(
-            urn="urn:ddi:fr.sciencespo:cv-cascade:1.0.0",
+            urn="urn:ddi:fr.cdsp:cv-cascade:1.0.0",
             label=[{"lang": "fr", "value": "Concept"}],
         )
         rv = RepresentedVariable.objects.create(
-            urn="urn:ddi:fr.sciencespo:rv-cascade:1.0.0",
+            urn="urn:ddi:fr.cdsp:rv-cascade:1.0.0",
             conceptual_variable=cv,
         )
 
         iv_scheme = InstanceVariableScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:ivs-bpf:1.0.0",
+            urn="urn:ddi:fr.cdsp:ivs-bpf:1.0.0",
             name=[{"lang": "fr", "value": "Schéma de variables d'instance"}],
         )
-        assert iv_scheme.pk == "urn:ddi:fr.sciencespo:ivs-bpf:1.0.0"
+        assert iv_scheme.pk == "urn:ddi:fr.cdsp:ivs-bpf:1.0.0"
         assert str(iv_scheme) == "Schéma de variables d'instance"
 
         iv = InstanceVariable.objects.create(
@@ -426,9 +426,9 @@ class TestFairwDDIModels(TestCase):
                 {"type": "universe", "value": "Ensemble des électeurs inscrits"},
                 {"type": "notes", "value": "Variable filtrée"},
             ],
-            urn="urn:ddi:fr.sciencespo:iv-fr-bpf2007-q01a:1.0.0",
+            urn="urn:ddi:fr.cdsp:iv-fr-bpf2007-q01a:1.0.0",
         )
-        assert iv.pk == "urn:ddi:fr.sciencespo:iv-fr-bpf2007-q01a:1.0.0"
+        assert iv.pk == "urn:ddi:fr.cdsp:iv-fr-bpf2007-q01a:1.0.0"
         assert str(iv) == "q01a"
         assert iv.scheme == iv_scheme
         assert iv_scheme.instance_variables.count() == 1
@@ -440,7 +440,7 @@ class TestFairwDDIModels(TestCase):
             study_unit=study_unit,
             name=[{"value": "bpf_2007.sav"}],
             description=[{"lang": "fr", "value": "Fichier SPSS principal"}],
-            urn="urn:ddi:fr.sciencespo:df-fr-bpf2007:1.0.0",
+            urn="urn:ddi:fr.cdsp:df-fr-bpf2007:1.0.0",
         )
         assert datafile.study == study_unit
         assert datafile.study_unit == study_unit
@@ -492,7 +492,7 @@ class TestFairwDDIModels(TestCase):
 
         # StudyInstrument table linking StudyUnit to Instrument
         inst = Instrument.objects.create(
-            urn="urn:ddi:fr.sciencespo:inst-cascade-test:1.0.0",
+            urn="urn:ddi:fr.cdsp:inst-cascade-test:1.0.0",
             name=[{"lang": "fr", "value": "Questionnaire Cascade"}],
         )
         study_inst = StudyInstrument.objects.create(
@@ -510,15 +510,15 @@ class TestFairwDDIModels(TestCase):
     def test_event_log(self) -> None:
         """Test EventLog model for generic DDI resource lifecycle tracking."""
         log = EventLog.objects.create(
-            urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
+            urn="urn:ddi:fr.cdsp:qi-fr-001:1.0.0",
             event_type="normalized",
             event_data={"source": "importer", "status": "success"},
         )
         assert log.id is not None
-        assert log.urn == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"
+        assert log.urn == "urn:ddi:fr.cdsp:qi-fr-001:1.0.0"
         assert log.event_type == "normalized"
         assert log.event_data["source"] == "importer"
-        assert EventLog.objects.filter(urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0").count() == 1
+        assert EventLog.objects.filter(urn="urn:ddi:fr.cdsp:qi-fr-001:1.0.0").count() == 1
 
     def test_auto_urn_generation_fallback(self) -> None:
         """Test that models inheriting DDIIdentifiable auto-generate canonical URN when omitted."""
@@ -527,9 +527,9 @@ class TestFairwDDIModels(TestCase):
             hashes={"sha256": "hash1234567890abcdef"},
         )
         assert cat.urn is not None
-        assert cat.urn.startswith("urn:ddi:fr.sciencespo:hash1234567890ab:1.0.0")
+        assert cat.urn.startswith("urn:ddi:fr.cdsp:hash1234567890ab:1.0.0")
         assert cat.pk == cat.urn
-        assert cat.agency == "fr.sciencespo"
+        assert cat.agency == "fr.cdsp"
         assert cat.version == "1.0.0"
 
     def test_urn_parsing_helpers(self) -> None:
@@ -558,7 +558,7 @@ class TestFairwDDIModels(TestCase):
         cat_raw = Category(urn="raw:closer:qi:1234")
         assert cat_raw.is_canonical_ddi is False
         assert cat_raw.is_maintainable_scoped is False
-        assert cat_raw.agency == "fr.sciencespo"  # fallback
+        assert cat_raw.agency == "fr.cdsp"  # fallback
         assert cat_raw.identifier == "raw:closer:qi:1234"
         assert cat_raw.maintainable_id is None
         assert cat_raw.object_id == "raw:closer:qi:1234"
@@ -568,18 +568,18 @@ class TestFairwDDIModels(TestCase):
         """Test URNAlias, MetadataQuarantine, and IngestBatch."""
         # UrnRegistry
         reg = UrnRegistry.objects.create(
-            urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
+            urn="urn:ddi:fr.cdsp:qi-fr-001:1.0.0",
             resource_type="QuestionItem",
             extended_attributes=[{"type": "source", "value": "test"}],
         )
-        assert reg.urn == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"
+        assert reg.urn == "urn:ddi:fr.cdsp:qi-fr-001:1.0.0"
         assert reg.resource_type == "QuestionItem"
         assert reg.status == "active"
-        assert str(reg) == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0 (QuestionItem)"
+        assert str(reg) == "urn:ddi:fr.cdsp:qi-fr-001:1.0.0 (QuestionItem)"
 
         # Custom status
         reg_deprecated = UrnRegistry.objects.create(
-            urn="urn:ddi:fr.sciencespo:qi-legacy:1.0.0",
+            urn="urn:ddi:fr.cdsp:qi-legacy:1.0.0",
             resource_type="QuestionItem",
             status="deprecated",
         )
@@ -597,12 +597,12 @@ class TestFairwDDIModels(TestCase):
         # URNAlias
         alias = URNAlias.objects.create(
             alias_urn="raw:colectica:random-uuid-1234",
-            canonical_urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
+            canonical_urn="urn:ddi:fr.cdsp:qi-fr-001:1.0.0",
             entity_type="QuestionItem",
             hash_strategy="v1_strict_sha256",
             source_file="survey2007.xml",
         )
-        assert alias.canonical_urn == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"
+        assert alias.canonical_urn == "urn:ddi:fr.cdsp:qi-fr-001:1.0.0"
 
         # MetadataQuarantine
         quarantine = MetadataQuarantine.objects.create(
@@ -622,12 +622,12 @@ class TestFairwDDIModels(TestCase):
             source_format="ddi-l:4.0:json",
             file_name="closer_sample.json",
             file_sha256="a" * 64,
-            options={"agency": "fr.sciencespo", "profile": "request"},
-            created_urns=["urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"],
+            options={"agency": "fr.cdsp", "profile": "request"},
+            created_urns=["urn:ddi:fr.cdsp:qi-fr-001:1.0.0"],
             stats={"QuestionItem": 1},
         )
         assert batch.status == "completed"
-        assert batch.created_urns == ["urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"]
+        assert batch.created_urns == ["urn:ddi:fr.cdsp:qi-fr-001:1.0.0"]
         assert "closer_sample.json" in str(batch)
 
     def test_semantic_relationship_triple(self) -> None:
@@ -636,7 +636,7 @@ class TestFairwDDIModels(TestCase):
 
         rel = SemanticRelationship.objects.create(
             subject_type="ConceptualVariable",
-            subject_urn="urn:ddi:fr.sciencespo:cv-fr-001:1.0.0",
+            subject_urn="urn:ddi:fr.cdsp:cv-fr-001:1.0.0",
             predicate="skos:exactMatch",
             object_type="Concept",
             object_urn="https://elsst.cessda.eu/id/4/Politics",
@@ -653,14 +653,14 @@ class TestFairwDDIModels(TestCase):
         assert len(rel.extended_attributes) == 2
         assert rel.extended_attributes[0]["value"] == 0.99
         assert str(rel) == (
-            "urn:ddi:fr.sciencespo:cv-fr-001:1.0.0 "
+            "urn:ddi:fr.cdsp:cv-fr-001:1.0.0 "
             "--[skos:exactMatch]--> "
             "https://elsst.cessda.eu/id/4/Politics"
         )
 
         # Query filtering by subject_urn & predicate
         matched = SemanticRelationship.objects.filter(
-            subject_urn="urn:ddi:fr.sciencespo:cv-fr-001:1.0.0",
+            subject_urn="urn:ddi:fr.cdsp:cv-fr-001:1.0.0",
             predicate="skos:exactMatch",
         )
         assert matched.count() == 1
@@ -669,7 +669,7 @@ class TestFairwDDIModels(TestCase):
         with pytest.raises(IntegrityError):
             SemanticRelationship.objects.create(
                 subject_type="ConceptualVariable",
-                subject_urn="urn:ddi:fr.sciencespo:cv-fr-001:1.0.0",
+                subject_urn="urn:ddi:fr.cdsp:cv-fr-001:1.0.0",
                 predicate="skos:exactMatch",
                 object_type="Concept",
                 object_urn="https://elsst.cessda.eu/id/4/Politics",
@@ -679,7 +679,7 @@ class TestFairwDDIModels(TestCase):
         """Verify that all DDI resources require urn and name, and all other fields are nullable."""
         # 1. Organization
         org = Organization.objects.create(
-            urn="urn:ddi:fr.sciencespo:org-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:org-minimal:1.0.0",
             name=[{"value": "Minimal Org"}],
             hashes=None,
         )
@@ -689,7 +689,7 @@ class TestFairwDDIModels(TestCase):
 
         # 2. Group
         grp = Group.objects.create(
-            urn="urn:ddi:fr.sciencespo:grp-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:grp-minimal:1.0.0",
             name=[{"value": "Minimal Group"}],
         )
         assert grp.description == []
@@ -698,13 +698,13 @@ class TestFairwDDIModels(TestCase):
 
         # 3. ConceptScheme & Concept
         cs = ConceptScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:cs-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:cs-minimal:1.0.0",
             name=[{"value": "Minimal CS"}],
         )
         assert cs.description == []
         assert not hasattr(cs, "hashes")
         concept = Concept.objects.create(
-            urn="urn:ddi:fr.sciencespo:concept-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:concept-minimal:1.0.0",
         )
         assert concept.scheme is None
         assert concept.uri is None
@@ -719,13 +719,13 @@ class TestFairwDDIModels(TestCase):
 
         # 4. ConceptualVariableScheme & ConceptualVariable
         cvs = ConceptualVariableScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:cvs-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:cvs-minimal:1.0.0",
             name=[{"value": "Minimal CVS"}],
         )
         assert cvs.description == []
         assert not hasattr(cvs, "hashes")
         cv = ConceptualVariable.objects.create(
-            urn="urn:ddi:fr.sciencespo:cv-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:cv-minimal:1.0.0",
             name=[{"value": "Minimal CV"}],
         )
         assert cv.scheme is None
@@ -736,13 +736,13 @@ class TestFairwDDIModels(TestCase):
 
         # 5. QuestionScheme & QuestionItem
         qs = QuestionScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:qs-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:qs-minimal:1.0.0",
             name=[{"value": "Minimal QS"}],
         )
         assert qs.description == []
         assert not hasattr(qs, "hashes")
         qi = QuestionItem.objects.create(
-            urn="urn:ddi:fr.sciencespo:qi-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:qi-minimal:1.0.0",
             name=[{"value": "Minimal QI"}],
         )
         assert qi.scheme is None
@@ -754,13 +754,13 @@ class TestFairwDDIModels(TestCase):
 
         # 6. CategoryScheme & Category
         cats = CategoryScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:cats-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:cats-minimal:1.0.0",
             name=[{"value": "Minimal CatS"}],
         )
         assert cats.description == []
         assert not hasattr(cats, "hashes")
         cat = Category.objects.create(
-            urn="urn:ddi:fr.sciencespo:cat-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:cat-minimal:1.0.0",
             name=[{"value": "Minimal Cat"}],
         )
         assert cat.scheme is None
@@ -773,7 +773,7 @@ class TestFairwDDIModels(TestCase):
 
         # 7. CodeList
         cl = CodeList.objects.create(
-            urn="urn:ddi:fr.sciencespo:cl-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:cl-minimal:1.0.0",
             name=[{"value": "Minimal CL"}],
         )
         assert cl.scheme is None
@@ -782,13 +782,13 @@ class TestFairwDDIModels(TestCase):
 
         # 8. RepresentedVariableScheme & RepresentedVariable
         rvs = RepresentedVariableScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:rvs-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:rvs-minimal:1.0.0",
             name=[{"value": "Minimal RVS"}],
         )
         assert rvs.description == []
         assert not hasattr(rvs, "hashes")
         rv = RepresentedVariable.objects.create(
-            urn="urn:ddi:fr.sciencespo:rv-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:rv-minimal:1.0.0",
             name=[{"value": "Minimal RV"}],
         )
         assert rv.scheme is None
@@ -800,7 +800,7 @@ class TestFairwDDIModels(TestCase):
 
         # 9. StudyUnit
         su = StudyUnit.objects.create(
-            urn="urn:ddi:fr.sciencespo:su-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:su-minimal:1.0.0",
             name=[{"value": "Minimal SU"}],
         )
         assert su.title == []
@@ -811,13 +811,13 @@ class TestFairwDDIModels(TestCase):
 
         # 10. InstanceVariableScheme & InstanceVariable
         ivs = InstanceVariableScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:ivs-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:ivs-minimal:1.0.0",
             name=[{"value": "Minimal IVS"}],
         )
         assert ivs.description == []
         assert not hasattr(ivs, "hashes")
         iv = InstanceVariable.objects.create(
-            urn="urn:ddi:fr.sciencespo:iv-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:iv-minimal:1.0.0",
             name=[{"value": "Minimal IV"}],
         )
         assert iv.scheme is None
@@ -828,7 +828,7 @@ class TestFairwDDIModels(TestCase):
 
         # 11. Instrument
         inst = Instrument.objects.create(
-            urn="urn:ddi:fr.sciencespo:inst-minimal:1.0.0",
+            urn="urn:ddi:fr.cdsp:inst-minimal:1.0.0",
             name=[{"value": "Minimal Instrument"}],
         )
         assert inst.label == []
@@ -838,7 +838,7 @@ class TestFairwDDIModels(TestCase):
 
         # 12. UrnRegistry
         reg_min = UrnRegistry.objects.create(
-            urn="urn:ddi:fr.sciencespo:min-reg:1.0.0",
+            urn="urn:ddi:fr.cdsp:min-reg:1.0.0",
             resource_type="Unknown",
         )
         assert reg_min.extended_attributes == []
@@ -847,7 +847,7 @@ class TestFairwDDIModels(TestCase):
         """Test UrnRegistry supertype automatic registration and deletion lifecycle."""
         # Creating a QuestionItem should automatically create a matching UrnRegistry record
         qi = QuestionItem.objects.create(
-            urn="urn:ddi:fr.sciencespo:qi-supertype-test:1.0.0",
+            urn="urn:ddi:fr.cdsp:qi-supertype-test:1.0.0",
             name=[{"value": "Supertype Test Question"}],
             question_text=[{"lang": "fr", "value": "Question test"}],
         )
@@ -858,11 +858,11 @@ class TestFairwDDIModels(TestCase):
 
         # Creating a Concept should register with resource_type 'Concept'
         cs = ConceptScheme.objects.create(
-            urn="urn:ddi:fr.sciencespo:cs-supertype-test:1.0.0",
+            urn="urn:ddi:fr.cdsp:cs-supertype-test:1.0.0",
             name=[{"value": "Supertype Test CS"}],
         )
         concept = Concept.objects.create(
-            urn="urn:ddi:fr.sciencespo:concept-supertype-test:1.0.0",
+            urn="urn:ddi:fr.cdsp:concept-supertype-test:1.0.0",
             scheme=cs,
             label=[{"lang": "en", "value": "Test Concept"}],
         )

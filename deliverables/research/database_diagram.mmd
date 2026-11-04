@@ -6,7 +6,7 @@ erDiagram
     %% 1. ORGANIZATION & GROUPING LAYER
     %% ==========================================
     Organization {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:org-cdsp:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:org-cdsp:1.0.0)"
         jsonb name "Multilingual name [{'lang': 'fr', 'value': '...'}]"
         string organization_type "Type: archive, distributor, funder"
         jsonb extended_attributes "Extensible attributes array"
@@ -16,7 +16,7 @@ erDiagram
     }
 
     Group {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:grp-ess:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:grp-ess:1.0.0)"
         jsonb name "Multilingual name [{'lang': 'fr', 'value': '...'}]"
         jsonb description "Multilingual description"
         string group_type "Type: study_series, panel, thematic, collection"
@@ -31,7 +31,7 @@ erDiagram
     %% 2. CONCEPT LAYER
     %% ==========================================
     ConceptScheme {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:cs-elsst:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:cs-elsst:1.0.0)"
         jsonb name "Multilingual scheme name"
         jsonb description "Multilingual description"
         jsonb extended_attributes "Extensible attributes array"
@@ -40,7 +40,7 @@ erDiagram
     }
 
     Concept {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:c-politics:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:c-politics:1.0.0)"
         string scheme_urn FK "FK -> ConceptScheme.urn"
         string uri "Controlled vocabulary URI (e.g. ELSST URI, unique)"
         string vocabulary "Thesaurus name (e.g. ELSST, Topics)"
@@ -57,7 +57,7 @@ erDiagram
     }
 
     ConceptualVariableScheme {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:cvs-core:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:cvs-core:1.0.0)"
         jsonb name "Multilingual scheme name"
         jsonb description "Multilingual description"
         jsonb extended_attributes "Extensible attributes array"
@@ -66,7 +66,7 @@ erDiagram
     }
 
     ConceptualVariable {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:cv-leftright:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:cv-leftright:1.0.0)"
         string scheme_urn FK "FK -> ConceptualVariableScheme.urn"
         string concept_urn FK "FK -> Concept.urn (Semantic Anchor)"
         jsonb name "Multilingual conceptual variable name"
@@ -94,7 +94,7 @@ erDiagram
     %% 3. REPRESENTATION & INSTRUMENT LAYER
     %% ==========================================
     CategoryScheme {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:cats-scales:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:cats-scales:1.0.0)"
         jsonb name "Multilingual scheme name"
         jsonb description "Multilingual description"
         jsonb extended_attributes "Extensible attributes array"
@@ -103,7 +103,7 @@ erDiagram
     }
 
     Category {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:cat-left:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:cat-left:1.0.0)"
         string scheme_urn FK "FK -> CategoryScheme.urn"
         string concept_urn FK "FK -> Concept.urn (Optional Concept Anchor)"
         string parent_urn FK "FK -> Category.urn (Self-referential hierarchy)"
@@ -118,7 +118,7 @@ erDiagram
     }
 
     CodeList {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:cl-lrscale:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:cl-lrscale:1.0.0)"
         string scheme_urn FK "FK -> CategoryScheme.urn (Optional)"
         jsonb name "Multilingual human title"
         jsonb description "Multilingual description"
@@ -129,7 +129,7 @@ erDiagram
     }
 
     Code {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:code-lr0:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:code-lr0:1.0.0)"
         string code_list_urn FK "FK -> CodeList.urn"
         string category_urn FK "FK -> Category.urn"
         string parent_urn FK "FK -> Code.urn (Self-referential hierarchy)"
@@ -143,7 +143,7 @@ erDiagram
     }
 
     QuestionScheme {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:qs-attitudes:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:qs-attitudes:1.0.0)"
         jsonb name "Multilingual scheme name"
         jsonb description "Multilingual description"
         jsonb extended_attributes "Extensible attributes array"
@@ -152,7 +152,7 @@ erDiagram
     }
 
     QuestionItem {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:qi-leftright:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:qi-leftright:1.0.0)"
         string scheme_urn FK "FK -> QuestionScheme.urn"
         string code_list_urn FK "FK -> CodeList.urn (Direct Coded Domain)"
         jsonb response_domain "Response domain JSON (code, numeric, text, scale)"
@@ -165,7 +165,7 @@ erDiagram
     }
 
     RepresentedVariableScheme {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:rvs-harmonized:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:rvs-harmonized:1.0.0)"
         jsonb name "Multilingual scheme name"
         jsonb description "Multilingual description"
         jsonb extended_attributes "Extensible attributes array"
@@ -174,7 +174,7 @@ erDiagram
     }
 
     RepresentedVariable {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:rv-lrscale:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:rv-lrscale:1.0.0)"
         string scheme_urn FK "FK -> RepresentedVariableScheme.urn"
         string conceptual_variable_urn FK "FK -> ConceptualVariable.urn (Cascade Top)"
         string code_list_urn FK "FK -> CodeList.urn (Direct Code Structure)"
@@ -199,7 +199,7 @@ erDiagram
     }
 
     Instrument {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:inst-ess3:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:inst-ess3:1.0.0)"
         jsonb name "Multilingual questionnaire name"
         jsonb label "Multilingual title"
         jsonb description "Multilingual description"
@@ -223,7 +223,7 @@ erDiagram
     %% 4. DATASET LAYER
     %% ==========================================
     StudyUnit {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:su-ess2007:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:su-ess2007:1.0.0)"
         jsonb name "Multilingual dataset identifier"
         jsonb title "Multilingual study title"
         string external_ref "External DOI / repo identifier (unique)"
@@ -236,7 +236,7 @@ erDiagram
     }
 
     InstanceVariableScheme {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:ivs-ess2007:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:ivs-ess2007:1.0.0)"
         jsonb name "Multilingual scheme name"
         jsonb description "Multilingual description"
         jsonb extended_attributes "Extensible attributes array"
@@ -245,7 +245,7 @@ erDiagram
     }
 
     InstanceVariable {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:iv-ess2007-q01:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:iv-ess2007-q01:1.0.0)"
         string scheme_urn FK "FK -> InstanceVariableScheme.urn"
         string represented_variable_urn FK "FK -> RepresentedVariable.urn (Cascade Mid)"
         jsonb name "Column name / mnemonic (e.g. q01a, lrscale)"
@@ -258,7 +258,7 @@ erDiagram
     }
 
     Datafile {
-        string urn PK "Canonical URN (e.g. urn:ddi:fr.sciencespo:df-bpf2007:1.0.0)"
+        string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:df-bpf2007:1.0.0)"
         string study_unit_urn FK "FK -> StudyUnit.urn"
         jsonb name "Multilingual file name (e.g. bpf2007.sav)"
         jsonb description "Multilingual file description"

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import uuid
 from pathlib import Path
@@ -24,28 +25,29 @@ from fairwddi.ingest.streaming import RawResourceNode, stream_resources
 from fairwddi.utils.normalize_string import normalize_string
 
 
-def parse_ddi_urn(urn: str, default_agency: str = "fr.cdsp") -> tuple[str, str, str, str]:
+def parse_ddi_urn(urn: str, default_agency: str | None = None) -> tuple[str, str, str, str]:
     """Parse a DDI URN into (canonical_urn, agency, identifier, version)."""
+    fallback_agency = default_agency or os.getenv("DDI_AGENCY", "fr.cdsp")
     cleaned = (urn or "").strip()
     if cleaned.startswith("urn:ddi:"):
         parts = cleaned.split(":")
         if len(parts) == 5:
             _, _, agency, identifier, version = parts
-            return cleaned, agency or default_agency, identifier, version or "1.0.0"
+            return cleaned, agency or fallback_agency, identifier, version or "1.0.0"
         if len(parts) > 5:
-            agency = parts[2] or default_agency
+            agency = parts[2] or fallback_agency
             version = parts[-1] or "1.0.0"
             identifier = ":".join(parts[3:-1])
             return f"urn:ddi:{agency}:{identifier}:{version}", agency, identifier, version
         if len(parts) == 4:
-            agency = parts[2] or default_agency
+            agency = parts[2] or fallback_agency
             identifier = parts[3]
             version = "1.0.0"
             return f"urn:ddi:{agency}:{identifier}:{version}", agency, identifier, version
 
     safe_id = re.sub(r"[^A-Za-z0-9_.\-]", "_", cleaned) or f"item_{uuid.uuid4().hex[:8]}"
-    canonical = f"urn:ddi:{default_agency}:{safe_id}:1.0.0"
-    return canonical, default_agency, safe_id, "1.0.0"
+    canonical = f"urn:ddi:{fallback_agency}:{safe_id}:1.0.0"
+    return canonical, fallback_agency, safe_id, "1.0.0"
 
 
 def _extract_multilingual(val: Any, default_lang: str = "en") -> dict[str, str] | None:

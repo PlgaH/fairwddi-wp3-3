@@ -524,22 +524,22 @@ erDiagram
 ```mermaid
 graph LR
     subgraph Concept_Level ["1. Concept Layer (Thematic Abstract)"]
-        CV["<b>ConceptualVariable</b><br/><code>urn:ddi:fr.sciencespo:cv-leftright:1.0.0</code><br/><i>Left-Right Political Scale</i><br/>Concept Anchor: ELSST #c4820"]
+        CV["<b>ConceptualVariable</b><br/><code>urn:ddi:fr.cdsp:cv-leftright:1.0.0</code><br/><i>Left-Right Political Scale</i><br/>Concept Anchor: ELSST #c4820"]
     end
 
     subgraph Rep_Level ["2. Representation Layer (Harmonized)"]
-        RV["<b>RepresentedVariable</b><br/><code>urn:ddi:fr.sciencespo:rv-lr-11pt:1.0.0</code><br/><i>11-Point Left-Right Scale (0-10)</i>"]
-        QI["<b>QuestionItem</b><br/><code>urn:ddi:fr.sciencespo:qi-lr-fr:1.0.0</code><br/><i>'En politique, on parle de gauche et de droite...'</i>"]
-        CL["<b>CodeList</b><br/><code>urn:ddi:fr.sciencespo:cl-lr-11pt:1.0.0</code><br/><i>Codes: 0 (Gauche) .. 10 (Droite), 98 (NSP)</i>"]
+        RV["<b>RepresentedVariable</b><br/><code>urn:ddi:fr.cdsp:rv-lr-11pt:1.0.0</code><br/><i>11-Point Left-Right Scale (0-10)</i>"]
+        QI["<b>QuestionItem</b><br/><code>urn:ddi:fr.cdsp:qi-lr-fr:1.0.0</code><br/><i>'En politique, on parle de gauche et de droite...'</i>"]
+        CL["<b>CodeList</b><br/><code>urn:ddi:fr.cdsp:cl-lr-11pt:1.0.0</code><br/><i>Codes: 0 (Gauche) .. 10 (Droite), 98 (NSP)</i>"]
 
         QI -.->|QuestionVariable| RV
         CL -->|Value Domain| RV
     end
 
     subgraph Data_Level ["3. Dataset Layer (Physical Variables)"]
-        DF1["<b>Datafile (2007)</b><br/><code>urn:ddi:fr.sciencespo:df-ess3:1.0.0</code>"] --> DV1["<b>DatafileVariable</b><br/><i>order=1</i>"] --> IV1["<b>InstanceVariable (2007)</b><br/><code>urn:ddi:fr.sciencespo:iv-ess3-lrscale:1.0.0</code><br/><i>Column: 'lrscale'</i>"]
-        DF2["<b>Datafile (2012)</b><br/><code>urn:ddi:fr.sciencespo:df-cdsp2012:1.0.0</code>"] --> DV2["<b>DatafileVariable</b><br/><i>order=1</i>"] --> IV2["<b>InstanceVariable (2012)</b><br/><code>urn:ddi:fr.sciencespo:iv-cdsp2012-q04:1.0.0</code><br/><i>Column: 'q04_gauche_droite'</i>"]
-        DF3["<b>Datafile (2017)</b><br/><code>urn:ddi:fr.sciencespo:df-cdsp2017:1.0.0</code>"] --> DV3["<b>DatafileVariable</b><br/><i>order=1</i>"] --> IV3["<b>InstanceVariable (2017)</b><br/><code>urn:ddi:fr.sciencespo:iv-cdsp2017-v12:1.0.0</code><br/><i>Column: 'v12_pol'</i>"]
+        DF1["<b>Datafile (2007)</b><br/><code>urn:ddi:fr.cdsp:df-ess3:1.0.0</code>"] --> DV1["<b>DatafileVariable</b><br/><i>order=1</i>"] --> IV1["<b>InstanceVariable (2007)</b><br/><code>urn:ddi:fr.cdsp:iv-ess3-lrscale:1.0.0</code><br/><i>Column: 'lrscale'</i>"]
+        DF2["<b>Datafile (2012)</b><br/><code>urn:ddi:fr.cdsp:df-cdsp2012:1.0.0</code>"] --> DV2["<b>DatafileVariable</b><br/><i>order=1</i>"] --> IV2["<b>InstanceVariable (2012)</b><br/><code>urn:ddi:fr.cdsp:iv-cdsp2012-q04:1.0.0</code><br/><i>Column: 'q04_gauche_droite'</i>"]
+        DF3["<b>Datafile (2017)</b><br/><code>urn:ddi:fr.cdsp:df-cdsp2017:1.0.0</code>"] --> DV3["<b>DatafileVariable</b><br/><i>order=1</i>"] --> IV3["<b>InstanceVariable (2017)</b><br/><code>urn:ddi:fr.cdsp:iv-cdsp2017-v12:1.0.0</code><br/><i>Column: 'v12_pol'</i>"]
 
         SU1["<b>StudyUnit</b><br/><i>ESS Round 3 (2007)</i>"] -->|contains| DF1
         SU2["<b>StudyUnit</b><br/><i>Panel Electoral (2012)</i>"] -->|contains| DF2

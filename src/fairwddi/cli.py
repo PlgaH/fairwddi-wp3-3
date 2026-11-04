@@ -586,7 +586,12 @@ def preflight_upgrade_cmd(
         "-f",
         help="Target DDI-L format: ddi4-json, ddi4-jsonl, ddi4-xml, ddi33-xml.",
     ),
-    agency: str | None = typer.Option(None, "--agency", "-a", help="Override DDI agency ID."),
+    agency: str | None = typer.Option(
+        None,
+        "--agency",
+        "-a",
+        help="Override DDI agency ID (default: 'fr.cdsp' or $DDI_AGENCY).",
+    ),
     version: str | None = typer.Option(None, "--version", help="Override DDI version."),
     identifier: str | None = typer.Option(None, "--identifier", help="Override study ID."),
     id_strategy: str = typer.Option(
@@ -780,7 +785,11 @@ def ingest_run_cmd(
     output_dir: Path | None = typer.Option(
         None, "--output-dir", "-o", help="Directory for stage plans, upgraded files, and reports."
     ),
-    agency: str | None = typer.Option(None, "--agency", help="Agency override for DDI-C upgrade."),
+    agency: str | None = typer.Option(
+        None,
+        "--agency",
+        help="Agency override for DDI-C upgrade (default: 'fr.cdsp' or $DDI_AGENCY).",
+    ),
     id_strategy: str = typer.Option("hierarchical", "--id-strategy", help="ID strategy."),
     plan_only: bool = typer.Option(
         False, "--plan-only", help="Stop after generating the preflight & ingestion plans."

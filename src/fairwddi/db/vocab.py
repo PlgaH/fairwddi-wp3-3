@@ -59,7 +59,7 @@ def extract_urn(
     subject: Any,
     graph: Any,
     fallback_prefix: str = "concept",
-    default_agency: str = "fr.sciencespo",
+    default_agency: str = "fr.cdsp",
 ) -> str:
     """Extract authoritative/original URN from RDF node, or synthesize fallback DDI URN.
 
@@ -133,7 +133,7 @@ def load_skos_vocabulary(
         raise FileNotFoundError(f"Vocabulary file not found: {path}")
 
     start_time = time.perf_counter()
-    agency = os.getenv("DDI_AGENCY", "fr.sciencespo")
+    agency = os.getenv("DDI_AGENCY", "fr.cdsp")
 
     # 1. Detect format and parse RDF graph
     fmt = rdf_format or guess_format(str(path)) or "turtle"

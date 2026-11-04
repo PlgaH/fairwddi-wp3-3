@@ -121,7 +121,7 @@ def test_multilingual_text_container() -> None:
 def test_domain_entity_schemas() -> None:
     """Test validation of entity schemas with canonical URNs and MultilingualText."""
     org_schema = OrganizationSchema(
-        urn="urn:ddi:fr.sciencespo:Organization.CDSP:1.0.0",
+        urn="urn:ddi:fr.cdsp:Organization.CDSP:1.0.0",
         name=MultilingualText.from_dict(
             {
                 "fr": "Centre de Données Socio-Politiques",
@@ -131,26 +131,26 @@ def test_domain_entity_schemas() -> None:
         organization_type="distributor",
         extended_attributes=[{"type": "acronym", "value": "CDSP"}],
     )
-    assert org_schema.urn == "urn:ddi:fr.sciencespo:Organization.CDSP:1.0.0"
-    assert org_schema.agency == "fr.sciencespo"
+    assert org_schema.urn == "urn:ddi:fr.cdsp:Organization.CDSP:1.0.0"
+    assert org_schema.agency == "fr.cdsp"
     assert org_schema.name.get("fr") == "Centre de Données Socio-Politiques"
     assert org_schema.organization_type == "distributor"
     assert len(org_schema.extended_attributes) == 1
 
     group_schema = GroupSchema(
-        urn="urn:ddi:fr.sciencespo:group-bpf:1.0.0",
+        urn="urn:ddi:fr.cdsp:group-bpf:1.0.0",
         name=MultilingualText.from_single("Baromètre Politique Français", lang="fr"),
         group_type="study_series",
         references=[
             GroupReferenceSchema(
                 resource_type="StudyUnit",
-                urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
+                urn="urn:ddi:fr.cdsp:su-2007:1.0.0",
             )
         ],
         hashes={"sha256": "group_hash"},
     )
-    assert group_schema.urn == "urn:ddi:fr.sciencespo:group-bpf:1.0.0"
-    assert group_schema.agency == "fr.sciencespo"
+    assert group_schema.urn == "urn:ddi:fr.cdsp:group-bpf:1.0.0"
+    assert group_schema.agency == "fr.cdsp"
     assert group_schema.identifier == "group-bpf"
     assert group_schema.group_type == "study_series"
     assert len(group_schema.references) == 1
@@ -158,60 +158,60 @@ def test_domain_entity_schemas() -> None:
     assert group_schema.hashes["sha256"] == "group_hash"
 
     q_schema = QuestionItemSchema(
-        urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
-        scheme_urn="urn:ddi:fr.sciencespo:qs-pol:1.0.0",
-        code_list_urn="urn:ddi:fr.sciencespo:cl-fr-001:1.0.0",
+        urn="urn:ddi:fr.cdsp:qi-fr-001:1.0.0",
+        scheme_urn="urn:ddi:fr.cdsp:qs-pol:1.0.0",
+        code_list_urn="urn:ddi:fr.cdsp:cl-fr-001:1.0.0",
         response_domain={
             "type": "code",
-            "code_list_urn": "urn:ddi:fr.sciencespo:cl-fr-001:1.0.0",
+            "code_list_urn": "urn:ddi:fr.cdsp:cl-fr-001:1.0.0",
         },
         question_text=MultilingualText.from_dict({"fr": "Êtes-vous intéressé par la politique ?"}),
         hashes={"sha256": "abc1234", "v2_unordered": "xyz9876"},
         extended_attributes=[{"type": "scope", "value": "core"}],
     )
-    assert q_schema.urn == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"
-    assert q_schema.agency == "fr.sciencespo"
-    assert q_schema.scheme_urn == "urn:ddi:fr.sciencespo:qs-pol:1.0.0"
-    assert q_schema.code_list_urn == "urn:ddi:fr.sciencespo:cl-fr-001:1.0.0"
+    assert q_schema.urn == "urn:ddi:fr.cdsp:qi-fr-001:1.0.0"
+    assert q_schema.agency == "fr.cdsp"
+    assert q_schema.scheme_urn == "urn:ddi:fr.cdsp:qs-pol:1.0.0"
+    assert q_schema.code_list_urn == "urn:ddi:fr.cdsp:cl-fr-001:1.0.0"
     assert q_schema.response_domain["type"] == "code"
     assert q_schema.question_text.get("fr") == "Êtes-vous intéressé par la politique ?"
     assert q_schema.hashes["v2_unordered"] == "xyz9876"
     assert q_schema.extended_attributes[0]["value"] == "core"
 
     qs_schema = QuestionSchemeSchema(
-        urn="urn:ddi:fr.sciencespo:qs-pol:1.0.0",
+        urn="urn:ddi:fr.cdsp:qs-pol:1.0.0",
         name=MultilingualText.from_single("Schéma Questions Politiques", lang="fr"),
         questions=[q_schema],
     )
-    assert qs_schema.urn == "urn:ddi:fr.sciencespo:qs-pol:1.0.0"
+    assert qs_schema.urn == "urn:ddi:fr.cdsp:qs-pol:1.0.0"
     assert len(qs_schema.questions) == 1
-    assert qs_schema.questions[0].urn == "urn:ddi:fr.sciencespo:qi-fr-001:1.0.0"
+    assert qs_schema.questions[0].urn == "urn:ddi:fr.cdsp:qi-fr-001:1.0.0"
 
     cat_schema = CategorySchema(
-        urn="urn:ddi:fr.sciencespo:cat-accord:1.0.0",
-        scheme_urn="urn:ddi:fr.sciencespo:cs-interest:1.0.0",
-        concept_urn="urn:ddi:fr.sciencespo:concept-accord:1.0.0",
+        urn="urn:ddi:fr.cdsp:cat-accord:1.0.0",
+        scheme_urn="urn:ddi:fr.cdsp:cs-interest:1.0.0",
+        concept_urn="urn:ddi:fr.cdsp:concept-accord:1.0.0",
         order=1,
         is_missing=False,
         label=MultilingualText.from_single("D'accord", lang="fr"),
-        parent_urn="urn:ddi:fr.sciencespo:cat-parent:1.0.0",
+        parent_urn="urn:ddi:fr.cdsp:cat-parent:1.0.0",
     )
     assert cat_schema.label.get("fr") == "D'accord"
-    assert cat_schema.parent_urn == "urn:ddi:fr.sciencespo:cat-parent:1.0.0"
-    assert cat_schema.scheme_urn == "urn:ddi:fr.sciencespo:cs-interest:1.0.0"
-    assert cat_schema.concept_urn == "urn:ddi:fr.sciencespo:concept-accord:1.0.0"
+    assert cat_schema.parent_urn == "urn:ddi:fr.cdsp:cat-parent:1.0.0"
+    assert cat_schema.scheme_urn == "urn:ddi:fr.cdsp:cs-interest:1.0.0"
+    assert cat_schema.concept_urn == "urn:ddi:fr.cdsp:concept-accord:1.0.0"
     assert cat_schema.order == 1
     assert cat_schema.is_missing is False
 
     cat_missing_schema = CategorySchema(
-        urn="urn:ddi:fr.sciencespo:cat-nsp:1.0.0",
+        urn="urn:ddi:fr.cdsp:cat-nsp:1.0.0",
         label=MultilingualText.from_single("NSP", lang="fr"),
         is_missing=True,
     )
     assert cat_missing_schema.is_missing is True
 
     cs_schema = CategorySchemeSchema(
-        urn="urn:ddi:fr.sciencespo:cs-interest:1.0.0",
+        urn="urn:ddi:fr.cdsp:cs-interest:1.0.0",
         name=MultilingualText.from_single("Échelle d'intérêt", lang="fr"),
         categories=[cat_schema],
     )
@@ -219,85 +219,85 @@ def test_domain_entity_schemas() -> None:
     assert len(cs_schema.categories) == 1
 
     cl_schema = CodeListSchema(
-        urn="urn:ddi:fr.sciencespo:cl-interest:1.0.0",
-        scheme_urn="urn:ddi:fr.sciencespo:cs-interest:1.0.0",
+        urn="urn:ddi:fr.cdsp:cl-interest:1.0.0",
+        scheme_urn="urn:ddi:fr.cdsp:cs-interest:1.0.0",
     )
-    assert cl_schema.scheme_urn == "urn:ddi:fr.sciencespo:cs-interest:1.0.0"
+    assert cl_schema.scheme_urn == "urn:ddi:fr.cdsp:cs-interest:1.0.0"
 
     code_schema = CodeSchema(
-        urn="urn:ddi:fr.sciencespo:cl-interest.1:1.0.0",
-        code_list_urn="urn:ddi:fr.sciencespo:cl-interest:1.0.0",
-        category_urn="urn:ddi:fr.sciencespo:cat-accord:1.0.0",
+        urn="urn:ddi:fr.cdsp:cl-interest.1:1.0.0",
+        code_list_urn="urn:ddi:fr.cdsp:cl-interest:1.0.0",
+        category_urn="urn:ddi:fr.cdsp:cat-accord:1.0.0",
         code_value="1",
-        parent_urn="urn:ddi:fr.sciencespo:cl-interest.0:1.0.0",
+        parent_urn="urn:ddi:fr.cdsp:cl-interest.0:1.0.0",
         is_missing=False,
     )
     assert code_schema.code_value == "1"
-    assert code_schema.parent_urn == "urn:ddi:fr.sciencespo:cl-interest.0:1.0.0"
+    assert code_schema.parent_urn == "urn:ddi:fr.cdsp:cl-interest.0:1.0.0"
     assert code_schema.is_missing is False
 
     code_missing = CodeSchema(
-        code_list_urn="urn:ddi:fr.sciencespo:cl-interest:1.0.0",
-        category_urn="urn:ddi:fr.sciencespo:cat-nsp:1.0.0",
+        code_list_urn="urn:ddi:fr.cdsp:cl-interest:1.0.0",
+        category_urn="urn:ddi:fr.cdsp:cat-nsp:1.0.0",
         code_value="88",
         is_missing=True,
     )
     assert code_missing.is_missing is True
 
     concept_scheme_schema = ConceptSchemeSchema(
-        urn="urn:ddi:fr.sciencespo:cs-thesaurus:1.0.0",
+        urn="urn:ddi:fr.cdsp:cs-thesaurus:1.0.0",
         name=MultilingualText.from_single("Schéma Concepts", lang="fr"),
     )
-    assert concept_scheme_schema.urn == "urn:ddi:fr.sciencespo:cs-thesaurus:1.0.0"
+    assert concept_scheme_schema.urn == "urn:ddi:fr.cdsp:cs-thesaurus:1.0.0"
 
     concept_schema = ConceptSchema(
-        urn="urn:ddi:fr.sciencespo:concept-pol:1.0.0",
-        scheme_urn="urn:ddi:fr.sciencespo:cs-thesaurus:1.0.0",
+        urn="urn:ddi:fr.cdsp:concept-pol:1.0.0",
+        scheme_urn="urn:ddi:fr.cdsp:cs-thesaurus:1.0.0",
         uri="https://elsst.cessda.eu/id/4/Politics",
         vocabulary="ELSST",
         notation="POL",
         label=MultilingualText.from_single("Politique", lang="fr"),
         hashes={"sha256": "concept_pol_hash"},
     )
-    assert concept_schema.urn == "urn:ddi:fr.sciencespo:concept-pol:1.0.0"
-    assert concept_schema.agency == "fr.sciencespo"
-    assert concept_schema.scheme_urn == "urn:ddi:fr.sciencespo:cs-thesaurus:1.0.0"
+    assert concept_schema.urn == "urn:ddi:fr.cdsp:concept-pol:1.0.0"
+    assert concept_schema.agency == "fr.cdsp"
+    assert concept_schema.scheme_urn == "urn:ddi:fr.cdsp:cs-thesaurus:1.0.0"
     assert concept_schema.uri == "https://elsst.cessda.eu/id/4/Politics"
     assert concept_schema.vocabulary == "ELSST"
     assert concept_schema.label.get("fr") == "Politique"
     assert concept_schema.hashes["sha256"] == "concept_pol_hash"
 
     cv_scheme_schema = ConceptualVariableSchemeSchema(
-        urn="urn:ddi:fr.sciencespo:cvs-pol:1.0.0",
+        urn="urn:ddi:fr.cdsp:cvs-pol:1.0.0",
         name=MultilingualText.from_single("Schéma Variables Conceptuelles", lang="fr"),
     )
-    assert cv_scheme_schema.urn == "urn:ddi:fr.sciencespo:cvs-pol:1.0.0"
+    assert cv_scheme_schema.urn == "urn:ddi:fr.cdsp:cvs-pol:1.0.0"
 
     cv_schema = ConceptualVariableSchema(
-        urn="urn:ddi:fr.sciencespo:cv-interest:1.0.0",
-        scheme_urn="urn:ddi:fr.sciencespo:cvs-pol:1.0.0",
+        urn="urn:ddi:fr.cdsp:cv-interest:1.0.0",
+        scheme_urn="urn:ddi:fr.cdsp:cvs-pol:1.0.0",
         name=MultilingualText.from_single("INTERET_POL", lang="fr"),
         label=MultilingualText.from_single("Concept", lang="fr"),
         description=MultilingualText.from_single("Description du concept", lang="fr"),
     )
-    assert cv_schema.scheme_urn == "urn:ddi:fr.sciencespo:cvs-pol:1.0.0"
+    assert cv_schema.scheme_urn == "urn:ddi:fr.cdsp:cvs-pol:1.0.0"
     assert cv_schema.name.get("fr") == "INTERET_POL"
     assert cv_schema.label.get("fr") == "Concept"
     assert cv_schema.description.get("fr") == "Description du concept"
 
     rv_scheme_schema = RepresentedVariableSchemeSchema(
-        urn="urn:ddi:fr.sciencespo:rvs-bpf:1.0.0",
+        urn="urn:ddi:fr.cdsp:rvs-bpf:1.0.0",
         name=MultilingualText.from_single("Schéma Variables Représentées", lang="fr"),
     )
-    assert rv_scheme_schema.urn == "urn:ddi:fr.sciencespo:rvs-bpf:1.0.0"
+    assert rv_scheme_schema.urn == "urn:ddi:fr.cdsp:rvs-bpf:1.0.0"
 
     rv_schema = RepresentedVariableSchema(
-        urn="urn:ddi:fr.sciencespo:rv-interest:1.0.0",
-        scheme_urn="urn:ddi:fr.sciencespo:rvs-bpf:1.0.0",
-        conceptual_variable_urn="urn:ddi:fr.sciencespo:cv-interest:1.0.0",
+        urn="urn:ddi:fr.cdsp:rv-interest:1.0.0",
+        scheme_urn="urn:ddi:fr.cdsp:rvs-bpf:1.0.0",
+        conceptual_variable_urn="urn:ddi:fr.cdsp:cv-interest:1.0.0",
         value_representation={
             "type": "code",
-            "code_list_urn": "urn:ddi:fr.sciencespo:cl-interest:1.0.0",
+            "code_list_urn": "urn:ddi:fr.cdsp:cl-interest:1.0.0",
         },
         name=MultilingualText.from_single("RV_INTERET_POL", lang="fr"),
         label=MultilingualText.from_single("Intérêt politique RV", lang="fr"),
@@ -305,87 +305,85 @@ def test_domain_entity_schemas() -> None:
             "Description de la variable représentée", lang="fr"
         ),
     )
-    assert rv_schema.scheme_urn == "urn:ddi:fr.sciencespo:rvs-bpf:1.0.0"
-    assert rv_schema.conceptual_variable_urn == "urn:ddi:fr.sciencespo:cv-interest:1.0.0"
+    assert rv_schema.scheme_urn == "urn:ddi:fr.cdsp:rvs-bpf:1.0.0"
+    assert rv_schema.conceptual_variable_urn == "urn:ddi:fr.cdsp:cv-interest:1.0.0"
     assert rv_schema.value_representation["type"] == "code"
-    assert (
-        rv_schema.value_representation["code_list_urn"] == "urn:ddi:fr.sciencespo:cl-interest:1.0.0"
-    )
+    assert rv_schema.value_representation["code_list_urn"] == "urn:ddi:fr.cdsp:cl-interest:1.0.0"
     assert rv_schema.name.get("fr") == "RV_INTERET_POL"
     assert rv_schema.label.get("fr") == "Intérêt politique RV"
     assert rv_schema.description.get("fr") == "Description de la variable représentée"
 
     qv_schema = QuestionVariableSchema(
-        question_item_urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
-        represented_variable_urn="urn:ddi:fr.sciencespo:rv-interest:1.0.0",
+        question_item_urn="urn:ddi:fr.cdsp:qi-fr-001:1.0.0",
+        represented_variable_urn="urn:ddi:fr.cdsp:rv-interest:1.0.0",
         path="/RepresentedVariable/QuestionItem[1]",
     )
     assert qv_schema.path == "/RepresentedVariable/QuestionItem[1]"
 
     inst_schema = InstrumentSchema(
-        urn="urn:ddi:fr.sciencespo:inst-001:1.0.0",
+        urn="urn:ddi:fr.cdsp:inst-001:1.0.0",
         label=MultilingualText.from_single("Questionnaire 2007", lang="fr"),
     )
-    assert inst_schema.urn == "urn:ddi:fr.sciencespo:inst-001:1.0.0"
+    assert inst_schema.urn == "urn:ddi:fr.cdsp:inst-001:1.0.0"
 
     iq_schema = InstrumentQuestionSchema(
-        instrument_urn="urn:ddi:fr.sciencespo:inst-001:1.0.0",
-        question_item_urn="urn:ddi:fr.sciencespo:qi-fr-001:1.0.0",
+        instrument_urn="urn:ddi:fr.cdsp:inst-001:1.0.0",
+        question_item_urn="urn:ddi:fr.cdsp:qi-fr-001:1.0.0",
         path="/Instrument/Sequence/Q1",
     )
     assert iq_schema.path == "/Instrument/Sequence/Q1"
 
     su_schema = StudyUnitSchema(
-        urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
+        urn="urn:ddi:fr.cdsp:su-2007:1.0.0",
         title=MultilingualText.from_single("Study 2007", lang="fr"),
     )
     assert su_schema.title.get("fr") == "Study 2007"
 
     iv_scheme_schema = InstanceVariableSchemeSchema(
-        urn="urn:ddi:fr.sciencespo:ivs-bpf:1.0.0",
+        urn="urn:ddi:fr.cdsp:ivs-bpf:1.0.0",
         name=MultilingualText.from_single("Schéma Variables d'Instance", lang="fr"),
     )
-    assert iv_scheme_schema.urn == "urn:ddi:fr.sciencespo:ivs-bpf:1.0.0"
+    assert iv_scheme_schema.urn == "urn:ddi:fr.cdsp:ivs-bpf:1.0.0"
 
     iv_schema = InstanceVariableSchema(
-        urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
-        scheme_urn="urn:ddi:fr.sciencespo:ivs-bpf:1.0.0",
-        represented_variable_urn="urn:ddi:fr.sciencespo:rv-interest:1.0.0",
+        urn="urn:ddi:fr.cdsp:iv-q01a:1.0.0",
+        scheme_urn="urn:ddi:fr.cdsp:ivs-bpf:1.0.0",
+        represented_variable_urn="urn:ddi:fr.cdsp:rv-interest:1.0.0",
         name="q01a",
         label=MultilingualText.from_single("Intérêt politique Q1", lang="fr"),
         description=MultilingualText.from_single("Variable q01a", lang="fr"),
     )
-    assert iv_schema.scheme_urn == "urn:ddi:fr.sciencespo:ivs-bpf:1.0.0"
+    assert iv_schema.scheme_urn == "urn:ddi:fr.cdsp:ivs-bpf:1.0.0"
     assert iv_schema.name.get() == "q01a"
     assert iv_schema.description.get("fr") == "Variable q01a"
 
     datafile_schema = DatafileSchema(
-        urn="urn:ddi:fr.sciencespo:df-2007:1.0.0",
+        urn="urn:ddi:fr.cdsp:df-2007:1.0.0",
         name="bpf_2007.sav",
-        study_unit_urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
+        study_unit_urn="urn:ddi:fr.cdsp:su-2007:1.0.0",
         description=MultilingualText.from_single("Fichier SPSS", lang="fr"),
     )
-    assert datafile_schema.urn == "urn:ddi:fr.sciencespo:df-2007:1.0.0"
-    assert datafile_schema.study_unit_urn == "urn:ddi:fr.sciencespo:su-2007:1.0.0"
+    assert datafile_schema.urn == "urn:ddi:fr.cdsp:df-2007:1.0.0"
+    assert datafile_schema.study_unit_urn == "urn:ddi:fr.cdsp:su-2007:1.0.0"
 
-    iv_schema.datafile_urn = "urn:ddi:fr.sciencespo:df-2007:1.0.0"
-    assert iv_schema.datafile_urn == "urn:ddi:fr.sciencespo:df-2007:1.0.0"
+    iv_schema.datafile_urn = "urn:ddi:fr.cdsp:df-2007:1.0.0"
+    assert iv_schema.datafile_urn == "urn:ddi:fr.cdsp:df-2007:1.0.0"
 
     df_var_schema = DatafileVariableSchema(
-        datafile_urn="urn:ddi:fr.sciencespo:df-2007:1.0.0",
-        instance_variable_urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
+        datafile_urn="urn:ddi:fr.cdsp:df-2007:1.0.0",
+        instance_variable_urn="urn:ddi:fr.cdsp:iv-q01a:1.0.0",
         order=2,
         statistics={"mean": 3.4, "min": 1.0, "max": 5.0, "stddev": 1.1},
     )
-    assert df_var_schema.datafile_urn == "urn:ddi:fr.sciencespo:df-2007:1.0.0"
-    assert df_var_schema.instance_variable_urn == "urn:ddi:fr.sciencespo:iv-q01a:1.0.0"
+    assert df_var_schema.datafile_urn == "urn:ddi:fr.cdsp:df-2007:1.0.0"
+    assert df_var_schema.instance_variable_urn == "urn:ddi:fr.cdsp:iv-q01a:1.0.0"
     assert df_var_schema.order == 2
     assert df_var_schema.statistics["mean"] == 3.4
     assert df_var_schema.statistics["min"] == 1.0
 
     freq_schema = DatafileVariableFrequencySchema(
-        datafile_urn="urn:ddi:fr.sciencespo:df-2007:1.0.0",
-        instance_variable_urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
+        datafile_urn="urn:ddi:fr.cdsp:df-2007:1.0.0",
+        instance_variable_urn="urn:ddi:fr.cdsp:iv-q01a:1.0.0",
         code_value="1",
         frequency=150.0,
         weight="poidstot",
@@ -396,32 +394,32 @@ def test_domain_entity_schemas() -> None:
 
     # Also test backward compatibility alias FrequencySchema
     freq_alias_schema = FrequencySchema(
-        datafile_urn="urn:ddi:fr.sciencespo:df-2007:1.0.0",
-        instance_variable_urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
+        datafile_urn="urn:ddi:fr.cdsp:df-2007:1.0.0",
+        instance_variable_urn="urn:ddi:fr.cdsp:iv-q01a:1.0.0",
         code_value="2",
         frequency=200.0,
     )
     assert freq_alias_schema.frequency == 200.0
 
     study_inst_schema = StudyInstrumentSchema(
-        study_unit_urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
-        instrument_urn="urn:ddi:fr.sciencespo:inst-2007:1.0.0",
+        study_unit_urn="urn:ddi:fr.cdsp:su-2007:1.0.0",
+        instrument_urn="urn:ddi:fr.cdsp:inst-2007:1.0.0",
         path="/StudyUnit/Instrument/Main",
         order=1,
     )
-    assert study_inst_schema.study_unit_urn == "urn:ddi:fr.sciencespo:su-2007:1.0.0"
-    assert study_inst_schema.instrument_urn == "urn:ddi:fr.sciencespo:inst-2007:1.0.0"
+    assert study_inst_schema.study_unit_urn == "urn:ddi:fr.cdsp:su-2007:1.0.0"
+    assert study_inst_schema.instrument_urn == "urn:ddi:fr.cdsp:inst-2007:1.0.0"
 
     suv_schema = StudyUnitVariableSchema(
-        study_unit_urn="urn:ddi:fr.sciencespo:su-2007:1.0.0",
-        instance_variable_urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
+        study_unit_urn="urn:ddi:fr.cdsp:su-2007:1.0.0",
+        instance_variable_urn="urn:ddi:fr.cdsp:iv-q01a:1.0.0",
         path="/StudyUnit/DataPipeline/q01a",
     )
-    assert suv_schema.study_unit_urn == "urn:ddi:fr.sciencespo:su-2007:1.0.0"
+    assert suv_schema.study_unit_urn == "urn:ddi:fr.cdsp:su-2007:1.0.0"
     assert suv_schema.path == "/StudyUnit/DataPipeline/q01a"
 
     event_schema = EventLogSchema(
-        urn="urn:ddi:fr.sciencespo:iv-q01a:1.0.0",
+        urn="urn:ddi:fr.cdsp:iv-q01a:1.0.0",
         event_type="indexed",
         event_data={"cluster": "node-1"},
     )
@@ -432,13 +430,13 @@ def test_domain_entity_schemas() -> None:
         source_format="ddi-l:3.3:xml",
         file_name="sample.xml",
         file_sha256="b" * 64,
-        options={"agency": "fr.sciencespo"},
-        created_urns=["urn:ddi:fr.sciencespo:qi-001:1.0.0"],
+        options={"agency": "fr.cdsp"},
+        created_urns=["urn:ddi:fr.cdsp:qi-001:1.0.0"],
         stats={"QuestionItem": 5},
     )
     assert batch_schema.source_format == "ddi-l:3.3:xml"
     assert batch_schema.status == "completed"
-    assert batch_schema.options["agency"] == "fr.sciencespo"
+    assert batch_schema.options["agency"] == "fr.cdsp"
     assert batch_schema.stats["QuestionItem"] == 5
 
 
@@ -477,7 +475,7 @@ def test_schema_urn_helpers() -> None:
     )
     assert s3.is_canonical_ddi is False
     assert s3.is_maintainable_scoped is False
-    assert s3.agency == "fr.sciencespo"  # default
+    assert s3.agency == "fr.cdsp"  # default
     assert s3.identifier == "doi:10.7303/item99"
     assert s3.maintainable_id is None
     assert s3.object_id == "doi:10.7303/item99"
@@ -488,7 +486,7 @@ def test_semantic_relationship_schema() -> None:
     """Test SemanticRelationshipSchema validation, attributes, and serialization."""
     schema = SemanticRelationshipSchema(
         subject_type="ConceptualVariable",
-        subject_urn="urn:ddi:fr.sciencespo:cv-fr-001:1.0.0",
+        subject_urn="urn:ddi:fr.cdsp:cv-fr-001:1.0.0",
         predicate="skos:exactMatch",
         object_type="Concept",
         object_urn="https://elsst.cessda.eu/id/4/Politics",
@@ -499,7 +497,7 @@ def test_semantic_relationship_schema() -> None:
     )
 
     assert schema.subject_type == "ConceptualVariable"
-    assert schema.subject_urn == "urn:ddi:fr.sciencespo:cv-fr-001:1.0.0"
+    assert schema.subject_urn == "urn:ddi:fr.cdsp:cv-fr-001:1.0.0"
     assert schema.predicate == "skos:exactMatch"
     assert schema.object_type == "Concept"
     assert schema.object_urn == "https://elsst.cessda.eu/id/4/Politics"
@@ -514,11 +512,11 @@ def test_semantic_relationship_schema() -> None:
 def test_urn_registry_schema() -> None:
     """Test UrnRegistrySchema validation for DDI and external URIs."""
     reg = UrnRegistrySchema(
-        urn="urn:ddi:fr.sciencespo:qi-001:1.0.0",
+        urn="urn:ddi:fr.cdsp:qi-001:1.0.0",
         resource_type="QuestionItem",
         extended_attributes=[{"type": "tag", "value": "demo"}],
     )
-    assert reg.urn == "urn:ddi:fr.sciencespo:qi-001:1.0.0"
+    assert reg.urn == "urn:ddi:fr.cdsp:qi-001:1.0.0"
     assert reg.resource_type == "QuestionItem"
     assert reg.status == "active"
     assert reg.extended_attributes[0]["value"] == "demo"
@@ -539,40 +537,40 @@ def test_all_resource_schemas_require_urn_and_name_and_other_fields_nullable() -
     min_name = MultilingualText.from_single("Test Resource")
 
     # 1. OrganizationSchema
-    org = OrganizationSchema(urn="urn:ddi:fr.sciencespo:org:1.0.0", name=min_name)
+    org = OrganizationSchema(urn="urn:ddi:fr.cdsp:org:1.0.0", name=min_name)
     assert org.organization_type is None
     assert org.hashes is None
 
     # 2. GroupSchema
-    grp = GroupSchema(urn="urn:ddi:fr.sciencespo:grp:1.0.0", name=min_name)
+    grp = GroupSchema(urn="urn:ddi:fr.cdsp:grp:1.0.0", name=min_name)
     assert grp.description is None
     assert grp.group_type is None
     assert grp.references == []
 
     # 3. ConceptSchemeSchema & ConceptSchema
-    cs = ConceptSchemeSchema(urn="urn:ddi:fr.sciencespo:cs:1.0.0", name=min_name)
+    cs = ConceptSchemeSchema(urn="urn:ddi:fr.cdsp:cs:1.0.0", name=min_name)
     assert cs.description is None
     assert "hashes" not in ConceptSchemeSchema.model_fields
-    concept = ConceptSchema(urn="urn:ddi:fr.sciencespo:concept:1.0.0")
+    concept = ConceptSchema(urn="urn:ddi:fr.cdsp:concept:1.0.0")
     assert concept.label is None
     assert concept.scheme_urn is None
     assert "hashes" in ConceptSchema.model_fields
 
     # 4. ConceptualVariableSchemeSchema & ConceptualVariableSchema
-    cvs = ConceptualVariableSchemeSchema(urn="urn:ddi:fr.sciencespo:cvs:1.0.0", name=min_name)
+    cvs = ConceptualVariableSchemeSchema(urn="urn:ddi:fr.cdsp:cvs:1.0.0", name=min_name)
     assert cvs.description is None
     assert "hashes" not in ConceptualVariableSchemeSchema.model_fields
-    cv = ConceptualVariableSchema(urn="urn:ddi:fr.sciencespo:cv:1.0.0", name=min_name)
+    cv = ConceptualVariableSchema(urn="urn:ddi:fr.cdsp:cv:1.0.0", name=min_name)
     assert cv.scheme_urn is None
     assert cv.concept_urn is None
     assert cv.label is None
     assert "hashes" in ConceptualVariableSchema.model_fields
 
     # 5. QuestionSchemeSchema & QuestionItemSchema
-    qs = QuestionSchemeSchema(urn="urn:ddi:fr.sciencespo:qs:1.0.0", name=min_name)
+    qs = QuestionSchemeSchema(urn="urn:ddi:fr.cdsp:qs:1.0.0", name=min_name)
     assert qs.description is None
     assert "hashes" not in QuestionSchemeSchema.model_fields
-    qi = QuestionItemSchema(urn="urn:ddi:fr.sciencespo:qi:1.0.0", name=min_name)
+    qi = QuestionItemSchema(urn="urn:ddi:fr.cdsp:qi:1.0.0", name=min_name)
     assert qi.question_text is None
     assert qi.scheme_urn is None
     assert qi.code_list_urn is None
@@ -580,26 +578,26 @@ def test_all_resource_schemas_require_urn_and_name_and_other_fields_nullable() -
     assert "hashes" in QuestionItemSchema.model_fields
 
     # 6. CategorySchemeSchema & CategorySchema
-    cats = CategorySchemeSchema(urn="urn:ddi:fr.sciencespo:cats:1.0.0", name=min_name)
+    cats = CategorySchemeSchema(urn="urn:ddi:fr.cdsp:cats:1.0.0", name=min_name)
     assert cats.description is None
     assert "hashes" not in CategorySchemeSchema.model_fields
-    cat = CategorySchema(urn="urn:ddi:fr.sciencespo:cat:1.0.0", name=min_name)
+    cat = CategorySchema(urn="urn:ddi:fr.cdsp:cat:1.0.0", name=min_name)
     assert cat.label is None
     assert cat.scheme_urn is None
     assert cat.concept_urn is None
     assert "hashes" in CategorySchema.model_fields
 
     # 7. CodeListSchema
-    cl = CodeListSchema(urn="urn:ddi:fr.sciencespo:cl:1.0.0", name=min_name)
+    cl = CodeListSchema(urn="urn:ddi:fr.cdsp:cl:1.0.0", name=min_name)
     assert cl.description is None
     assert cl.scheme_urn is None
     assert "hashes" in CodeListSchema.model_fields
 
     # 8. RepresentedVariableSchemeSchema & RepresentedVariableSchema
-    rvs = RepresentedVariableSchemeSchema(urn="urn:ddi:fr.sciencespo:rvs:1.0.0", name=min_name)
+    rvs = RepresentedVariableSchemeSchema(urn="urn:ddi:fr.cdsp:rvs:1.0.0", name=min_name)
     assert rvs.description is None
     assert "hashes" not in RepresentedVariableSchemeSchema.model_fields
-    rv = RepresentedVariableSchema(urn="urn:ddi:fr.sciencespo:rv:1.0.0", name=min_name)
+    rv = RepresentedVariableSchema(urn="urn:ddi:fr.cdsp:rv:1.0.0", name=min_name)
     assert rv.scheme_urn is None
     assert rv.conceptual_variable_urn is None
     assert rv.code_list_urn is None
@@ -608,24 +606,24 @@ def test_all_resource_schemas_require_urn_and_name_and_other_fields_nullable() -
     assert "hashes" in RepresentedVariableSchema.model_fields
 
     # 9. StudyUnitSchema
-    su = StudyUnitSchema(urn="urn:ddi:fr.sciencespo:su:1.0.0", name=min_name)
+    su = StudyUnitSchema(urn="urn:ddi:fr.cdsp:su:1.0.0", name=min_name)
     assert su.title is None
     assert su.external_ref is None
     assert su.year is None
     assert "hashes" in StudyUnitSchema.model_fields
 
     # 10. InstanceVariableSchemeSchema & InstanceVariableSchema
-    ivs = InstanceVariableSchemeSchema(urn="urn:ddi:fr.sciencespo:ivs:1.0.0", name=min_name)
+    ivs = InstanceVariableSchemeSchema(urn="urn:ddi:fr.cdsp:ivs:1.0.0", name=min_name)
     assert ivs.description is None
     assert "hashes" not in InstanceVariableSchemeSchema.model_fields
-    iv = InstanceVariableSchema(urn="urn:ddi:fr.sciencespo:iv:1.0.0", name=min_name)
+    iv = InstanceVariableSchema(urn="urn:ddi:fr.cdsp:iv:1.0.0", name=min_name)
     assert iv.scheme_urn is None
     assert iv.represented_variable_urn is None
     assert iv.label is None
     assert "hashes" in InstanceVariableSchema.model_fields
 
     # 11. InstrumentSchema
-    inst = InstrumentSchema(urn="urn:ddi:fr.sciencespo:inst:1.0.0", name=min_name)
+    inst = InstrumentSchema(urn="urn:ddi:fr.cdsp:inst:1.0.0", name=min_name)
     assert inst.label is None
     assert inst.description is None
     assert "hashes" in InstrumentSchema.model_fields

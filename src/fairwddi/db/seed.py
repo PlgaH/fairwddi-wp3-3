@@ -54,7 +54,7 @@ def seed_sample_data(reset: bool = False) -> dict[str, int]:
 
         wipe_database()
 
-    agency = os.getenv("DDI_AGENCY", "fr.sciencespo")
+    agency = os.getenv("DDI_AGENCY", "fr.cdsp")
 
     # -------------------------------------------------------------------------
     # 1. Organizational Hierarchy

@@ -13,7 +13,7 @@ class DDIIdentifiable(models.Model):
 
     Canonical DDI 3.3 / 4.0 URN format:
     urn:ddi:{agency[.sub-agency]}:{ID}:{version}
-    e.g. urn:ddi:fr.sciencespo:Category.cat-fr-yes:1.0.0
+    e.g. urn:ddi:fr.cdsp:Category.cat-fr-yes:1.0.0
     """
 
     urn = models.CharField(
@@ -57,7 +57,7 @@ class DDIIdentifiable(models.Model):
             parts = self.urn.split(":")
             if len(parts) >= 3:
                 return parts[2]
-        return os.getenv("DDI_AGENCY", "fr.sciencespo")
+        return os.getenv("DDI_AGENCY", "fr.cdsp")
 
     @agency.setter
     def agency(self, value: str) -> None:
@@ -81,7 +81,7 @@ class DDIIdentifiable(models.Model):
     def identifier(self, value: str) -> None:
         """Allow setting or overriding identifier component."""
         if not self.urn:
-            agency = os.getenv("DDI_AGENCY", "fr.sciencespo")
+            agency = os.getenv("DDI_AGENCY", "fr.cdsp")
             self.urn = f"urn:ddi:{agency}:{value}:1.0.0"
 
     @property
@@ -131,7 +131,7 @@ class DDIIdentifiable(models.Model):
     def save(self, *args, **kwargs) -> None:
         """Ensure a canonical URN is present and registered before saving."""
         if not self.urn:
-            agency = os.getenv("DDI_AGENCY", "fr.sciencespo")
+            agency = os.getenv("DDI_AGENCY", "fr.cdsp")
             primary_hash = None
             hashes_val = getattr(self, "hashes", None)
             if isinstance(hashes_val, dict):

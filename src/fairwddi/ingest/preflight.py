@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import uuid
 from pathlib import Path
 from typing import Any, Literal
@@ -182,9 +183,7 @@ def run_preflight_check(
                 )
                 for qf in ddic_prof.quality.findings:
                     sev_str = (
-                        qf.severity.value
-                        if hasattr(qf.severity, "value")
-                        else str(qf.severity)
+                        qf.severity.value if hasattr(qf.severity, "value") else str(qf.severity)
                     )
                     sev_norm: Literal["error", "warning", "info"] = (
                         "error"
@@ -415,9 +414,10 @@ def upgrade_ddic_to_ddil(
     target_path.parent.mkdir(parents=True, exist_ok=True)
 
     cb = codebook.loadxml(str(src_path))
+    target_agency = agency or os.getenv("DDI_AGENCY", "fr.cdsp")
     converter = cb_utils.codebook_to_lifecycle(
         cb,
-        agency=agency,
+        agency=target_agency,
         version=version,
         identifier=identifier,
         id_strategy=id_strategy,
@@ -440,9 +440,8 @@ def upgrade_ddic_to_ddil(
     stats_file: Path | None = None
     has_stats = summary.get("variable_statistics_count", 0) > 0
     if output_format in ("ddi4-json", "ddi4-jsonl") and has_stats:
-        stats_name = (
-            target_path.name.replace(".ddi40.jsonl", ".stats.ddi40.json")
-            .replace(".ddi40.json", ".stats.ddi40.json")
+        stats_name = target_path.name.replace(".ddi40.jsonl", ".stats.ddi40.json").replace(
+            ".ddi40.json", ".stats.ddi40.json"
         )
         stats_file = target_path.with_name(stats_name)
         if stats_file == target_path:

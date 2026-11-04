@@ -1447,7 +1447,7 @@
             </p>
             <div class="urn-pattern-box">
               <span class="urn-pattern-label">Canonical URN Pattern</span>
-              <span class="urn-pattern-code" id="ent-urn-pattern">urn:ddi:fr.sciencespo:QuestionItem.qi-leftright:1.0.0</span>
+              <span class="urn-pattern-code" id="ent-urn-pattern">urn:ddi:fr.cdsp:QuestionItem.qi-leftright:1.0.0</span>
             </div>
           </div>
 
@@ -1620,7 +1620,7 @@
         base: "Model",
         table: "request_ddi_urnregistry",
         ddiTag: "URN Supertype / Crosswalk",
-        urnPattern: "urn:ddi:fr.sciencespo:QuestionItem.qi-leftright:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:QuestionItem.qi-leftright:1.0.0",
         description: "Master supertype registry holding every canonical DDI entity URN and external URI. Enforces universal referential integrity (Class Table Inheritance) and provides O(1) URN-to-resource_type polymorphic crosswalk resolution across the entire repository.",
         pos: { x: 1140, y: 80 },
         fields: [
@@ -1648,7 +1648,7 @@
         base: "DDIResource",
         table: "request_ddi_organization",
         ddiTag: "<ddi:Organization>",
-        urnPattern: "urn:ddi:fr.sciencespo:Organization.org-cdsp:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:Organization.org-cdsp:1.0.0",
         description: "Institutional organization resource in DDI-Lifecycle. Represents archives, distributors, research centers, universities, and funding bodies. Secondary details (acronyms, contact info, URIs) are captured in extended_attributes.",
         pos: { x: 60, y: 80 },
         fields: [
@@ -1671,7 +1671,7 @@
         base: "DDIResource",
         table: "request_ddi_group",
         ddiTag: "<ddi:Group> / <ddi:SubGroup>",
-        urnPattern: "urn:ddi:fr.sciencespo:Group.grp-ess:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:Group.grp-ess:1.0.0",
         description: "Generic Group DDI resource. Logical grouping of related resources (e.g. longitudinal study series, panels, thematic collections, or waves) referenced via polymorphic typed URN references.",
         pos: { x: 60, y: 170 },
         fields: [
@@ -1698,7 +1698,7 @@
         base: "DDIScheme",
         table: "request_ddi_conceptscheme",
         ddiTag: "<ddi:ConceptScheme> / <skos:ConceptScheme>",
-        urnPattern: "urn:ddi:fr.sciencespo:ConceptScheme.cs-elsst:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:ConceptScheme.cs-elsst:1.0.0",
         description: "Named collection of reusable domain concepts (maps to DDI-L ConceptScheme or SKOS ConceptScheme). Contains hierarchical Concept entities.",
         pos: { x: 430, y: 80 },
         fields: [
@@ -1720,7 +1720,7 @@
         base: "DDIIdentifiable",
         table: "request_ddi_concept",
         ddiTag: "<ddi:Concept> / <skos:Concept>",
-        urnPattern: "urn:ddi:fr.sciencespo:Concept.c-politics:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:Concept.c-politics:1.0.0",
         description: "High-level thematic domain concept from any controlled vocabulary or thesaurus (e.g. CESSDA ELSST, CESSDA Topics, DDI-CV). Supports hierarchical trees via parent_urn.",
         pos: { x: 430, y: 170 },
         fields: [
@@ -1756,7 +1756,7 @@
         base: "DDIScheme",
         table: "request_ddi_conceptualvariablescheme",
         ddiTag: "<ddi:ConceptualVariableScheme>",
-        urnPattern: "urn:ddi:fr.sciencespo:ConceptualVariableScheme.cvs-core:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:ConceptualVariableScheme.cvs-core:1.0.0",
         description: "Named collection of reusable conceptual variables (maps to DDI-L ConceptualVariableScheme).",
         pos: { x: 740, y: 80 },
         fields: [
@@ -1778,7 +1778,7 @@
         base: "DDIResource",
         table: "request_ddi_conceptualvariable",
         ddiTag: "<ddi:ConceptualVariable>",
-        urnPattern: "urn:ddi:fr.sciencespo:ConceptualVariable.cv-leftright:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:ConceptualVariable.cv-leftright:1.0.0",
         description: "Abstract measurement concept (e.g. 'Left-Right Political Placement', 'Subjective Health') representing Tier 1 of the Variable Cascade.",
         pos: { x: 740, y: 170 },
         fields: [
@@ -1835,7 +1835,7 @@
         base: "DDIScheme",
         table: "request_ddi_categoryscheme",
         ddiTag: "<ddi:CategoryScheme>",
-        urnPattern: "urn:ddi:fr.sciencespo:CategoryScheme.cats-scales:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:CategoryScheme.cats-scales:1.0.0",
         description: "Named collection of reusable categories (maps to DDI-L CategoryScheme).",
         pos: { x: 60, y: 340 },
         fields: [
@@ -1857,7 +1857,7 @@
         base: "DDIResource",
         table: "request_ddi_category",
         ddiTag: "<ddi:Category>",
-        urnPattern: "urn:ddi:fr.sciencespo:Category.cat-left:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:Category.cat-left:1.0.0",
         description: "Response category text label (decoupled from numerical code values). Supports self-referential hierarchy via parent_urn and optional semantic anchoring to Concept.",
         pos: { x: 60, y: 440 },
         fields: [
@@ -1889,7 +1889,7 @@
         base: "DDIScheme",
         table: "request_ddi_codelistscheme",
         ddiTag: "<ddi:CodeListScheme>",
-        urnPattern: "urn:ddi:fr.sciencespo:CodeListScheme.cls-scales:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:CodeListScheme.cls-scales:1.0.0",
         description: "Named collection of reusable code lists (maps to DDI-L CodeListScheme).",
         pos: { x: 230, y: 340 },
         fields: [
@@ -1911,7 +1911,7 @@
         base: "DDIResource",
         table: "request_ddi_codelist",
         ddiTag: "<ddi:CodeList>",
-        urnPattern: "urn:ddi:fr.sciencespo:CodeList.cl-lrscale:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:CodeList.cl-lrscale:1.0.0",
         description: "Structural set of response codes linked to categories. Reusable across multiple QuestionItems and RepresentedVariables.",
         pos: { x: 230, y: 440 },
         fields: [
@@ -1939,7 +1939,7 @@
         base: "DDIIdentifiable",
         table: "request_ddi_code",
         ddiTag: "<ddi:Code>",
-        urnPattern: "urn:ddi:fr.sciencespo:Code.code-lr0:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:Code.code-lr0:1.0.0",
         description: "Junction connecting a CodeList to a Category with a discrete code value (e.g. '1', '98', 'DK'). Supports self-referential hierarchy.",
         pos: { x: 230, y: 530 },
         fields: [
@@ -1968,7 +1968,7 @@
         base: "DDIScheme",
         table: "request_ddi_questionscheme",
         ddiTag: "<ddi:QuestionScheme>",
-        urnPattern: "urn:ddi:fr.sciencespo:QuestionScheme.qs-attitudes:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:QuestionScheme.qs-attitudes:1.0.0",
         description: "Named collection of reusable questions (maps to DDI-L QuestionScheme).",
         pos: { x: 420, y: 340 },
         fields: [
@@ -1990,7 +1990,7 @@
         base: "DDIResource",
         table: "request_ddi_questionitem",
         ddiTag: "<ddi:QuestionItem>",
-        urnPattern: "urn:ddi:fr.sciencespo:QuestionItem.qi-leftright:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:QuestionItem.qi-leftright:1.0.0",
         description: "Standalone reusable question wording and response domain specification. Belongs to a single QuestionScheme, can link directly to a response CodeList or define a flexible response_domain JSON object.",
         pos: { x: 420, y: 440 },
         fields: [
@@ -2023,7 +2023,7 @@
         base: "DDIScheme",
         table: "request_ddi_representedvariablescheme",
         ddiTag: "<ddi:RepresentedVariableScheme>",
-        urnPattern: "urn:ddi:fr.sciencespo:RepresentedVariableScheme.rvs-core:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:RepresentedVariableScheme.rvs-core:1.0.0",
         description: "Named collection of reusable represented variables (maps to DDI-L RepresentedVariableScheme).",
         pos: { x: 740, y: 340 },
         fields: [
@@ -2045,7 +2045,7 @@
         base: "DDIResource",
         table: "request_ddi_representedvariable",
         ddiTag: "<ddi:RepresentedVariable>",
-        urnPattern: "urn:ddi:fr.sciencespo:RepresentedVariable.rv-lrscale:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:RepresentedVariable.rv-lrscale:1.0.0",
         description: "Combination of conceptual variable and response representation (e.g. code list, numeric range). Represents Tier 2 of the Variable Cascade.",
         pos: { x: 740, y: 440 },
         fields: [
@@ -2104,7 +2104,7 @@
         base: "DDIScheme",
         table: "request_ddi_instrumentscheme",
         ddiTag: "<ddi:InstrumentScheme>",
-        urnPattern: "urn:ddi:fr.sciencespo:InstrumentScheme.is-ess:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:InstrumentScheme.is-ess:1.0.0",
         description: "Named collection of survey questionnaires and data collection instruments (maps to DDI-L InstrumentScheme).",
         pos: { x: 920, y: 340 },
         fields: [
@@ -2126,7 +2126,7 @@
         base: "DDIResource",
         table: "request_ddi_instrument",
         ddiTag: "<ddi:Instrument>",
-        urnPattern: "urn:ddi:fr.sciencespo:Instrument.inst-ess3:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:Instrument.inst-ess3:1.0.0",
         description: "Data collection instrument / questionnaire in DDI-Lifecycle. Holds ordered question items.",
         pos: { x: 920, y: 440 },
         fields: [
@@ -2179,7 +2179,7 @@
         base: "DDIResource",
         table: "request_ddi_studyunit",
         ddiTag: "<ddi:StudyUnit>",
-        urnPattern: "urn:ddi:fr.sciencespo:StudyUnit.su-ess2007:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:StudyUnit.su-ess2007:1.0.0",
         description: "A specific survey wave or dataset (renamed from Survey). Contains concrete physical dataset variables.",
         pos: { x: 55, y: 730 },
         fields: [
@@ -2207,7 +2207,7 @@
         base: "DDIResource",
         table: "request_ddi_datafile",
         ddiTag: "<ddi:DataFile> / <ddi:PhysicalInstance>",
-        urnPattern: "urn:ddi:fr.sciencespo:Datafile.df-ess2007:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:Datafile.df-ess2007:1.0.0",
         description: "Minimal Datafile entity relating InstanceVariables to StudyUnit (replaces legacy StudyVariable table). A datafile points to a study wave.",
         pos: { x: 265, y: 730 },
         fields: [
@@ -2258,7 +2258,7 @@
         base: "DDIScheme",
         table: "request_ddi_instancevariablescheme",
         ddiTag: "<ddi:VariableScheme> / <ddi:InstanceVariableScheme>",
-        urnPattern: "urn:ddi:fr.sciencespo:InstanceVariableScheme.ivs-ess2007:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:InstanceVariableScheme.ivs-ess2007:1.0.0",
         description: "Named collection of instance variables for a specific survey wave.",
         pos: { x: 895, y: 730 },
         fields: [
@@ -2280,7 +2280,7 @@
         base: "DDIResource",
         table: "request_ddi_instancevariable",
         ddiTag: "<ddi:Variable> / <ddi:InstanceVariable>",
-        urnPattern: "urn:ddi:fr.sciencespo:InstanceVariable.iv-ess2007-q01:1.0.0",
+        urnPattern: "urn:ddi:fr.cdsp:InstanceVariable.iv-ess2007-q01:1.0.0",
         description: "Physical realization of a variable in a specific dataset column (e.g. q01a). Relates to Datafile via DatafileVariable.",
         pos: { x: 685, y: 730 },
         fields: [
@@ -3195,55 +3195,55 @@
         concept: {
           name: "Left-Right Political Scale",
           thesaurus: "ELSST Thesaurus (#c4820)",
-          urn: "urn:ddi:fr.sciencespo:cv-leftright:1.0.0",
+          urn: "urn:ddi:fr.cdsp:cv-leftright:1.0.0",
           desc: "Abstract ideological positioning scale measuring individual political placement on the traditional left-right continuum."
         },
         represented: {
           name: "11-Point Left-Right Scale (0-10)",
-          urn: "urn:ddi:fr.sciencespo:rv-lr-11pt:1.0.0",
+          urn: "urn:ddi:fr.cdsp:rv-lr-11pt:1.0.0",
           question: "En politique, on parle de gauche et de droite. Où vous situez-vous personnellement sur une échelle de 0 (gauche) à 10 (droite) ?",
           codes: "0 (Extrême gauche) .. 10 (Extrême droite), 98 (Refus), 99 (NSP)"
         },
         instances: [
-          { study: "European Social Survey — Round 3 (2007)", varName: "lrscale", urn: "urn:ddi:fr.sciencespo:iv-ess3-lrscale:1.0.0" },
-          { study: "Panel Electoral Français (2012)", varName: "q04_gauche_droite", urn: "urn:ddi:fr.sciencespo:iv-pef2012-q04:1.0.0" },
-          { study: "Baromètre Politique CDSP (2017)", varName: "v12_pol_orient", urn: "urn:ddi:fr.sciencespo:iv-cdsp2017-v12:1.0.0" }
+          { study: "European Social Survey — Round 3 (2007)", varName: "lrscale", urn: "urn:ddi:fr.cdsp:iv-ess3-lrscale:1.0.0" },
+          { study: "Panel Electoral Français (2012)", varName: "q04_gauche_droite", urn: "urn:ddi:fr.cdsp:iv-pef2012-q04:1.0.0" },
+          { study: "Baromètre Politique CDSP (2017)", varName: "v12_pol_orient", urn: "urn:ddi:fr.cdsp:iv-cdsp2017-v12:1.0.0" }
         ]
       },
       health: {
         concept: {
           name: "Subjective General Health",
           thesaurus: "ELSST Thesaurus (#c1928)",
-          urn: "urn:ddi:fr.sciencespo:cv-health:1.0.0",
+          urn: "urn:ddi:fr.cdsp:cv-health:1.0.0",
           desc: "Self-perceived general state of physical and mental health independently of diagnosed clinical conditions."
         },
         represented: {
           name: "5-Point Self-Assessed Health",
-          urn: "urn:ddi:fr.sciencespo:rv-health-5pt:1.0.0",
+          urn: "urn:ddi:fr.cdsp:rv-health-5pt:1.0.0",
           question: "Comment évaluez-vous votre état de santé général ?",
           codes: "1 (Très bon), 2 (Bon), 3 (Moyen), 4 (Mauvais), 5 (Très mauvais)"
         },
         instances: [
-          { study: "ESS Wave 4 (2008)", varName: "health", urn: "urn:ddi:fr.sciencespo:iv-ess4-health:1.0.0" },
-          { study: "Enquête Santé & Société (2015)", varName: "sante_gen", urn: "urn:ddi:fr.sciencespo:iv-ess2015-sante:1.0.0" }
+          { study: "ESS Wave 4 (2008)", varName: "health", urn: "urn:ddi:fr.cdsp:iv-ess4-health:1.0.0" },
+          { study: "Enquête Santé & Société (2015)", varName: "sante_gen", urn: "urn:ddi:fr.cdsp:iv-ess2015-sante:1.0.0" }
         ]
       },
       trust_parliament: {
         concept: {
           name: "Trust in Democratic Institutions",
           thesaurus: "ELSST Thesaurus (#c5112)",
-          urn: "urn:ddi:fr.sciencespo:cv-trust-inst:1.0.0",
+          urn: "urn:ddi:fr.cdsp:cv-trust-inst:1.0.0",
           desc: "Attitudinal measurement of citizen confidence in national legislative assemblies."
         },
         represented: {
           name: "11-Point Trust in National Parliament",
-          urn: "urn:ddi:fr.sciencespo:rv-trust-parl-11pt:1.0.0",
+          urn: "urn:ddi:fr.cdsp:rv-trust-parl-11pt:1.0.0",
           question: "À quel point faites-vous confiance au parlement national sur une échelle de 0 (aucune confiance) à 10 (confiance totale) ?",
           codes: "0 (Aucune confiance) .. 10 (Confiance totale)"
         },
         instances: [
-          { study: "ESS Round 5 (2010)", varName: "trstprl", urn: "urn:ddi:fr.sciencespo:iv-ess5-trstprl:1.0.0" },
-          { study: "Post-Electoral Study (2022)", varName: "conf_parlement", urn: "urn:ddi:fr.sciencespo:iv-pes2022-conf:1.0.0" }
+          { study: "ESS Round 5 (2010)", varName: "trstprl", urn: "urn:ddi:fr.cdsp:iv-ess5-trstprl:1.0.0" },
+          { study: "Post-Electoral Study (2022)", varName: "conf_parlement", urn: "urn:ddi:fr.cdsp:iv-pes2022-conf:1.0.0" }
         ]
       }
     };
