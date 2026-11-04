@@ -3,7 +3,7 @@
 > **Project:** FAIRwDDI WP3 ST3 — Implementation of DDI Architecture for ReQuest  
 > **Organization:** Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS  
 > **Duration:** July 20 – December 18, 2026 (25 days)  
-> **Status:** Phase I Architecture & Technical Specification Summary Deliverable  
+> **Status:** Phase I Architecture & Phase II Ingestion Production Specification Deliverable  
 
 ---
 
@@ -26,34 +26,40 @@ The goal of this project is to upgrade ReQuest from a legacy pseudo-DDI architec
 
 ```mermaid
 flowchart TD
-    subgraph MultiStandardIn ["1. Multi-Standard Upload Sources"]
-        DDI33["DDI-Lifecycle 3.3 XML"]
-        DDI4["DDI-L 4 JSON / COGS"]
-        DDI25["Legacy DDI-C 2.5 XML"]
-        Croissant["Croissant JSON-LD"]
-        CSV_In["Dataverse Codebook CSV"]
+    subgraph MultiStandardIn ["1. Multi-Standard Ingestion Files"]
+        DDIC["DDI-Codebook 2.5 XML\n(Classic Monolingual)"]
+        DDIC_ML["DDI-Codebook 2.5 XML\n(Multilingual fr/en)"]
+        DDIL33["DDI-Lifecycle 3.3 XML\n(Study / Question Bank)"]
+        DDIL4["DDI-Lifecycle 4.0\n(.json / .jsonl)"]
     end
 
-    subgraph Stage1 ["2. Stage 1: Fast Raw File & Resource Staging"]
-        Bundle["File Bundle Record\n(StagedImport)"]
-        Nodes["Broken-Down Element Nodes\n(StagedResourceNode: raw_urn, raw_value JSONB)"]
+    subgraph PreflightPhase ["2. Preflight & Explicit Upgrade Engine"]
+        Detector["fairwddi.ingest.detector\n(Format Detection & SHA-256)"]
+        QA["fairwddi.ingest.preflight\n(Profile QA & URN Link Audit)"]
+        Upgrade["upgrade_ddic_to_ddil / dartfx-ddi ddic2l\n(DDI-C to DDI 4.0 Disk Converter)\n• Primary: *.ddi40.json (ReQuest Core)\n• Secondary: *.stats.ddi40.json (VariableStatistics)"]
+        DedupeMetrics["Deduplication Engine\n(Raw count, duplicates removed, % reduction)"]
+        PlanPre["preflight.plan.yaml\n(Readiness Gate & Quality Scorecard)"]
     end
 
-    subgraph Stage2 ["3. Stage 2: Asynchronous Background Normalization"]
-        Adapters["Pluggable Format Adapters\n(DDILifecycleAdapter, DDIL4JSONAdapter, etc.)"]
-        Normalizer["Resource Normalizer Engine\n(Simple Text & Compound URN Hashes)"]
-        
-        Normalizer --> PreferredURN["Primary Preferred Canonical URN\n(Git/URL-Shortener Style 16-char Hex)"]
-        Normalizer --> MultiHash["Multi-Algorithm Hashes\n(content_hashes JSONB)"]
+    subgraph IngestPhase ["3. Direct Ingestion Engine (fairwddi.ingest.loader)"]
+        Streaming["fairwddi.ingest.streaming\n(Constant Memory iterparse / JSON Streamer)"]
+        PlanIng["ingest.plan.yaml\n(Zero-Write Dry-Run Plan)"]
+        Apply["apply_ingestion\n(Atomic Single Transaction)"]
     end
 
-    subgraph CoreStore ["4. Standard-Agnostic Normalized PostgreSQL Core"]
-        Entities["PostgreSQL 17 Database Core\n• ConceptualVariable ➔ RepresentedVariable ➔ InstanceVariable\n• QuestionItem • CodeList • Category • StudyUnit\n• URNAlias Provenance Registry"]
+    subgraph CoreStore ["4. Standard-Agnostic PostgreSQL 17 Core"]
+        Receipt["IngestBatch (1 row per file)\n(file_sha256, status, created_urns, reused_urns, stats)"]
+        Cascade["DDI Variable Cascade\n(ConceptualVariable ➔ RepresentedVariable ➔ InstanceVariable)"]
+        Representation["Representation Core\n(QuestionItem, CodeList, Category, StudyUnit)"]
+        Frequencies["Bulk Relational SQL\n(DatafileVariableFrequency & DatafileVariable.statistics)"]
+        Registry["UrnRegistry & URNAlias\n(Universal Foreign Key Supertype & Provenance)"]
+        Quarantine["MetadataQuarantine\n(Content Drift Isolation)"]
     end
 
-    DDI33 & DDI4 & DDI25 & Croissant & CSV_In --> Bundle & Nodes
-    Nodes --> Adapters --> Normalizer
-    PreferredURN & MultiHash --> Entities
+    DDIC & DDIC_ML --> Detector --> Upgrade --> DedupeMetrics --> PlanPre
+    DDIL33 & DDIL4 --> Detector --> QA --> PlanPre
+    PlanPre --> Streaming --> PlanIng --> Apply
+    Apply --> Receipt & Cascade & Representation & Frequencies & Registry & Quarantine
 ```
 
 ---
@@ -74,14 +80,31 @@ flowchart TD
 
 ---
 
-### B. Ingestion & Multi-Standard Staging Architecture ([`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md))
+### B. Ingestion & Multi-Standard Architecture ([`deliverables/research/ingestion_architecture.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/ingestion_architecture.md) & [`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md))
 
-1. **Standard-Agnostic Core:** Core database tables represent pure domain entities independent of input metadata standards.
-2. **Two-Stage Decoupled Ingestion Pipeline:**
-   - **Stage 1 (Synchronous Fast Staging):** Streams uploaded files into `StagedImport` (file bundle) and decomposes elements into **`StagedResourceNode`** rows (`raw_urn`, `raw_value` JSONB). Returns HTTP 200 immediately to prevent browser timeouts.
-   - **Stage 2 (Asynchronous Normalization Worker):** Executed in background via `django-tasks-db`. Runs specialized Resource Normalizers, computes content hashes, resolves URNs, inserts database rows, and syncs to Elasticsearch.
-3. **Pluggable Format Adapters (`MetadataAdapter`):** Isolated Python parsers for each standard (`DDILifecycleAdapter`, `DDIL4JSONAdapter` for native DDI-L 4 / COGS models, `DDICodebookAdapter`, `CroissantAdapter`, `CSVMetadataAdapter`).
-4. **Granular Offline Re-Normalization:** If thesaurus mappings or normalization rules update, Stage 2 can re-normalize **only affected `StagedResourceNode` rows** (`WHERE resource_type = 'CodeList'`) without re-parsing raw files.
+1. **Standard-Agnostic Core:** Core database tables represent pure DDI domain entities independent of input metadata standards.
+2. **Architectural Evolution — Phase 1 Staging vs. Phase 2 Direct Streaming:**
+   - *Phase 1 Intermediate Staging Concept:* The preliminary design evaluated breaking down raw XML files into intermediate database rows (`StagedImport` / `StagedResourceNode: raw_urn, raw_value JSONB`).
+   - *Phase 2 Benchmarking & Resolution:* Benchmarking on real-world ELIPSS datasets revealed severe database WAL/storage bloat, relational detour overhead for numeric frequencies, and transaction bottlenecks. Phase 2 replaces database staging with a **direct file-to-core streaming ingestion pipeline** (`lxml.iterparse` and `ddi-toolkit` streaming models in constant memory).
+3. **Single-Row Operational Receipts (`IngestBatch`):** Intermediate staging tables are replaced with a single audit row per file in `request_ddi_ingestbatch`. It records the source file SHA-256 fingerprint, format, execution duration, and JSON arrays of created URNs, reused URNs, registered aliases, and entity counts.
+4. **Decoupled Architecture for Empirical Statistics:**
+   - Reusable Question Bank metadata (`StudyUnit`, `LogicalProduct`, `VariableScheme`, `QuestionScheme`, `CodeListScheme`, `CategoryScheme`, `PhysicalInstance`) is saved in the primary `*.ddi40.json` file.
+   - Dataset-specific observation statistics (`<catStat>` frequencies, weighted counts, and `<sumStat>` numeric metrics) belong to `PhysicalInstance.StatisticalSummary` pointing to native `VariableStatistics` in a dedicated secondary `*.stats.ddi40.json` file.
+   - At database ingestion, categorical frequencies and numeric statistics bypass JSONB and are written directly to `DatafileVariableFrequency` and `DatafileVariable.statistics` using high-speed bulk SQL operations.
+5. **Deduplication & Reduction Metrics (`--harmonize-codes`):**
+   - The upgrade engine compares code lists and categories across variables, collapsing identical sets into canonical instances.
+   - The CLI and upgrade markdown reports compute and display exact reduction metrics: raw count, duplicates removed, and percentage reduction (e.g., 71.1% code list reduction on ELIPSS `movipic2015`).
+6. **Declarative Quality Profiling (`request.ddic.yaml`):**
+   - Stage 1 preflight evaluates incoming DDI-Codebook files against declarative YAML quality profiles.
+   - Enforces required elements (e.g., variables required as fatal errors) and recommended archival best practices (e.g., standalone question items as warnings) with weighted quality scorecards.
+7. **Zero-Write Dry-Run Plans & One-Click Rollbacks:**
+   - `plan_ingestion` reads disk files, checks existing identities against `UrnRegistry`, and outputs an `ingest.plan.yaml` with zero database writes.
+   - Changes are gated by review flags (`requires_review = True`).
+   - `apply_ingestion` executes mutations in an atomic single transaction.
+   - `undo_ingestion` atomically removes all created URNs via `UrnRegistry` cascading foreign keys, leaving zero orphaned records.
+8. **Pluggable & Standalone CLI Tools:**
+   - Complete pipeline accessible via `fairwddi preflight`, `fairwddi ingest`, `fairwddi compare`, and `fairwddi harmonize`.
+   - Standalone DDI conversion utility available directly in `ddi-toolkit` as `dartfx-ddi ddic2l`, supporting independent DDI-C to DDI 4.0 / DDI 3.3 conversions with code harmonization and secondary statistics export.
 
 ---
 
@@ -124,11 +147,16 @@ flowchart TD
 | :--- | :--- | :--- |
 | **Phase I Audit Report** | [`deliverables/phase1_report.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/phase1_report.md) | Official Phase I summary report, legacy ReQuest audit, and validated target DDI-L architecture. |
 | **Database Schema** | [`deliverables/research/database.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database.md) | Complete 30-model PostgreSQL 17 schema, ER diagrams, `DDIIdentifiable` mixin, `IngestBatch` receipts, index strategy, zero-data-loss migration path. |
-| **Normalization Engine** | [`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md) | 4-phase cascade, standard-agnostic core, 2-stage ingestion pipeline, multi-standard format adapters, multilingual 3-tier strategy, architectural complexity evaluation. |
+| **Database Explorer & Diagram** | [`deliverables/research/database_diagram.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database_diagram.md) & [`explorer`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/database_explorer.html) | Interactive visual browser and comprehensive Mermaid ER diagram of the ReQuest DDI-L core schema with spotlight cascade modes. |
+| **Ingestion Architecture** | [`deliverables/research/ingestion_architecture.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/ingestion_architecture.md) | Phase 2 direct file-to-core streaming ingestion specification, decoupled empirical statistics (`*.stats.ddi40.json`), dry-run planning, atomic transactions, and rollback engine. |
+| **Ingestion Workflows** | [`deliverables/research/ingestion_workflows.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/ingestion_workflows.md) | Step-by-step procedures for DDI-C to DDI 4.0 upgrade, deduplication tracking, direct database ingestion, review gates, and audit receipt verification. |
+| **Ingestion Troubleshooting & QA** | [`deliverables/research/ingestion_troubleshooting_and_qa.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/ingestion_troubleshooting_and_qa.md) | Diagnostic guide for DDI-C/DDI-L errors, validation failures, profile scorecards, missing variables/questions, URI reference validation, and recovery strategies. |
+| **Normalization Engine** | [`deliverables/research/normalization.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/normalization.md) | 4-phase cascade, standard-agnostic core, multi-standard format adapters, multilingual 3-tier strategy, architectural complexity evaluation. |
 | **Hashing Specification** | [`deliverables/research/hashing_algorithms.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/hashing_algorithms.md) | Master resource-algorithm table, Simple vs. Compound hashing, shortened hash URN strategy, `CategorySet` / `CodeList` set hashing, Preferred Algorithm pattern, worked examples, BLAKE3 benchmark. |
 | **Glossary & Terminology** | [`deliverables/research/glossary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/glossary.md) | Authoritative domain reference mapping DDI-L entities, URN classifications (Authoritative vs. Random vs. Canonical vs. Alias), hashing terminology, ELSST thesaurus, and staging concepts. |
 | **Executive Summary** | [`deliverables/research/summary.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/summary.md) | Master executive overview capturing all architectural decisions, design patterns, database schemas, and ingestion workflows. |
+| **Variable Cascade Analysis** | [`deliverables/research/variable_cascade_gsim_cdi_vs_ddi_lifecycle.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/variable_cascade_gsim_cdi_vs_ddi_lifecycle.md) | Comparative architectural analysis of variable cascades across GSIM, DDI-CDI, and DDI-Lifecycle 3.3, harmonizing multi-standard representations. |
 | **Variable & Question Relationships** | [`deliverables/research/variable_question_relationships.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/variable_question_relationships.md) | Architectural analysis of the 6 canonical relationship paths between variables and questions in DDI-Lifecycle 3.3, DDI-CDI, and ReQuest. |
 | **PostgreSQL & Django JSONB Support** | [`deliverables/research/postgres_django_json.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/postgres_django_json.md) | In-depth research report on PostgreSQL JSONB architecture, JSONPath/JSON_TABLE expressions, Django ORM lookups & key transforms (`KT`), subtable unnesting patterns, GIN/B-Tree indexing, and TOAST storage. |
-| **CLI User Guide** | [`deliverables/research/cli_user_guide.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/cli_user_guide.md) | Comprehensive manual for the `fairwddi` command-line tools, database administration, seeding, vocabulary ingestion, multi-standard metadata file import, staging node inspection, and Python programmatic APIs. |
+| **CLI User Guide** | [`deliverables/research/cli_user_guide.md`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/cli_user_guide.md) | Comprehensive manual for the `fairwddi` command-line tools (`preflight`, `ingest`, `compare`, `harmonize`), standalone `dartfx-ddi ddic2l`, database administration, seeding, vocabulary ingestion, and Python APIs. |
 

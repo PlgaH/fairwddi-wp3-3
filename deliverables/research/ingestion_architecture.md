@@ -45,7 +45,7 @@ flowchart TD
     subgraph PreflightPhase ["2. Preflight & Explicit Upgrade Engine"]
         Detector["fairwddi.ingest.detector\n(Format Detection & SHA-256)"]
         QA["fairwddi.ingest.preflight\n(Profile QA & URN Link Audit)"]
-        Upgrade["upgrade_ddic_to_ddil\n(DDI-C ➔ DDI-L 4 Conversion on Disk)"]
+        Upgrade["upgrade_ddic_to_ddil\n(DDI-C ➔ DDI-L 4 Conversion on Disk)\n• Primary: *.ddi40.json (ReQuest Core)\n• Secondary: *.stats.ddi40.json (VariableStatistics)"]
         PlanPre["preflight.plan.yaml\n(Readiness Gate & Report)"]
     end
 
@@ -80,6 +80,9 @@ flowchart TD
 6. **Universal URN Supertype Lifecycle (`UrnRegistry`):** All core DDI tables inherit from [`DDIIdentifiable`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/models/base.py#L11-L164), which automatically upserts into `request_ddi_urnregistry(urn)` before child record creation. Foreign keys cascade from `UrnRegistry`, ensuring referential integrity and clean cascading deletions.
 7. **One-Click Atomic Rollback (`undo_ingestion`):** Using the `created_urns` recorded in `IngestBatch`, `undo_ingestion` deletes newly minted `UrnRegistry` records in a single atomic transaction. PostgreSQL cascades the delete to all child tables, shortcut tables, and frequency rows, resetting the batch status to `undone`.
 8. **Metadata Drift Quarantine:** When an incoming resource matches an existing canonical URN but exhibits a conflicting SHA-256 content fingerprint, the record is quarantined in [`MetadataQuarantine`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/models/infrastructure.py#L86-L145) rather than silently overwriting the bank record.
+9. **Decoupled Architecture for Empirical Statistics:** In standard DDI 4.0 and DDI-Lifecycle, `Variable`, `CodeList`, `Category`, and `QuestionItem` represent reusable, survey-agnostic metadata. Empirical observation statistics (frequencies, weighted counts, and numeric summaries) are dataset-specific. Upgrades decouple these into a primary question bank file (`*.ddi40.json`) and a dedicated secondary file (`*.stats.ddi40.json`) containing native `VariableStatistics` structures linked to parent variable URNs.
+10. **Deduplication & Reduction Metrics:** When upgrading DDI-C files (`--harmonize-codes`), the engine computes exact deduplication metrics (raw counts, duplicates removed, and percentage reduction) for both code lists and categories, outputting these directly into CLI summary tables and Markdown upgrade reports.
+11. **Declarative Quality Profiling:** Stage 1 preflight evaluates incoming DDI-C files against configurable YAML quality profiles (e.g., `profiles/request.ddic.yaml`), enforcing required elements (variables required as fatal errors) and recommending archival best practices (question items as warnings) with weighted quality scorecards.
 
 ---
 
@@ -109,8 +112,8 @@ src/fairwddi/ingest/
 | [`profiles.py`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/ingest/profiles.py) | `load_profile`, `list_available_profiles`, `ImportProfile`, `ImportStrategies` | Loads declarative YAML/JSON profiles controlling resource inclusion, exclusion, reference resolution, and collision handling. |
 | [`streaming.py`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/ingest/streaming.py) | `stream_resources`, `stream_ddi_c_xml`, `stream_ddi_l_xml`, `stream_ddi_l_json`, `stream_ddi_l_jsonl`, `RawResourceNode` | Streams metadata documents fragment-by-fragment without loading full trees into memory. Emits unified `RawResourceNode` instances. |
 | [`plan.py`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/ingest/plan.py) | `IngestPlan`, `PlanActionItem`, `PlanIssue`, `ReviewGate` | Pydantic v2 models representing review-gated plans and reports across all stages. Handles YAML/Markdown serialization and approval verification. |
-| [`preflight.py`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/ingest/preflight.py) | `run_preflight_check`, `upgrade_ddic_to_ddil` | Verifies file readiness, audits URNs, validates external references against `UrnRegistry`, and explicitly converts DDI-C files to DDI-L 4.0 on disk. |
-| [`loader.py`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/ingest/loader.py) | `plan_ingestion`, `apply_ingestion`, `undo_ingestion`, `list_ingest_batches`, `get_ingest_batch_status`, `compute_resource_hashes` | The core direct ingestion engine. Plans and applies streaming insertion into PostgreSQL core tables, bulk loads frequencies, records `IngestBatch` receipts, and performs atomic rollbacks. |
+| [`preflight.py`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/ingest/preflight.py) | `run_preflight_check`, `upgrade_ddic_to_ddil`, `_resolve_ddic_profile` | Verifies file readiness, audits URNs, evaluates custom DDI-C quality profiles (e.g. `request.ddic.yaml`), and converts DDI-C files to DDI-L 4.0 on disk with code list deduplication tracking and decoupled `*.stats.ddi40.json` companion files. |
+| [`loader.py`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/ingest/loader.py) | `plan_ingestion`, `apply_ingestion`, `undo_ingestion`, `list_ingest_batches`, `get_ingest_batch_status`, `compute_resource_hashes` | The core direct ingestion engine. Plans and applies streaming insertion into PostgreSQL core tables, bulk loads frequencies from both inline and dedicated `VariableStatistics` structures, records `IngestBatch` receipts, and performs atomic rollbacks. |
 | [`comparator.py`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/ingest/comparator.py) | `compare_batch`, `discover_candidates` | Evaluates similarities across six tiers (`EXACT`, `FACET_EXACT`, `MULTILINGUAL_OVERLAP`, `SUBSTANTIVE_PERMUTATION`, `CATEGORIES_EXACT_CODES_DIFFERENT`, `SYNTACTIC_SIMILAR`). |
 | [`harmonizer.py`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/ingest/harmonizer.py) | `plan_harmonization`, `apply_harmonization`, `undo_harmonization` | Executes review-gated harmonization actions (multilingual label merging, `URNAlias` consolidation, `RepresentedVariable` relinking, `SemanticRelationship` creation) and snapshots rollbacks in `EventLog`. |
 | [`pipeline.py`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/ingest/pipeline.py) | `run_ingestion_pipeline` | Orchestrates the end-to-end pipeline (`preflight` $\rightarrow$ optional `upgrade` $\rightarrow$ `ingest` $\rightarrow$ optional `harmonize`). |
@@ -305,10 +308,14 @@ classDiagram
    - DDI-L instruments define questionnaires as nested trees (`Sequence` $\rightarrow$ `IfThenElse` $\rightarrow$ `Loop` $\rightarrow$ `QuestionConstruct` $\rightarrow$ `QuestionReference`).
    - The loader traverses the control constructs, flattens the hierarchy into ordered items, and inserts rows into `InstrumentQuestion(instrument, question_item, path="/Instrument/Sequence/1", order=n)` and `StudyInstrument(study_unit, instrument)`.
 4. **Direct Frequency Loading (`DatafileVariableFrequency`):**
-   - Extracted from `<catStat>` (DDI-C), `UserAttributePair` (DDI-L 4), or `VariableStatistics` (DDI-L 3.3).
+   - Extracted from `<catStat>` (DDI-C), inline `UserAttributePair` (DDI-L 4), or strongly-typed `VariableStatistics` (DDI-L 3.3 and DDI 4.0 companion files).
+   - Resolves `code_value`, weighted counts, and parent `InstanceVariable`.
    - Bulk-inserted via `DatafileVariableFrequency.objects.bulk_create(..., batch_size=1000)`.
 5. **Summary Statistics (`DatafileVariable.statistics`):**
-   - Populated with key-value pairs (e.g. `{"valid": 1180, "invalid": 20, "mean": 2.45, "stddev": 0.82}`).
+   - Populated with key-value pairs (e.g. `{"valid": 1180, "invalid": 20, "mean": 2.45, "stddev": 0.82}`) extracted from `<sumStat>`, `SummaryStatisticType`, or `VariableStatistics`.
+6. **Decoupled Secondary Statistics Ingestion:**
+   - In accordance with DDI 4.0 principles, empirical frequencies and summary statistics may be streamed either inline or from a paired companion file (`<dataset>.stats.ddi40.json`).
+   - The loader automatically reconciles `VariableStatistics.VariableReference` URNs back to the corresponding `InstanceVariable` in the primary dataset, maintaining full data integrity without bloating reusable question bank records.
 
 ---
 

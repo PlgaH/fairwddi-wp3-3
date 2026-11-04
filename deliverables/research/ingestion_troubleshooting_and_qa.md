@@ -149,7 +149,7 @@ Pending Review Count: 14
 Expected resources (such as `Instrument` or `Datafile`) are missing from the plan summary.
 
 *Root Cause:*
-The active import profile ([`profiles/request.yaml`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/profiles/request.yaml)) explicitly excludes certain resource types (e.g., `Archive`, `VariableStatistics`, `QualityStandard`).
+The active import profile ([`profiles/request.yaml`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/profiles/request.yaml)) explicitly excludes certain resource types (e.g., `Archive`, `QualityStandard`).
 
 *Remedy:*
 1. Check profile rules via CLI:
@@ -160,6 +160,74 @@ The active import profile ([`profiles/request.yaml`](file:///Users/pascal/git-pl
    ```bash
    fairwddi ingest plan metadata.xml --profile all_ddi
    ```
+
+---
+
+### Issue 2.8: Missing Variables in Codebook (`request.ddic.variables_required`)
+
+*Symptom:*
+Preflight audit reports fatal error:
+```
+[ERROR] [request.ddic.variables_required] DDI Codebook contains 0 variables in dataDscr. A valid survey codebook must contain variables.
+```
+
+*Impact:*
+Under the ReQuest DDI-C profile ([`profiles/request.ddic.yaml`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/profiles/request.ddic.yaml)), an incoming codebook must document at least one variable. Files without variables fail the preflight readiness check and will halt automated pipeline runs.
+
+*Remedy:*
+Verify that the incoming file is a complete study codebook and that `<dataDscr>` contains `<var>` elements. If the document is purely a study citation stub, ingest it as a DDI-L StudyUnit or supply variables before loading.
+
+---
+
+### Issue 2.9: Missing Question Items in Codebook (`request.ddic.questions_recommended`)
+
+*Symptom:*
+Preflight audit reports warning:
+```
+[WARNING] [request.ddic.questions_recommended] DDI Codebook contains variables but 0 question items in dataDscr.
+```
+
+*Impact:*
+Because ReQuest is a question-bank platform, variables without explicit `<qstn>` tags will fall back to using their `<labl>` content as the question wording during `RepresentedVariable` synthesis.
+
+*Remedy:*
+If questionnaire documentation exists, ensure `<var>` elements contain `<qstn><qstnLit>...</qstnLit></qstn>`. If question text is unrecoverable, the warning can be reviewed and accepted via `--auto-approve`.
+
+---
+
+### Issue 2.10: Locating Empirical Frequencies & Summary Statistics (`*.stats.ddi40.json`)
+
+*Symptom:*
+Archivists inspecting upgraded DDI 4.0 JSON (`*.ddi40.json`) do not see frequency tables or summary statistics directly on `Variable` or `Category` objects.
+
+*Architecture Explanation:*
+In DDI 4.0 (COGS), a `Variable` is a reusable, survey-agnostic conceptual/representation object. Multiple survey waves or datasets can reuse the exact same variable and code list definition. Frequencies and summary statistics are dataset-specific empirical observations and therefore do not belong on `Variable`.
+
+*Resolution:*
+Empirical statistics are exported to a dedicated companion file:
+- Primary file (`<name>.ddi40.json`): Contains `PhysicalInstance.StatisticalSummary` pointing to statistics by persistent URN.
+- Companion file (`<name>.stats.ddi40.json`): Contains strongly-typed `VariableStatistics` elements with:
+  - `TotalResponses`: Non-negative integer count.
+  - `SummaryStatistic`: `SummaryStatisticType` items (`vald`, `invd`, `min`, `max`, `mean`, `stdev`).
+  - `UnfilteredCategoryStatistics`: `VariableCategoryType` mapping code values to frequencies and weights.
+
+During ingestion, the loader reads both inline `UserAttributePair` and companion `VariableStatistics` elements, populating `DatafileVariableFrequency` (relational SQL rows) and `DatafileVariable.statistics` (JSONB).
+
+---
+
+### Issue 2.11: Invalid URI Reference during DDI 4.0 Serialization
+
+*Symptom:*
+Upgrade or serialization halts with:
+```
+ValueError: Invalid RFC 3986 URI reference: 'Le fichier contient les réponses brutes...'
+```
+
+*Root Cause:*
+Legacy DDI-C files frequently place descriptive paragraphs of text inside `<fileDscr><fileTxt><fileCont>`, which naive mappers previously assigned directly to `data_file_uri`.
+
+*Resolution:*
+The converter separates `file_uri` (validated against RFC 3986) from `file_description` (stored in `fileCont` / user attributes). If a file URI does not conform to RFC 3986, it is preserved safely in `user_attribute_pair("ddi:raw_file_uri")` without causing serialization errors.
 
 ---
 

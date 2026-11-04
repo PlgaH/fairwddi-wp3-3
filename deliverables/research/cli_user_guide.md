@@ -540,7 +540,185 @@ uv run fairwddi import delete 1 --yes --force
 
 ---
 
-## 5. Database Connection Configuration & `.env` Files
+## 5. Phase 2 Direct Ingestion & Harmonization Pipeline
+
+Phase 2 introduces a **direct file-to-core streaming pipeline** (`fairwddi preflight`, `ingest`, `compare`, `harmonize`) that eliminates intermediate database staging tables. Metadata documents stream directly from disk into ReQuest core tables, with review-gated dry-run YAML plans and single-row batch receipts (`IngestBatch`).
+
+---
+
+### 5.1 Preflight Stage (`fairwddi preflight`)
+
+The `preflight` command group inspects incoming files, validates profile conformance, audits persistent URN references, and executes explicit DDI-C to DDI-L disk conversions.
+
+```bash
+uv run fairwddi preflight --help
+```
+
+#### Preflight Readiness Check (`fairwddi preflight check`)
+
+Audits metadata structure and generates a zero-write plan (`.preflight.plan.yaml`) and report (`.report.md`):
+
+```bash
+uv run fairwddi preflight check tests/fixtures/FSD3562_eng.ddic.xml \
+  --profile request \
+  --output-dir ./ingest_output
+```
+
+*Key Options:*
+- `-o, --output-dir`: Destination directory for `.preflight.plan.yaml` and `.report.md`.
+- `--auto-approve`: Automatically mark review gates as approved.
+
+#### Explicit DDI-C to DDI-L Upgrade on Disk (`fairwddi preflight upgrade`)
+
+Upgrades DDI-Codebook (2.5/2.6) XML files into canonical DDI-Lifecycle 4.0 JSON/XML on disk. When empirical observation statistics are present, the upgrade automatically emits **two decoupled files**:
+1. **Primary Question Bank & Study File (`*.ddi40.json`):** Reusable `StudyUnit`, `LogicalProduct`, schemes, `QuestionItem`, `Variable`, `CodeList`, `Category`, and `PhysicalInstance` layout.
+2. **Dedicated Secondary Statistics File (`*.stats.ddi40.json`):** Strongly-typed `VariableStatistics` elements containing `TotalResponses`, `SummaryStatisticType`, and `UnfilteredCategoryStatisticsType`.
+
+```bash
+uv run fairwddi preflight upgrade survey.ddic.xml \
+  --output ./ingest_output/survey.ddi40.json \
+  --format ddi4-json \
+  --agency fr.cdsp \
+  --version 2.0.0 \
+  --harmonize-codes
+```
+
+*Rich Terminal Summary:*
+```text
+                         DDI-C to DDI-L Upgrade Summary                         
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Metric                    ┃ Value                                            ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Output DDI-L File         │ ./ingest_output/survey.ddi40.json                │
+│ Statistics DDI-L File     │ ./ingest_output/survey.stats.ddi40.json          │
+│ Upgrade Report            │ ./ingest_output/survey.ddi40.upgrade.report.md   │
+│ Agency / Version          │ fr.cdsp / 2.0.0                                  │
+│ Variables                 │ 300                                              │
+│ CodeLists (Deduplicated)  │ 80 (197 duplicates removed, 71.1% reduction)     │
+│ Categories (Deduplicated) │ 610 (1,108 duplicates removed, 64.5% reduction)  │
+│ Questions                 │ 288                                              │
+│ Physical Instances        │ 1                                                │
+│ Variable Statistics       │ 300 (1,718 frequencies, 1,587 summary stats)     │
+└───────────────────────────┴──────────────────────────────────────────────────┘
+```
+
+*Standalone Conversion with `dartfx-ddi`:*
+The converter is part of the `ddi-toolkit` library and can also be executed independently via the standalone CLI:
+```bash
+uv run --directory /path/to/ddi-toolkit dartfx-ddi ddic2l survey.ddic.xml \
+  --output survey.ddi40.json \
+  --agency fr.cdsp \
+  --version 2.0.0 \
+  --harmonize-codes
+```
+
+#### List Available Profiles (`fairwddi preflight profiles`)
+
+Lists all installed declarative import and validation profiles:
+
+```bash
+uv run fairwddi preflight profiles
+```
+
+---
+
+### 5.2 Direct Ingestion Stage (`fairwddi ingest`)
+
+The `ingest` command group plans, applies, and rolls back direct file-to-core ingestion runs.
+
+```bash
+uv run fairwddi ingest --help
+```
+
+#### Generate Dry-Run Ingestion Plan (`fairwddi ingest plan`)
+
+Streams the document in constant memory, checks URNs in `UrnRegistry`, detects metadata drift, and plans core allocations with **zero database writes**:
+
+```bash
+uv run fairwddi ingest plan ./ingest_output/survey.ddi40.json \
+  --profile request \
+  --output-dir ./ingest_output
+```
+
+Emits `./ingest_output/survey.ddi40.ingest.plan.yaml` and `.report.md`.
+
+#### Apply Ingestion Plan (`fairwddi ingest apply`)
+
+Executes insertion into PostgreSQL within an atomic transaction. Writes an `IngestBatch` receipt and bulk-loads frequency rows:
+
+```bash
+# Execute from an approved plan YAML
+uv run fairwddi ingest apply ./ingest_output/survey.ddi40.ingest.plan.yaml
+
+# Or execute directly from the metadata file (evaluating review gate)
+uv run fairwddi ingest apply ./ingest_output/survey.ddi40.json --auto-approve
+```
+
+#### One-Command Pipeline Runner (`fairwddi ingest run`)
+
+Automates preflight, upgrade, plan, apply, and optional harmonization in a single run:
+
+```bash
+uv run fairwddi ingest run survey.ddic.xml \
+  --profile request \
+  --output-dir ./ingest_output \
+  --agency fr.cdsp \
+  --version 2.0.0 \
+  --harmonize \
+  --auto-approve
+```
+
+#### Atomic Rollback (`fairwddi ingest undo`)
+
+Rolls back newly minted resources and frequency rows in a single atomic transaction:
+
+```bash
+uv run fairwddi ingest undo 42
+```
+
+#### List & Inspect Ingestion Batches (`fairwddi ingest list` / `status`)
+
+```bash
+# List recent batches
+uv run fairwddi ingest list --limit 10
+
+# Inspect batch receipt details
+uv run fairwddi ingest status 42
+```
+
+---
+
+### 5.3 Cross-Survey Similarity & Discovery (`fairwddi compare`)
+
+Finds reusable question and variable candidates across ingested survey waves using multi-tier similarity matching:
+
+```bash
+uv run fairwddi compare discover \
+  --batch 42 \
+  --threshold 0.85 \
+  --output-dir ./compare_output
+```
+
+---
+
+### 5.4 Review-Gated Harmonization (`fairwddi harmonize`)
+
+Executes multilingual merging, cascade relinking, and semantic link creation:
+
+```bash
+# Plan harmonization actions
+uv run fairwddi harmonize plan ./compare_output/candidates.json --output-dir ./harm_output
+
+# Apply harmonization mutations
+uv run fairwddi harmonize apply ./harm_output/harmonization.plan.yaml
+
+# Roll back harmonization changes
+uv run fairwddi harmonize undo <job_id>
+```
+
+---
+
+## 6. Database Connection Configuration & `.env` Files
 
 The CLI automatically looks for and loads a `.env` file in the current working directory or any parent directory.
 
@@ -618,7 +796,7 @@ DJANGO_SETTINGS_MODULE=request_service.settings
 
 ---
 
-## 6. Python Programmatic API Reference
+## 7. Python Programmatic API Reference
 
 All CLI commands and underlying data structures correspond directly to clean, reusable Python APIs in `fairwddi`:
 

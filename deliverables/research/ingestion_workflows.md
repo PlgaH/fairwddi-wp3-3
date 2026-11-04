@@ -56,19 +56,104 @@ fairwddi preflight check tests/fixtures/FSD3562_eng.ddic.xml \
 #### Step 2: Explicit DDI-C $\rightarrow$ DDI-L 4.0 Upgrade on Disk
 Converts DDI-C into canonical DDI-Lifecycle 4.0 format. Categories and code lists sharing identical response options across variables are automatically deduplicated.
 
+When empirical observation statistics (frequencies or summary statistics) are present, the upgrade engine produces **two decoupled files**:
+1. **Primary Question Bank & Study File (`*.ddi40.json` / `*.ddi40.jsonl`):** Reusable `StudyUnit`, `LogicalProduct`, schemes, `QuestionItem`, `Variable`, `CodeList`, `Category`, and `PhysicalInstance` layout.
+2. **Dedicated Secondary Statistics File (`*.stats.ddi40.json`):** Strongly-typed `VariableStatistics` elements documenting empirical observations (`TotalResponses`, `SummaryStatisticType`, and `UnfilteredCategoryStatisticsType`).
+
 ```bash
 fairwddi preflight upgrade tests/fixtures/FSD3562_eng.ddic.xml \
-  --output ./ingest_output/FSD3562_eng.ddi40.jsonl \
-  --format ddi4-jsonl \
+  --output ./ingest_output/FSD3562_eng.ddi40.json \
+  --format ddi4-json \
   --agency fi.fsd \
-  --id-strategy content_hash \
+  --version 1.0.0 \
+  --id-strategy hierarchical \
   --harmonize-codes
 ```
 
+*Rich CLI Output Summary:*
+```text
+                         DDI-C to DDI-L Upgrade Summary                         
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Metric                    ┃ Value                                            ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Output DDI-L File         │ ./ingest_output/FSD3562_eng.ddi40.json           │
+│ Statistics DDI-L File     │ ./ingest_output/FSD3562_eng.stats.ddi40.json     │
+│ Upgrade Report            │ ./ingest_output/FSD3562_eng.ddi40.upgrade.repo…  │
+│ Agency / Version          │ fi.fsd / 1.0.0                                   │
+│ Variables                 │ 74                                               │
+│ CodeLists (Deduplicated)  │ 48 (26 duplicates removed, 35.1% reduction)      │
+│ Categories (Deduplicated) │ 210 (102 duplicates removed, 32.7% reduction)   │
+│ Questions                 │ 74                                               │
+│ Physical Instances        │ 1                                                │
+│ Variable Statistics       │ 74 (312 frequencies, 148 summary stats)          │
+└───────────────────────────┴──────────────────────────────────────────────────┘
+```
+
+> [!TIP]
+> **Standalone Upgrades with `dartfx-ddi`:**
+> The conversion engine is part of `ddi-toolkit` and can be run independently of the `fairwddi` application via the `dartfx-ddi` CLI:
+> ```bash
+> dartfx-ddi ddic2l FSD3562_eng.ddic.xml \
+>   --output ./ingest_output/FSD3562_eng.ddi40.json \
+>   --agency fi.fsd \
+>   --version 1.0.0 \
+>   --harmonize-codes
+> ```
+
 *Key Parameters:*
-- `--format ddi4-jsonl`: Emits line-delimited JSON for constant-memory streaming.
-- `--id-strategy content_hash`: Mints deterministic URNs derived from normalized resource contents.
-- `--harmonize-codes`: Consolidates redundant code lists across survey variables.
+- `--format ddi4-json`: Emits formatted DDI 4.0 JSON (`ddi4-jsonl`, `ddi4-xml`, and `ddi33-xml` also supported).
+- `--id-strategy hierarchical`: Derives semantic, human-readable URNs (`urn:ddi:{agency}:{study_var}:{version}`).
+- `--harmonize-codes`: Consolidates redundant code lists across survey variables and computes reduction metrics.
+
+*Dedicated Statistics Output (`FSD3562_eng.stats.ddi40.json`):*
+```json
+{
+  "topLevelReferences": [
+    {
+      "$type": "PhysicalInstance",
+      "URN": "urn:ddi:fi.fsd:FSD3562-files.F1:1.0.0",
+      "Agency": "fi.fsd",
+      "ID": "FSD3562-files.F1",
+      "Version": "1.0.0"
+    }
+  ],
+  "items": [
+    {
+      "$type": "VariableStatistics",
+      "URN": "urn:ddi:fi.fsd:vs_FSD3562-variables.V1:1.0.0",
+      "Agency": "fi.fsd",
+      "ID": "vs_FSD3562-variables.V1",
+      "Version": "1.0.0",
+      "VariableReference": {
+        "$type": "Variable",
+        "URN": "urn:ddi:fi.fsd:FSD3562-variables.V1:1.0.0"
+      },
+      "TotalResponses": 1200,
+      "SummaryStatistic": [
+        {
+          "TypeOfSummaryStatistic": {"StringValue": "vald"},
+          "Statistic": {"DecimalValue": 1200.0, "IsWeighted": false}
+        }
+      ],
+      "UnfilteredCategoryStatistics": [
+        {
+          "VariableCategory": [
+            {
+              "CategoryValue": {"Value": {"StringValue": "1"}},
+              "CategoryStatistic": [
+                {
+                  "TypeOfCategoryStatistic": {"StringValue": "freq"},
+                  "Statistic": {"DecimalValue": 600.0, "IsWeighted": false}
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
 
 #### Step 3: Zero-Write Ingestion Plan
 Streams the upgraded `.ddi40.jsonl` file, checks existing URNs in `UrnRegistry`, verifies content hashes for drift detection, and plans core entity allocations.
@@ -360,10 +445,20 @@ The pipeline returns a structured execution receipt dictionary:
     "batch_id": 42,
     "upgrade_result": {
         "output_file": "./ingest_output/FSD3562_eng.ddi40.json",
-        "report_file": "./ingest_output/FSD3562_eng.ddi40.report.md",
+        "stats_file": "./ingest_output/FSD3562_eng.stats.ddi40.json",
+        "report_file": "./ingest_output/FSD3562_eng.ddi40.upgrade.report.md",
         "variable_count": 74,
-        "category_count": 312,
-        "codelist_count": 48
+        "category_count": 210,
+        "codelist_count": 48,
+        "raw_codelist_count": 74,
+        "codelist_duplicates_removed": 26,
+        "codelist_reduction_pct": 35.1,
+        "raw_category_count": 312,
+        "category_duplicates_removed": 102,
+        "category_reduction_pct": 32.7,
+        "variable_statistics_count": 74,
+        "total_frequencies_count": 312,
+        "total_summary_statistics_count": 148
     },
     "ingest_result": {
         "job_id": "ingest-FSD3562_eng-8f2a1b",
