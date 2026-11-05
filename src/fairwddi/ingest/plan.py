@@ -210,6 +210,69 @@ class IngestPlan(BaseModel):
                     f"{r_urn} | {rev} | {issue.message} |"
                 )
 
+        alias_actions = [a for a in self.actions if a.action == "alias"]
+        if alias_actions:
+            from collections import Counter
+
+            by_type = Counter(a.resource_type for a in alias_actions)
+            summary_parts = [f"**{t}:** {cnt:,}" for t, cnt in by_type.most_common()]
+            lines.extend(
+                [
+                    "",
+                    "## Cross-Survey Deduplication (URN Aliases)",
+                    "",
+                    "> [!TIP]",
+                    (
+                        f"> **{len(alias_actions):,} incoming entities** match pre-existing "
+                        f"canonical resources in PostgreSQL ({', '.join(summary_parts)}). "
+                        "Instead of inserting duplicate database records, the engine will "
+                        "link these resources to existing canonical URNs via `URNAlias` "
+                        "records, ensuring multi-study harmonization and zero database bloat."
+                    ),
+                    "",
+                    "| Type | Source URN (Incoming) | Target Canonical URN | Match Basis |",
+                    "| :--- | :--- | :--- | :--- |",
+                ]
+            )
+            # Display up to 20 examples per type so all resource types are clearly visible
+            actions_by_type: dict[str, list[PlanActionItem]] = {}
+            for act in alias_actions:
+                actions_by_type.setdefault(act.resource_type, []).append(act)
+
+            for r_type, act_list in actions_by_type.items():
+                for act in act_list[:20]:
+                    note = act.notes.replace("will register URNAlias.", "").strip()
+                    lines.append(
+                        f"| `{act.resource_type}` | `{act.source_urn}` | "
+                        f"`{act.target_urn}` | {note} |"
+                    )
+                if len(act_list) > 20:
+                    extra_cnt = len(act_list) - 20
+                    lines.append(
+                        f"| *...* | *({extra_cnt} additional `{r_type}` aliases omitted)* | | |"
+                    )
+
+        quarantine_actions = [a for a in self.actions if a.action == "quarantine"]
+        if quarantine_actions:
+            lines.extend(
+                [
+                    "",
+                    "## Quarantined Items (Content Drift Detected)",
+                    "",
+                    "> [!WARNING]",
+                    (
+                        f"> **{len(quarantine_actions):,} entities** carry URNs that already "
+                        "exist in the database with conflicting content hashes. These items "
+                        "will be held in `MetadataQuarantine` pending review."
+                    ),
+                    "",
+                    "| Resource Type | URN | Conflict Details |",
+                    "| :--- | :--- | :--- |",
+                ]
+            )
+            for act in quarantine_actions:
+                lines.append(f"| `{act.resource_type}` | `{act.source_urn}` | {act.notes} |")
+
         if self.actions:
             lines.extend(
                 [

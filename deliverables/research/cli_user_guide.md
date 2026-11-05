@@ -580,7 +580,8 @@ uv run fairwddi preflight upgrade survey.ddic.xml \
   --format ddi4-json \
   --agency fr.cdsp \
   --version 2.0.0 \
-  --harmonize-codes
+  --harmonize-codes \
+  --harmonize-questions
 ```
 
 *Rich Terminal Summary:*
@@ -596,11 +597,15 @@ uv run fairwddi preflight upgrade survey.ddic.xml \
 │ Variables                 │ 300                                              │
 │ CodeLists (Deduplicated)  │ 80 (197 duplicates removed, 71.1% reduction)     │
 │ Categories (Deduplicated) │ 610 (1,108 duplicates removed, 64.5% reduction)  │
-│ Questions                 │ 288                                              │
+│ Questions (Deduplicated)  │ 180 (120 duplicates removed, 40.0% reduction)    │
 │ Physical Instances        │ 1                                                │
 │ Variable Statistics       │ 300 (1,718 frequencies, 1,587 summary stats)     │
 └───────────────────────────┴──────────────────────────────────────────────────┘
 ```
+
+*CLI Options for `preflight upgrade`:*
+- `--harmonize-codes / --no-harmonize-codes`: Enable/disable semantic deduplication of identical code lists and response categories across variables (default: enabled).
+- `--harmonize-questions / --no-harmonize-questions`: Enable/disable deduplication of identical question texts across variables during DDI-C upgrade (default: enabled).
 
 *Standalone Conversion with `dartfx-ddi`:*
 The converter is part of the `ddi-toolkit` library and can also be executed independently via the standalone CLI:

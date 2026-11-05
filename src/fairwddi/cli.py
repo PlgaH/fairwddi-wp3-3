@@ -604,6 +604,11 @@ def preflight_upgrade_cmd(
         "--harmonize-codes/--no-harmonize-codes",
         help="Deduplicate identical categories and code lists during upgrade.",
     ),
+    harmonize_questions: bool = typer.Option(
+        True,
+        "--harmonize-questions/--no-harmonize-questions",
+        help="Deduplicate identical questions across variables during upgrade.",
+    ),
 ) -> None:
     """Explicitly upgrade a classic or multilingual DDI-Codebook file to DDI-Lifecycle on disk."""
     from fairwddi.ingest.preflight import upgrade_ddic_to_ddil
@@ -618,6 +623,7 @@ def preflight_upgrade_cmd(
             identifier=identifier,
             id_strategy=id_strategy,
             harmonize_codes=harmonize_codes,
+            harmonize_questions=harmonize_questions,
         )
     except Exception as exc:
         console.print(f"[bold red]Upgrade Error:[/bold red] {exc}")
@@ -647,7 +653,12 @@ def preflight_upgrade_cmd(
         cat_text += f" ({cat_rem:,} duplicates removed, {cat_pct:.1f}% reduction)"
     table.add_row("Categories (Deduplicated)", cat_text)
 
-    table.add_row("Questions", f"{res['question_count']:,}")
+    q_text = f"{res['question_count']:,}"
+    if res.get("question_duplicates_removed", 0) > 0:
+        q_rem = res["question_duplicates_removed"]
+        q_pct = res.get("question_reduction_pct", 0.0)
+        q_text += f" ({q_rem:,} duplicates removed, {q_pct:.1f}% reduction)"
+    table.add_row("Questions (Deduplicated)", q_text)
     table.add_row("Physical Instances", f"{res['physical_instance_count']:,}")
     if res.get("variable_statistics_count", 0) > 0:
         vs_cnt = res["variable_statistics_count"]

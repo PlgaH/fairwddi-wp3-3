@@ -636,8 +636,9 @@ CORE_RESOURCE_TYPES = {
 def _find_existing_by_content_hash(
     resource_type: str,
     content_hash: str,
+    facet_hash: str | None = None,
 ) -> str | None:
-    """Check if an entity of `resource_type` already exists in the DB with the same content hash."""
+    """Check if an entity of `resource_type` already exists in DB by content or facet hash."""
     from fairwddi.models import (
         Category,
         CodeList,
@@ -659,8 +660,18 @@ def _find_existing_by_content_hash(
     if model_cls is None:
         return None
 
+    facet_key = (
+        "question_text"
+        if resource_type == "QuestionItem"
+        else ("label" if resource_type == "Category" else None)
+    )
+
     for obj in model_cls.objects.exclude(hashes__isnull=True).only("urn", "hashes"):
-        if isinstance(obj.hashes, dict) and obj.hashes.get("content") == content_hash:
+        if not isinstance(obj.hashes, dict):
+            continue
+        if obj.hashes.get("content") == content_hash:
+            return obj.urn
+        if facet_hash and facet_key and obj.hashes.get(facet_key) == facet_hash:
             return obj.urn
     return None
 
@@ -824,13 +835,23 @@ def plan_ingestion(
                     )
                 )
         else:
-            matched_urn = _find_existing_by_content_hash(r_type, c_hash)
+            facet_h = (
+                norm["hashes"].get("question_text")
+                if r_type == "QuestionItem"
+                else (norm["hashes"].get("label") if r_type == "Category" else None)
+            )
+            matched_urn = _find_existing_by_content_hash(r_type, c_hash, facet_hash=facet_h)
             if matched_urn and matched_urn != c_urn:
                 act_type = "alias"
                 target_urn = matched_urn
                 req_review = False
+                match_desc = (
+                    "question text"
+                    if r_type == "QuestionItem" and facet_h
+                    else ("label" if r_type == "Category" and facet_h else "content hash")
+                )
                 notes = (
-                    f"Exact content hash match with existing {r_type} "
+                    f"Exact {match_desc} match with existing {r_type} "
                     f"'{matched_urn}'; will register URNAlias."
                 )
             else:
@@ -1484,7 +1505,9 @@ def apply_ingestion(
                         {"name": f"q_{norm['name']}", "question_text": norm["question_text"]},
                     )
                     existing_q_urn = _find_existing_by_content_hash(
-                        "QuestionItem", q_hashes["content"]
+                        "QuestionItem",
+                        q_hashes["content"],
+                        facet_hash=q_hashes.get("question_text"),
                     )
                     if existing_q_urn:
                         q_obj = QuestionItem.objects.filter(urn=existing_q_urn).first()

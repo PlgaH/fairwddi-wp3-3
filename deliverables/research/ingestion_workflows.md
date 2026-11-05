@@ -478,3 +478,107 @@ The pipeline returns a structured execution receipt dictionary:
     }
 }
 ```
+
+---
+
+## 6. Multi-Wave Harmonization, URN Aliasing & Empirical Statistics Deep Dive
+
+### 6.1 Multi-Wave Survey Ingestion: ELIPSS 2013 vs. 2014 Case Study
+
+When managing longitudinal and multi-wave survey panels like ELIPSS (Enquête Longitudinale Internet pour les Sciences Sociales), repeated questions across annual waves must be consolidated to enable cross-temporal analysis.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Archivist
+    participant CLI as fairwddi CLI
+    participant Loader as IngestLoader
+    participant DB as PostgreSQL Core
+    participant Registry as UrnRegistry
+    participant Alias as URNAlias
+
+    Note over Archivist,DB: Phase A: Ingest Wave 1 (ELIPSS 2013)
+    Archivist->>CLI: fairwddi ingest apply elipss.2013.ddi40.json
+    CLI->>Loader: Plan & Apply Ingestion
+    Loader->>Registry: Register canonical URNs (action: create)
+    Loader->>DB: Insert QuestionItems, Categories, Variables
+    Note right of Registry: source_urn == canonical_urn<br/>(No alias needed)
+
+    Note over Archivist,DB: Phase B: Plan Wave 2 (ELIPSS 2014)
+    Archivist->>CLI: fairwddi ingest plan elipss.2014.ddi40.json
+    CLI->>Loader: Compute content/facet hashes
+    Loader->>DB: Query existing QuestionItems & Categories by facet_hash
+    DB-->>Loader: Found matches in 2013 canonical records!
+    Loader-->>CLI: PlanActionItem(action='alias', target_urn='2013_URN')
+    CLI-->>Archivist: Markdown Report with 'Cross-Survey Deduplication' section
+
+    Note over Archivist,DB: Phase C: Apply Wave 2 (ELIPSS 2014)
+    Archivist->>CLI: fairwddi ingest apply elipss.2014.ingest.plan.yaml
+    CLI->>Loader: Execute mutations
+    Loader->>Alias: Insert URNAlias(alias_urn=2014_URN, canonical_urn=2013_URN)
+    Loader->>DB: Link 2014 InstanceVariables -> 2013 QuestionItem/RepresentedVariable
+    Note right of DB: Zero duplicate QuestionItem rows created!
+```
+
+#### Detailed Breakdown of Actions:
+1. **Initial Creation (Wave 1):**
+   - In Wave 1 (2013), all questions are new. Each entity is assigned an action of `create`.
+   - The incoming URN is registered as the primary master key in `UrnRegistry`.
+   - **Why is no alias created?** An alias represents a mapping between an incoming alternate/external URN and an existing canonical database record. During initial creation, `source_urn == canonical_urn`; recording an alias would simply record $A \rightarrow A$, which is redundant.
+2. **Cross-Wave Deduplication (Wave 2):**
+   - In Wave 2 (2014), the loader inspects the `facet_hash` (the canonical SHA-256 fingerprint of the normalized text/label).
+   - If an existing record in PostgreSQL shares that exact fingerprint, the loader marks the incoming entity as `action: "alias"` (with `match_type: "content_hash"` and `confidence: "high"` or `"exact"`).
+   - The plan's Markdown report displays a dedicated table under `## Cross-Survey Deduplication (URN Aliases)` showing the incoming 2014 source URN and the existing 2013 canonical target URN.
+   - Upon execution (`apply`), the loader writes an entry into `URNAlias` (`alias_urn = ...2014...`, `canonical_urn = ...2013...`) and references the existing 2013 entity. **Zero duplicate question rows are inserted into the database.**
+
+---
+
+### 6.2 Future Canonical Promotion & Long-Term Provenance
+
+A common scenario in question bank curation is the future promotion of a survey-specific URN to a centralized bank-wide canonical URN:
+
+$$\text{urn:ddi:fr.cdsp:elipss.2013.04.ea-questions.qi\_V1\_q1:3.0.0} \xrightarrow{\text{Promote}} \text{urn:ddi:fr.cdsp:ea-questions.0001:1.0.0}$$
+
+When this occurs:
+1. The master record in `UrnRegistry` is updated to the new canonical identifier.
+2. A new entry is recorded in `URNAlias`:
+   $$\text{alias\_urn} = \text{urn:ddi:fr.cdsp:elipss.2013.04.ea-questions.qi\_V1\_q1:3.0.0} \longrightarrow \text{canonical\_urn} = \text{urn:ddi:fr.cdsp:ea-questions.0001:1.0.0}$$
+3. Because Wave 2 already aliased the 2014 URN to the 2013 URN, transitive resolution (or batch update) connects both 2013 and 2014 identifiers to the new canonical bank URN.
+
+> [!NOTE]
+> **Provenance Guarantee:** Original source URNs found in historical DDI files or external citations are never orphaned. Any lookup for a historical URN automatically resolves through `URNAlias` to the promoted canonical URN.
+
+---
+
+### 6.3 Variable Cascade URN Transparency
+
+In DDI-Codebook, a variable (`<var>`) conflates the abstract question wording and response scale with the physical column in a dataset. In DDI-Lifecycle and the ReQuest core, this is split into two distinct entities:
+
+- **`RepresentedVariable`:** Reusable question wording + response code list.
+  - Target URN: `urn:ddi:fr.cdsp:elipss.2013.rv_V1_q1:1.0.0`
+- **`InstanceVariable`:** Physical dataset realization (column name, data file pointer).
+  - Target URN: `urn:ddi:fr.cdsp:elipss.2013.iv_V1_q1:1.0.0`
+
+The dry-run ingestion plan (`.ingest.plan.yaml`) and Markdown report explicitly list both derived URNs in the item's `details` and `notes` to ensure archivist clarity prior to execution.
+
+---
+
+### 6.4 Empirical Statistics and Frequencies
+
+- **Planning Transparency:** The plan inspects incoming companion stats files (`*.stats.ddi40.json`) and reports explicit statistics counts on each `Variable` action item (e.g. `frequencies: 12 codes, summary_stats: 7 metrics`).
+- **Database Bulk Execution:** Frequencies and summary statistics are dataset-specific empirical observations rather than reusable question entities. During `apply`, they bypass JSONB wrapping and are written directly to `DatafileVariableFrequency` and `DatafileVariable.statistics` using high-speed SQL batch insertion (`bulk_create(batch_size=1000)`).
+
+---
+
+### 6.5 Skipped Packaging Wrappers
+
+In accordance with the lightweight profile guarantee, packaging envelopes such as `LogicalProduct`, `DataCollection`, and `DDIInstance` are pruned during ingestion. They are explicitly reported as `action: "skip"` in the plan and execution summary tables, ensuring 100% accounting transparency for every element in the source file.
+
+---
+
+### 6.6 Preflight Question Harmonization (`--harmonize-questions`)
+
+During the preflight upgrade stage from DDI-Codebook to DDI-Lifecycle (`fairwddi preflight upgrade`), the `--harmonize-questions` option clusters repeated questions across variables within the same survey before database loading. The preflight report displays exact metrics:
+- Raw question count extracted from variables.
+- Duplicates removed.
+- Percentage reduction achieved.

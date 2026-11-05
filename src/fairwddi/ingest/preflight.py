@@ -381,12 +381,13 @@ def upgrade_ddic_to_ddil(
     identifier: str | None = None,
     id_strategy: str = "hierarchical",
     harmonize_codes: bool = True,
+    harmonize_questions: bool = True,
     report_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Explicitly upgrade a DDI-Codebook (classic or multilingual) file to DDI-Lifecycle on disk.
 
-    Uses dartfx-ddi CodebookToLifecycleConverter with automatic code list deduplication
-    and deterministic URN generation.
+    Uses dartfx-ddi CodebookToLifecycleConverter with automatic code list and question
+    deduplication and deterministic URN generation.
     """
     from dartfx.ddi import ddicodebook as codebook
     from dartfx.ddi.ddicodebook import utils as cb_utils
@@ -422,6 +423,7 @@ def upgrade_ddic_to_ddil(
         identifier=identifier,
         id_strategy=id_strategy,
         harmonize_codes=harmonize_codes,
+        harmonize_questions=harmonize_questions,
     )
 
     if output_format == "ddi4-json":
@@ -472,6 +474,10 @@ def upgrade_ddic_to_ddil(
     cat_rem = summary.get("category_duplicates_removed", 0)
     cat_pct = summary.get("category_reduction_pct", 0.0)
 
+    raw_q = summary.get("raw_question_count", summary["question_count"])
+    q_rem = summary.get("question_duplicates_removed", 0)
+    q_pct = summary.get("question_reduction_pct", 0.0)
+
     v_cnt = summary["variable_count"]
     q_cnt = summary["question_count"]
     vg_cnt = summary["variable_group_count"]
@@ -482,6 +488,7 @@ def upgrade_ddic_to_ddil(
             f"- **Target Format:** `{output_format}`",
             f"- **ID Strategy:** `{id_strategy}`",
             f"- **CodeList Harmonization:** `{harmonize_codes}`",
+            f"- **Question Harmonization:** `{harmonize_questions}`",
             f"- **Resolved Agency:** `{summary['agency']}`",
             f"- **Version:** `{summary['version']}`",
             f"- **Study ID:** `{summary['codebook_id']}`",
@@ -495,8 +502,8 @@ def upgrade_ddic_to_ddil(
             f"{cl_rem:,} | {cl_pct:.1f}% |",
             f"| `Category` | {raw_cat:,} | {summary['category_count']:,} | "
             f"{cat_rem:,} | {cat_pct:.1f}% |",
+            f"| `QuestionItem` | {raw_q:,} | {q_cnt:,} | {q_rem:,} | {q_pct:.1f}% |",
             f"| `Variable` | {v_cnt:,} | {v_cnt:,} | 0 | 0.0% |",
-            f"| `QuestionItem` | {q_cnt:,} | {q_cnt:,} | 0 | 0.0% |",
             f"| `VariableGroup` | {vg_cnt:,} | {vg_cnt:,} | 0 | 0.0% |",
             f"| `PhysicalInstance` | {pi_cnt:,} | {pi_cnt:,} | 0 | 0.0% |",
             "",
@@ -554,5 +561,6 @@ def upgrade_ddic_to_ddil(
         "output_format": output_format,
         "id_strategy": id_strategy,
         "harmonize_codes": harmonize_codes,
+        "harmonize_questions": harmonize_questions,
         **summary,
     }

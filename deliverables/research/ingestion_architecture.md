@@ -351,8 +351,50 @@ stateDiagram-v2
 
 - `create`: Resource is new to the database; it will be inserted into its core table and registered in `UrnRegistry`.
 - `reuse`: Canonical URN already exists with an identical content hash; the existing record is reused with zero mutations.
-- `alias`: Resource content matches an existing record under a different URN; a `URNAlias` record will be created to map the incoming URN to the canonical database URN.
+- `alias`: Resource content matches an existing record under a different URN (e.g. cross-wave question repetition); a `URNAlias` record will be created mapping incoming `source_urn` to existing `canonical_urn` without creating duplicate table rows.
+- `skip`: Structural packaging wrapper or envelope construct (e.g. `LogicalProduct`, `DataCollection`, `DDIInstance`) that is pruned during ingestion in accordance with the lightweight profile guarantee.
 - `quarantine`: Resource URN matches an existing record, but the content hash differs (`ING-DRIFT-001`). The incoming payload is isolated in `MetadataQuarantine`.
+
+---
+
+## 5.1 URN Lifecycle: Initial Creation, Cross-Survey Aliasing, and Canonical Promotion
+
+The interplay between `UrnRegistry` and `URNAlias` handles the entire evolution of DDI identifiers:
+
+```mermaid
+flowchart TD
+    subgraph Wave1 ["1. Initial Wave Ingestion (e.g. ELIPSS 2013)"]
+        W1_Src["Source URN:\nurn:ddi:fr.cdsp:elipss.2013...qi_V1_q1:3.0.0"]
+        W1_Action["Action: CREATE"]
+        W1_Reg["UrnRegistry & QuestionItem Table\ncanonical_urn = urn:ddi:fr.cdsp:elipss.2013...qi_V1_q1:3.0.0\n(source_urn == canonical_urn -> No URNAlias needed)"]
+        W1_Src --> W1_Action --> W1_Reg
+    end
+
+    subgraph Wave2 ["2. Subsequent Wave Ingestion (e.g. ELIPSS 2014)"]
+        W2_Src["Source URN:\nurn:ddi:fr.cdsp:elipss.2014...qi_V1_q1:3.0.0"]
+        W2_Action["Action: ALIAS\n(Content/Facet Hash Match: identical question text)"]
+        W2_Alias["URNAlias Entry:\nalias_urn = ...elipss.2014...qi_V1_q1:3.0.0\ncanonical_urn = ...elipss.2013...qi_V1_q1:3.0.0\n(Zero duplicate database rows inserted)"]
+        W2_Src --> W2_Action --> W2_Alias
+        W2_Alias -.->|Resolves to| W1_Reg
+    end
+
+    subgraph Future ["3. Future Canonical Promotion"]
+        Promo["Archivist Promotes to Global Canonical URN:\nurn:ddi:fr.cdsp:ea-questions.0001:1.0.0"]
+        Master_Updated["UrnRegistry Master Updated:\ncanonical_urn = ...ea-questions.0001:1.0.0"]
+        New_Alias["URNAlias Entries for Historical Traceability:\n• 2013 URN -> ...ea-questions.0001:1.0.0\n• 2014 URN -> ...ea-questions.0001:1.0.0"]
+        Promo --> Master_Updated
+        Promo --> New_Alias
+        New_Alias -.->|Full Provenance Maintained| Master_Updated
+    end
+```
+
+### Key Principles of the URN Lifecycle:
+1. **Initial Creation (`source_urn == target_urn`):**
+   When an entity is first ingested, it becomes the canonical master record in `UrnRegistry`. Because its incoming source URN is its canonical URN, recording a self-referential alias (`source_urn == canonical_urn`) would be redundant noise.
+2. **Subsequent Cross-Wave Ingestion (`alias`):**
+   When subsequent surveys repeat the same question or category, the engine computes the content facet hash (normalized text/label) and matches the existing canonical entity. The action is `alias`, and an entry is recorded in `URNAlias` (`alias_urn` = incoming wave URN, `canonical_urn` = existing master URN). Downstream instances point to the canonical representation.
+3. **Canonical Promotion and URN Evolution:**
+   If archivists later change or promote a survey-specific URN into a centralized bank-wide canonical URN (e.g. `...:ea-questions.0001:1.0.0`), the promotion operation registers an alias from the old URN to the new canonical URN in `URNAlias`. Consequently, **source file provenance is never lost**: both the 2013 and 2014 original source URNs continue to resolve deterministically to the updated canonical record.
 
 ---
 

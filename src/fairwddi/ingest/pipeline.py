@@ -61,6 +61,7 @@ def run_ingestion_pipeline(
             agency=agency,
             id_strategy=id_strategy,
             harmonize_codes=True,
+            harmonize_questions=True,
         )
         target_ingest_file = Path(upgrade_result["output_file"])
 
