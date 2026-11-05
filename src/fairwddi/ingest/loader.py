@@ -735,6 +735,7 @@ def plan_ingestion(
 
     actions: list[PlanActionItem] = []
     issues: list[PlanIssue] = []
+    skipped_types: set[str] = set()
     action_counts: dict[str, int] = {
         "create": 0,
         "reuse": 0,
@@ -769,11 +770,30 @@ def plan_ingestion(
 
         if r_type not in CORE_RESOURCE_TYPES:
             action_counts["skip"] += 1
+            skipped_types.add(r_type)
+            actions.append(
+                PlanActionItem(
+                    id=f"ing-{idx:04d}",
+                    stage="ingest",
+                    action="skip",  # type: ignore[arg-type]
+                    resource_type=r_type,
+                    source_urn=node.raw_urn,
+                    target_urn=None,
+                    confidence=1.0,
+                    requires_review=False,
+                    details={"raw_urn": node.raw_urn, "type": r_type},
+                    notes=(
+                        f"Non-core structural container wrapper '{r_type}' skipped "
+                        f"(enclosed schemes and entities are ingested into core tables)."
+                    ),
+                )
+            )
             continue
 
         norm = _normalize_node(r_type, node.raw_urn, node.raw_value)
         c_urn = norm["canonical_urn"]
         c_hash = norm["hashes"]["content"]
+        rv_urn: str | None = None
         if norm["summary_stats"]:
             planned_summary_stat_vars += 1
         planned_frequency_rows += len(norm["frequencies"])
@@ -817,13 +837,45 @@ def plan_ingestion(
                 act_type = "create"
                 target_urn = c_urn
                 req_review = False
-                notes = (
-                    "Split into RepresentedVariable + InstanceVariable"
-                    if r_type == "Variable"
-                    else f"Create {r_type} in ReQuest core schema."
-                )
+                if r_type == "Variable":
+                    rv_payload = {
+                        "label": norm["label"],
+                        "codelist_urn": norm["codelist_urn"],
+                        "question_urns": norm["question_urns"],
+                        "value_representation": norm["value_representation"],
+                    }
+                    rv_hashes = compute_resource_hashes("RepresentedVariable", rv_payload)
+                    matched_rv = _find_existing_by_content_hash(
+                        "RepresentedVariable", rv_hashes["content"]
+                    )
+                    if matched_rv:
+                        rv_urn = matched_rv
+                    else:
+                        rv_id = f"rv_{norm['identifier']}_{rv_hashes['content'].split(':')[-1][:8]}"
+                        rv_urn = f"urn:ddi:{norm['agency']}:{rv_id}:{norm['version']}"
+
+                    freq_parts: list[str] = []
+                    if norm["frequencies"]:
+                        freq_parts.append(f"{len(norm['frequencies'])} frequency rows")
+                    if norm["summary_stats"]:
+                        freq_parts.append("summary stats")
+                    extra_note = f" [{', '.join(freq_parts)}]" if freq_parts else ""
+
+                    notes = (
+                        f"Split: InstanceVariable ({c_urn}) + "
+                        f"RepresentedVariable ({rv_urn}){extra_note}"
+                    )
+                else:
+                    notes = f"Create {r_type} in ReQuest core schema."
 
         action_counts[act_type] += 1
+        var_stats_details: dict[str, Any] = {}
+        if r_type == "Variable":
+            if norm["frequencies"]:
+                var_stats_details["frequency_count"] = len(norm["frequencies"])
+            if norm["summary_stats"]:
+                var_stats_details["summary_stats"] = norm["summary_stats"]
+
         actions.append(
             PlanActionItem(
                 id=f"ing-{idx:04d}",
@@ -839,6 +891,15 @@ def plan_ingestion(
                     "canonical_urn": c_urn,
                     "content_hash": c_hash,
                     "name": norm["name"],
+                    **(
+                        {
+                            "instance_variable_urn": c_urn,
+                            "represented_variable_urn": rv_urn,
+                        }
+                        if rv_urn
+                        else {}
+                    ),
+                    **var_stats_details,
                 },
                 notes=notes,
             )
@@ -860,6 +921,7 @@ def plan_ingestion(
             "planned_frequency_rows": planned_frequency_rows,
             "planned_summary_stat_variables": planned_summary_stat_vars,
             **action_counts,
+            "skipped_types": sorted(skipped_types),
         },
         issues=issues,
         actions=actions,

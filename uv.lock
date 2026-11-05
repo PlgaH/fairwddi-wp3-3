@@ -140,7 +140,7 @@ wheels = [
 [[package]]
 name = "dartfx-ddi"
 version = "0.3.0"
-source = { git = "https://github.com/DataArtifex/ddi-toolkit.git?rev=main#e9f3b25facc360ca4dcf5b0e4664292d9b05d05f" }
+source = { git = "https://github.com/DataArtifex/ddi-toolkit.git?rev=main#5eb18800803a65c046762549adc94ab6bafe70ab" }
 dependencies = [
     { name = "dartfx-rdf" },
     { name = "pyshacl" },

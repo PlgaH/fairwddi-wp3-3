@@ -1,0 +1,720 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1520" width="2400" height="1520">
+<defs>
+    <style>
+        .font-sans { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .font-mono { font-family: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+        .title { font-weight: 800; fill: #ffffff; letter-spacing: -0.6px; }
+        .subtitle { font-weight: 500; fill: #94a3b8; }
+        .card-title { font-weight: 700; fill: #f8fafc; letter-spacing: -0.3px; }
+        .card-sub { font-weight: 400; fill: #94a3b8; }
+        .box-title { font-weight: 700; fill: #f1f5f9; }
+        .box-desc { font-weight: 400; fill: #94a3b8; line-height: 1.4; }
+        .tag-text { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; }
+        .code-text { font-weight: 500; font-size: 11px; fill: #38bdf8; }
+    </style>
+
+    <!-- Background Gradients -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#080c14" />
+        <stop offset="40%" stop-color="#0f172a" />
+        <stop offset="100%" stop-color="#090d16" />
+    </linearGradient>
+
+    <!-- Card Backgrounds -->
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#1e293b" stop-opacity="0.85" />
+        <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95" />
+    </linearGradient>
+
+    <linearGradient id="boxBg" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#1e293b" stop-opacity="0.65" />
+        <stop offset="100%" stop-color="#111c30" stop-opacity="0.85" />
+    </linearGradient>
+
+    <!-- Glowing Stage Gradients -->
+    <linearGradient id="cyanGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#06b6d4" />
+        <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+
+    <linearGradient id="amberGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#f59e0b" />
+        <stop offset="100%" stop-color="#ea580c" />
+    </linearGradient>
+
+    <linearGradient id="purpleGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#8b5cf6" />
+        <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+
+    <linearGradient id="emeraldGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#10b981" />
+        <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <linearGradient id="indigoGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#6366f1" />
+        <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+
+    <!-- Drop Shadows -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+        <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+    <filter id="glowSubtle" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="8" result="blur" />
+        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Arrow Markers -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 8 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="arrow-glow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8" />
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 8 5 L 0 9 z" fill="#34d399" />
+    </marker>
+    <marker id="arrow-violet" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 8 5 L 0 9 z" fill="#a78bfa" />
+    </marker>
+</defs>
+
+<!-- Main Canvas Background -->
+<rect width="2400" height="1520" fill="url(#bgGradient)" />
+
+<!-- Background Tech Grid Lines -->
+<g stroke="#334155" stroke-opacity="0.1" stroke-width="1">
+<line x1="0" y1="0" x2="0" y2="1520" /><line x1="80" y1="0" x2="80" y2="1520" /><line x1="160" y1="0" x2="160" y2="1520" /><line x1="240" y1="0" x2="240" y2="1520" /><line x1="320" y1="0" x2="320" y2="1520" /><line x1="400" y1="0" x2="400" y2="1520" /><line x1="480" y1="0" x2="480" y2="1520" /><line x1="560" y1="0" x2="560" y2="1520" /><line x1="640" y1="0" x2="640" y2="1520" /><line x1="720" y1="0" x2="720" y2="1520" /><line x1="800" y1="0" x2="800" y2="1520" /><line x1="880" y1="0" x2="880" y2="1520" /><line x1="960" y1="0" x2="960" y2="1520" /><line x1="1040" y1="0" x2="1040" y2="1520" /><line x1="1120" y1="0" x2="1120" y2="1520" /><line x1="1200" y1="0" x2="1200" y2="1520" /><line x1="1280" y1="0" x2="1280" y2="1520" /><line x1="1360" y1="0" x2="1360" y2="1520" /><line x1="1440" y1="0" x2="1440" y2="1520" /><line x1="1520" y1="0" x2="1520" y2="1520" /><line x1="1600" y1="0" x2="1600" y2="1520" /><line x1="1680" y1="0" x2="1680" y2="1520" /><line x1="1760" y1="0" x2="1760" y2="1520" /><line x1="1840" y1="0" x2="1840" y2="1520" /><line x1="1920" y1="0" x2="1920" y2="1520" /><line x1="2000" y1="0" x2="2000" y2="1520" /><line x1="2080" y1="0" x2="2080" y2="1520" /><line x1="2160" y1="0" x2="2160" y2="1520" /><line x1="2240" y1="0" x2="2240" y2="1520" /><line x1="2320" y1="0" x2="2320" y2="1520" /><line x1="0" y1="0" x2="2400" y2="0" /><line x1="0" y1="80" x2="2400" y2="80" /><line x1="0" y1="160" x2="2400" y2="160" /><line x1="0" y1="240" x2="2400" y2="240" /><line x1="0" y1="320" x2="2400" y2="320" /><line x1="0" y1="400" x2="2400" y2="400" /><line x1="0" y1="480" x2="2400" y2="480" /><line x1="0" y1="560" x2="2400" y2="560" /><line x1="0" y1="640" x2="2400" y2="640" /><line x1="0" y1="720" x2="2400" y2="720" /><line x1="0" y1="800" x2="2400" y2="800" /><line x1="0" y1="880" x2="2400" y2="880" /><line x1="0" y1="960" x2="2400" y2="960" /><line x1="0" y1="1040" x2="2400" y2="1040" /><line x1="0" y1="1120" x2="2400" y2="1120" /><line x1="0" y1="1200" x2="2400" y2="1200" /><line x1="0" y1="1280" x2="2400" y2="1280" /><line x1="0" y1="1360" x2="2400" y2="1360" /><line x1="0" y1="1440" x2="2400" y2="1440" /></g>
+<g transform="translate(60, 40)">
+    <!-- Top Brand Badges -->
+    <rect x="0" y="0" width="235" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
+    <text x="12" y="18" class="font-sans" font-size="11" font-weight="700" fill="#38bdf8" letter-spacing="1">CDSP • SCIENCES PO / CNRS</text>
+    
+    <rect x="245" y="0" width="165" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
+    <circle cx="260" cy="14" r="4" fill="#a78bfa" />
+    <text x="272" y="18" class="font-sans" font-size="11" font-weight="700" fill="#c084fc" letter-spacing="0.5">AGENCY: FR.CDSP</text>
+
+    <rect x="420" y="0" width="240" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
+    <text x="432" y="18" class="font-sans" font-size="11" font-weight="700" fill="#34d399" letter-spacing="0.5">DDI-L 3.3 • DDI 4.0 • DDI-CDI</text>
+
+    <rect x="670" y="0" width="205" height="28" rx="6" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" stroke-width="1" />
+    <circle cx="687" cy="14" r="4" fill="#10b981" />
+    <text x="699" y="18" class="font-sans" font-size="11" font-weight="700" fill="#6ee7b7" letter-spacing="0.5">ZERO DB STAGING BLOAT</text>
+
+    <!-- Main Title & Subtitle -->
+    <text x="0" y="70" class="font-sans title" font-size="34">FAIRwDDI — ReQuest Ingestion Workflow</text>
+    <text x="0" y="98" class="font-sans subtitle" font-size="16">
+        High-Performance Direct File-to-Core Streaming, Profile QA, Decoupled Upgrade, and Harmonization Cascade
+    </text>
+
+    <!-- Right Header Legend Badges -->
+    <g transform="translate(1420, 15)">
+        <rect x="0" y="0" width="860" height="75" rx="12" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+        <text x="24" y="28" class="font-sans" font-size="13" font-weight="700" fill="#f8fafc">PIPELINE CORE PRINCIPLES:</text>
+        
+        <circle cx="28" cy="50" r="5" fill="#38bdf8" />
+        <text x="40" y="54" class="font-sans" font-size="13" fill="#cbd5e1">Direct Constant-Memory Streaming</text>
+
+        <circle cx="280" cy="50" r="5" fill="#f59e0b" />
+        <text x="292" y="54" class="font-sans" font-size="13" fill="#cbd5e1">Dry-Run Zero-Write Plans</text>
+
+        <circle cx="485" cy="50" r="5" fill="#10b981" />
+        <text x="497" y="54" class="font-sans" font-size="13" fill="#cbd5e1">Atomic Rollback Receipts</text>
+
+        <circle cx="685" cy="50" r="5" fill="#a78bfa" />
+        <text x="697" y="54" class="font-sans" font-size="13" fill="#cbd5e1">Variable Cascade</text>
+    </g>
+</g>
+
+<g transform="translate(0, 0)">
+    <rect x="260" y="141" width="1880" height="4" fill="#1e293b" rx="2" />
+</g>
+
+    <g>
+        <line x1="488" y1="270" x2="523" y2="270" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="4 3" marker-end="url(#arrow-glow)" />
+        <circle cx="505.5" cy="270" r="12" fill="#0f172a" stroke="#0284c7" stroke-width="1.5" />
+        <text x="505.5" y="274" text-anchor="middle" class="font-sans" font-size="11" font-weight="700" fill="#38bdf8">→</text>
+    </g>
+    
+    <g>
+        <line x1="957" y1="270" x2="992" y2="270" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="4 3" marker-end="url(#arrow-glow)" />
+        <circle cx="974.5" cy="270" r="12" fill="#0f172a" stroke="#0284c7" stroke-width="1.5" />
+        <text x="974.5" y="274" text-anchor="middle" class="font-sans" font-size="11" font-weight="700" fill="#38bdf8">→</text>
+    </g>
+    
+    <g>
+        <line x1="1426" y1="270" x2="1461" y2="270" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="4 3" marker-end="url(#arrow-glow)" />
+        <circle cx="1443.5" cy="270" r="12" fill="#0f172a" stroke="#0284c7" stroke-width="1.5" />
+        <text x="1443.5" y="274" text-anchor="middle" class="font-sans" font-size="11" font-weight="700" fill="#38bdf8">→</text>
+    </g>
+    
+    <g>
+        <line x1="1895" y1="270" x2="1930" y2="270" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="4 3" marker-end="url(#arrow-glow)" />
+        <circle cx="1912.5" cy="270" r="12" fill="#0f172a" stroke="#0284c7" stroke-width="1.5" />
+        <text x="1912.5" y="274" text-anchor="middle" class="font-sans" font-size="11" font-weight="700" fill="#38bdf8">→</text>
+    </g>
+    
+<g transform="translate(60, 165)">
+    <rect width="422" height="750" rx="16" fill="url(#cardBg)" stroke="#334155" stroke-width="1.5" filter="url(#cardShadow)" />
+    <path d="M 0 16 Q 0 0 16 0 L 406 0 Q 422 0 422 16 L 422 22 L 0 22 Z" fill="url(#cyanGlow)" />
+
+    <g transform="translate(24, 38)">
+        <rect x="0" y="0" width="105" height="24" rx="12" fill="rgba(6, 182, 212, 0.15)" stroke="#06b6d4" stroke-width="1" />
+        <text x="52" y="16" text-anchor="middle" class="font-sans tag-text" fill="#22d3ee">STAGE 01</text>
+        <text x="120" y="17" class="font-mono" font-size="12" font-weight="600" fill="#94a3b8">INPUT SOURCES</text>
+
+        <text x="0" y="52" class="font-sans card-title" font-size="22">Heterogeneous Formats</text>
+        <text x="0" y="74" class="font-sans card-sub" font-size="13">Ingests diverse social science survey XML/JSON</text>
+    </g>
+
+    <!-- Source Format Box 1: DDI-C Classic -->
+    <g transform="translate(20, 130)">
+        <rect width="382" height="135" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <rect x="16" y="14" width="75" height="20" rx="4" fill="rgba(14, 165, 233, 0.2)" />
+        <text x="53" y="28" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#38bdf8">DDI-C 2.5</text>
+        <text x="100" y="28" class="font-sans box-title" font-size="14">Classic Monolingual</text>
+
+        <text x="16" y="56" class="font-sans box-desc" font-size="12">• Flat variable listing: &lt;var ID="V1"&gt;</text>
+        <text x="16" y="76" class="font-sans box-desc" font-size="12">• Embedded question texts: &lt;qstnLit&gt;</text>
+        <text x="16" y="96" class="font-sans box-desc" font-size="12">• Discrete category values &amp; labels (&lt;catgry&gt;)</text>
+        <text x="16" y="116" class="font-sans box-desc" font-size="12">• Embedded sample frequencies: &lt;catStat&gt;</text>
+    </g>
+
+    <!-- Source Format Box 2: DDI-C Multilingual -->
+    <g transform="translate(20, 280)">
+        <rect width="382" height="145" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <rect x="16" y="14" width="95" height="20" rx="4" fill="rgba(168, 85, 247, 0.2)" />
+        <text x="63" y="28" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#c084fc">MULTILINGUAL</text>
+        <text x="120" y="28" class="font-sans box-title" font-size="14">Merged DDI-C (fr/en)</text>
+
+        <text x="16" y="56" class="font-sans box-desc" font-size="12">• Merged via ddi-toolkit ddic-i18nmerge</text>
+        <text x="16" y="76" class="font-sans box-desc" font-size="12">• Parallel xml:lang attributes ("fr" &amp; "en")</text>
+        <text x="16" y="96" class="font-sans box-desc" font-size="12">• Preserves interviewer instructions (&lt;ivuInstr&gt;)</text>
+        <text x="16" y="116" class="font-sans box-desc" font-size="12">• Retains question numbers &amp; concept schemes</text>
+        <text x="16" y="134" class="font-mono code-text" font-size="10">xml:lang="fr" / xml:lang="en"</text>
+    </g>
+
+    <!-- Source Format Box 3: DDI-L 3.3 XML -->
+    <g transform="translate(20, 440)">
+        <rect width="382" height="135" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <rect x="16" y="14" width="80" height="20" rx="4" fill="rgba(52, 211, 153, 0.2)" />
+        <text x="56" y="28" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#34d399">DDI-L 3.3</text>
+        <text x="105" y="28" class="font-sans box-title" font-size="14">Complex XML Archives</text>
+
+        <text x="16" y="56" class="font-sans box-desc" font-size="12">• European social science study waves (e.g. CSO, ESS)</text>
+        <text x="16" y="76" class="font-sans box-desc" font-size="12">• Deeply nested maintainable schemes &amp; URNs</text>
+        <text x="16" y="96" class="font-sans box-desc" font-size="12">• Control constructs: &lt;d:Sequence&gt;, &lt;d:Instrument&gt;</text>
+        <text x="16" y="116" class="font-sans box-desc" font-size="12">• Empirical &lt;VariableStatistics&gt; fragments</text>
+    </g>
+
+    <!-- Source Format Box 4: DDI 4.0 JSON/JSONL -->
+    <g transform="translate(20, 590)">
+        <rect width="382" height="135" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <rect x="16" y="14" width="85" height="20" rx="4" fill="rgba(244, 63, 94, 0.2)" />
+        <text x="58" y="28" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#fb7185">DDI 4 COGS</text>
+        <text x="110" y="28" class="font-sans box-title" font-size="14">JSON &amp; JSON Lines</text>
+
+        <text x="16" y="56" class="font-sans box-desc" font-size="12">• Modern standard-agnostic model structures</text>
+        <text x="16" y="76" class="font-sans box-desc" font-size="12">• Typed JSON items: {"$type": "QuestionItem"}</text>
+        <text x="16" y="96" class="font-sans box-desc" font-size="12">• Line-delimited streaming for massive datasets</text>
+        <text x="16" y="116" class="font-sans box-desc" font-size="12">• Canonical URN primary keys: urn:ddi:fr.cdsp:...</text>
+    </g>
+</g>
+
+<g transform="translate(529, 165)">
+    <rect width="422" height="750" rx="16" fill="url(#cardBg)" stroke="#334155" stroke-width="1.5" filter="url(#cardShadow)" />
+    <path d="M 0 16 Q 0 0 16 0 L 406 0 Q 422 0 422 16 L 422 22 L 0 22 Z" fill="url(#amberGlow)" />
+
+    <g transform="translate(24, 38)">
+        <rect x="0" y="0" width="105" height="24" rx="12" fill="rgba(245, 158, 11, 0.15)" stroke="#f59e0b" stroke-width="1" />
+        <text x="52" y="16" text-anchor="middle" class="font-sans tag-text" fill="#fbbf24">STAGE 02</text>
+        <text x="120" y="17" class="font-mono" font-size="12" font-weight="600" fill="#94a3b8">PREFLIGHT &amp; UPGRADE</text>
+
+        <text x="0" y="52" class="font-sans card-title" font-size="22">Readiness &amp; Conversion</text>
+        <text x="0" y="74" class="font-sans card-sub" font-size="13">QA scorecard, URN minting &amp; decoupled upgrade</text>
+    </g>
+
+    <!-- Preflight Step 1: Detector & SHA-256 -->
+    <g transform="translate(20, 130)">
+        <rect width="382" height="105" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">1. Format Detection &amp; Deduplication</text>
+        <text x="16" y="50" class="font-sans box-desc" font-size="12">• Computes SHA-256 batch file digest</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• Checks existing batch receipt in database</text>
+        <text x="16" y="90" class="font-sans box-desc" font-size="12">• Identifies DDI specification, version &amp; encoding</text>
+    </g>
+
+    <!-- Preflight Step 2: Quality Profiling & Rules -->
+    <g transform="translate(20, 250)">
+        <rect width="382" height="130" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">2. Declarative Profile QA Audit</text>
+        <text x="16" y="50" class="font-sans box-desc" font-size="12">• Profiles: profiles/request.ddic.yaml</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• Enforces required tags (fatal errors)</text>
+        <text x="16" y="90" class="font-sans box-desc" font-size="12">• Recommends question wordings (warnings)</text>
+        <rect x="16" y="100" width="135" height="18" rx="4" fill="rgba(16, 185, 129, 0.2)" />
+        <text x="83" y="113" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#34d399">SCORE: 100% (GRADE A+)</text>
+    </g>
+
+    <!-- Preflight Step 3: Explicit DDI-C -> DDI-L Upgrade -->
+    <g transform="translate(20, 395)">
+        <rect width="382" height="205" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">3. Decoupled DDI-C ➔ DDI-L 4.0 Upgrade</text>
+        <text x="16" y="48" class="font-mono code-text" font-size="11">fairwddi preflight upgrade --harmonize-codes</text>
+
+        <!-- Reductions Metrics Pill -->
+        <g transform="translate(16, 62)">
+            <rect width="350" height="36" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+            <text x="12" y="16" class="font-sans" font-size="10" font-weight="600" fill="#94a3b8">CODE DEDUPLICATION METRICS:</text>
+            <text x="12" y="30" class="font-mono" font-size="11" font-weight="700" fill="#fbbf24">-35.1% CodeLists • -32.7% Categories</text>
+        </g>
+
+        <!-- Two Decoupled Files Output -->
+        <g transform="translate(16, 108)">
+            <rect width="350" height="40" rx="6" fill="rgba(14, 165, 233, 0.15)" stroke="#0284c7" stroke-width="1" />
+            <text x="10" y="16" class="font-mono" font-size="10" font-weight="700" fill="#38bdf8">PRIMARY FILE: *.ddi40.json</text>
+            <text x="10" y="32" class="font-sans" font-size="11" fill="#cbd5e1">Reusable Questions, Categories, Variables</text>
+        </g>
+
+        <g transform="translate(16, 155)">
+            <rect width="350" height="40" rx="6" fill="rgba(245, 158, 11, 0.15)" stroke="#d97706" stroke-width="1" />
+            <text x="10" y="16" class="font-mono" font-size="10" font-weight="700" fill="#fbbf24">STATS FILE: *.stats.ddi40.json</text>
+            <text x="10" y="32" class="font-sans" font-size="11" fill="#cbd5e1">Decoupled VariableStatistics &amp; Frequencies</text>
+        </g>
+    </g>
+
+    <!-- Preflight Step 4: Plan Artifacts -->
+    <g transform="translate(20, 615)">
+        <rect width="382" height="110" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">4. Preflight Plan &amp; Audit Report</text>
+        <text x="16" y="50" class="font-sans box-desc" font-size="12">• Emits &lt;file&gt;.preflight.plan.yaml</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• Emits detailed &lt;file&gt;.preflight.report.md</text>
+        <text x="16" y="92" class="font-sans" font-size="11" font-weight="700" fill="#34d399">Gate Check: is_ready_to_execute() = True</text>
+    </g>
+</g>
+
+<g transform="translate(998, 165)">
+    <rect width="422" height="750" rx="16" fill="url(#cardBg)" stroke="#334155" stroke-width="1.5" filter="url(#cardShadow)" />
+    <path d="M 0 16 Q 0 0 16 0 L 406 0 Q 422 0 422 16 L 422 22 L 0 22 Z" fill="url(#purpleGlow)" />
+
+    <g transform="translate(24, 38)">
+        <rect x="0" y="0" width="105" height="24" rx="12" fill="rgba(139, 92, 246, 0.15)" stroke="#8b5cf6" stroke-width="1" />
+        <text x="52" y="16" text-anchor="middle" class="font-sans tag-text" fill="#c084fc">STAGE 03</text>
+        <text x="120" y="17" class="font-mono" font-size="12" font-weight="600" fill="#94a3b8">PLAN &amp; REVIEW</text>
+
+        <text x="0" y="52" class="font-sans card-title" font-size="22">Zero-Write Planning</text>
+        <text x="0" y="74" class="font-sans card-sub" font-size="13">Dry-run simulation &amp; human-in-the-loop review</text>
+    </g>
+
+    <!-- Planning Step 1: Streaming iterparse -->
+    <g transform="translate(20, 130)">
+        <rect width="382" height="120" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">1. Low-Memory Stream Reader</text>
+        <text x="16" y="50" class="font-sans box-desc" font-size="12">• lxml.etree.iterparse for XML documents</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• Constant-memory JSON streaming</text>
+        <text x="16" y="90" class="font-sans box-desc" font-size="12">• O(1) memory footprint: handles 100k+ vars</text>
+        <text x="16" y="108" class="font-mono code-text" font-size="10">zero RAM spikes during ingestion</text>
+    </g>
+
+    <!-- Planning Step 2: Identity & Drift Detection -->
+    <g transform="translate(20, 265)">
+        <rect width="382" height="155" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">2. Identity &amp; Drift Resolution</text>
+        <text x="16" y="48" class="font-sans box-desc" font-size="12">Audits canonical URNs against UrnRegistry:</text>
+
+        <g transform="translate(16, 58)">
+            <rect x="0" y="0" width="80" height="22" rx="4" fill="rgba(16, 185, 129, 0.2)" />
+            <text x="40" y="15" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#34d399">CREATE</text>
+            <text x="90" y="16" class="font-sans box-desc" font-size="12">New canonical URN</text>
+
+            <rect x="0" y="28" width="80" height="22" rx="4" fill="rgba(56, 189, 248, 0.2)" />
+            <text x="40" y="43" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#38bdf8">REUSE</text>
+            <text x="90" y="44" class="font-sans box-desc" font-size="12">Identical hash match</text>
+
+            <rect x="0" y="56" width="80" height="22" rx="4" fill="rgba(244, 63, 94, 0.2)" />
+            <text x="40" y="71" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#fb7185">QUARANTINE</text>
+            <text x="90" y="72" class="font-sans box-desc" font-size="12">Same URN, altered hash</text>
+        </g>
+    </g>
+
+    <!-- Planning Step 3: Zero DB Writes -->
+    <g transform="translate(20, 435)">
+        <rect width="382" height="145" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">3. Zero-Write Dry-Run Guarantee</text>
+        <text x="16" y="50" class="font-sans box-desc" font-size="12">• Computes planned entity insertions</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• Counts planned frequency bulk rows</text>
+        <text x="16" y="90" class="font-sans box-desc" font-size="12">• Detects missing reference targets</text>
+        <text x="16" y="110" class="font-sans box-desc" font-size="12">• Database remains completely untouched</text>
+        <text x="16" y="132" class="font-mono code-text" font-size="11">fairwddi ingest plan --profile request</text>
+    </g>
+
+    <!-- Planning Step 4: Human-in-the-Loop Review Gate -->
+    <g transform="translate(20, 595)">
+        <rect width="382" height="130" rx="10" fill="rgba(139, 92, 246, 0.1)" stroke="#8b5cf6" stroke-width="1.2" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13" fill="#c084fc">4. Human-in-the-Loop Review Gate</text>
+        <text x="16" y="50" class="font-sans box-desc" font-size="12">• Plan halts if errors or quarantine flagged</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• Archivist can review YAML before committing</text>
+        <text x="16" y="90" class="font-sans box-desc" font-size="12">• Explicit approve: review_gate.approved = true</text>
+        <text x="16" y="112" class="font-mono code-text" font-size="10" fill="#a78bfa">CLI override flag: --auto-approve</text>
+    </g>
+</g>
+
+<g transform="translate(1467, 165)">
+    <rect width="422" height="750" rx="16" fill="url(#cardBg)" stroke="#334155" stroke-width="1.5" filter="url(#cardShadow)" />
+    <path d="M 0 16 Q 0 0 16 0 L 406 0 Q 422 0 422 16 L 422 22 L 0 22 Z" fill="url(#emeraldGlow)" />
+
+    <g transform="translate(24, 38)">
+        <rect x="0" y="0" width="105" height="24" rx="12" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" stroke-width="1" />
+        <text x="52" y="16" text-anchor="middle" class="font-sans tag-text" fill="#34d399">STAGE 04</text>
+        <text x="120" y="17" class="font-mono" font-size="12" font-weight="600" fill="#94a3b8">APPLY CORE</text>
+
+        <text x="0" y="52" class="font-sans card-title" font-size="22">Atomic PostgreSQL Ingest</text>
+        <text x="0" y="74" class="font-sans card-sub" font-size="13">Direct stream into normalized ReQuest tables</text>
+    </g>
+
+    <!-- Apply Step 1: Elimination of Staging Tables -->
+    <g transform="translate(20, 130)">
+        <rect width="382" height="135" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">1. Direct Streaming Architecture</text>
+        <text x="16" y="50" class="font-sans box-desc" font-size="12">• ELIMINATED intermediate staging tables</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• Avoids duplicating XML in PostgreSQL JSONB</text>
+        <text x="16" y="90" class="font-sans box-desc" font-size="12">• Zero storage bloat &amp; zero WAL explosion</text>
+        <text x="16" y="110" class="font-sans box-desc" font-size="12">• Replaced by single IngestBatch receipt</text>
+        <text x="16" y="126" class="font-mono code-text" font-size="10">request_ddi_ingestbatch (#1 row)</text>
+    </g>
+
+    <!-- Apply Step 2: Atomic Transaction -->
+    <g transform="translate(20, 280)">
+        <rect width="382" height="130" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">2. Atomic Single Transaction</text>
+        <text x="16" y="50" class="font-sans box-desc" font-size="12">• Wrapped in django.db.transaction.atomic</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• All entities and frequencies commit together</text>
+        <text x="16" y="90" class="font-sans box-desc" font-size="12">• Automatic complete rollback on any error</text>
+        <text x="16" y="112" class="font-mono code-text" font-size="11">Zero partial corruptions in database</text>
+    </g>
+
+    <!-- Apply Step 3: Bulk SQL Frequencies -->
+    <g transform="translate(20, 425)">
+        <rect width="382" height="145" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">3. Direct Bulk SQL Frequencies</text>
+        <text x="16" y="50" class="font-sans box-desc" font-size="12">• Bypasses intermediate JSONB columns</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• Writes straight to DatafileVariableFrequency</text>
+        <text x="16" y="90" class="font-sans box-desc" font-size="12">• Bulk insertions: bulk_create(batch_size=1000)</text>
+        <text x="16" y="110" class="font-sans box-desc" font-size="12">• Fast SQL index scans on (datafile, var, code)</text>
+        <text x="16" y="130" class="font-mono code-text" font-size="10">request_ddi_datafilevariablefrequency</text>
+    </g>
+
+    <!-- Apply Step 4: Core Entity Synthesis -->
+    <g transform="translate(20, 585)">
+        <rect width="382" height="140" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">4. ReQuest Core Synthesis</text>
+        <text x="16" y="48" class="font-sans box-desc" font-size="12">Pre-registers in UrnRegistry supertype:</text>
+        <text x="16" y="68" class="font-sans box-desc" font-size="12">• StudyUnit, Instrument &amp; Datafile</text>
+        <text x="16" y="88" class="font-sans box-desc" font-size="12">• QuestionItem, Category, CodeList, Code</text>
+        <text x="16" y="108" class="font-sans box-desc" font-size="12">• Shortcuts: QuestionVariable, InstrumentQuestion</text>
+        <text x="16" y="128" class="font-mono code-text" font-size="10">Multilingual JSONB: {"fr": "...", "en": "..."}</text>
+    </g>
+</g>
+
+<g transform="translate(1936, 165)">
+    <rect width="422" height="750" rx="16" fill="url(#cardBg)" stroke="#334155" stroke-width="1.5" filter="url(#cardShadow)" />
+    <path d="M 0 16 Q 0 0 16 0 L 406 0 Q 422 0 422 16 L 422 22 L 0 22 Z" fill="url(#indigoGlow)" />
+
+    <g transform="translate(24, 38)">
+        <rect x="0" y="0" width="105" height="24" rx="12" fill="rgba(99, 102, 241, 0.15)" stroke="#6366f1" stroke-width="1" />
+        <text x="52" y="16" text-anchor="middle" class="font-sans tag-text" fill="#a5b4fc">STAGE 05</text>
+        <text x="120" y="17" class="font-mono" font-size="12" font-weight="600" fill="#94a3b8">LIFECYCLE &amp; OPS</text>
+
+        <text x="0" y="52" class="font-sans card-title" font-size="22">Rollback &amp; Harmonization</text>
+        <text x="0" y="74" class="font-sans card-sub" font-size="13">Operational control, receipts &amp; cross-survey link</text>
+    </g>
+
+    <!-- Post Step 1: 1-Click Rollback -->
+    <g transform="translate(20, 130)">
+        <rect width="382" height="145" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">1. 1-Click Atomic Rollback (Undo)</text>
+        <text x="16" y="48" class="font-mono code-text" font-size="11">fairwddi ingest undo &lt;batch_id&gt;</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• Reads created_urns from IngestBatch</text>
+        <text x="16" y="90" class="font-sans box-desc" font-size="12">• Deletes matching UrnRegistry records</text>
+        <text x="16" y="110" class="font-sans box-desc" font-size="12">• ON DELETE CASCADE purges core tables</text>
+        <text x="16" y="130" class="font-sans box-desc" font-size="12">• Resets batch status to 'undone'</text>
+    </g>
+
+    <!-- Post Step 2: IngestBatch Status & Listing -->
+    <g transform="translate(20, 290)">
+        <rect width="382" height="135" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">2. Ingest Receipts &amp; Auditing</text>
+        <text x="16" y="48" class="font-mono code-text" font-size="11">fairwddi ingest status &lt;batch_id&gt;</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• Detailed receipt: created vs reused URNs</text>
+        <text x="16" y="90" class="font-sans box-desc" font-size="12">• Quarantine count &amp; frequency row totals</text>
+        <text x="16" y="110" class="font-sans box-desc" font-size="12">• Full provenance history in request_ddi_eventlog</text>
+        <text x="16" y="126" class="font-mono code-text" font-size="10">fairwddi ingest list</text>
+    </g>
+
+    <!-- Post Step 3: Metadata Quarantine -->
+    <g transform="translate(20, 440)">
+        <rect width="382" height="130" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">3. Metadata Quarantine</text>
+        <text x="16" y="50" class="font-sans box-desc" font-size="12">• Isolates metadata drift conflicts</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• Flags identical URNs with divergent hashes</text>
+        <text x="16" y="90" class="font-sans box-desc" font-size="12">• Prevents silent database clobbering</text>
+        <text x="16" y="112" class="font-mono code-text" font-size="10">request_ddi_metadataquarantine</text>
+    </g>
+
+    <!-- Post Step 4: Semantic Harmonization -->
+    <g transform="translate(20, 585)">
+        <rect width="382" height="140" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <text x="16" y="26" class="font-sans box-title" font-size="13">4. Post-Ingest Harmonization</text>
+        <text x="16" y="48" class="font-mono code-text" font-size="11">fairwddi compare discover --threshold 0.5</text>
+        <text x="16" y="70" class="font-sans box-desc" font-size="12">• Clusters question items across survey waves</text>
+        <text x="16" y="90" class="font-sans box-desc" font-size="12">• Merges bilingual question equivalents</text>
+        <text x="16" y="110" class="font-sans box-desc" font-size="12">• Anchors variables to ELSST / CESSDA concepts</text>
+        <text x="16" y="128" class="font-mono code-text" font-size="10">fairwddi compare batch &lt;batch_id&gt;</text>
+    </g>
+</g>
+
+<g transform="translate(60, 945)">
+    <rect width="760" height="495" rx="16" fill="url(#cardBg)" stroke="#334155" stroke-width="1.5" filter="url(#cardShadow)" />
+    <path d="M 0 16 Q 0 0 16 0 L 744 0 Q 760 0 760 16 L 760 20 L 0 20 Z" fill="url(#purpleGlow)" />
+
+    <g transform="translate(24, 34)">
+        <rect x="0" y="0" width="130" height="22" rx="11" fill="rgba(168, 85, 247, 0.2)" stroke="#a855f7" stroke-width="1" />
+        <text x="65" y="15" text-anchor="middle" class="font-sans tag-text" fill="#c084fc">DATA ARCHITECTURE</text>
+        <text x="0" y="48" class="font-sans card-title" font-size="20">The DDI Variable Cascade Walkthrough</text>
+        <text x="0" y="68" class="font-sans card-sub" font-size="12">Decouples abstract concepts from concrete survey questions and dataset columns</text>
+    </g>
+
+    <!-- Cascade Level 1: Concept Layer -->
+    <g transform="translate(24, 110)">
+        <rect width="712" height="95" rx="8" fill="rgba(139, 92, 246, 0.12)" stroke="#8b5cf6" stroke-width="1" />
+        <text x="14" y="24" class="font-sans" font-size="12" font-weight="700" fill="#c084fc">1. CONCEPT LAYER (Thematic Abstract)</text>
+        <text x="14" y="45" class="font-sans" font-size="14" font-weight="700" fill="#ffffff">ConceptualVariable: Left-Right Political Placement</text>
+        <text x="14" y="65" class="font-mono code-text" font-size="11">URN: urn:ddi:fr.cdsp:cv-leftright:1.0.0</text>
+        <text x="14" y="83" class="font-sans" font-size="11" fill="#cbd5e1">Controlled Vocabulary Anchor: CESSDA ELSST Thesaurus #c4820</text>
+    </g>
+
+    <!-- Down arrow from L1 to L2 -->
+    <g transform="translate(380.0, 208)">
+        <line x1="0" y1="0" x2="0" y2="18" stroke="#8b5cf6" stroke-width="2.5" marker-end="url(#arrow-violet)" />
+        <text x="12" y="12" class="font-sans" font-size="10" font-weight="700" fill="#a78bfa">HARMONIZES</text>
+    </g>
+
+    <!-- Cascade Level 2: Representation Layer -->
+    <g transform="translate(24, 230)">
+        <rect width="712" height="105" rx="8" fill="rgba(6, 182, 212, 0.12)" stroke="#06b6d4" stroke-width="1" />
+        <text x="14" y="24" class="font-sans" font-size="12" font-weight="700" fill="#22d3ee">2. REPRESENTATION LAYER (Harmonized Value Domain)</text>
+        <text x="14" y="45" class="font-sans" font-size="14" font-weight="700" fill="#ffffff">RepresentedVariable: 11-Point Left-Right Scale (0–10)</text>
+        <text x="14" y="65" class="font-mono code-text" font-size="11">URN: urn:ddi:fr.cdsp:rv-lr-11pt:1.0.0</text>
+        <text x="14" y="83" class="font-sans" font-size="11" fill="#cbd5e1">• QuestionItem: "En politique, on parle de gauche et de droite..." (urn:ddi:fr.cdsp:qi-lr-fr:1.0.0)</text>
+        <text x="14" y="98" class="font-sans" font-size="11" fill="#cbd5e1">• CodeList: 0 (Gauche) ... 10 (Droite), 98 (NSP) (urn:ddi:fr.cdsp:cl-lr-11pt:1.0.0)</text>
+    </g>
+
+    <!-- Down arrow from L2 to L3 -->
+    <g transform="translate(380.0, 338)">
+        <line x1="0" y1="0" x2="0" y2="18" stroke="#06b6d4" stroke-width="2.5" marker-end="url(#arrow-glow)" />
+        <text x="12" y="12" class="font-sans" font-size="10" font-weight="700" fill="#38bdf8">INSTANTIATED IN</text>
+    </g>
+
+    <!-- Cascade Level 3: Dataset Layer -->
+    <g transform="translate(24, 360)">
+        <rect width="712" height="115" rx="8" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" stroke-width="1" />
+        <text x="14" y="24" class="font-sans" font-size="12" font-weight="700" fill="#34d399">3. DATASET LAYER (Physical Survey Variables)</text>
+        
+        <!-- Survey Column 1 -->
+        <g transform="translate(14, 36)">
+            <rect width="215" height="65" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1.2" />
+            <text x="10" y="18" class="font-sans" font-size="12" font-weight="700" fill="#f8fafc">ESS Round 3 (2007)</text>
+            <text x="10" y="36" class="font-mono" font-size="11" fill="#38bdf8">col: lrscale</text>
+            <text x="10" y="52" class="font-mono" font-size="9" fill="#94a3b8">urn:ddi:fr.cdsp:iv-ess3-lrscale</text>
+        </g>
+
+        <!-- Survey Column 2 -->
+        <g transform="translate(245, 36)">
+            <rect width="220" height="65" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1.2" />
+            <text x="10" y="18" class="font-sans" font-size="12" font-weight="700" fill="#f8fafc">Panel Electoral (2012)</text>
+            <text x="10" y="36" class="font-mono" font-size="11" fill="#38bdf8">col: q04_gauche_droite</text>
+            <text x="10" y="52" class="font-mono" font-size="9" fill="#94a3b8">urn:ddi:fr.cdsp:iv-cdsp2012-q04</text>
+        </g>
+
+        <!-- Survey Column 3 -->
+        <g transform="translate(480, 36)">
+            <rect width="220" height="65" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1.2" />
+            <text x="10" y="18" class="font-sans" font-size="12" font-weight="700" fill="#f8fafc">Baromètre (2017)</text>
+            <text x="10" y="36" class="font-mono" font-size="11" fill="#38bdf8">col: v12_pol</text>
+            <text x="10" y="52" class="font-mono" font-size="9" fill="#94a3b8">urn:ddi:fr.cdsp:iv-cdsp2017-v12</text>
+        </g>
+    </g>
+</g>
+
+<g transform="translate(850, 945)">
+    <rect width="740" height="495" rx="16" fill="url(#cardBg)" stroke="#334155" stroke-width="1.5" filter="url(#cardShadow)" />
+    <path d="M 0 16 Q 0 0 16 0 L 724 0 Q 740 0 740 16 L 740 20 L 0 20 Z" fill="url(#cyanGlow)" />
+
+    <g transform="translate(24, 34)">
+        <rect x="0" y="0" width="135" height="22" rx="11" fill="rgba(6, 182, 212, 0.2)" stroke="#06b6d4" stroke-width="1" />
+        <text x="67" y="15" text-anchor="middle" class="font-sans tag-text" fill="#22d3ee">ORCHESTRATOR</text>
+        <text x="0" y="48" class="font-sans card-title" font-size="20">Unified Fast-Track Ingestion Command</text>
+        <text x="0" y="68" class="font-sans card-sub" font-size="12">Execute all stages automatically in a single reproducible CLI invocation</text>
+    </g>
+
+    <!-- Terminal Box -->
+    <g transform="translate(24, 85)">
+        <rect width="692" height="140" rx="10" fill="#090d16" stroke="#334155" stroke-width="1.2" />
+        
+        <!-- Window Controls -->
+        <circle cx="20" cy="18" r="5" fill="#ef4444" />
+        <circle cx="36" cy="18" r="5" fill="#f59e0b" />
+        <circle cx="52" cy="18" r="5" fill="#10b981" />
+        <text x="75" y="22" class="font-mono" font-size="11" fill="#64748b">bash — fairwddi ingest run</text>
+
+        <!-- Command Code -->
+        <text x="20" y="52" class="font-mono" font-size="12" fill="#38bdf8">$ fairwddi ingest run survey.ddic.xml \</text>
+        <text x="40" y="72" class="font-mono" font-size="12" fill="#e2e8f0">  --profile request \</text>
+        <text x="40" y="92" class="font-mono" font-size="12" fill="#e2e8f0">  --agency fr.cdsp \</text>
+        <text x="40" y="112" class="font-mono" font-size="12" fill="#e2e8f0">  --harmonize --auto-approve</text>
+    </g>
+
+    <!-- Execution Sequence Flow Inside Panel -->
+    <g transform="translate(24, 240)">
+        <rect width="692" height="235" rx="10" fill="url(#boxBg)" stroke="#1e293b" />
+        <text x="16" y="24" class="font-sans box-title" font-size="13">Automated Pipeline Execution Flow:</text>
+
+        <!-- 4 Step Boxes with proper isolated translates! -->
+        <g transform="translate(16, 40)">
+            <!-- Step 1: Preflight -->
+            <g transform="translate(0, 0)">
+                <rect width="155" height="74" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+                <text x="12" y="18" class="font-mono" font-size="10" font-weight="700" fill="#fbbf24">1. PREFLIGHT</text>
+                <text x="12" y="34" class="font-sans" font-size="11" font-weight="600" fill="#ffffff">Validates profile</text>
+                <text x="12" y="50" class="font-sans" font-size="10" fill="#94a3b8">SHA-256 digest</text>
+                <text x="12" y="64" class="font-mono" font-size="9" font-weight="700" fill="#34d399">✓ READY</text>
+            </g>
+
+            <text x="163" y="42" class="font-sans" font-size="16" font-weight="700" fill="#64748b">→</text>
+
+            <!-- Step 2: Upgrade -->
+            <g transform="translate(178, 0)">
+                <rect width="155" height="74" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+                <text x="12" y="18" class="font-mono" font-size="10" font-weight="700" fill="#fbbf24">2. UPGRADE</text>
+                <text x="12" y="34" class="font-sans" font-size="11" font-weight="600" fill="#ffffff">DDI-C ➔ DDI-L 4</text>
+                <text x="12" y="50" class="font-sans" font-size="10" fill="#94a3b8">Deduplicates codes</text>
+                <text x="12" y="64" class="font-mono" font-size="9" fill="#38bdf8">*.ddi40.json</text>
+            </g>
+
+            <text x="341" y="42" class="font-sans" font-size="16" font-weight="700" fill="#64748b">→</text>
+
+            <!-- Step 3: Zero-Write Plan -->
+            <g transform="translate(356, 0)">
+                <rect width="155" height="74" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+                <text x="12" y="18" class="font-mono" font-size="10" font-weight="700" fill="#c084fc">3. ZERO-WRITE PLAN</text>
+                <text x="12" y="34" class="font-sans" font-size="11" font-weight="600" fill="#ffffff">Identity resolution</text>
+                <text x="12" y="50" class="font-sans" font-size="10" fill="#94a3b8">Metadata drift check</text>
+                <text x="12" y="64" class="font-mono" font-size="9" font-weight="700" fill="#34d399">Gate Approved</text>
+            </g>
+
+            <text x="519" y="42" class="font-sans" font-size="16" font-weight="700" fill="#64748b">→</text>
+
+            <!-- Step 4: Atomic Apply -->
+            <g transform="translate(534, 0)">
+                <rect width="142" height="74" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+                <text x="12" y="18" class="font-mono" font-size="10" font-weight="700" fill="#34d399">4. ATOMIC APPLY</text>
+                <text x="12" y="34" class="font-sans" font-size="11" font-weight="600" fill="#ffffff">Core DB commit</text>
+                <text x="12" y="50" class="font-sans" font-size="10" fill="#94a3b8">Bulk frequencies</text>
+                <text x="12" y="64" class="font-mono" font-size="9" font-weight="700" fill="#38bdf8">Receipt #42</text>
+            </g>
+        </g>
+
+        <!-- Polished Receipt Box -->
+        <g transform="translate(16, 128)">
+            <rect width="660" height="92" rx="8" fill="#090d16" stroke="#334155" stroke-dasharray="3 3" />
+            
+            <g transform="translate(12, 12)">
+                <rect width="145" height="20" rx="4" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" stroke-width="0.8" />
+                <text x="72" y="14" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#34d399">EXECUTION RECEIPT (#42)</text>
+
+                <rect x="155" y="0" width="85" height="20" rx="4" fill="rgba(56, 189, 248, 0.2)" />
+                <text x="197" y="14" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#38bdf8">435 CREATED</text>
+
+                <rect x="250" y="0" width="80" height="20" rx="4" fill="rgba(168, 85, 247, 0.2)" />
+                <text x="290" y="14" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#c084fc">12 REUSED</text>
+
+                <rect x="340" y="0" width="105" height="20" rx="4" fill="rgba(245, 158, 11, 0.2)" />
+                <text x="392" y="14" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#fbbf24">418 FREQUENCIES</text>
+
+                <rect x="455" y="0" width="100" height="20" rx="4" fill="rgba(244, 63, 94, 0.2)" />
+                <text x="505" y="14" text-anchor="middle" class="font-mono" font-size="10" font-weight="700" fill="#fb7185">0 QUARANTINE</text>
+            </g>
+
+            <text x="14" y="55" class="font-sans" font-size="11" fill="#cbd5e1">
+                Receipt recorded in <tspan fill="#38bdf8" font-family="monospace">request_ddi_ingestbatch</tspan> with full rollback provenance list.
+            </text>
+            
+            <g transform="translate(14, 65)">
+                <rect width="255" height="18" rx="4" fill="#1e293b" />
+                <text x="10" y="13" class="font-mono" font-size="10" fill="#38bdf8">1-Click Undo: fairwddi ingest undo 42</text>
+            </g>
+        </g>
+    </g>
+</g>
+
+<g transform="translate(1620, 945)">
+    <rect width="710" height="495" rx="16" fill="url(#cardBg)" stroke="#334155" stroke-width="1.5" filter="url(#cardShadow)" />
+    <path d="M 0 16 Q 0 0 16 0 L 694 0 Q 710 0 710 16 L 710 20 L 0 20 Z" fill="url(#emeraldGlow)" />
+
+    <g transform="translate(24, 34)">
+        <rect x="0" y="0" width="135" height="22" rx="11" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" stroke-width="1" />
+        <text x="67" y="15" text-anchor="middle" class="font-sans tag-text" fill="#34d399">CORE ADVANTAGES</text>
+        <text x="0" y="48" class="font-sans card-title" font-size="20">Architecture Benchmarks &amp; Benefits</text>
+        <text x="0" y="68" class="font-sans card-sub" font-size="12">Key performance &amp; structural gains of the Phase 2 pipeline</text>
+    </g>
+
+    <!-- Benefit 1: Zero DB Staging -->
+    <g transform="translate(24, 95)">
+        <rect width="662" height="76" rx="8" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <circle cx="28" cy="28" r="14" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" stroke-width="1.2" />
+        <text x="28" y="33" text-anchor="middle" class="font-sans" font-size="14" font-weight="700" fill="#34d399">✓</text>
+        <text x="56" y="26" class="font-sans box-title" font-size="13">Zero Database Staging Storage Bloat</text>
+        <text x="56" y="46" class="font-sans box-desc" font-size="12">Direct file-to-core streaming eliminates storing raw XML/JSONB rows in PostgreSQL,</text>
+        <text x="56" y="62" class="font-sans box-desc" font-size="12">reducing table and WAL storage footprint by over 50%.</text>
+    </g>
+
+    <!-- Benefit 2: Decoupled Statistics -->
+    <g transform="translate(24, 182)">
+        <rect width="662" height="76" rx="8" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <circle cx="28" cy="28" r="14" fill="rgba(6, 182, 212, 0.2)" stroke="#06b6d4" stroke-width="1.2" />
+        <text x="28" y="33" text-anchor="middle" class="font-sans" font-size="14" font-weight="700" fill="#22d3ee">✓</text>
+        <text x="56" y="26" class="font-sans box-title" font-size="13">Decoupled Question Bank &amp; Statistics</text>
+        <text x="56" y="46" class="font-sans box-desc" font-size="12">Separates reusable question items from study-specific empirical observation counts</text>
+        <text x="56" y="62" class="font-sans box-desc" font-size="12">via *.stats.ddi40.json and DatafileVariableFrequency tables.</text>
+    </g>
+
+    <!-- Benefit 3: Supertype Referential Integrity -->
+    <g transform="translate(24, 269)">
+        <rect width="662" height="76" rx="8" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <circle cx="28" cy="28" r="14" fill="rgba(139, 92, 246, 0.2)" stroke="#8b5cf6" stroke-width="1.2" />
+        <text x="28" y="33" text-anchor="middle" class="font-sans" font-size="14" font-weight="700" fill="#c084fc">✓</text>
+        <text x="56" y="26" class="font-sans box-title" font-size="13">Global Master Registry (UrnRegistry)</text>
+        <text x="56" y="46" class="font-sans box-desc" font-size="12">Guarantees universal referential integrity across all DDI entities with ON DELETE CASCADE,</text>
+        <text x="56" y="62" class="font-sans box-desc" font-size="12">enabling O(1) type resolution and clean polymorphic foreign keys.</text>
+    </g>
+
+    <!-- Benefit 4: Multilingual JSONB -->
+    <g transform="translate(24, 356)">
+        <rect width="662" height="76" rx="8" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
+        <circle cx="28" cy="28" r="14" fill="rgba(245, 158, 11, 0.2)" stroke="#f59e0b" stroke-width="1.2" />
+        <text x="28" y="33" text-anchor="middle" class="font-sans" font-size="14" font-weight="700" fill="#fbbf24">✓</text>
+        <text x="56" y="26" class="font-sans box-title" font-size="13">Native ISO 639-1 Multilingual Support</text>
+        <text x="56" y="46" class="font-sans box-desc" font-size="12">Question wording, labels, and interviewer instructions stored in PostgreSQL JSONB</text>
+        <text x="56" y="62" class="font-sans box-desc" font-size="12">with deterministic canonical hashing for fast drift detection.</text>
+    </g>
+</g>
+
+<g transform="translate(60, 1485)">
+    <text x="0" y="0" class="font-sans" font-size="12" fill="#64748b">
+        FAIRwDDI Lifecycle • WP3 ST3 Implementation of DDI Architecture for ReQuest • Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS
+    </text>
+    <text x="2280" y="0" text-anchor="end" class="font-mono" font-size="12" fill="#64748b">
+        Canonical Agency: fr.cdsp • Standard: DDI 4.0 / DDI-CDI / DDI-Lifecycle 3.3
+    </text>
+</g>
+</svg>

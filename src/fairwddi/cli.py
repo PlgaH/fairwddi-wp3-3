@@ -704,11 +704,23 @@ def ingest_plan_cmd(
     from fairwddi.ingest.loader import plan_ingestion
 
     configure_django_for_cli()
+    path = Path(file_path)
+    if not path.exists():
+        candidate_temp = Path("temp") / path.name
+        if candidate_temp.exists():
+            console.print(
+                f"[yellow]Notice:[/yellow] File not found at '{file_path}'. "
+                f"Found at '{candidate_temp}', using that."
+            )
+            path = candidate_temp
+            file_path = str(candidate_temp)
+
+    effective_output_dir = output_dir if output_dir is not None else path.resolve().parent
     try:
         plan = plan_ingestion(
             file_path=file_path,
             profile=profile,
-            output_dir=output_dir,
+            output_dir=effective_output_dir,
             force_reload=force_reload,
             auto_approve=auto_approve,
         )
@@ -721,10 +733,24 @@ def ingest_plan_cmd(
     table.add_column("Count", justify="right", style="yellow")
     table.add_row("Source Format", str(plan.source_format))
     for k, v in plan.summary.items():
-        table.add_row(str(k), str(v))
+        if k == "skipped_types":
+            if v:
+                table.add_row("Skipped Types", ", ".join(v))
+        else:
+            table.add_row(str(k), str(v))
     table.add_row("Pending Review Items", str(plan.pending_review_count))
     table.add_row("Errors", str(plan.error_count))
     console.print(table)
+
+    plan_path = effective_output_dir / f"{path.stem}.ingest.plan.yaml"
+    report_path = effective_output_dir / f"{path.stem}.ingest.report.md"
+    console.print()
+    console.print("[bold green]✓ Ingestion Plan saved to disk:[/bold green]")
+    console.print(f"  • Plan YAML: [cyan]{plan_path}[/cyan]")
+    console.print(f"  • Report:    [cyan]{report_path}[/cyan]")
+    console.print()
+    console.print("[dim]To execute this plan in PostgreSQL:[/dim]")
+    console.print(f"  [yellow]fairwddi ingest apply {plan_path}[/yellow]\n")
 
 
 @ingest_app.command("apply")
@@ -1021,13 +1047,14 @@ def harmonize_plan_cmd(
     from fairwddi.ingest.harmonizer import plan_harmonization
 
     configure_django_for_cli()
+    effective_output_dir = output_dir if output_dir is not None else Path(".")
     plan = plan_harmonization(
         batch_id=batch_id,
         resource_type=resource_type,
         study_urn=study_urn,
         query=query,
         threshold=threshold,
-        output_dir=output_dir,
+        output_dir=effective_output_dir,
         auto_approve=auto_approve,
     )
     console.print(
@@ -1035,6 +1062,12 @@ def harmonize_plan_cmd(
         f"[yellow]{len(plan.actions)}[/yellow] action(s), "
         f"[yellow]{plan.pending_review_count}[/yellow] pending review."
     )
+    plan_path = effective_output_dir / f"{plan.job_id}.harmonize.plan.yaml"
+    report_path = effective_output_dir / f"{plan.job_id}.harmonize.report.md"
+    console.print(f"  • Plan YAML: [cyan]{plan_path}[/cyan]")
+    console.print(f"  • Report:    [cyan]{report_path}[/cyan]")
+    console.print("\n[dim]To apply this plan:[/dim]")
+    console.print(f"  [yellow]fairwddi harmonize apply {plan_path}[/yellow]\n")
 
 
 @harmonize_app.command("apply")
