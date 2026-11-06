@@ -1484,21 +1484,24 @@ EXPLORER_HTML = """<!DOCTYPE html>
       if (pushHistory) {
         recordHistory('codelists', urn);
       }
-      let cl = currentCodeLists.find(x => x.urn === urn);
-      if (!cl) {
-        try {
-          const res = await fetch(`/api/codelists/${encodeURIComponent(urn)}`);
-          if (res.ok) {
-            cl = await res.json();
-            if (!currentCodeLists.some(x => x.urn === cl.urn)) {
-              currentCodeLists.unshift(cl);
-            }
-          }
-        } catch (e) {
-          console.error("Failed to fetch codelist detail", e);
-        }
-      }
       renderCodeListItems(currentCodeLists);
+
+      let cl = currentCodeLists.find(x => x.urn === urn);
+      try {
+        const res = await fetch(`/api/codelists/${encodeURIComponent(urn)}`);
+        if (res.ok) {
+          cl = await res.json();
+          const idx = currentCodeLists.findIndex(x => x.urn === cl.urn);
+          if (idx >= 0) {
+            currentCodeLists[idx] = cl;
+          } else {
+            currentCodeLists.unshift(cl);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch codelist detail", e);
+      }
+
       if (cl) {
         renderCodeListDetail(cl);
         const sel = document.querySelector('#codelist-list .q-item.selected');
@@ -1564,34 +1567,60 @@ EXPLORER_HTML = """<!DOCTYPE html>
         </div>
 
         <div class="detail-card">
-          <div class="detail-title" style="font-size: 15px; margin-bottom: 4px;">Associated Variables & Questions (${cl.variable_count})</div>
-          <div class="detail-subtitle">Variables and survey datasets sharing this standardized response domain.</div>
-          ${cl.questions && cl.questions.length > 0 ? `
+          <div class="detail-title" style="font-size: 15px; margin-bottom: 4px;">Represented Variables Using this Code List (${cl.variable_count})</div>
+          <div class="detail-subtitle">In DDI architecture, a CodeList defines a reusable response domain referenced by RepresentedVariables, which link to QuestionItems and are realized as InstanceVariables in survey datasets.</div>
+          ${cl.represented_variables && cl.represented_variables.length > 0 ? `
             <table class="detail-table">
               <thead>
                 <tr>
-                  <th style="width: 140px;">Question Item</th>
-                  <th>Question Wording</th>
-                  <th style="width: 130px;">Action</th>
+                  <th style="width: 170px;">Represented Variable</th>
+                  <th>Associated Question</th>
+                  <th style="width: 170px;">Surveys & Dataset Columns</th>
+                  <th style="width: 110px;">Action</th>
                 </tr>
               </thead>
               <tbody>
-                ${cl.questions.map(q => `
+                ${cl.represented_variables.map(rv => `
                   <tr>
-                    <td style="font-family: var(--font-mono); font-weight: 600; color: #10b981;">${escapeHtml(q.name)}</td>
-                    <td>${escapeHtml(q.text)}</td>
                     <td>
-                      <button type="button" class="action-btn" onclick="navigateTo('explorer', '${escapeHtml(q.urn)}');">
-                        View Cascade ↗
-                      </button>
+                      <div style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8; font-size: 12px;">${escapeHtml(rv.name)}</div>
+                      ${rv.label ? `<div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${escapeHtml(rv.label)}</div>` : ''}
+                      <div class="prop-mono" style="font-size: 9px; color: var(--text-dim); margin-top: 3px;" title="${escapeHtml(rv.urn)}">${escapeHtml(rv.urn.length > 35 ? rv.urn.slice(0, 32) + '…' : rv.urn)}</div>
+                    </td>
+                    <td>
+                      ${rv.question_text ? `
+                        <div style="font-size: 12px; line-height: 1.4;">${escapeHtml(rv.question_text)}</div>
+                        ${rv.question_name ? `<div style="font-family: var(--font-mono); font-size: 10px; color: #10b981; margin-top: 3px;">${escapeHtml(rv.question_name)}</div>` : ''}
+                      ` : '<span style="color: var(--text-dim); font-style: italic; font-size: 12px;">No question linked</span>'}
+                    </td>
+                    <td>
+                      ${rv.surveys && rv.surveys.length > 0 ? `
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text);">${rv.surveys.map(s => escapeHtml(s.replace('fr.cdsp.ddi.', '').replace('fr.cdsp.', ''))).join(', ')}</div>
+                      ` : '<span style="color: var(--text-dim); font-size: 11px;">(No survey)</span>'}
+                      ${rv.instance_variables && rv.instance_variables.length > 0 ? `
+                        <div class="prop-mono" style="font-size: 10px; color: #f59e0b; margin-top: 3px;">
+                          Col: ${rv.instance_variables.map(iv => escapeHtml(iv)).join(', ')}
+                        </div>
+                      ` : ''}
+                    </td>
+                    <td>
+                      ${rv.question_urn ? `
+                        <button type="button" class="action-btn" onclick="navigateTo('explorer', '${escapeHtml(rv.question_urn)}');" style="font-size: 11px; padding: 4px 8px;">
+                          View Cascade ↗
+                        </button>
+                      ` : `
+                        <span style="color: var(--text-dim); font-size: 11px;">(No question)</span>
+                      `}
                     </td>
                   </tr>
                 `).join('')}
               </tbody>
             </table>
           ` : `
-            <div style="color: var(--text-dim); font-size: 12px; margin-top: 8px;">
-              Used by variables: ${cl.variable_names.join(', ')}
+            <div style="color: var(--text-dim); font-size: 12px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 6px; margin-top: 8px;">
+              ${cl.variable_names && cl.variable_names.length > 0
+                ? `Referenced by variables: <strong>${escapeHtml(cl.variable_names.join(', '))}</strong>`
+                : 'This CodeList is not currently bound to any Represented Variables.'}
             </div>
           `}
         </div>
@@ -1696,21 +1725,24 @@ EXPLORER_HTML = """<!DOCTYPE html>
       if (pushHistory) {
         recordHistory('categories', urn);
       }
-      let cat = currentCategories.find(x => x.urn === urn);
-      if (!cat) {
-        try {
-          const res = await fetch(`/api/categories/${encodeURIComponent(urn)}`);
-          if (res.ok) {
-            cat = await res.json();
-            if (!currentCategories.some(x => x.urn === cat.urn)) {
-              currentCategories.unshift(cat);
-            }
-          }
-        } catch (e) {
-          console.error("Failed to fetch category detail", e);
-        }
-      }
       renderCategoryItems(currentCategories);
+
+      let cat = currentCategories.find(x => x.urn === urn);
+      try {
+        const res = await fetch(`/api/categories/${encodeURIComponent(urn)}`);
+        if (res.ok) {
+          cat = await res.json();
+          const idx = currentCategories.findIndex(x => x.urn === cat.urn);
+          if (idx >= 0) {
+            currentCategories[idx] = cat;
+          } else {
+            currentCategories.unshift(cat);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch category detail", e);
+      }
+
       if (cat) {
         renderCategoryDetail(cat);
         const sel = document.querySelector('#category-list .q-item.selected');

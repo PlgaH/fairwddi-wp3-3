@@ -123,6 +123,19 @@ class CodeListQuestionRef(BaseModel):
     text: str
 
 
+class RepresentedVariableUsage(BaseModel):
+    """RepresentedVariable using a CodeList, with its questions and dataset occurrences."""
+
+    urn: str
+    name: str
+    label: str | None = None
+    question_urn: str | None = None
+    question_name: str | None = None
+    question_text: str | None = None
+    instance_variables: list[str] = Field(default_factory=list)
+    surveys: list[str] = Field(default_factory=list)
+
+
 class CodeListSummary(BaseModel):
     """Summary of a CodeList and its response domain."""
 
@@ -133,6 +146,7 @@ class CodeListSummary(BaseModel):
     codes: list[CodeItemInfo] = Field(default_factory=list)
     variable_count: int = 0
     variable_names: list[str] = Field(default_factory=list)
+    represented_variables: list[RepresentedVariableUsage] = Field(default_factory=list)
     questions: list[CodeListQuestionRef] = Field(default_factory=list)
     surveys: list[str] = Field(default_factory=list)
     is_reused: bool = False

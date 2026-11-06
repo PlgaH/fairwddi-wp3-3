@@ -155,7 +155,15 @@ def test_api_aliases(api_client: TestClient) -> None:
 
 @pytest.mark.django_db
 def test_api_codelists(api_client: TestClient) -> None:
-    from fairwddi.models import Category, Code, CodeList
+    from fairwddi.models import (
+        Category,
+        Code,
+        CodeList,
+        InstanceVariable,
+        QuestionItem,
+        QuestionVariable,
+        RepresentedVariable,
+    )
 
     cl = CodeList.objects.create(urn="urn:ddi:fr.cdsp:cl_test_unique:1.0.0", name="CL_Unique")
     cat = Category.objects.create(
@@ -168,6 +176,26 @@ def test_api_codelists(api_client: TestClient) -> None:
         code_list=cl,
         category=cat,
         code_value="99",
+    )
+    rv = RepresentedVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:rv_test_unique:1.0.0",
+        name="RV_Unique",
+        label={"fr": "Label RV"},
+        code_list=cl,
+    )
+    qi = QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:qi_test_unique:1.0.0",
+        name="QI_Unique",
+        question_text={"fr": "Question texte ?"},
+    )
+    QuestionVariable.objects.create(
+        question_item=qi,
+        represented_variable=rv,
+    )
+    InstanceVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:iv_test_unique:1.0.0",
+        name="VAR_COL_1",
+        represented_variable=rv,
     )
 
     resp = api_client.get("/codelists?limit=10")
@@ -183,6 +211,13 @@ def test_api_codelists(api_client: TestClient) -> None:
     assert single_data["urn"] == cl.urn
     assert single_data["code_count"] == 1
     assert single_data["codes"][0]["code_value"] == "99"
+    assert len(single_data["represented_variables"]) == 1
+    rv_item = single_data["represented_variables"][0]
+    assert rv_item["urn"] == rv.urn
+    assert rv_item["name"] == "RV_Unique"
+    assert rv_item["question_urn"] == qi.urn
+    assert rv_item["question_text"] == "Question texte ?"
+    assert "VAR_COL_1" in rv_item["instance_variables"]
 
 
 @pytest.mark.django_db

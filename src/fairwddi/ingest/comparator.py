@@ -254,6 +254,7 @@ def _compare_pair(
                         "source_name": rec_a.get("name"),
                         "target_name": rec_b.get("name"),
                         "code_count": len(pairs_a),
+                        "codes": [f"{v}: {lbl}" for v, lbl in pairs_a[:5]],
                     },
                 }
 
@@ -272,6 +273,7 @@ def _compare_pair(
                         "source_name": rec_a.get("name"),
                         "target_name": rec_b.get("name"),
                         "substantive_codes": len(subst_a),
+                        "codes": [f"{v}: {lbl}" for v, lbl in sorted(subst_a)[:5]],
                     },
                 }
 
@@ -335,6 +337,9 @@ def _compare_pair(
                         "target_languages": sorted(langs_b),
                     },
                 }
+
+        # CodeList identity is strictly structural; do not fall through to text/label comparison
+        return None
 
     # 3. Text/Label comparison (Category, QuestionItem, RepresentedVariable)
     m_type, conf, details = _compare_multilingual_texts(rec_a.get("text"), rec_b.get("text"))

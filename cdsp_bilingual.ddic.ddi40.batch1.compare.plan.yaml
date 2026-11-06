@@ -1,0 +1,26 @@
+plan_version: '1.0'
+stage: compare
+job_id: compare-batch-1-885c1f
+created_at: '2026-11-06T20:47:58.821129+00:00'
+source_file: cdsp_bilingual.ddic.ddi40.json
+source_path: null
+file_sha256: null
+source_format: ddi-l:4.0:json
+batch_id: 1
+profile: request
+summary:
+  total_candidates: 0
+  threshold: 0.75
+  by_match_type: {}
+  by_resource_type: {}
+  error_count: 0
+  warning_count: 0
+  pending_review_count: 0
+  total_actions: 0
+review_gate:
+  approved: true
+  reviewer: null
+  reviewed_at: null
+  comments: ''
+issues: []
+actions: []

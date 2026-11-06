@@ -25,6 +25,7 @@ from fairwddi.api.schemas import (
     OverviewStats,
     QuestionCascadeGraph,
     QuestionItemSummary,
+    RepresentedVariableUsage,
     SurveyItem,
 )
 from fairwddi.models import (
@@ -491,6 +492,103 @@ def list_aliases(
     return items
 
 
+def _build_codelist_summary(cl: CodeList) -> CodeListSummary:
+    """Build a complete summary of a CodeList and its variable cascade footprint."""
+    cl_name = _extract_display_text(cl.name) or cl.urn
+    cl_desc = _extract_display_text(cl.description)
+
+    codes_info: list[CodeItemInfo] = []
+    for code in cl.codes.all().order_by("order", "code_value"):
+        cat_label = ""
+        cat_urn = ""
+        if code.category:
+            cat_label = _extract_display_text(
+                code.category.label
+            ) or _extract_display_text(code.category.name)
+            cat_urn = code.category.urn
+        codes_info.append(
+            CodeItemInfo(
+                code_value=str(code.code_value),
+                category_label=cat_label,
+                category_urn=cat_urn,
+                is_missing=bool(code.is_missing),
+                order=code.order,
+            )
+        )
+
+    rv_usages: list[RepresentedVariableUsage] = []
+    var_names: list[str] = []
+    questions_map: dict[str, str] = {}
+    surveys_set: set[str] = set()
+
+    for rv in cl.represented_variables.all().order_by("urn"):
+        rv_name = _extract_display_text(rv.name) or rv.urn
+        rv_label = _extract_display_text(rv.label)
+        var_names.append(rv_name)
+
+        q_urn: str | None = None
+        q_name: str | None = None
+        q_text: str | None = None
+        for qa in rv.question_associations.all():
+            qi = qa.question_item
+            q_urn = qi.urn
+            q_name = _extract_display_text(qi.name) or (
+                qi.urn.split(":")[-2] if ":" in qi.urn else qi.urn
+            )
+            q_text = _extract_display_text(
+                qi.question_text
+            ) or _extract_display_text(qi.name)
+            questions_map[qi.urn] = q_text
+            break
+
+        rv_surveys: set[str] = set()
+        iv_names: list[str] = []
+        for iv in rv.instance_variables.all().order_by("urn"):
+            iv_name = _extract_display_text(iv.name) or iv.urn
+            iv_names.append(iv_name)
+            for dfv in iv.datafile_variables.all():
+                if dfv.datafile and dfv.datafile.study_unit:
+                    s_name = _extract_display_text(dfv.datafile.study_unit.name)
+                    surveys_set.add(s_name)
+                    rv_surveys.add(s_name)
+
+        rv_usages.append(
+            RepresentedVariableUsage(
+                urn=rv.urn,
+                name=rv_name,
+                label=rv_label if rv_label and rv_label != rv_name else None,
+                question_urn=q_urn,
+                question_name=q_name,
+                question_text=q_text,
+                instance_variables=sorted(list(set(iv_names))),
+                surveys=sorted(list(rv_surveys)),
+            )
+        )
+
+    is_reused = len(var_names) > 1 or len(surveys_set) > 1
+
+    return CodeListSummary(
+        urn=cl.urn,
+        name=cl_name,
+        description=cl_desc,
+        code_count=len(codes_info),
+        codes=codes_info,
+        variable_count=len(var_names),
+        variable_names=sorted(list(set(var_names))),
+        represented_variables=rv_usages,
+        questions=[
+            CodeListQuestionRef(
+                urn=u,
+                name=u.split(":")[-2] if ":" in u else u,
+                text=t,
+            )
+            for u, t in questions_map.items()
+        ],
+        surveys=sorted(list(surveys_set)),
+        is_reused=is_reused,
+    )
+
+
 @api.get(
     "/codelists",
     response=list[CodeListSummary],
@@ -517,90 +615,30 @@ def list_codelists(
     )
 
     results: list[CodeListSummary] = []
-    q_lower = q.lower().strip()
+    q_lower = q.lower().strip() if isinstance(q, str) else ""
+    is_reused_filter = reused_only if isinstance(reused_only, bool) else False
+    limit_val = limit if isinstance(limit, int) else 100
+    offset_val = offset if isinstance(offset, int) else 0
 
     for cl in qs:
-        cl_name = _extract_display_text(cl.name) or cl.urn
-        cl_desc = _extract_display_text(cl.description)
+        summary = _build_codelist_summary(cl)
 
-        codes_info: list[CodeItemInfo] = []
-        for code in cl.codes.all().order_by("order", "code_value"):
-            cat_label = ""
-            cat_urn = ""
-            if code.category:
-                cat_label = _extract_display_text(
-                    code.category.label
-                ) or _extract_display_text(code.category.name)
-                cat_urn = code.category.urn
-            codes_info.append(
-                CodeItemInfo(
-                    code_value=str(code.code_value),
-                    category_label=cat_label,
-                    category_urn=cat_urn,
-                    is_missing=bool(code.is_missing),
-                    order=code.order,
-                )
-            )
-
-        # Collect variables, questions, and surveys using this CodeList
-        var_names: list[str] = []
-        questions_map: dict[str, str] = {}
-        surveys_set: set[str] = set()
-
-        for rv in cl.represented_variables.all():
-            rv_name = _extract_display_text(rv.name) or rv.urn
-            var_names.append(rv_name)
-            for qa in rv.question_associations.all():
-                qi = qa.question_item
-                q_text = _extract_display_text(qi.question_text) or _extract_display_text(
-                    qi.name
-                )
-                questions_map[qi.urn] = q_text
-
-            for iv in rv.instance_variables.all():
-                for dfv in iv.datafile_variables.all():
-                    if dfv.datafile and dfv.datafile.study_unit:
-                        s_name = _extract_display_text(dfv.datafile.study_unit.name)
-                        surveys_set.add(s_name)
-
-        is_reused = len(var_names) > 1 or len(surveys_set) > 1
-
-        if reused_only and not is_reused:
+        if is_reused_filter and not summary.is_reused:
             continue
 
         if q_lower:
-            name_match = q_lower in cl_name.lower() or q_lower in cl.urn.lower()
+            name_match = q_lower in summary.name.lower() or q_lower in summary.urn.lower()
             code_match = any(
                 q_lower in c.category_label.lower() or q_lower in c.code_value.lower()
-                for c in codes_info
+                for c in summary.codes
             )
-            var_match = any(q_lower in v.lower() for v in var_names)
+            var_match = any(q_lower in v.lower() for v in summary.variable_names)
             if not (name_match or code_match or var_match):
                 continue
 
-        results.append(
-            CodeListSummary(
-                urn=cl.urn,
-                name=cl_name,
-                description=cl_desc,
-                code_count=len(codes_info),
-                codes=codes_info,
-                variable_count=len(var_names),
-                variable_names=sorted(list(set(var_names))),
-                questions=[
-                    CodeListQuestionRef(
-                        urn=u,
-                        name=u.split(":")[-2] if ":" in u else u,
-                        text=t,
-                    )
-                    for u, t in questions_map.items()
-                ],
-                surveys=sorted(list(surveys_set)),
-                is_reused=is_reused,
-            )
-        )
+        results.append(summary)
 
-    return results[offset : offset + limit]
+    return results[offset_val : offset_val + limit_val]
 
 
 @api.get(
@@ -712,69 +750,7 @@ def get_codelist(request: Any, urn: str) -> CodeListSummary:
     if not cl:
         raise ValueError(f"CodeList '{urn}' not found.")
 
-    cl_name = _extract_display_text(cl.name) or cl.urn
-    cl_desc = _extract_display_text(cl.description)
-
-    codes_info: list[CodeItemInfo] = []
-    for code in cl.codes.all().order_by("order", "code_value"):
-        cat_label = ""
-        cat_urn = ""
-        if code.category:
-            cat_label = _extract_display_text(
-                code.category.label
-            ) or _extract_display_text(code.category.name)
-            cat_urn = code.category.urn
-        codes_info.append(
-            CodeItemInfo(
-                code_value=str(code.code_value),
-                category_label=cat_label,
-                category_urn=cat_urn,
-                is_missing=bool(code.is_missing),
-                order=code.order,
-            )
-        )
-
-    var_names: list[str] = []
-    questions_map: dict[str, str] = {}
-    surveys_set: set[str] = set()
-
-    for rv in cl.represented_variables.all():
-        rv_name = _extract_display_text(rv.name) or rv.urn
-        var_names.append(rv_name)
-        for qa in rv.question_associations.all():
-            qi = qa.question_item
-            q_text = _extract_display_text(
-                qi.question_text
-            ) or _extract_display_text(qi.name)
-            questions_map[qi.urn] = q_text
-
-        for iv in rv.instance_variables.all():
-            for dfv in iv.datafile_variables.all():
-                if dfv.datafile and dfv.datafile.study_unit:
-                    s_name = _extract_display_text(dfv.datafile.study_unit.name)
-                    surveys_set.add(s_name)
-
-    is_reused = len(var_names) > 1 or len(surveys_set) > 1
-
-    return CodeListSummary(
-        urn=cl.urn,
-        name=cl_name,
-        description=cl_desc,
-        code_count=len(codes_info),
-        codes=codes_info,
-        variable_count=len(var_names),
-        variable_names=sorted(list(set(var_names))),
-        questions=[
-            CodeListQuestionRef(
-                urn=u,
-                name=u.split(":")[-2] if ":" in u else u,
-                text=t,
-            )
-            for u, t in questions_map.items()
-        ],
-        surveys=sorted(list(surveys_set)),
-        is_reused=is_reused,
-    )
+    return _build_codelist_summary(cl)
 
 
 @api.get(

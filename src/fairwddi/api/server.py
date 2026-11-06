@@ -38,5 +38,10 @@ def run_server(host: str = "127.0.0.1", port: int = 8000, open_browser: bool = F
     if open_browser:
         Timer(1.0, lambda: webbrowser.open(app_url)).start()
 
-    application = get_wsgi_application()
-    basehttp.run(host, port, application)
+    def _serve() -> None:
+        application = get_wsgi_application()
+        basehttp.run(host, port, application)
+
+    import django.utils.autoreload as autoreload
+
+    autoreload.run_with_reloader(_serve)

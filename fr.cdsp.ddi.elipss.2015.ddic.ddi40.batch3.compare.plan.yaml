@@ -1,0 +1,1335 @@
+plan_version: '1.0'
+stage: compare
+job_id: compare-batch-3-cee551
+created_at: '2026-11-06T19:43:02.734449+00:00'
+source_file: fr.cdsp.ddi.elipss.2015.ddic.ddi40.json
+source_path: null
+file_sha256: null
+source_format: ddi-l:4.0:json
+batch_id: 3
+profile: request
+summary:
+  total_candidates: 63
+  threshold: 0.75
+  by_match_type:
+    FACET_EXACT: 63
+  by_resource_type:
+    CodeList: 63
+  error_count: 0
+  warning_count: 0
+  pending_review_count: 0
+  total_actions: 63
+review_gate:
+  approved: false
+  reviewer: null
+  reviewed_at: null
+  comments: ''
+issues: []
+actions:
+- id: cmp-0001
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V107:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V98:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_E1A
+    target_name: CL_ea14_E1A
+    code_count: 3
+    codes:
+    - '1: oui'
+    - '2: non'
+    - '3: je ne sais pas'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0002
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V117:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V108:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_E2A_rec
+    target_name: CL_ea14_E2A_rec
+    code_count: 13
+    codes:
+    - '3: (moins de 800 €)'
+    - '4: de 800 à moins de 1000 €'
+    - '5: de 1000 à moins de 1200 €'
+    - '6: de 1200 à moins de 1500 €'
+    - '7: de 1500 à moins de 1800 €'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0003
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V118:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V109:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_E2AUC
+    target_name: CL_ea14_E2AUC
+    code_count: 12
+    codes:
+    - '1: moins de 650 €'
+    - '2: de 650 à moins de 950 €'
+    - '3: de 950 à moins de 1200 €'
+    - '4: de 1200 à moins de 1400 €'
+    - '5: de 1400 à moins de 1650 €'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0004
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V119:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V110:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_E2AUC_SOURCE
+    target_name: CL_ea14_E2AUC_SOURCE
+    code_count: 3
+    codes:
+    - '1: à partir du montant déclaré des ressources'
+    - '2: à partir de la tranche déclarée des ressources'
+    - '3: non calculé'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0005
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V136:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V127:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_E5C
+    target_name: CL_ea14_E5C
+    code_count: 4
+    codes:
+    - '1: s''améliorer'
+    - '2: rester sensiblement la même'
+    - '3: s''aggraver'
+    - '9: n''a pas répondu'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0006
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V137:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V128:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_E5
+    target_name: CL_ea14_E5
+    code_count: 7
+    codes:
+    - '1: vous ne pouvez pas y arriver sans faire de dettes'
+    - '2: vous y arrivez difficilement'
+    - '3: c''est juste, il faut faire attention'
+    - '4: ça va'
+    - '5: vous êtes plutôt à l''aise'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0007
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V138:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V129:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_F1
+    target_name: CL_ea14_F1
+    code_count: 6
+    codes:
+    - '1: au moins une fois par semaine'
+    - '2: une, deux ou trois fois par mois'
+    - '3: plusieurs fois dans l''année (mais moins d''une fois par mois)'
+    - '4: seulement pour des occasions exceptionnelles'
+    - '5: jamais'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0008
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V140:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V131:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_F3
+    target_name: CL_ea14_F3
+    code_count: 5
+    codes:
+    - '1: il n''y en a pas'
+    - '2: 1 ou 2 personnes'
+    - '3: entre 3 et 5 personnes'
+    - '4: 6 personnes ou plus'
+    - '8: ne sait pas'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0009
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V141:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V132:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_F4
+    target_name: CL_ea14_F4
+    code_count: 6
+    codes:
+    - '1: très seul(e)'
+    - '2: plutôt seul(e)'
+    - '3: plutôt entouré(e)'
+    - '4: très entouré(e)'
+    - '7: refuse de répondre'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0010
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V142:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V133:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_F5
+    target_name: CL_ea14_F5
+    code_count: 3
+    codes:
+    - '1: on peut faire confiance à la plupart des gens'
+    - '2: on n''est jamais assez prudent quand on a affaire aux autres'
+    - '8: ne sait pas'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0011
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V144:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V135:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_G2
+    target_name: CL_ea14_G2
+    code_count: 7
+    codes:
+    - '1: aucun'
+    - '2: moins de 6'
+    - '3: de 6 à moins de 12'
+    - '4: de 12 à 24 (c''est-à-dire entre 1 et 2 par mois)'
+    - '5: de 24 à 50 (c''est-à-dire plus de 2 livres par mois)'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0012
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V145:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V136:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_G3A
+    target_name: CL_ea14_G3A
+    code_count: 6
+    codes:
+    - '1: jamais'
+    - '2: 1 à 3 fois'
+    - '3: 4 à 6 fois'
+    - '4: 7 à 12 fois'
+    - '5: plus de 12 fois'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0013
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V154:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V145:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_G5A_rec
+    target_name: CL_ea14_G5A_rec
+    code_count: 10
+    codes:
+    - '1: allemand'
+    - '2: anglais'
+    - '3: arabe'
+    - '4: espagnol'
+    - '5: italien'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0014
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V155:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V146:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_H1_rec
+    target_name: CL_ea14_H1_rec
+    code_count: 7
+    codes:
+    - '1: aucune'
+    - '2: catholique'
+    - '3: protestante'
+    - '4: musulmane'
+    - '5: (autre religion)'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0015
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V157:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V148:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_H2
+    target_name: CL_ea14_H2
+    code_count: 6
+    codes:
+    - '1: pas du tout d''importance'
+    - '2: un peu d''importance'
+    - '3: assez d''importance'
+    - '4: beaucoup d''importance'
+    - '7: refuse de répondre'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0016
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V158:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V149:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_H3
+    target_name: CL_ea14_H3
+    code_count: 8
+    codes:
+    - '1: plusieurs fois par semaine'
+    - '2: une fois par semaine'
+    - '3: une ou deux fois par mois'
+    - '4: de temps en temps, aux grandes fêtes'
+    - '5: uniquement pour les cérémonies, mariages'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0017
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V160:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V151:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_H4A_rec
+    target_name: CL_ea14_H4A_rec
+    code_count: 7
+    codes:
+    - '1: catholique'
+    - '2: protestante'
+    - '3: musulmane'
+    - '4: (autre religion)'
+    - '6: non concerné'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0018
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V161:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V152:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_H5
+    target_name: CL_ea14_H5
+    code_count: 7
+    codes:
+    - '1: plusieurs fois par jour'
+    - '2: une fois par jour'
+    - '3: souvent'
+    - '4: rarement'
+    - '5: jamais'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0019
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V168:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V156:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_J7A
+    target_name: CL_ea14_J7A
+    code_count: 6
+    codes:
+    - '1: en permanence'
+    - '2: souvent'
+    - '3: quelquefois'
+    - '4: rarement'
+    - '5: jamais'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0020
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V179:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V167:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_K2_rec
+    target_name: CL_ea14_K2_rec
+    code_count: 11
+    codes:
+    - '1: moins de 55 kg'
+    - '2: entre 55 et 59 kg'
+    - '3: entre 60 et 64 kg'
+    - '4: entre 65 et 69 kg'
+    - '5: entre 70 et 74 kg'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0021
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V180:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V168:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_K3
+    target_name: CL_ea14_K3
+    code_count: 6
+    codes:
+    - '1: tous les jours ou presque'
+    - '2: plusieurs fois par semaine'
+    - '3: une fois par semaine'
+    - '4: une à trois fois par mois'
+    - '5: moins souvent'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0022
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V181:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V169:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_K4
+    target_name: CL_ea14_K4
+    code_count: 9
+    codes:
+    - '1: tous les jours'
+    - '2: quatre fois par semaine ou plus'
+    - '3: deux ou trois fois par semaine'
+    - '4: une fois par semaine'
+    - '5: deux à quatre fois par mois'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0023
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V182:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V170:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_K5A
+    target_name: CL_ea14_K5A
+    code_count: 8
+    codes:
+    - '1: 1 ou 2 verres'
+    - '2: 3 ou 4 verres'
+    - '3: 5 ou 6 verres'
+    - '4: 7 à 9 verres'
+    - '5: 10 verres ou plus'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0024
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V183:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V171:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_K5B
+    target_name: CL_ea14_K5B
+    code_count: 8
+    codes:
+    - '1: jamais'
+    - '2: moins d''une fois par mois'
+    - '3: une fois par mois'
+    - '4: une fois par semaine'
+    - '5: tous les jours ou presque'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0025
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V193:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2013.04.ea-codelists.cl_V175:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_insee_NUTS1
+    target_name: CL_insee_NUTS1
+    code_count: 9
+    codes:
+    - '1: fr1 : région parisienne'
+    - '2: fr2 : bassin parisien'
+    - '3: fr3 : nord'
+    - '4: fr4 : est'
+    - '5: fr5 : ouest'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0026
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V193:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V180:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_insee_NUTS1
+    target_name: CL_insee_NUTS1
+    code_count: 9
+    codes:
+    - '1: fr1 : région parisienne'
+    - '2: fr2 : bassin parisien'
+    - '3: fr3 : nord'
+    - '4: fr4 : est'
+    - '5: fr5 : ouest'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0027
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V194:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2013.04.ea-codelists.cl_V176:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_insee_CATAEU2010
+    target_name: CL_insee_CATAEU2010
+    code_count: 9
+    codes:
+    - '111: commune appartenant à un grand pôle (10 000 emplois ou plus)'
+    - '112: commune appartenant à la couronne d''un grand pôle'
+    - '120: commune multipolarisée des grandes aires urbaines'
+    - '211: commune appartenant à un moyen pôle (5 000 à moins de 10 000 emplois)'
+    - '212: commune appartenant à la couronne d''un moyen pôle'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0028
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V194:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V181:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_insee_CATAEU2010
+    target_name: CL_insee_CATAEU2010
+    code_count: 9
+    codes:
+    - '111: commune appartenant à un grand pôle (10 000 emplois ou plus)'
+    - '112: commune appartenant à la couronne d''un grand pôle'
+    - '120: commune multipolarisée des grandes aires urbaines'
+    - '211: commune appartenant à un moyen pôle (5 000 à moins de 10 000 emplois)'
+    - '212: commune appartenant à la couronne d''un moyen pôle'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0029
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V195:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2013.04.ea-codelists.cl_V177:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_insee_TAU2014
+    target_name: CL_insee_TAU2014
+    code_count: 11
+    codes:
+    - '0: commune hors aire urbaine'
+    - '1: commune appartenant à une unité urbaine de 2 000 à 4 999 habitants'
+    - '2: commune appartenant à une unité urbaine de 5 000 à 9 999 habitants'
+    - '3: commune appartenant à une unité urbaine de 10 000 à 19 999 habitants'
+    - '4: commune appartenant à une unité urbaine de 20 000 à 49 999 habitants'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0030
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V195:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V182:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_insee_TAU2014
+    target_name: CL_insee_TAU2014
+    code_count: 11
+    codes:
+    - '0: commune hors aire urbaine'
+    - '1: commune appartenant à une unité urbaine de 2 000 à 4 999 habitants'
+    - '2: commune appartenant à une unité urbaine de 5 000 à 9 999 habitants'
+    - '3: commune appartenant à une unité urbaine de 10 000 à 19 999 habitants'
+    - '4: commune appartenant à une unité urbaine de 20 000 à 49 999 habitants'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0031
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V196:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2013.04.ea-codelists.cl_V178:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_insee_TUU2014
+    target_name: CL_insee_TUU2014
+    code_count: 9
+    codes:
+    - '0: commune rurale'
+    - '1: commune appartenant à une unité urbaine de 2 000 à 4 999 habitants'
+    - '2: commune appartenant à une unité urbaine de 5 000 à 9 999 habitants'
+    - '3: commune appartenant à une unité urbaine de 10 000 à 19 999 habitants'
+    - '4: commune appartenant à une unité urbaine de 20 000 à 49 999 habitants'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0032
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V196:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V183:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_insee_TUU2014
+    target_name: CL_insee_TUU2014
+    code_count: 9
+    codes:
+    - '0: commune rurale'
+    - '1: commune appartenant à une unité urbaine de 2 000 à 4 999 habitants'
+    - '2: commune appartenant à une unité urbaine de 5 000 à 9 999 habitants'
+    - '3: commune appartenant à une unité urbaine de 10 000 à 19 999 habitants'
+    - '4: commune appartenant à une unité urbaine de 20 000 à 49 999 habitants'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0033
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V198:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2013.04.ea-codelists.cl_V180:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_cal_SEXE
+    target_name: CL_cal_SEXE
+    code_count: 2
+    codes:
+    - '1: homme'
+    - '2: femme'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0034
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V198:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V185:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_cal_SEXE
+    target_name: CL_cal_SEXE
+    code_count: 2
+    codes:
+    - '1: homme'
+    - '2: femme'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0035
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V199:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2013.04.ea-codelists.cl_V181:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_cal_AGE1
+    target_name: CL_cal_AGE1
+    code_count: 6
+    codes:
+    - '1: 18-24 ans'
+    - '2: 25-34 ans'
+    - '3: 35-44 ans'
+    - '4: 45-54 ans'
+    - '5: 55-64 ans'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0036
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V199:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V186:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_cal_AGE1
+    target_name: CL_cal_AGE1
+    code_count: 6
+    codes:
+    - '1: 18-24 ans'
+    - '2: 25-34 ans'
+    - '3: 35-44 ans'
+    - '4: 45-54 ans'
+    - '5: 55-64 ans'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0037
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V200:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2013.04.ea-codelists.cl_V182:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_cal_AGE2
+    target_name: CL_cal_AGE2
+    code_count: 7
+    codes:
+    - '1: 18-22 ans'
+    - '2: 23-34 ans'
+    - '3: 35-44 ans'
+    - '4: 45-54 ans'
+    - '5: 55-64 ans'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0038
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V200:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V187:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_cal_AGE2
+    target_name: CL_cal_AGE2
+    code_count: 7
+    codes:
+    - '1: 18-22 ans'
+    - '2: 23-34 ans'
+    - '3: 35-44 ans'
+    - '4: 45-54 ans'
+    - '5: 55-64 ans'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0039
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V201:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2013.04.ea-codelists.cl_V183:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_cal_NAT
+    target_name: CL_cal_NAT
+    code_count: 3
+    codes:
+    - '1: français(e)'
+    - '2: a acquis la nationalité française'
+    - '3: nationalité étrangère'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0040
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V201:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V188:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_cal_NAT
+    target_name: CL_cal_NAT
+    code_count: 3
+    codes:
+    - '1: français(e)'
+    - '2: a acquis la nationalité française'
+    - '3: nationalité étrangère'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0041
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V202:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2013.04.ea-codelists.cl_V184:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_cal_DIPL
+    target_name: CL_cal_DIPL
+    code_count: 4
+    codes:
+    - '1: aucun/cep/bepc'
+    - '2: cap/bep'
+    - '3: bac/bac+2'
+    - '4: bac+3 et plus'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0042
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V202:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V189:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_cal_DIPL
+    target_name: CL_cal_DIPL
+    code_count: 4
+    codes:
+    - '1: aucun/cep/bepc'
+    - '2: cap/bep'
+    - '3: bac/bac+2'
+    - '4: bac+3 et plus'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0043
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V203:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2013.04.ea-codelists.cl_V185:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_cal_ZEAT
+    target_name: CL_cal_ZEAT
+    code_count: 8
+    codes:
+    - '1: région parisienne'
+    - '2: bassin parisien'
+    - '3: nord'
+    - '4: est'
+    - '5: ouest'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0044
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V203:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V190:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_cal_ZEAT
+    target_name: CL_cal_ZEAT
+    code_count: 8
+    codes:
+    - '1: région parisienne'
+    - '2: bassin parisien'
+    - '3: nord'
+    - '4: est'
+    - '5: ouest'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0045
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V26:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V78:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_A3B_rec
+    target_name: CL_ea14_B22_rec
+    code_count: 4
+    codes:
+    - '1: france'
+    - '2: union européenne'
+    - '3: hors union européenne'
+    - '9: n''a pas répondu'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0046
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V27:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V20:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_A3_rec
+    target_name: CL_ea14_A3_rec
+    code_count: 4
+    codes:
+    - '1: oui, de naissance'
+    - '2: (oui par réintégration, naturalisation, par mariage, par déclaration ou
+      option à la majorité (ou avant))'
+    - '3: non'
+    - '4: apatride'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0047
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V31:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V24:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_A4
+    target_name: CL_ea14_A4
+    code_count: 5
+    codes:
+    - '1: célibataire (jamais légalement marié(e))'
+    - '2: marié(e) (ou séparé(e) mais non divorcé(e))'
+    - '3: divorcé(e)'
+    - '4: veuf(ve)'
+    - '7: refuse de répondre'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0048
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V33:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V26:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_A5A
+    target_name: CL_ea14_A5A
+    code_count: 6
+    codes:
+    - '1: marié(e)'
+    - '2: pacsé(e)'
+    - '3: en union libre, en concubinage'
+    - '4: autre'
+    - '6: non concerné'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0049
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V34:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V27:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_A5C_rec
+    target_name: CL_ea14_A5C_rec
+    code_count: 9
+    codes:
+    - '1: moins de 2 ans'
+    - '2: de 2 à 4 ans'
+    - '3: de 5 à 9 ans'
+    - '4: de 10 à 14 ans'
+    - '5: de 15 à 19 ans'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0050
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V44:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V37:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_B5A
+    target_name: CL_ea14_B5A
+    code_count: 4
+    codes:
+    - '1: à temps complet'
+    - '2: à temps partiel'
+    - '6: non concerné'
+    - '9: n''a pas répondu'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0051
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V45:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V38:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_B5B_rec
+    target_name: CL_ea14_B5B_rec
+    code_count: 6
+    codes:
+    - '1: moins d''un mi-temps (moins de 50%)'
+    - '2: mi-temps (50%)'
+    - '3: entre 50 et 80%'
+    - '4: (80% et plus)'
+    - '6: non concerné'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0052
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V46:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V39:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_B5C
+    target_name: CL_ea14_B5C
+    code_count: 8
+    codes:
+    - '1: pour exercer une autre activité professionnelle, ou suivre des études ou
+      une formation'
+    - '2: pour raison de santé'
+    - '3: vous n''avez pas trouvé d''emploi à temps plein'
+    - '4: pour vous occuper de vos enfants, ou d''un autre membre de votre famille'
+    - '5: pour disposer de temps libre ou faire des travaux domestiques'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0053
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V52:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V45:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_B10D
+    target_name: CL_ea14_B10D
+    code_count: 4
+    codes:
+    - '1: oui, et la durée totale de la (des) période(s) de chômage n''a pas dépassé
+      3 mois cumulés'
+    - '2: oui, et la durée totale de la (des) période(s) de chômage a dépassé 3 mois
+      cumulés'
+    - '3: non, aucune'
+    - '6: non concerné'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0054
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V53:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V46:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_B10A
+    target_name: CL_ea14_B10A
+    code_count: 5
+    codes:
+    - '1: oui, depuis moins d''un an'
+    - '2: oui, depuis un an ou plus'
+    - '3: non'
+    - '6: non concerné'
+    - '7: refuse de répondre'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0055
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V56:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V49:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_B18_rec
+    target_name: CL_ea14_B18_rec
+    code_count: 11
+    codes:
+    - '1: (aucun diplôme)'
+    - '4: cep (certificat d''études primaires)'
+    - '5: bepc, brevet élementaire, brevet des collèges'
+    - '6: cap, brevet de compagnon'
+    - '7: bep'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0056
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V57:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V50:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_B18C
+    target_name: CL_ea14_B18C
+    code_count: 7
+    codes:
+    - '1: niveau vi : sans diplôme ou brevet des collèges'
+    - '2: niveau v : cap ou bep'
+    - '3: niveau iv : baccalauréat général, technologique ou professionnel'
+    - '4: niveau iii : diplômes de niveau bac+2 (dut, bts, deug, écoles des formations
+      sanitaires ou sociales,...)'
+    - '5: niveau ii et i : diplômes de 2nd et 3e cycle universitaire (licence, maîtrise,
+      master, dea, dess, doctorat) ou diplôme de grande école'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0057
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V83:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V74:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_C8A_rec
+    target_name: CL_ea14_C8A_rec
+    code_count: 5
+    codes:
+    - '1: 1 enfant'
+    - '2: 2 enfants'
+    - '3: 3 enfants ou plus'
+    - '6: non concerné'
+    - '7: refuse de répondre'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0058
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V84:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V75:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_C8B_rec
+    target_name: CL_ea14_C8B_rec
+    code_count: 6
+    codes:
+    - '1: 0 enfant'
+    - '2: 1 enfant'
+    - '3: 2 enfants'
+    - '4: 3 enfants ou plus'
+    - '6: non concerné'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0059
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V85:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V76:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_B20
+    target_name: CL_ea14_B20
+    code_count: 12
+    codes:
+    - '1: agriculteur exploitant, aide familiale dans l''agriculture'
+    - '2: artisan, commerçant, chef d''entreprise'
+    - '3: cadre, profession libérale'
+    - '4: profession intermédiaire (hors enseignement), technicien'
+    - '5: professeur, cadre de l''enseignement, instituteur'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0060
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V90:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V81:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_D1_rec
+    target_name: CL_ea14_D1_rec
+    code_count: 6
+    codes:
+    - '1: propriétaire (ou copropriétaire) : vous ne payez pas de crédit immobilier
+      pour ce logement'
+    - '2: accédant à la propriété : vous payez toujours un crédit immobilier pour
+      ce logement'
+    - '3: (locataire, sous-locataire)'
+    - '5: occupant à titre gratuit'
+    - '7: refuse de répondre'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0061
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V92:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V83:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_D2
+    target_name: CL_ea14_D2
+    code_count: 7
+    codes:
+    - '1: votre conjoint'
+    - '2: un autre membre de votre foyer'
+    - '3: une autre personne de votre famille'
+    - '4: une personne hors de votre famille, ou une société privée'
+    - '6: non concerné'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0062
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V93:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V84:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_D3
+    target_name: CL_ea14_D3
+    code_count: 4
+    codes:
+    - '1: une maison individuelle'
+    - '2: un appartement'
+    - '3: autre'
+    - '6: non concerné'
+  notes: FACET_EXACT match (confidence=0.95)
+- id: cmp-0063
+  stage: compare
+  action: alias
+  resource_type: CodeList
+  source_urn: urn:ddi:fr.cdsp:fr.cdsp.ddi.elipss.2015.03.ea-codelists.cl_V96:3.0.0
+  target_urn: urn:ddi:fr.cdsp:fr.cdsp.elipss.ddi.2014.03.ea-codelists.cl_V87:3.0.0
+  confidence: 0.95
+  match_type: FACET_EXACT
+  requires_review: false
+  approved: true
+  details:
+    source_name: CL_ea15_D6
+    target_name: CL_ea14_D6
+    code_count: 7
+    codes:
+    - '1: maisons dispersées, hors agglomération'
+    - '2: maisons en lotissement, en quartier pavillonnaire ou en ville'
+    - '3: immeubles en ville (autres que cité ou grand ensemble)'
+    - '4: immeubles en cité ou grand ensemble'
+    - '5: habitat mixte : à la fois immeubles et maisons'
+  notes: FACET_EXACT match (confidence=0.95)
