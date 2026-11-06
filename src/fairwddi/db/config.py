@@ -127,6 +127,7 @@ def configure_django_for_cli() -> None:
         DATABASES={
             "default": db_config,
         },
+        ROOT_URLCONF="fairwddi.api.urls",
         USE_TZ=True,
     )
     django.setup()

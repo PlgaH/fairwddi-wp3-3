@@ -1126,5 +1126,23 @@ def harmonize_undo_cmd(
     )
 
 
+@app.command("serve")
+def serve_cmd(
+    host: str = typer.Option("127.0.0.1", "--host", "-h", help="Bind host address."),
+    port: int = typer.Option(8000, "--port", "-p", help="Bind port number."),
+    open_browser: bool = typer.Option(
+        False, "--open", "-o", help="Automatically open browser to Visual Explorer."
+    ),
+) -> None:
+    """Launch the interactive Question Bank & Harmonization Explorer web app and REST API."""
+    configure_django_for_cli()
+    from fairwddi.api.server import run_server
+
+    try:
+        run_server(host=host, port=port, open_browser=open_browser)
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Server stopped.[/yellow]")
+
+
 if __name__ == "__main__":
     app()

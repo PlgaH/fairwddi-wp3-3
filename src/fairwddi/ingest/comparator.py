@@ -284,8 +284,30 @@ def _compare_pair(
             # Check if code values are identical with complementary languages in labels
             vals_a = [v for v, _, _ in codes_a]
             vals_b = [v for v, _, _ in codes_b]
-            langs_a = set((rec_a.get("text") or {}).keys())
-            langs_b = set((rec_b.get("text") or {}).keys())
+            text_a = rec_a.get("text")
+            text_b = rec_b.get("text")
+            langs_a = (
+                set(text_a.keys())
+                if isinstance(text_a, dict)
+                else {
+                    item["lang"]
+                    for item in text_a
+                    if isinstance(item, dict) and "lang" in item
+                }
+                if isinstance(text_a, list)
+                else set()
+            )
+            langs_b = (
+                set(text_b.keys())
+                if isinstance(text_b, dict)
+                else {
+                    item["lang"]
+                    for item in text_b
+                    if isinstance(item, dict) and "lang" in item
+                }
+                if isinstance(text_b, list)
+                else set()
+            )
             if vals_a == vals_b and langs_a and langs_b and langs_a != langs_b:
                 return {
                     "resource_type": "CodeList",

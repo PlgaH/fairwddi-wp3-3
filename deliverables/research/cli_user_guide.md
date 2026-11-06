@@ -925,3 +925,28 @@ from fairwddi.models import (
 for rv in RepresentedVariable.objects.select_related("conceptual_variable").all():
     print(f"RepresentedVariable: {rv.urn} -> Concept: {rv.conceptual_variable.urn}")
 ```
+
+---
+
+## 7. Interactive Visual Explorer & REST API (`fairwddi serve`)
+
+For stakeholder demonstrations, cross-survey harmonization reviews, and visual question bank exploration, `fairwddi` provides a built-in interactive Single-Page Application (SPA) powered by `django-ninja`:
+
+```bash
+# Start server and auto-open the browser to the visual explorer
+uv run fairwddi serve --open
+
+# Or specify host and port
+uv run fairwddi serve --host 127.0.0.1 --port 8000
+```
+
+### URLs Provided
+- **Interactive Visual Explorer:** `http://127.0.0.1:8000/explorer`
+- **Interactive Swagger / OpenAPI Docs:** `http://127.0.0.1:8000/api/docs`
+- **REST API Base URL:** `http://127.0.0.1:8000/api`
+
+### Core Explorer Capabilities
+1. **DDI Variable Cascade Visualizer:** Click any canonical question to inspect its complete node-link lineage graph (`ConceptualVariable` $\rightarrow$ `RepresentedVariable` $\rightarrow$ `[InstanceVariables across waves]`), with inbound dashed arrows showing historical `URNAlias` provenance links.
+2. **Cross-Wave Survey Harmonization Matrix:** Side-by-side comparison table (e.g. ELIPSS 2013 vs 2014) showing how repeated survey questions share identical canonical entities.
+3. **URN Alias Crosswalk Directory:** Real-time lookup resolving historical wave URNs to canonical database master records.
+4. **Entity Inspector:** Slide-out drawer with syntax-highlighted multilingual text, content hashes, and dataset column metadata.
