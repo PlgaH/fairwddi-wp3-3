@@ -250,7 +250,11 @@ def _compare_pair(
                     "confidence": 0.95,
                     "recommended_action": "alias",
                     "requires_review": False,
-                    "details": {"code_count": len(pairs_a)},
+                    "details": {
+                        "source_name": rec_a.get("name"),
+                        "target_name": rec_b.get("name"),
+                        "code_count": len(pairs_a),
+                    },
                 }
 
             subst_a = {(v, lbl) for v, lbl, miss in codes_a if not miss and lbl}
@@ -264,7 +268,11 @@ def _compare_pair(
                     "confidence": 0.88,
                     "recommended_action": "link_semantic",
                     "requires_review": True,
-                    "details": {"substantive_codes": len(subst_a)},
+                    "details": {
+                        "source_name": rec_a.get("name"),
+                        "target_name": rec_b.get("name"),
+                        "substantive_codes": len(subst_a),
+                    },
                 }
 
             cats_a = {lbl for _, lbl, miss in codes_a if not miss and lbl}
@@ -278,7 +286,11 @@ def _compare_pair(
                     "confidence": 0.85,
                     "recommended_action": "link_semantic",
                     "requires_review": True,
-                    "details": {"shared_categories": sorted(cats_a)},
+                    "details": {
+                        "source_name": rec_a.get("name"),
+                        "target_name": rec_b.get("name"),
+                        "shared_categories": sorted(cats_a),
+                    },
                 }
 
             # Check if code values are identical with complementary languages in labels
@@ -397,21 +409,32 @@ def discover_candidates(
         scoped_urns = iv_rvs
 
     candidates: list[dict[str, Any]] = []
+    seen_pairs: set[tuple[str, str]] = set()
+
     for r_type in target_types:
         records = _load_resource_records(r_type, query=query)
         n = len(records)
         for i in range(n):
-            rec_a = records[i]
             for j in range(i + 1, n):
-                rec_b = records[j]
+                item_a = records[i]
+                item_b = records[j]
                 if scoped_urns is not None:
-                    if rec_a["urn"] not in scoped_urns and rec_b["urn"] not in scoped_urns:
+                    if item_a["urn"] not in scoped_urns and item_b["urn"] not in scoped_urns:
                         continue
                     # Ensure source_urn is the one from the scoped batch/study
-                    if rec_b["urn"] in scoped_urns and rec_a["urn"] not in scoped_urns:
-                        rec_a, rec_b = rec_b, rec_a
+                    if item_b["urn"] in scoped_urns and item_a["urn"] not in scoped_urns:
+                        src_item, tgt_item = item_b, item_a
+                    else:
+                        src_item, tgt_item = item_a, item_b
+                else:
+                    src_item, tgt_item = item_a, item_b
 
-                cand = _compare_pair(rec_a, rec_b, threshold=threshold)
+                pair_key = (src_item["urn"], tgt_item["urn"])
+                if pair_key in seen_pairs:
+                    continue
+                seen_pairs.add(pair_key)
+
+                cand = _compare_pair(src_item, tgt_item, threshold=threshold)
                 if cand is not None:
                     candidates.append(cand)
 
@@ -423,6 +446,8 @@ def compare_batch(
     batch_id: int,
     threshold: float = 0.75,
     output_dir: str | Path | None = None,
+    limit: int = 1000,
+    resource_type: str | None = None,
 ) -> IngestPlan:
     """Compare resources from an IngestBatch against the bank and return a Compare Plan."""
     from fairwddi.models import IngestBatch
@@ -431,13 +456,21 @@ def compare_batch(
     if not batch:
         raise ValueError(f"IngestBatch #{batch_id} does not exist.")
 
-    candidates = discover_candidates(batch_id=batch_id, threshold=threshold, limit=500)
+    candidates = discover_candidates(
+        resource_type=resource_type,
+        batch_id=batch_id,
+        threshold=threshold,
+        limit=limit,
+    )
     actions: list[PlanActionItem] = []
     by_match_type: dict[str, int] = {}
+    by_resource_type: dict[str, int] = {}
 
     for idx, cand in enumerate(candidates, start=1):
         m_type = cand["match_type"]
+        r_type = cand["resource_type"]
         by_match_type[m_type] = by_match_type.get(m_type, 0) + 1
+        by_resource_type[r_type] = by_resource_type.get(r_type, 0) + 1
         actions.append(
             PlanActionItem(
                 id=f"cmp-{idx:04d}",
@@ -465,6 +498,7 @@ def compare_batch(
             "total_candidates": len(candidates),
             "threshold": threshold,
             "by_match_type": by_match_type,
+            "by_resource_type": by_resource_type,
         },
         actions=actions,
         review_gate=ReviewGate(approved=(len(candidates) == 0)),

@@ -841,6 +841,13 @@ EXPLORER_HTML = """<!DOCTYPE html>
     }
 
     async function navigateTo(tab, urn) {
+      if (tab === 'explorer') {
+        selectedQuestionUrn = urn;
+      } else if (tab === 'codelists') {
+        selectedCodeListUrn = urn;
+      } else if (tab === 'categories') {
+        selectedCategoryUrn = urn;
+      }
       switchTab(tab, false);
       if (tab === 'explorer') {
         if (currentQuestions.length === 0) await loadQuestions();
@@ -1483,7 +1490,9 @@ EXPLORER_HTML = """<!DOCTYPE html>
           const res = await fetch(`/api/codelists/${encodeURIComponent(urn)}`);
           if (res.ok) {
             cl = await res.json();
-            currentCodeLists.unshift(cl);
+            if (!currentCodeLists.some(x => x.urn === cl.urn)) {
+              currentCodeLists.unshift(cl);
+            }
           }
         } catch (e) {
           console.error("Failed to fetch codelist detail", e);
@@ -1539,9 +1548,9 @@ EXPLORER_HTML = """<!DOCTYPE html>
                   <td style="font-weight: 500;">
                     ${escapeHtml(c.category_label || '(no label)')}
                     ${c.category_urn ? `
-                      <a href="javascript:void(0)" onclick="navigateTo('categories', '${c.category_urn}');" class="action-btn" style="margin-left: 8px; font-size: 10px; padding: 2px 6px;">
+                      <button type="button" class="action-btn" onclick="navigateTo('categories', '${escapeHtml(c.category_urn)}');" style="margin-left: 8px; font-size: 10px; padding: 2px 6px;">
                         Inspect Category ↗
-                      </a>
+                      </button>
                     ` : ''}
                   </td>
                   <td>
@@ -1572,7 +1581,7 @@ EXPLORER_HTML = """<!DOCTYPE html>
                     <td style="font-family: var(--font-mono); font-weight: 600; color: #10b981;">${escapeHtml(q.name)}</td>
                     <td>${escapeHtml(q.text)}</td>
                     <td>
-                      <button class="action-btn" onclick="navigateTo('explorer', '${q.urn}');">
+                      <button type="button" class="action-btn" onclick="navigateTo('explorer', '${escapeHtml(q.urn)}');">
                         View Cascade ↗
                       </button>
                     </td>
@@ -1693,7 +1702,9 @@ EXPLORER_HTML = """<!DOCTYPE html>
           const res = await fetch(`/api/categories/${encodeURIComponent(urn)}`);
           if (res.ok) {
             cat = await res.json();
-            currentCategories.unshift(cat);
+            if (!currentCategories.some(x => x.urn === cat.urn)) {
+              currentCategories.unshift(cat);
+            }
           }
         } catch (e) {
           console.error("Failed to fetch category detail", e);
@@ -1765,7 +1776,7 @@ EXPLORER_HTML = """<!DOCTYPE html>
                   <td style="font-family: var(--font-mono); font-weight: 700; color: #818cf8; text-align: center; vertical-align: middle;">${escapeHtml(cr.code_value)}</td>
                   <td style="vertical-align: middle;">${cr.is_missing ? '<span style="color: #f87171; font-weight: 600;">Missing</span>' : '<span style="color: #34d399; font-weight: 600;">Valid</span>'}</td>
                   <td style="vertical-align: middle;">
-                    <button class="action-btn" onclick="navigateTo('codelists', '${cr.code_list_urn}');">
+                    <button type="button" class="action-btn" onclick="navigateTo('codelists', '${escapeHtml(cr.code_list_urn)}');">
                       View Code List ↗
                     </button>
                   </td>

@@ -966,27 +966,176 @@ def ingest_status_cmd(
         console.print(s_table)
 
 
+def _format_urn_id(urn: str) -> str:
+    """Extract a human-friendly identifier from a URN."""
+    if not urn:
+        return ""
+    parts = urn.split(":")
+    if len(parts) >= 4:
+        return parts[-2].split(".")[-1]
+    return urn.split(".")[-1]
+
+
 @compare_app.command("batch")
 def compare_batch_cmd(
     batch_id: int = typer.Argument(..., help="IngestBatch ID to compare against the bank."),
-    threshold: float = typer.Option(0.75, "--threshold", "-t", help="Minimum similarity score."),
+    resource_type: str | None = typer.Option(
+        None, "--type", "-t", help="Filter comparison by resource type (e.g. QuestionItem)."
+    ),
+    threshold: float = typer.Option(0.75, "--threshold", help="Minimum similarity score."),
+    limit: int = typer.Option(15, "--limit", "-n", help="Max candidate pairs to display in table."),
+    max_candidates: int = typer.Option(
+        1000, "--max-candidates", "-m", help="Max candidate pairs to include in the plan."
+    ),
     output_dir: Path | None = typer.Option(
         None, "--output-dir", "-o", help="Directory to write .compare.plan.yaml & .report.md."
     ),
+    no_write: bool = typer.Option(
+        False, "--no-write", help="Do not write .compare.plan.yaml and .report.md to disk."
+    ),
 ) -> None:
     """Compare resources from a specific IngestBatch against existing ReQuest bank entities."""
-    from fairwddi.ingest.comparator import compare_batch
-
     configure_django_for_cli()
+    from fairwddi.ingest.comparator import compare_batch
+    from fairwddi.models import IngestBatch
+
+    batch = IngestBatch.objects.filter(id=batch_id).first()
+    if not batch:
+        console.print(f"[bold red]Compare Error:[/bold red] IngestBatch #{batch_id} not found.")
+        raise typer.Exit(code=1)
+
+    effective_output_dir = (
+        output_dir if output_dir is not None else (None if no_write else Path("."))
+    )
+
     try:
-        plan = compare_batch(batch_id=batch_id, threshold=threshold, output_dir=output_dir)
+        plan = compare_batch(
+            batch_id=batch_id,
+            threshold=threshold,
+            output_dir=effective_output_dir,
+            limit=max_candidates,
+            resource_type=resource_type,
+        )
     except Exception as exc:
         console.print(f"[bold red]Compare Error:[/bold red] {exc}")
         raise typer.Exit(code=1) from exc
 
     console.print(
-        f"[bold green]Comparison complete ({plan.job_id}):[/bold green] "
-        f"found [yellow]{len(plan.actions):,}[/yellow] candidate pair(s)."
+        Panel(
+            f"[bold]Batch #{batch_id}[/bold]: [cyan]{batch.file_name}[/cyan] "
+            f"({batch.source_format})\n"
+            f"[dim]Threshold:[/dim] [yellow]{threshold:.2f}[/yellow]   "
+            f"[dim]Candidates Found:[/dim] [bold green]{len(plan.actions):,}[/bold green]   "
+            f"[dim]Job ID:[/dim] [magenta]{plan.job_id}[/magenta]",
+            title="[bold green]Ingest Batch Harmonization Comparison[/bold green]",
+            border_style="green",
+        )
+    )
+
+    total = len(plan.actions)
+    if total == 0:
+        console.print("[yellow]No harmonization candidate pairs found above threshold.[/yellow]\n")
+        return
+
+    # 1. Summary Breakdown Table
+    summary_table = Table(title="Candidate Pair Breakdown", border_style="cyan")
+    summary_table.add_column("Dimension", style="bold")
+    summary_table.add_column("Category / Tier", style="cyan")
+    summary_table.add_column("Count", justify="right", style="yellow")
+    summary_table.add_column("% Share", justify="right", style="dim")
+
+    by_res = plan.summary.get("by_resource_type", {})
+    for r_type, count in sorted(by_res.items(), key=lambda x: -x[1]):
+        pct = f"{(count / total * 100):.1f}%"
+        summary_table.add_row("Resource Type", r_type, f"{count:,}", pct)
+
+    by_match = plan.summary.get("by_match_type", {})
+    for m_type, count in sorted(by_match.items(), key=lambda x: -x[1]):
+        pct = f"{(count / total * 100):.1f}%"
+        summary_table.add_row("Match Tier", m_type, f"{count:,}", pct)
+
+    console.print(summary_table)
+
+    # 2. Sample Candidates Table
+    display_limit = min(limit, total)
+    cand_table = Table(
+        title=f"Sample Discovered Candidates (Showing {display_limit} of {total:,})",
+        border_style="yellow",
+    )
+    cand_table.add_column("Type", style="bold green")
+    cand_table.add_column("Match Tier", style="magenta")
+    cand_table.add_column("Conf", justify="right", style="yellow")
+    cand_table.add_column("Action", style="cyan")
+    cand_table.add_column("Source Candidate", style="white")
+    cand_table.add_column("Target (Bank Entity)", style="white")
+
+    for a in plan.actions[:display_limit]:
+        src_info = (
+            a.details.get("source_name")
+            or a.details.get("source_text")
+            or _format_urn_id(a.source_urn)
+        )
+        tgt_info = (
+            a.details.get("target_name")
+            or a.details.get("target_text")
+            or (_format_urn_id(a.target_urn) if a.target_urn else "")
+        )
+        if isinstance(src_info, dict):
+            src_info = (
+                src_info.get("fr") or src_info.get("en") or next(iter(src_info.values()), "")
+            )
+        if isinstance(tgt_info, dict):
+            tgt_info = (
+                tgt_info.get("fr") or tgt_info.get("en") or next(iter(tgt_info.values()), "")
+            )
+
+        src_disp = (
+            f"[bold cyan]{str(src_info)[:45]}[/bold cyan]\n[dim]{a.source_urn}[/dim]"
+            if src_info
+            else a.source_urn
+        )
+        tgt_disp = (
+            f"[bold cyan]{str(tgt_info)[:45]}[/bold cyan]\n[dim]{a.target_urn}[/dim]"
+            if tgt_info and a.target_urn
+            else (a.target_urn or "")
+        )
+
+        cand_table.add_row(
+            a.resource_type,
+            a.match_type or "",
+            f"{a.confidence:.2f}",
+            a.action,
+            src_disp,
+            tgt_disp,
+        )
+
+    console.print(cand_table)
+    if total > display_limit:
+        more_count = total - display_limit
+        console.print(f"[dim]... and {more_count:,} more candidate pairs in full report.[/dim]\n")
+
+    # 3. Artifact Paths
+    if effective_output_dir is not None:
+        stem = Path(batch.file_name).stem
+        plan_path = effective_output_dir / f"{stem}.batch{batch_id}.compare.plan.yaml"
+        report_path = effective_output_dir / f"{stem}.batch{batch_id}.compare.report.md"
+        console.print("[bold green]Generated Artifacts:[/bold green]")
+        console.print(f"  • Plan YAML: [cyan]{plan_path}[/cyan]")
+        console.print(f"  • Report:    [cyan]{report_path}[/cyan]\n")
+
+    # 4. Next Steps
+    console.print("[bold]Next Steps:[/bold]")
+    console.print(
+        f"  1. Discover & filter candidates interactively:\n"
+        f"     [yellow]fairwddi compare discover --batch-id {batch_id} --type QuestionItem[/yellow]"
+    )
+    console.print(
+        f"  2. Generate review-gated Harmonization Plan:\n"
+        f"     [yellow]fairwddi harmonize plan --batch-id {batch_id}[/yellow]"
+    )
+    console.print(
+        "  3. Inspect in Question Bank Explorer web UI:\n"
+        "     [yellow]fairwddi serve --open[/yellow]\n"
     )
 
 
@@ -1127,6 +1276,10 @@ def harmonize_undo_cmd(
 
 
 @app.command("serve")
+@app.command(
+    "ui",
+    help="Alias for 'serve': launch the Question Bank Explorer web app and REST API.",
+)
 def serve_cmd(
     host: str = typer.Option("127.0.0.1", "--host", "-h", help="Bind host address."),
     port: int = typer.Option(8000, "--port", "-p", help="Bind port number."),
