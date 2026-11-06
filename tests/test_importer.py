@@ -306,7 +306,7 @@ def test_cli_preflight_profiles(runner: CliRunner) -> None:
 
 
 @pytest.mark.django_db
-def test_cli_ingest_plan_apply_list_status_and_undo(
+def test_cli_ingest_plan_execute_list_status_and_undo(
     runner: CliRunner, sample_fsd_ddic: Path, tmp_path: Path
 ) -> None:
     # 1. fairwddi ingest plan (zero DB writes)
@@ -317,11 +317,11 @@ def test_cli_ingest_plan_apply_list_status_and_undo(
     assert "Ingestion Plan" in plan_res.stdout
     assert IngestBatch.objects.count() == 0
 
-    # 2. fairwddi ingest apply
+    # 2. fairwddi ingest execute
     plan_yaml = tmp_path / f"{sample_fsd_ddic.stem}.ingest.plan.yaml"
-    apply_res = runner.invoke(app, ["ingest", "apply", str(plan_yaml), "--auto-approve"])
-    assert apply_res.exit_code == 0
-    assert "Ingestion Completed" in apply_res.stdout
+    exec_res = runner.invoke(app, ["ingest", "execute", str(plan_yaml), "--auto-approve"])
+    assert exec_res.exit_code == 0
+    assert "Ingestion Completed" in exec_res.stdout
 
     batch = IngestBatch.objects.latest("id")
 

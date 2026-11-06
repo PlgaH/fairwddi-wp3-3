@@ -333,14 +333,14 @@ stateDiagram-v2
     Evaluated --> AutoApproved: 0 errors AND 0 pending reviews
     Evaluated --> RequiresReview: pending_review_count > 0 OR errors > 0
     
-    AutoApproved --> Applied: fairwddi ingest apply <file>
+    AutoApproved --> Applied: fairwddi ingest execute <plan.yaml>
     
-    RequiresReview --> Blocked: fairwddi ingest apply (Fails with PermissionError)
+    RequiresReview --> Blocked: fairwddi ingest execute (Fails with PermissionError)
     Blocked --> ReviewYAML: Archivist edits .plan.yaml\n(Sets review_gate.approved: true)
     Blocked --> ForceCLI: Archivist passes --auto-approve
     
-    ReviewYAML --> Applied: fairwddi ingest apply <plan.yaml>
-    ForceCLI --> Applied: fairwddi ingest apply <file> --auto-approve
+    ReviewYAML --> Applied: fairwddi ingest execute <plan.yaml>
+    ForceCLI --> Applied: fairwddi ingest execute <plan.yaml> --auto-approve
     
     Applied --> Rollback: fairwddi ingest undo <batch_id>
     Rollback --> [*]: Clean Cascade Reset

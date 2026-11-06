@@ -647,16 +647,16 @@ uv run fairwddi ingest plan ./ingest_output/survey.ddi40.json \
 
 Emits `./ingest_output/survey.ddi40.ingest.plan.yaml` and `.report.md`.
 
-#### Apply Ingestion Plan (`fairwddi ingest apply`)
+#### Execute Ingestion Plan (`fairwddi ingest execute`)
 
 Executes insertion into PostgreSQL within an atomic transaction. Writes an `IngestBatch` receipt and bulk-loads frequency rows:
 
 ```bash
 # Execute from an approved plan YAML
-uv run fairwddi ingest apply ./ingest_output/survey.ddi40.ingest.plan.yaml
+uv run fairwddi ingest execute ./ingest_output/survey.ddi40.ingest.plan.yaml
 
 # Or execute directly from the metadata file (evaluating review gate)
-uv run fairwddi ingest apply ./ingest_output/survey.ddi40.json --auto-approve
+uv run fairwddi ingest execute ./ingest_output/survey.ddi40.json --auto-approve
 ```
 
 #### One-Command Pipeline Runner (`fairwddi ingest run`)

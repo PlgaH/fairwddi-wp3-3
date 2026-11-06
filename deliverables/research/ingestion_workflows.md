@@ -32,7 +32,7 @@ flowchart TD
     D --> E["FSD3562_eng.ddi40.jsonl\n(Deduplicated CodeLists & Categories)"]
     E --> F["Step 3: fairwddi ingest plan"]
     F --> G["ingest.plan.yaml & report.md\n(Zero DB Writes, Review Gate Checked)"]
-    G --> H["Step 4: fairwddi ingest apply"]
+    G --> H["Step 4: fairwddi ingest execute"]
     H --> I["PostgreSQL Core DB\n• IngestBatch Receipt (#1)\n• StudyUnit, Datafile, DatafileVariable\n• DatafileVariableFrequency (bulk SQL rows)\n• QuestionItem, Category, CodeList\n• RepresentedVariable, InstanceVariable"]
     I --> J["Step 5: Post-Ingest Discovery\n(fairwddi compare discover)"]
 ```
@@ -173,11 +173,11 @@ fairwddi ingest plan ./ingest_output/FSD3562_eng.ddi40.jsonl \
   - `quarantine`: Drift conflicts detected.
 - Database remains completely unmodified.
 
-#### Step 4: Apply Core Ingestion
+#### Step 4: Execute Core Ingestion
 Executes the approved plan within an atomic PostgreSQL transaction.
 
 ```bash
-fairwddi ingest apply ./ingest_output/FSD3562_eng.ddi40.ingest.plan.yaml
+fairwddi ingest execute ./ingest_output/FSD3562_eng.ddi40.ingest.plan.yaml
 ```
 
 *What Happens in PostgreSQL:*
@@ -254,7 +254,7 @@ flowchart TD
     D --> E["cdsp_bilingual.ddi40.json\n(Preserves Multilingual Dictionaries)"]
     E --> F["fairwddi ingest plan"]
     F --> G["ingest.plan.yaml\n(Multilingual Hash Computation)"]
-    G --> H["fairwddi ingest apply"]
+    G --> H["fairwddi ingest execute"]
     H --> I["PostgreSQL JSONB Columns\n• Category.label = {'fr': '...', 'en': '...'}\n• QuestionItem.question_text = {'fr': '...', 'en': '...'}\n• QuestionItem.interviewer_instructions = {'fr': '...', 'en': '...'}\n• DatafileVariableFrequency (bulk SQL rows)\n• IngestBatch Receipt"]
 ```
 
@@ -311,11 +311,11 @@ fairwddi ingest plan ./ingest_output/cdsp_bilingual.ddi40.json \
   --output-dir ./ingest_output
 ```
 
-#### Step 4: Apply Direct Ingestion
+#### Step 4: Execute Direct Ingestion
 Executes insertion into core PostgreSQL tables:
 
 ```bash
-fairwddi ingest apply ./ingest_output/cdsp_bilingual.ddi40.json
+fairwddi ingest execute ./ingest_output/cdsp_bilingual.ddi40.json
 ```
 
 *Database Verification in PostgreSQL:*
@@ -347,7 +347,7 @@ flowchart TD
     B --> C["Preflight Audit\n• Structural Topology\n• Reference Resolution\n• Quality Score & Grade"]
     C --> D["fairwddi ingest plan\n(Streaming iterparse, Zero DB Writes)"]
     D --> E["ingest.plan.yaml\n(Flattening Control Constructs)"]
-    E --> F["fairwddi ingest apply"]
+    E --> F["fairwddi ingest execute"]
     F --> G["PostgreSQL Core DB\n• StudyUnit & Datafile\n• Instrument & StudyInstrument\n• InstrumentQuestion (flattened sequence path)\n• QuestionItem & Category & CodeList\n• DatafileVariable & DatafileVariableFrequency\n• IngestBatch Receipt"]
 ```
 
@@ -382,11 +382,11 @@ fairwddi ingest plan tests/fixtures/sample_cso.ddi33.xml \
 - Generates planned `InstrumentQuestion` actions with ordered paths (e.g. `/Instrument/Seq_Main/1`).
 - Extracts `VariableStatistics` fragments and plans bulk frequency rows.
 
-#### Step 3: Apply Ingestion
+#### Step 3: Execute Ingestion
 Streams the XML document into PostgreSQL core tables:
 
 ```bash
-fairwddi ingest apply ./ingest_output/sample_cso.ddi33.ingest.plan.yaml
+fairwddi ingest execute ./ingest_output/sample_cso.ddi33.ingest.plan.yaml
 ```
 
 *Core Verification:*
@@ -498,8 +498,8 @@ sequenceDiagram
     participant Alias as URNAlias
 
     Note over Archivist,DB: Phase A: Ingest Wave 1 (ELIPSS 2013)
-    Archivist->>CLI: fairwddi ingest apply elipss.2013.ddi40.json
-    CLI->>Loader: Plan & Apply Ingestion
+    Archivist->>CLI: fairwddi ingest execute elipss.2013.ddi40.json
+    CLI->>Loader: Plan & Execute Ingestion
     Loader->>Registry: Register canonical URNs (action: create)
     Loader->>DB: Insert QuestionItems, Categories, Variables
     Note right of Registry: source_urn == canonical_urn<br/>(No alias needed)
@@ -513,7 +513,7 @@ sequenceDiagram
     CLI-->>Archivist: Markdown Report with 'Cross-Survey Deduplication' section
 
     Note over Archivist,DB: Phase C: Apply Wave 2 (ELIPSS 2014)
-    Archivist->>CLI: fairwddi ingest apply elipss.2014.ingest.plan.yaml
+    Archivist->>CLI: fairwddi ingest execute elipss.2014.ingest.plan.yaml
     CLI->>Loader: Execute mutations
     Loader->>Alias: Insert URNAlias(alias_urn=2014_URN, canonical_urn=2013_URN)
     Loader->>DB: Link 2014 InstanceVariables -> 2013 QuestionItem/RepresentedVariable

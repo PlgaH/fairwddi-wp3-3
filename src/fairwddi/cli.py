@@ -761,13 +761,13 @@ def ingest_plan_cmd(
     console.print(f"  • Report:    [cyan]{report_path}[/cyan]")
     console.print()
     console.print("[dim]To execute this plan in PostgreSQL:[/dim]")
-    console.print(f"  [yellow]fairwddi ingest apply {plan_path}[/yellow]\n")
+    console.print(f"  [yellow]fairwddi ingest execute {plan_path}[/yellow]\n")
 
 
-@ingest_app.command("apply")
-def ingest_apply_cmd(
-    file_or_plan: str = typer.Argument(
-        ..., help="Path to metadata file or approved .ingest.plan.yaml file."
+@ingest_app.command("execute")
+def ingest_execute_cmd(
+    plan: str = typer.Argument(
+        ..., help="Path to approved .ingest.plan.yaml file or metadata file."
     ),
     profile: str = typer.Option("request", "--profile", "-p", help="Import profile."),
     force_reload: bool = typer.Option(
@@ -778,18 +778,18 @@ def ingest_apply_cmd(
     ),
 ) -> None:
     """Stream metadata directly into ReQuest core tables and record an IngestBatch receipt."""
-    from fairwddi.ingest.loader import apply_ingestion
+    from fairwddi.ingest.loader import execute_ingestion
 
     configure_django_for_cli()
     try:
-        res = apply_ingestion(
-            file_or_plan=file_or_plan,
+        res = execute_ingestion(
+            file_or_plan=plan,
             profile=profile,
             force_reload=force_reload,
             auto_approve=auto_approve,
         )
     except Exception as exc:
-        console.print(f"[bold red]Ingest Apply Error:[/bold red] {exc}")
+        console.print(f"[bold red]Ingest Execution Error:[/bold red] {exc}")
         raise typer.Exit(code=1) from exc
 
     if res["status"] == "already_ingested":

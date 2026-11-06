@@ -21,6 +21,7 @@ from fairwddi.ingest.harmonizer import (
 from fairwddi.ingest.loader import (
     apply_ingestion,
     compute_resource_hashes,
+    execute_ingestion,
     get_ingest_batch_status,
     list_ingest_batches,
     parse_ddi_urn,
@@ -69,6 +70,7 @@ __all__ = [
     "compute_resource_hashes",
     "plan_ingestion",
     "apply_ingestion",
+    "execute_ingestion",
     "undo_ingestion",
     "list_ingest_batches",
     "get_ingest_batch_status",

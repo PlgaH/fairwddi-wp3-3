@@ -1869,3 +1869,7 @@ def get_ingest_batch_status(batch_id: int) -> dict[str, Any]:
         "created_at": b.created_at.isoformat() if b.created_at else None,
         "updated_at": b.updated_at.isoformat() if b.updated_at else None,
     }
+
+
+# Convenience alias for executing an IngestPlan
+execute_ingestion = apply_ingestion

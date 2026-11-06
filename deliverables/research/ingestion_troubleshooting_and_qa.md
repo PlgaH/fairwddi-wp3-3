@@ -258,7 +258,7 @@ The file's SHA-256 cryptographic hash matches an existing record in `request_ddi
 - **If the file was re-uploaded accidentally:** No action required; the existing batch protects the database from duplicate insertion.
 - **If the file needs to be reloaded:** Supply `--force-reload`. The system will automatically trigger `undo_ingestion()` on the old batch, deleting previously created entities, and perform a clean re-ingestion:
   ```bash
-  fairwddi ingest apply survey.xml --force-reload
+  fairwddi ingest execute survey.xml --force-reload
   ```
 
 ---
@@ -284,7 +284,7 @@ flowchart TD
     Quarantine --> PlanHalt["Plan requires review\n(pending_review_count = 1)"]
     PlanHalt --> Triage{"Archivist Decision"}
     Triage -->|Reject Drift| Drop["Discard incoming file"]
-    Triage -->|Accept Drift as Quarantine| ApplyQuar["fairwddi ingest apply --auto-approve\n(Isolated in MetadataQuarantine)"]
+    Triage -->|Accept Drift as Quarantine| ApplyQuar["fairwddi ingest execute --auto-approve\n(Isolated in MetadataQuarantine)"]
     Triage -->|Bump Version| Version["Update source version to 1.0.1 in file\n(New canonical URN)"]
 ```
 
@@ -309,7 +309,7 @@ An incoming element declares a canonical URN that is already registered in `UrnR
 ### Issue 3.3: Execution Blocked by Review Gate (`PermissionError`)
 
 *Symptom:*
-Executing `fairwddi ingest apply` fails with:
+Executing `fairwddi ingest execute` fails with:
 ```
 PermissionError: Ingestion plan 'ingest-survey-7a2b9c' has 2 pending review item(s).
 Approve the plan YAML (review_gate.approved: true) or pass --auto-approve.
@@ -326,12 +326,12 @@ Option A — **Human-in-the-Loop Review (Recommended):**
      reviewer: "Archivist QA Lead"
      notes: "Reviewed drift items; confirmed acceptable for quarantine."
    ```
-4. Re-run `fairwddi ingest apply ./ingest_output/survey.ingest.plan.yaml`.
+4. Re-run `fairwddi ingest execute ./ingest_output/survey.ingest.plan.yaml`.
 
 Option B — **Automated Script Override:**
 If executing in an unattended CI/CD pipeline, pass the bypass flag:
 ```bash
-fairwddi ingest apply ./ingest_output/survey.ingest.plan.yaml --auto-approve
+fairwddi ingest execute ./ingest_output/survey.ingest.plan.yaml --auto-approve
 ```
 
 ---
