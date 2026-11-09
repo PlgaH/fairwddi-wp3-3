@@ -1,7 +1,7 @@
 plan_version: '1.0'
 stage: compare
-job_id: compare-batch-1-885c1f
-created_at: '2026-11-06T20:47:58.821129+00:00'
+job_id: compare-batch-1-0a7236
+created_at: '2026-11-09T19:16:48.800885+00:00'
 source_file: cdsp_bilingual.ddic.ddi40.json
 source_path: null
 file_sha256: null

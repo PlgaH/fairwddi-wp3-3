@@ -533,20 +533,46 @@ sequenceDiagram
 
 ---
 
-### 6.2 Future Canonical Promotion & Long-Term Provenance
+### 6.2 Canonical Elevation, Absorption & Long-Term Provenance
 
-A common scenario in question bank curation is the future promotion of a survey-specific URN to a centralized bank-wide canonical URN:
+In longitudinal survey programmes and question banks, question wordings and variables migrate across two distinct lifecycle phases:
 
-$$\text{urn:ddi:fr.cdsp:elipss.2013.04.ea-questions.qi\_V1\_q1:3.0.0} \xrightarrow{\text{Promote}} \text{urn:ddi:fr.cdsp:ea-questions.0001:1.0.0}$$
+```mermaid
+flowchart LR
+    subgraph Wave12 ["Wave 1 & Wave 2 Ingested"]
+        W1["elipss.2013.q01"]
+        W2["elipss.2014.q01"]
+    end
 
-When this occurs:
-1. The master record in `UrnRegistry` is updated to the new canonical identifier.
-2. A new entry is recorded in `URNAlias`:
-   $$\text{alias\_urn} = \text{urn:ddi:fr.cdsp:elipss.2013.04.ea-questions.qi\_V1\_q1:3.0.0} \longrightarrow \text{canonical\_urn} = \text{urn:ddi:fr.cdsp:ea-questions.0001:1.0.0}$$
-3. Because Wave 2 already aliased the 2014 URN to the 2013 URN, transitive resolution (or batch update) connects both 2013 and 2014 identifiers to the new canonical bank URN.
+    subgraph Elevation ["Elevation Phase (fairwddi harmonize elevate)"]
+        W1 & W2 -->|Multilingual Merge| BankQI["Canonical Bank Resource\nQI-trust-institutions:1.0.0\n(UrnRegistry: elevated)"]
+        W1 & W2 -->|Aliases| BankQI
+        W1 & W2 -.->|Retire| Sup1["UrnRegistry: superseded"]
+    end
+
+    subgraph Absorption ["Later Absorption Phase (fairwddi harmonize absorb)"]
+        W3["Wave 3 Ingested Later\nelipss.2015.q01\n(brings new translations)"] -->|Absorb into Existing| BankQI
+        BankQI -->|Enriched Target| BankQI2["Canonical Bank Resource\n• Multilingual text fused\n• Hashes updated\n• Provenance recorded"]
+        W3 -->|Alias| BankQI2
+        W3 -.->|Retire| Sup2["UrnRegistry: superseded"]
+    end
+```
+
+#### 1. Elevation (`fairwddi harmonize elevate`)
+- When two or more study-specific questions/variables are identified as equivalent across waves, an archivist elevates them into a **brand-new generic resource** with a canonical bank URN (e.g. `urn:ddi:fr.cdsp:QI-trust-institutions:1.0.0`).
+- The generic entity fuses multilingual labels, question texts, and instructions across sources, recalculates SHA-256 content hashes, and registers in `UrnRegistry` with `status = 'elevated'`.
+- All active relational pointers across the DDI cascade (`QuestionVariable`, `InstrumentQuestion`, `RepresentedVariable`, `InstanceVariable`, etc.) are repointed to the new generic URN.
+- The original study URNs are recorded in `URNAlias` (`alias_urn -> canonical_urn`) and marked as `superseded` in `UrnRegistry`.
+
+#### 2. Absorption (`fairwddi harmonize absorb`)
+- When a subsequent survey wave is ingested (e.g. Wave 3) or an archivist discovers an existing study resource corresponding to a previously elevated question, the archivist **absorbs** the new study item into the *already existing* harmonized resource.
+- **In-Place Multilingual Fusion:** Any new translations or instructions provided by the absorbed item are dynamically merged into the target entity, and its SHA-256 fingerprint is updated.
+- **Audit Provenance:** `target_obj.extended_attributes` and `UrnRegistry.extended_attributes` record structured absorption provenance (`job_id`, `absorbed_urns`, `note`).
+- **Cascade Repointing & Aliasing:** Foreign keys linking to the absorbed item are updated to point to the canonical target, and an alias is registered in `URNAlias`.
+- **Target-Preserving Undo:** Reverting an absorption job (`fairwddi harmonize undo <job_id>`) restores the target object to its exact pre-absorption state (without deleting it) while restoring the absorbed sources.
 
 > [!NOTE]
-> **Provenance Guarantee:** Original source URNs found in historical DDI files or external citations are never orphaned. Any lookup for a historical URN automatically resolves through `URNAlias` to the promoted canonical URN.
+> **Provenance Guarantee:** Original source URNs found in historical DDI files, external citations, or historical JSONB records are never orphaned. Any lookup for a historical URN automatically resolves through `URNAlias` to the canonical bank URN without requiring destructive rewriting of historical JSONB documents.
 
 ---
 

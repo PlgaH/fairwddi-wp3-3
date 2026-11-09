@@ -708,17 +708,95 @@ uv run fairwddi compare discover \
 
 ### 5.4 Review-Gated Harmonization (`fairwddi harmonize`)
 
-Executes multilingual merging, cascade relinking, and semantic link creation:
+Executes multilingual merging, cascade relinking, semantic link creation, resource elevation, and subsequent absorption:
+
+#### 1. Automated Harmonization Pipeline (Stage 3b)
 
 ```bash
-# Plan harmonization actions
+# Plan harmonization actions across discovered candidates
 uv run fairwddi harmonize plan ./compare_output/candidates.json --output-dir ./harm_output
 
-# Apply harmonization mutations
+# Apply review-gated harmonization plan
 uv run fairwddi harmonize apply ./harm_output/harmonization.plan.yaml
 
-# Roll back harmonization changes
+# Roll back harmonization changes using snapshot
 uv run fairwddi harmonize undo <job_id>
+```
+
+---
+
+#### 2. Resource Elevation (`fairwddi harmonize elevate`)
+
+Converts one or more study-specific resources (e.g. `QuestionItem`, `RepresentedVariable`, `ConceptualVariable`) into a brand-new generic harmonized resource, fusing multilingual texts, repointing cascade references, recording canonical aliases in `URNAlias`, and retiring sources:
+
+```bash
+# Elevate study questions into a generic QuestionItem with auto-generated slug URN
+uv run fairwddi harmonize elevate \
+  --source urn:ddi:fr.cdsp:elipss.2015.q01:1.0.0 \
+  --source urn:ddi:fr.cdsp:elipss.2016.q01:1.0.0 \
+  --name "Trust in National Assembly (Harmonized)"
+
+# Elevate with an explicit canonical target DDI URN
+uv run fairwddi harmonize elevate \
+  -s urn:ddi:fr.cdsp:elipss.2015.q01:1.0.0 \
+  -s urn:ddi:fr.cdsp:elipss.2016.q01:1.0.0 \
+  -t urn:ddi:fr.cdsp:QI-trust-national-assembly:1.0.0
+```
+
+**Key Options:**
+- `--source / -s`: Source study-specific URN(s) to elevate (can specify multiple times).
+- `--target-urn / -t`: Explicit canonical generic DDI URN (auto-generated if omitted).
+- `--type / -T`: Optional resource type (e.g., `QuestionItem`, `ConceptualVariable`). Auto-inferred if omitted.
+- `--name / -n`: Human-readable label/name for the elevated generic resource.
+- `--update-references / --no-update-references`: Automatically repoint foreign keys across the DDI cascade (default: enabled).
+- `--retire-sources / --keep-sources`: Retire source records from primary entity table while preserving aliases (default: retire).
+- `--note`: Audit note stored in `URNAlias` and `EventLog`.
+
+---
+
+#### 3. Subsequent Resource Absorption (`fairwddi harmonize absorb`)
+
+Absorbs a newly discovered or subsequent wave's resource into an *already existing* harmonized/elevated resource. Merges any newly provided translations or interviewer instructions, updates SHA-256 hashes, repoints foreign keys across the cascade, records an alias, and retires the source:
+
+```bash
+# Absorb a wave 3 question into the existing harmonized QuestionItem
+uv run fairwddi harmonize absorb \
+  --source urn:ddi:fr.cdsp:elipss.2017.q01:1.0.0 \
+  --into urn:ddi:fr.cdsp:QI-trust-national-assembly:1.0.0 \
+  --note "Wave 3 longitudinal absorption"
+```
+
+**Key Options:**
+- `--source / -s`: Source study-specific URN(s) to absorb (can specify multiple times).
+- `--into / -i`: Target canonical harmonized/elevated URN (must already exist in the database).
+- `--type / -T`: Optional DDI resource type. Auto-inferred from target URN if omitted.
+- `--update-references`: Repoint foreign keys and junction entries to target URN.
+- `--retire-sources`: Retire source records from primary entity table.
+
+---
+
+#### 4. Canonical URN Renaming & Promotion (`fairwddi harmonize rename`)
+
+Atomically promotes or renames a single resource URN, creating an alias for the old URN and updating all relational pointers across the cascade:
+
+```bash
+uv run fairwddi harmonize rename \
+  urn:ddi:fr.cdsp:legacy_q1:1.0.0 \
+  urn:ddi:fr.cdsp:QI-canonical-trust:1.0.0
+```
+
+---
+
+#### 5. Reverting Harmonization, Elevation, or Absorption (`fairwddi harmonize undo`)
+
+Reverts an applied harmonization, elevation, or absorption job using its complete `EventLog` snapshot:
+
+```bash
+# Revert an elevation job (removes generic entity, restores original source entities and pointers)
+uv run fairwddi harmonize undo elevate-questionitem-7f2a1b
+
+# Revert an absorption job (restores target to pre-absorption state, restores source entities)
+uv run fairwddi harmonize undo absorb-questionitem-9a0257
 ```
 
 ---

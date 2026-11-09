@@ -14,7 +14,10 @@ from __future__ import annotations
 from fairwddi.ingest.comparator import compare_batch, discover_candidates
 from fairwddi.ingest.detector import MetadataFormatInfo, compute_file_sha256, detect_metadata_format
 from fairwddi.ingest.harmonizer import (
+    absorb_resource,
     apply_harmonization,
+    elevate_resource,
+    migrate_urn,
     plan_harmonization,
     undo_harmonization,
 )
@@ -78,6 +81,9 @@ __all__ = [
     "discover_candidates",
     "plan_harmonization",
     "apply_harmonization",
+    "elevate_resource",
+    "absorb_resource",
+    "migrate_urn",
     "undo_harmonization",
     "run_ingestion_pipeline",
 ]

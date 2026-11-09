@@ -61,6 +61,7 @@ class PlanActionItem(BaseModel):
         "harmonize",
         "merge_multilingual",
         "link_semantic",
+        "elevate",
         "upgrade",
         "skip",
     ]

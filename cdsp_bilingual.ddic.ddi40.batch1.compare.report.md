@@ -1,10 +1,10 @@
-# FAIRwDDI `COMPARE` Report — `compare-batch-1-885c1f`
+# FAIRwDDI `COMPARE` Report — `compare-batch-1-0a7236`
 
 ## Overview
 
 - **Stage:** `compare`
-- **Job ID:** `compare-batch-1-885c1f`
-- **Created At:** `2026-11-06T20:47:58.821129+00:00`
+- **Job ID:** `compare-batch-1-0a7236`
+- **Created At:** `2026-11-09T19:16:48.800885+00:00`
 - **Review Gate Status:** **APPROVED**
 - **Errors:** `0` | **Warnings:** `0` | **Pending Review Items:** `0`
 - **Source File:** `cdsp_bilingual.ddic.ddi40.json`
