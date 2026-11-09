@@ -1233,7 +1233,7 @@ def harmonize_apply_cmd(
         False, "--auto-approve", help="Execute even if review gate is not marked approved."
     ),
 ) -> None:
-    """Apply an approved Harmonization Plan (multilingual merges, URN aliases, semantic links)."""
+    """Apply an approved Harmonization Plan (merges, aliases, elevations, absorptions, groups)."""
     from fairwddi.ingest.harmonizer import apply_harmonization
 
     configure_django_for_cli()
@@ -1246,7 +1246,44 @@ def harmonize_apply_cmd(
     console.print(
         f"[bold green]Applied Harmonization Job [cyan]{res['job_id']}[/cyan]:[/bold green] "
         f"merged={res['merged_multilingual_count']}, aliased={res['aliased_count']}, "
-        f"semantic_links={res['semantic_links_created']}."
+        f"elevated={res.get('elevated_count', 0)}, absorbed={res.get('absorbed_count', 0)}, "
+        f"grouped={res.get('grouped_count', 0)}, semantic_links={res['semantic_links_created']}."
+    )
+
+
+@harmonize_app.command("approve-high")
+def harmonize_approve_high_cmd(
+    plan_file: Path = typer.Argument(..., help="Path to .plan.yaml file to triage."),
+    threshold: float = typer.Option(
+        0.96, "--threshold", "-t", help="Minimum confidence/similarity to approve."
+    ),
+    reviewer: str = typer.Option(
+        "Archivist Triage", "--reviewer", "-r", help="Reviewer name for ReviewGate."
+    ),
+) -> None:
+    """Approve high-confidence/near-exact items in a plan and disable lower-confidence ones."""
+    from fairwddi.ingest.plan import IngestPlan
+
+    plan = IngestPlan.from_yaml(plan_file)
+    approved_cnt = 0
+    disabled_cnt = 0
+    for act in plan.actions:
+        sim = float(act.details.get("similarity", act.confidence))
+        if act.confidence >= threshold or sim >= threshold or not act.requires_review:
+            act.approved = True
+            act.requires_review = False
+            approved_cnt += 1
+        else:
+            act.approved = False
+            act.requires_review = False
+            disabled_cnt += 1
+
+    plan.review_gate.approved = True
+    plan.review_gate.reviewer = reviewer
+    plan.to_yaml(plan_file)
+    console.print(
+        f"[bold green]Updated Plan [cyan]{plan_file}[/cyan]:[/bold green] "
+        f"approved={approved_cnt} (>= {threshold}), disabled={disabled_cnt}."
     )
 
 
@@ -1393,9 +1430,7 @@ def harmonize_absorb_cmd(
         console.print(f"[bold red]Absorption Error:[/bold red] {exc}")
         raise typer.Exit(code=1) from exc
 
-    table = Table(
-        title=f"Resource Absorbed into ({res['resource_type']})", border_style="green"
-    )
+    table = Table(title=f"Resource Absorbed into ({res['resource_type']})", border_style="green")
     table.add_column("Property", style="bold cyan")
     table.add_column("Value", style="green")
     table.add_row("Target Harmonized URN", f"[bold green]{res['target_urn']}[/bold green]")
@@ -1478,9 +1513,7 @@ def harmonize_undo_cmd(
 
     restored = res.get("restored_sources", res.get("restored_targets", 0))
     tgt_info = (
-        f", rolled back target [cyan]{res['target_urn']}[/cyan]"
-        if res.get("is_absorption")
-        else ""
+        f", rolled back target [cyan]{res['target_urn']}[/cyan]" if res.get("is_absorption") else ""
     )
     console.print(
         f"[bold green]Reverted Job [cyan]{res['job_id']}[/cyan]:[/bold green] "

@@ -1,18 +1,25 @@
 """Stage 3a (Comparison & Discovery): Cross-survey candidate discovery and similarity comparison.
 
-Evaluates ReQuest resources (Category, CodeList, QuestionItem, RepresentedVariable) across 6 tiers:
+Evaluates ReQuest resources (Category, CodeList, QuestionItem, RepresentedVariable) across tiers:
 1. EXACT (1.00): Identical content hash.
 2. FACET_EXACT (0.95): Identical normalized label or question_text hash across present languages.
 3. MULTILINGUAL_OVERLAP (0.92): Exact match in at least one shared language with complementary
    translations, or complementary language labels on matching code structures.
-4. SUBSTANTIVE_PERMUTATION (0.88): CodeLists sharing identical substantive categories.
-5. CATEGORIES_EXACT_CODES_DIFFERENT (0.85): CodeLists with identical categories, different codes.
-6. SYNTACTIC_SIMILAR (0.75 - 0.94): High normalized string similarity on label/question_text.
+4. NEAR_EXACT (0.96 - 0.98): Identical after loose punctuation normalization or >= 0.98 similarity.
+5. INCLUSIVE_WRITING_VARIANT (0.98): Identical after stripping inclusive gender/plural markers.
+6. TYPOGRAPHICAL_VARIANT (0.95): Single-word typographical or grammatical error variant.
+7. PHRASING_VARIANT (0.92 - 0.94): Stylistic or pronominal phrasing variation.
+8. SHARED_STEM_GRID (0.88): Shared question/category stem followed by distinct sub-items/choices.
+9. SUBSTANTIVE_PERMUTATION (0.88): CodeLists sharing identical substantive categories.
+10. CATEGORIES_EXACT_CODES_DIFFERENT (0.85): CodeLists with identical categories, different codes.
+11. SYNTACTIC_SIMILAR (0.75 - 0.91): General normalized string similarity on label/question_text.
 """
 
 from __future__ import annotations
 
 import difflib
+import os
+import re
 import uuid
 from pathlib import Path
 from typing import Any
@@ -20,8 +27,38 @@ from typing import Any
 from fairwddi.ingest.plan import IngestPlan, PlanActionItem, ReviewGate
 from fairwddi.utils.normalize_string import normalize_string
 
+_INCLUSIVE_PATTERN = re.compile(
+    r"\(\s*(?:e|es|s|ne|nes|ve|ves|trice|trices|ère|ères|se|ses|x)\s*\)"
+    r"|[\u00b7\u22c5\.]\s*(?:e|es|s|ne|nes)\b",
+    re.IGNORECASE,
+)
 
-def _norm_lang_dict(d: Any) -> dict[str, str]:
+_LEADING_PRONOUN_PATTERN = re.compile(
+    r"^(?:je\s+|j['’]\s*|moi\s*,?\s+|nous\s+|on\s+|i\s+|we\s+)",
+    re.IGNORECASE,
+)
+
+_FEMININE_NOUNS_AFTER_MON = {
+    "mère",
+    "mere",
+    "soeur",
+    "sœur",
+    "fille",
+    "femme",
+    "tante",
+    "grand-mère",
+    "grand-mere",
+    "famille",
+    "maison",
+    "voiture",
+    "santé",
+    "sante",
+    "vie",
+}
+
+
+def _raw_lang_dict(d: Any) -> dict[str, str]:
+    """Extract language-keyed dictionary preserving original casing (with whitespace normalized)."""
     if not d:
         return {}
     if isinstance(d, list):
@@ -36,17 +73,38 @@ def _norm_lang_dict(d: Any) -> dict[str, str]:
                     or "en"
                 )
                 val = item.get("value") or item.get("@value") or item.get("text") or ""
-                cleaned = normalize_string(str(val)).lower()
+                cleaned = normalize_string(str(val))
                 if cleaned:
                     res[str(lang).lower()] = cleaned
         return res
     if isinstance(d, dict):
         return {
-            str(k).lower(): normalize_string(str(v)).lower()
-            for k, v in d.items()
-            if v and str(v).strip()
+            str(k).lower(): normalize_string(str(v)) for k, v in d.items() if v and str(v).strip()
         }
     return {}
+
+
+def _norm_lang_dict(d: Any) -> dict[str, str]:
+    return {k: v.lower() for k, v in _raw_lang_dict(d).items()}
+
+
+def _normalize_text_loose(text: str) -> str:
+    """Strip trailing/leading punctuation, quotes, and French punctuation spacing."""
+    cleaned = normalize_string(text, french_punctuation=False).lower()
+    cleaned = re.sub(r"\s+([?!:;])", r"\1", cleaned)
+    cleaned = re.sub(r"[\s\?\!\.\:\;\,\…\"\'\«\»]+$", "", cleaned)
+    cleaned = re.sub(r"^[\s\?\!\.\:\;\,\…\"\'\«\»]+", "", cleaned)
+    return " ".join(cleaned.split())
+
+
+def _strip_inclusive_markers(text: str) -> str:
+    """Remove parenthetical or midpoint French inclusive gender/plural markers."""
+    cleaned = _INCLUSIVE_PATTERN.sub("", text)
+    return " ".join(cleaned.split())
+
+
+def _has_inclusive_markers(text: str) -> bool:
+    return bool(_INCLUSIVE_PATTERN.search(text))
 
 
 def _text_similarity(a: str, b: str) -> float:
@@ -57,20 +115,160 @@ def _text_similarity(a: str, b: str) -> float:
     return round(difflib.SequenceMatcher(None, a, b).ratio(), 4)
 
 
+def _detect_shared_stem(
+    raw_a: str,
+    raw_b: str,
+    min_stem_len: int = 20,
+) -> dict[str, Any] | None:
+    """Detect if two strings share a common question/category stem and distinct sub-items."""
+    if not raw_a or not raw_b:
+        return None
+
+    # 1. Explicit delimiter split (e.g. "... concernant votre quartier ? Manque d'espaces verts")
+    delim_re = re.compile(r"^(.{20,}?[\?\:\;\—\–])\s+(.+)$")
+    ma = delim_re.match(raw_a.strip())
+    mb = delim_re.match(raw_b.strip())
+    if ma and mb:
+        stem_a, sub_a = ma.group(1).strip(), ma.group(2).strip()
+        stem_b, sub_b = mb.group(1).strip(), mb.group(2).strip()
+        stem_sim = _text_similarity(
+            _strip_inclusive_markers(_normalize_text_loose(stem_a)),
+            _strip_inclusive_markers(_normalize_text_loose(stem_b)),
+        )
+        sub_sim = _text_similarity(
+            _normalize_text_loose(sub_a),
+            _normalize_text_loose(sub_b),
+        )
+        if stem_sim >= 0.90 and sub_a and sub_b and sub_sim < 0.80:
+            canonical_stem = stem_a if len(stem_a) >= len(stem_b) else stem_b
+            return {
+                "group_type": "question_grid",
+                "shared_stem": canonical_stem,
+                "sub_item_a": sub_a,
+                "sub_item_b": sub_b,
+                "stem_similarity": stem_sim,
+                "stem_ratio": round(len(canonical_stem) / max(len(raw_a), len(raw_b)), 4),
+            }
+
+    # 2. Common prefix on word boundaries without shared trailing suffix
+    norm_a = raw_a.strip()
+    norm_b = raw_b.strip()
+    common_pref = os.path.commonprefix([norm_a.lower(), norm_b.lower()])
+    if len(common_pref) >= max(35, min_stem_len):
+        # Snap back to last whitespace or punctuation boundary
+        boundary = re.search(r"^(.*[\s\?\:\;\-\—\–])", common_pref)
+        if boundary:
+            cut = len(boundary.group(1))
+            stem = norm_a[:cut].strip()
+            sub_a = norm_a[cut:].strip()
+            sub_b = norm_b[cut:].strip()
+            common_suff = os.path.commonprefix([sub_a.lower()[::-1], sub_b.lower()[::-1]])
+            if (
+                len(stem) >= 30
+                and sub_a
+                and sub_b
+                and len(common_suff) < 5
+                and len(stem) / max(len(norm_a), len(norm_b)) >= 0.55
+                and _text_similarity(_normalize_text_loose(sub_a), _normalize_text_loose(sub_b))
+                < 0.80
+            ):
+                return {
+                    "group_type": "question_grid",
+                    "shared_stem": stem,
+                    "sub_item_a": sub_a,
+                    "sub_item_b": sub_b,
+                    "stem_similarity": 1.0,
+                    "stem_ratio": round(len(stem) / max(len(norm_a), len(norm_b)), 4),
+                }
+
+    return None
+
+
+def _detect_wording_or_typo_variant(
+    raw_a: str,
+    raw_b: str,
+    lang: str,
+    best_sim: float,
+) -> tuple[str, float, dict[str, Any]] | None:
+    """Classify stylistic/pronominal phrasing variants vs grammatical/typographical errors."""
+    loose_a = _normalize_text_loose(raw_a)
+    loose_b = _normalize_text_loose(raw_b)
+
+    # 1. Leading pronoun / stylistic shift (e.g., "Je refuse de répondre" vs "Refuse de répondre")
+    stripped_pro_a = _LEADING_PRONOUN_PATTERN.sub("", loose_a).strip()
+    stripped_pro_b = _LEADING_PRONOUN_PATTERN.sub("", loose_b).strip()
+    if stripped_pro_a == stripped_pro_b and stripped_pro_a:
+        canonical = raw_a if len(raw_a) >= len(raw_b) else raw_b
+        variant = raw_b if canonical == raw_a else raw_a
+        return (
+            "PHRASING_VARIANT",
+            0.94,
+            {
+                "variant_type": "stylistic",
+                "canonical_text": {lang: canonical},
+                "preserved_variants": [variant],
+                "discarded_variants": [],
+            },
+        )
+
+    # 2. Single-token typo or grammatical error in multi-word text
+    #    e.g., "Ma mère était déjà décédée à l'époque" vs "Mon mère était déjà décédée à l'époque"
+    words_a = loose_a.split()
+    words_b = loose_b.split()
+    if len(words_a) == len(words_b) and len(words_a) >= 4:
+        diffs = [
+            (idx, wa, wb)
+            for idx, (wa, wb) in enumerate(zip(words_a, words_b, strict=False))
+            if wa != wb
+        ]
+        if len(diffs) == 1:
+            idx, wa, wb = diffs[0]
+            # Exclude single-letter codes/grades (e.g. "catégorie c" vs "catégorie b") or numbers
+            if len(wa) >= 2 and len(wb) >= 2 and not wa.isdigit() and not wb.isdigit():
+                word_sim = _text_similarity(wa, wb)
+                # Either high word similarity (typo like vancances/vacances) or grammar (ma/mon)
+                is_possessive_pair = {wa, wb} <= {"ma", "mon", "mes", "ta", "ton", "sa", "son"}
+                if word_sim >= 0.65 or is_possessive_pair:
+                    next_word = words_a[idx + 1] if idx + 1 < len(words_a) else ""
+                    # Determine which one is the grammatical error vs canonical
+                    if is_possessive_pair and next_word in _FEMININE_NOUNS_AFTER_MON:
+                        bad_is_a = wa in ("mon", "ton", "son")
+                    else:
+                        # Default: target (raw_b) is canonical unless raw_a is known clean
+                        bad_is_a = True
+                    canonical = raw_b if bad_is_a else raw_a
+                    discarded = raw_a if bad_is_a else raw_b
+                    return (
+                        "TYPOGRAPHICAL_VARIANT",
+                        0.96,
+                        {
+                            "variant_type": "typographical_or_grammar",
+                            "divergence": [wa, wb],
+                            "canonical_text": {lang: canonical},
+                            "preserved_variants": [],
+                            "discarded_variants": [discarded],
+                        },
+                    )
+
+    return None
+
+
 def _compare_multilingual_texts(
-    ml_a: dict[str, str] | None,
-    ml_b: dict[str, str] | None,
+    ml_a: dict[str, str] | list[Any] | None,
+    ml_b: dict[str, str] | list[Any] | None,
 ) -> tuple[str | None, float, dict[str, Any]]:
     """Compare two multilingual text dictionaries and return (match_type, confidence, details)."""
-    na = _norm_lang_dict(ml_a)
-    nb = _norm_lang_dict(ml_b)
+    raw_a = _raw_lang_dict(ml_a)
+    raw_b = _raw_lang_dict(ml_b)
+    na = {k: v.lower() for k, v in raw_a.items()}
+    nb = {k: v.lower() for k, v in raw_b.items()}
     if not na or not nb:
         return None, 0.0, {}
 
     if na == nb:
         return "FACET_EXACT", 0.95, {"languages": list(na.keys())}
 
-    shared_langs = set(na.keys()) & set(nb.keys())
+    shared_langs = sorted(set(na.keys()) & set(nb.keys()))
     if shared_langs:
         exact_shared = [lng for lng in shared_langs if na[lng] == nb[lng]]
         if exact_shared:
@@ -86,15 +284,115 @@ def _compare_multilingual_texts(
                 },
             )
 
-        best_sim = max(_text_similarity(na[lng], nb[lng]) for lng in shared_langs)
+        best_lang = max(shared_langs, key=lambda lng: _text_similarity(na[lng], nb[lng]))
+        best_sim = _text_similarity(na[best_lang], nb[best_lang])
+        ra = raw_a[best_lang]
+        rb = raw_b[best_lang]
+
+        # 1. Loose punctuation equivalence (e.g., trailing '?' or French spacing before '?')
+        loose_a = _normalize_text_loose(ra)
+        loose_b = _normalize_text_loose(rb)
+        if loose_a and loose_a == loose_b:
+            # Prefer version without stray trailing '?' if one has it and the other doesn't,
+            # or keep target by default
+            canonical = ra if rb.endswith("?") and not ra.endswith("?") else rb
+            discarded = rb if canonical == ra else ra
+            return (
+                "NEAR_EXACT",
+                0.98,
+                {
+                    "shared_languages": shared_langs,
+                    "similarity": best_sim,
+                    "variant_type": "punctuation",
+                    "punctuation_variant": True,
+                    "canonical_text": {best_lang: canonical},
+                    "preserved_variants": [],
+                    "discarded_variants": [discarded],
+                },
+            )
+
+        # 2. Inclusive writing variant (e.g., "confronté(e)" vs "confronté")
+        inc_a = _strip_inclusive_markers(loose_a)
+        inc_b = _strip_inclusive_markers(loose_b)
+        if inc_a and inc_a == inc_b:
+            canonical = ra if _has_inclusive_markers(ra) else rb
+            variant = rb if canonical == ra else ra
+            return (
+                "INCLUSIVE_WRITING_VARIANT",
+                0.98,
+                {
+                    "shared_languages": shared_langs,
+                    "similarity": best_sim,
+                    "variant_type": "inclusive_writing",
+                    "canonical_text": {best_lang: canonical},
+                    "preserved_variants": [variant],
+                    "discarded_variants": [],
+                },
+            )
+
+        # 3. Shared-stem question grid / battery detection
+        stem_info = _detect_shared_stem(ra, rb)
+        if stem_info is not None:
+            return (
+                "SHARED_STEM_GRID",
+                0.88,
+                {
+                    "shared_languages": shared_langs,
+                    "similarity": best_sim,
+                    **stem_info,
+                },
+            )
+
+        # 4. Stylistic phrasing variant or single-word grammatical/typo error
+        variant_match = _detect_wording_or_typo_variant(ra, rb, best_lang, best_sim)
+        if variant_match is not None:
+            v_type, v_conf, v_details = variant_match
+            return (
+                v_type,
+                v_conf,
+                {
+                    "shared_languages": shared_langs,
+                    "similarity": best_sim,
+                    **v_details,
+                },
+            )
+
+        # 5. High-similarity NEAR_EXACT (>= 0.98)
+        if best_sim >= 0.98:
+            return (
+                "NEAR_EXACT",
+                round(max(0.96, best_sim), 4),
+                {
+                    "shared_languages": shared_langs,
+                    "similarity": best_sim,
+                    "variant_type": "near_exact",
+                    "canonical_text": {best_lang: rb},
+                    "preserved_variants": [],
+                    "discarded_variants": [ra],
+                },
+            )
+
+        # 6. General SYNTACTIC_SIMILAR (0.75 <= best_sim < 0.98)
         if best_sim >= 0.75:
             return (
                 "SYNTACTIC_SIMILAR",
                 round(min(0.91, best_sim), 4),
-                {"shared_languages": sorted(shared_langs), "similarity": best_sim},
+                {"shared_languages": shared_langs, "similarity": best_sim},
             )
 
     return None, 0.0, {}
+
+
+def _is_record_elevated(urn: str, ext_attrs: Any, elevated_urns: set[str]) -> bool:
+    if urn in elevated_urns:
+        return True
+    if isinstance(ext_attrs, list):
+        for item in ext_attrs:
+            if isinstance(item, dict) and (
+                item.get("is_elevated") is True or item.get("type") == "elevation"
+            ):
+                return True
+    return False
 
 
 def _load_resource_records(
@@ -109,8 +407,10 @@ def _load_resource_records(
         QuestionItem,
         QuestionVariable,
         RepresentedVariable,
+        UrnRegistry,
     )
 
+    elevated_urns = set(UrnRegistry.objects.filter(status="elevated").values_list("urn", flat=True))
     records: list[dict[str, Any]] = []
     q_low = query.lower() if query else None
 
@@ -130,16 +430,20 @@ def _load_resource_records(
                     "name": cat.name,
                     "text": text_map,
                     "content_hash": (cat.hashes or {}).get("content"),
+                    "is_elevated": _is_record_elevated(
+                        cat.urn, cat.extended_attributes, elevated_urns
+                    ),
                 }
             )
 
     elif resource_type == "QuestionItem":
         for qi in QuestionItem.objects.all().order_by("urn"):
             text_map = qi.question_text or qi.label or {}
+            text_dict = _raw_lang_dict(text_map)
             if (
                 q_low
                 and q_low not in qi.urn.lower()
-                and not any(q_low in str(v).lower() for v in text_map.values())
+                and not any(q_low in str(v).lower() for v in text_dict.values())
             ):
                 continue
             records.append(
@@ -149,6 +453,9 @@ def _load_resource_records(
                     "name": qi.name,
                     "text": text_map,
                     "content_hash": (qi.hashes or {}).get("content"),
+                    "is_elevated": _is_record_elevated(
+                        qi.urn, qi.extended_attributes, elevated_urns
+                    ),
                 }
             )
 
@@ -164,7 +471,7 @@ def _load_resource_records(
                 cat_lbl_dict = _norm_lang_dict(ci.category.label) if ci.category else {}
                 cat_lbl = next(iter(cat_lbl_dict.values()), ci.category.urn if ci.category else "")
                 code_pairs.append((str(ci.value).strip(), cat_lbl, bool(ci.is_missing)))
-            if q_low and q_low not in cl.urn.lower() and q_low not in cl.name.lower():
+            if q_low and q_low not in cl.urn.lower() and q_low not in str(cl.name).lower():
                 if not any(q_low in lbl for _, lbl, _ in code_pairs):
                     continue
             records.append(
@@ -175,6 +482,9 @@ def _load_resource_records(
                     "text": cl.label or {},
                     "codes": code_pairs,
                     "content_hash": (cl.hashes or {}).get("content"),
+                    "is_elevated": _is_record_elevated(
+                        cl.urn, cl.extended_attributes, elevated_urns
+                    ),
                 }
             )
 
@@ -188,10 +498,11 @@ def _load_resource_records(
                 .values_list("question_item_id", flat=True)
             )
             text_map = rv.label or {}
+            text_dict = _raw_lang_dict(text_map)
             if (
                 q_low
                 and q_low not in rv.urn.lower()
-                and not any(q_low in str(v).lower() for v in text_map.values())
+                and not any(q_low in str(v).lower() for v in text_dict.values())
             ):
                 continue
             records.append(
@@ -203,6 +514,9 @@ def _load_resource_records(
                     "codelist_urn": rv.code_list_id,
                     "question_urns": q_urns,
                     "content_hash": (rv.hashes or {}).get("content"),
+                    "is_elevated": _is_record_elevated(
+                        rv.urn, rv.extended_attributes, elevated_urns
+                    ),
                 }
             )
 
@@ -221,6 +535,8 @@ def _compare_pair(
     if urn_a == urn_b:
         return None
 
+    is_tgt_elevated = bool(rec_b.get("is_elevated"))
+
     # 1. Exact content hash match
     if rec_a.get("content_hash") and rec_a.get("content_hash") == rec_b.get("content_hash"):
         return {
@@ -229,9 +545,13 @@ def _compare_pair(
             "target_urn": urn_b,
             "match_type": "EXACT",
             "confidence": 1.0,
-            "recommended_action": "alias",
+            "recommended_action": "absorb" if is_tgt_elevated else "alias",
             "requires_review": False,
-            "details": {"source_name": rec_a["name"], "target_name": rec_b["name"]},
+            "details": {
+                "source_name": rec_a["name"],
+                "target_name": rec_b["name"],
+                "target_is_elevated": is_tgt_elevated,
+            },
         }
 
     # 2. CodeList structural comparison
@@ -248,13 +568,14 @@ def _compare_pair(
                     "target_urn": urn_b,
                     "match_type": "FACET_EXACT",
                     "confidence": 0.95,
-                    "recommended_action": "alias",
+                    "recommended_action": "absorb" if is_tgt_elevated else "alias",
                     "requires_review": False,
                     "details": {
                         "source_name": rec_a.get("name"),
                         "target_name": rec_b.get("name"),
                         "code_count": len(pairs_a),
                         "codes": [f"{v}: {lbl}" for v, lbl in pairs_a[:5]],
+                        "target_is_elevated": is_tgt_elevated,
                     },
                 }
 
@@ -303,22 +624,14 @@ def _compare_pair(
             langs_a = (
                 set(text_a.keys())
                 if isinstance(text_a, dict)
-                else {
-                    item["lang"]
-                    for item in text_a
-                    if isinstance(item, dict) and "lang" in item
-                }
+                else {item["lang"] for item in text_a if isinstance(item, dict) and "lang" in item}
                 if isinstance(text_a, list)
                 else set()
             )
             langs_b = (
                 set(text_b.keys())
                 if isinstance(text_b, dict)
-                else {
-                    item["lang"]
-                    for item in text_b
-                    if isinstance(item, dict) and "lang" in item
-                }
+                else {item["lang"] for item in text_b if isinstance(item, dict) and "lang" in item}
                 if isinstance(text_b, list)
                 else set()
             )
@@ -329,12 +642,13 @@ def _compare_pair(
                     "target_urn": urn_b,
                     "match_type": "MULTILINGUAL_OVERLAP",
                     "confidence": 0.90,
-                    "recommended_action": "merge_multilingual",
+                    "recommended_action": "absorb" if is_tgt_elevated else "merge_multilingual",
                     "requires_review": True,
                     "details": {
                         "code_values": vals_a,
                         "source_languages": sorted(langs_a),
                         "target_languages": sorted(langs_b),
+                        "target_is_elevated": is_tgt_elevated,
                     },
                 }
 
@@ -344,12 +658,25 @@ def _compare_pair(
     # 3. Text/Label comparison (Category, QuestionItem, RepresentedVariable)
     m_type, conf, details = _compare_multilingual_texts(rec_a.get("text"), rec_b.get("text"))
     if m_type and conf >= threshold:
-        if m_type == "MULTILINGUAL_OVERLAP":
-            rec_action = "merge_multilingual"
+        if m_type == "SHARED_STEM_GRID":
+            rec_action = "group"
+            req_rev = True
+        elif m_type == "MULTILINGUAL_OVERLAP":
+            rec_action = "absorb" if is_tgt_elevated else "merge_multilingual"
             req_rev = False
         elif m_type == "FACET_EXACT":
-            rec_action = "alias"
+            rec_action = "absorb" if is_tgt_elevated else "alias"
             req_rev = False
+        elif m_type == "NEAR_EXACT":
+            rec_action = "absorb" if is_tgt_elevated else "alias"
+            req_rev = True
+        elif m_type in (
+            "INCLUSIVE_WRITING_VARIANT",
+            "PHRASING_VARIANT",
+            "TYPOGRAPHICAL_VARIANT",
+        ):
+            rec_action = "absorb" if is_tgt_elevated else "elevate"
+            req_rev = True
         else:
             rec_action = "link_semantic"
             req_rev = True
@@ -365,6 +692,7 @@ def _compare_pair(
             "details": {
                 "source_text": rec_a.get("text"),
                 "target_text": rec_b.get("text"),
+                "target_is_elevated": is_tgt_elevated,
                 **details,
             },
         }
@@ -433,6 +761,11 @@ def discover_candidates(
                         src_item, tgt_item = item_a, item_b
                 else:
                     src_item, tgt_item = item_a, item_b
+
+                # If src_item is already elevated and tgt_item is study-specific,
+                # orient so study-specific is absorbed into elevated target
+                if src_item.get("is_elevated") and not tgt_item.get("is_elevated"):
+                    src_item, tgt_item = tgt_item, src_item
 
                 pair_key = (src_item["urn"], tgt_item["urn"])
                 if pair_key in seen_pairs:

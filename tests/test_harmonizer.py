@@ -2,16 +2,24 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
+from fairwddi.ingest.comparator import discover_candidates
 from fairwddi.ingest.harmonizer import (
     absorb_resource,
+    apply_harmonization,
     elevate_resource,
     migrate_urn,
+    plan_harmonization,
     undo_harmonization,
 )
 from fairwddi.models import (
+    Category,
+    CodeList,
     ConceptualVariable,
+    Group,
     Instrument,
     InstrumentQuestion,
     QuestionItem,
@@ -400,3 +408,285 @@ def test_absorb_and_elevate_error_handling() -> None:
             source_urns=[qi.urn],
             into_urn=qi.urn,
         )
+
+
+@pytest.mark.django_db
+def test_near_exact_punctuation_and_target_aware_absorb_in_plan(tmp_path: Path) -> None:
+    """Test NEAR_EXACT punctuation variant detection and target-aware absorb in plan."""
+    # 1. Category pair differing only by trailing ' ?' (like cmp-0783)
+    cat_2015 = Category.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2015.cat_ouvrier:3.0.0",
+        name=[{"value": "cat_2_Ouvrier"}],
+        label={"fr": "Ouvrier(e) qualifié(e) ou hautement qualifié(e), technicien(ne) d'atelier"},
+    )
+    cat_2013 = Category.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2013.cat_ouvrier:3.0.0",
+        name=[{"value": "cat_2_Ouvrier_q"}],
+        label={"fr": "Ouvrier(e) qualifié(e) ou hautement qualifié(e), technicien(ne) d'atelier ?"},
+    )
+    # Mark cat_2015 as already elevated to test target-aware 'absorb' recommendation
+    UrnRegistry.objects.filter(urn=cat_2015.urn).update(
+        status="elevated",
+        extended_attributes=[{"type": "elevation", "is_elevated": True}],
+    )
+
+    cands = discover_candidates(resource_type="Category", threshold=0.75)
+    assert len(cands) == 1
+    cand = cands[0]
+    assert cand["match_type"] == "NEAR_EXACT"
+    assert cand["confidence"] == 0.98
+    assert cand["requires_review"] is True
+    assert cand["details"]["punctuation_variant"] is True
+    # Because cat_2015 is elevated, source is oriented to cat_2013 and action is 'absorb'
+    assert cand["source_urn"] == cat_2013.urn
+    assert cand["target_urn"] == cat_2015.urn
+    assert cand["recommended_action"] == "absorb"
+
+    # Plan and apply declarative absorption
+    plan = plan_harmonization(resource_type="Category", output_dir=tmp_path)
+    assert plan.pending_review_count == 1
+    assert plan.is_ready_to_execute(auto_approve=False) is False
+
+    res = apply_harmonization(plan, auto_approve=True)
+    assert res["absorbed_count"] == 1
+
+    # Verify cat_2013 was absorbed into cat_2015 without keeping the stray '?' variant
+    cat_2015.refresh_from_db()
+    assert cat_2015.label == {
+        "fr": "Ouvrier(e) qualifié(e) ou hautement qualifié(e), technicien(ne) d'atelier"
+    }
+    wording_vars = [
+        a for a in (cat_2015.extended_attributes or []) if a.get("type") == "wording_variant"
+    ]
+    assert wording_vars == []
+    assert URNAlias.objects.filter(alias_urn=cat_2013.urn, canonical_urn=cat_2015.urn).exists()
+
+    # Undo plan restores cat_2013
+    undo_res = undo_harmonization(plan.job_id)
+    assert undo_res["status"] == "reverted"
+    assert undo_res["reverted_sub_jobs"] == 1
+    assert Category.objects.filter(urn=cat_2013.urn).exists() is True
+
+
+@pytest.mark.django_db
+def test_shared_stem_question_grid_detection_and_generic_group(tmp_path: Path) -> None:
+    """Test SHARED_STEM_GRID detection and generic Group creation (group_type='question_grid')."""
+    q_green = QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2015.qi_quartier_verts:1.0.0",
+        name=[{"value": "qi_quartier_verts"}],
+        question_text=[
+            {
+                "lang": "fr",
+                "value": (
+                    "Êtes-vous confronté(e) à un ou plusieurs des problèmes suivants "
+                    "concernant votre quartier ? Manque d'espaces verts"
+                ),
+            }
+        ],
+    )
+    q_sec = QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2015.qi_quartier_sec:1.0.0",
+        name=[{"value": "qi_quartier_sec"}],
+        question_text=[
+            {
+                "lang": "fr",
+                "value": (
+                    "Êtes-vous confronté(e) à un ou plusieurs des problèmes suivants "
+                    "concernant votre quartier ? Manque de sécurité"
+                ),
+            }
+        ],
+    )
+
+    # Link related RepresentedVariables with distinct CodeLists
+    cl1 = CodeList.objects.create(urn="urn:ddi:fr.cdsp:cl_yesno:1.0.0", name="cl_yesno")
+    cl2 = CodeList.objects.create(urn="urn:ddi:fr.cdsp:cl_scale:1.0.0", name="cl_scale")
+    rv_green = RepresentedVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:rv_quartier_verts:1.0.0",
+        name="rv_quartier_verts",
+        code_list=cl1,
+    )
+    rv_sec = RepresentedVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:rv_quartier_sec:1.0.0",
+        name="rv_quartier_sec",
+        code_list=cl2,
+    )
+    QuestionVariable.objects.create(question_item=q_green, represented_variable=rv_green)
+    QuestionVariable.objects.create(question_item=q_sec, represented_variable=rv_sec)
+
+    cands = discover_candidates(resource_type="QuestionItem", threshold=0.75)
+    assert len(cands) == 1
+    cand = cands[0]
+    assert cand["match_type"] == "SHARED_STEM_GRID"
+    assert cand["recommended_action"] == "group"
+    assert cand["requires_review"] is True
+    assert cand["details"]["group_type"] == "question_grid"
+    expected_stem = (
+        "Êtes-vous confronté(e) à un ou plusieurs des problèmes suivants "
+        "concernant votre quartier ?"
+    )
+    assert cand["details"]["shared_stem"] == expected_stem
+    assert {cand["details"]["sub_item_a"], cand["details"]["sub_item_b"]} == {
+        "Manque d'espaces verts",
+        "Manque de sécurité",
+    }
+
+    plan = plan_harmonization(resource_type="QuestionItem", output_dir=tmp_path)
+    assert plan.pending_review_count == 1
+    md = plan.to_markdown()
+    assert "Shared-Stem Grids & Resource Groups" in md
+
+    res = apply_harmonization(plan, auto_approve=True)
+    assert res["grouped_count"] == 1
+
+    groups = list(Group.objects.filter(group_type="question_grid"))
+    assert len(groups) == 1
+    grp = groups[0]
+    ref_urns = {r["urn"] for r in (grp.references or [])}
+    assert q_green.urn in ref_urns
+    assert q_sec.urn in ref_urns
+    assert rv_green.urn in ref_urns
+    assert rv_sec.urn in ref_urns
+    assert SemanticRelationship.objects.filter(
+        subject_urn=q_green.urn, predicate="ddi:inGroup", object_urn=grp.urn
+    ).exists()
+
+    # Undo removes the created Group and SemanticRelationships
+    undo_res = undo_harmonization(plan.job_id)
+    assert undo_res["removed_groups"] == 1
+    assert Group.objects.filter(urn=grp.urn).exists() is False
+
+
+@pytest.mark.django_db
+def test_phrasing_inclusive_and_typo_variants_in_plan(tmp_path: Path) -> None:
+    """Test inclusive writing, stylistic phrasing, and grammatical error handling in plans."""
+    # 1. Inclusive writing variant on QuestionItem
+    q_inc = QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2015.qi_salete:1.0.0",
+        name=[{"value": "qi_salete_2015"}],
+        question_text=[
+            {
+                "lang": "fr",
+                "value": (
+                    "Êtes-vous confronté(e) à un ou plusieurs des problèmes suivants "
+                    "concernant votre quartier ? Saleté des rues ou du quartier"
+                ),
+            }
+        ],
+    )
+    QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2013.qi_salete:1.0.0",
+        name=[{"value": "qi_salete_2013"}],
+        question_text=[
+            {
+                "lang": "fr",
+                "value": (
+                    "Êtes-vous confronté à un ou plusieurs des problèmes suivants "
+                    "concernant votre quartier ? Saleté des rues ou du quartier"
+                ),
+            }
+        ],
+    )
+
+    # 2. Stylistic phrasing variant on Category ("Je refuse de répondre" vs "Refuse de répondre")
+    cat_je = Category.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2015.cat_refus:1.0.0",
+        name=[{"value": "cat_refus_2015"}],
+        label={"fr": "Je refuse de répondre"},
+    )
+    Category.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2013.cat_refus:1.0.0",
+        name=[{"value": "cat_refus_2013"}],
+        label={"fr": "Refuse de répondre"},
+    )
+
+    # 3. Grammatical error on Category ("Ma mère..." vs "Mon mère...")
+    cat_ma = Category.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2015.cat_mere:1.0.0",
+        name=[{"value": "cat_mere_2015"}],
+        label={"fr": "Ma mère était déjà décédée à l'époque"},
+    )
+    cat_mon = Category.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2013.cat_mere:1.0.0",
+        name=[{"value": "cat_mere_2013"}],
+        label={"fr": "Mon mère était déjà décédée à l'époque"},
+    )
+
+    plan = plan_harmonization(threshold=0.75, output_dir=tmp_path)
+    by_match = {a.match_type: a for a in plan.actions}
+
+    assert "INCLUSIVE_WRITING_VARIANT" in by_match
+    inc_act = by_match["INCLUSIVE_WRITING_VARIANT"]
+    assert inc_act.action == "elevate"
+    assert inc_act.requires_review is True
+    assert inc_act.details["canonical_text"] == {
+        "fr": (
+            "Êtes-vous confronté(e) à un ou plusieurs des problèmes suivants "
+            "concernant votre quartier ? Saleté des rues ou du quartier"
+        )
+    }
+
+    assert "PHRASING_VARIANT" in by_match
+    phr_act = by_match["PHRASING_VARIANT"]
+    assert phr_act.action == "elevate"
+    assert phr_act.requires_review is True
+    assert phr_act.details["canonical_text"] == {"fr": "Je refuse de répondre"}
+    assert phr_act.details["preserved_variants"] == ["Refuse de répondre"]
+
+    assert "TYPOGRAPHICAL_VARIANT" in by_match
+    typo_act = by_match["TYPOGRAPHICAL_VARIANT"]
+    assert typo_act.action == "elevate"
+    assert typo_act.requires_review is True
+    assert typo_act.details["canonical_text"] == {"fr": "Ma mère était déjà décédée à l'époque"}
+    assert typo_act.details["discarded_variants"] == ["Mon mère était déjà décédée à l'époque"]
+
+    # Apply the plan and verify elevated entities
+    res = apply_harmonization(plan, auto_approve=True)
+    assert res["elevated_count"] == 3
+
+    # 1. Check inclusive QuestionItem
+    gen_q_urn = URNAlias.objects.get(alias_urn=q_inc.urn).canonical_urn
+    gen_q = QuestionItem.objects.get(urn=gen_q_urn)
+    assert gen_q.question_text == [
+        {
+            "lang": "fr",
+            "value": (
+                "Êtes-vous confronté(e) à un ou plusieurs des problèmes suivants "
+                "concernant votre quartier ? Saleté des rues ou du quartier"
+            ),
+        }
+    ]
+    q_variants = [
+        a for a in (gen_q.extended_attributes or []) if a.get("type") == "wording_variant"
+    ]
+    assert len(q_variants) == 1
+    assert q_variants[0]["value"] == (
+        "Êtes-vous confronté à un ou plusieurs des problèmes suivants "
+        "concernant votre quartier ? Saleté des rues ou du quartier"
+    )
+
+    # 2. Check stylistic Category ("Je refuse de répondre" default + "Refuse de répondre" variant)
+    gen_ref_urn = URNAlias.objects.get(alias_urn=cat_je.urn).canonical_urn
+    gen_ref = Category.objects.get(urn=gen_ref_urn)
+    assert gen_ref.label == {"fr": "Je refuse de répondre"}
+    ref_variants = [
+        a for a in (gen_ref.extended_attributes or []) if a.get("type") == "wording_variant"
+    ]
+    assert len(ref_variants) == 1
+    assert ref_variants[0]["value"] == "Refuse de répondre"
+
+    # 3. Check grammatical typo Category ("Ma mère..." default, "Mon mère..." dropped!)
+    gen_mere_urn = URNAlias.objects.get(alias_urn=cat_ma.urn).canonical_urn
+    assert URNAlias.objects.get(alias_urn=cat_mon.urn).canonical_urn == gen_mere_urn
+    gen_mere = Category.objects.get(urn=gen_mere_urn)
+    assert gen_mere.label == {"fr": "Ma mère était déjà décédée à l'époque"}
+    mere_variants = [
+        a for a in (gen_mere.extended_attributes or []) if a.get("type") == "wording_variant"
+    ]
+    assert mere_variants == []
+
+    # Undo plan reverts all 3 elevations cleanly
+    undo_res = undo_harmonization(plan.job_id)
+    assert undo_res["reverted_sub_jobs"] == 3
+    assert QuestionItem.objects.filter(urn=q_inc.urn).exists() is True
+    assert Category.objects.filter(urn=cat_mon.urn).exists() is True

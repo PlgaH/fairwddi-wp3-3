@@ -647,6 +647,15 @@ uv run fairwddi ingest plan ./ingest_output/survey.ddi40.json \
 
 Emits `./ingest_output/survey.ddi40.ingest.plan.yaml` and `.report.md`.
 
+#### Review & Authorize via Interactive Ingest Plan Editor
+
+Data managers and archivists can open the generated `.ingest.plan.yaml` file in the standalone browser-based **Ingest Plan Editor** ([`deliverables/research/ingest_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/ingest_plan_editor.html)):
+
+- **Visual Review Gate:** Inspect review readiness, toggle approval from `PENDING` to `APPROVED`, record reviewer ID, timestamp, and comments.
+- **Action Editing:** Change planned actions (`create`, `alias`, `reuse`, `quarantine`, `skip`), edit canonical target URNs, and add archivist notes.
+- **Bulk Authoring:** 1-click approve or reject all visible actions or filtered subsets.
+- **Direct Save & Export:** Save approved plans directly back to disk or download as clean YAML/JSON ready for CLI execution.
+
 #### Execute Ingestion Plan (`fairwddi ingest execute`)
 
 Executes insertion into PostgreSQL within an atomic transaction. Writes an `IngestBatch` receipt and bulk-loads frequency rows:
@@ -715,7 +724,21 @@ Executes multilingual merging, cascade relinking, semantic link creation, resour
 ```bash
 # Plan harmonization actions across discovered candidates
 uv run fairwddi harmonize plan ./compare_output/candidates.json --output-dir ./harm_output
+```
 
+#### Review & Authorize via Interactive Harmonization Plan Editor
+
+Archivists can inspect candidate matches in the standalone browser-based **Harmonization Plan Editor** ([`deliverables/research/harmonization_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/harmonization_plan_editor.html)):
+
+- **Question Grid Inspector:** Inspect detected common question stems (`SHARED_STEM_GRID`), view sub-item prompts, and configure `group_type: question_grid` groups.
+- **Wording Variant Curator:** Classify inclusive writing markers (`(e)`, `·es`), stylistic phrasing, and punctuation shifts; configure `canonical_text` overrides, manage `preserved_variants` (stored in `extended_attributes` for search discovery), and discard errata.
+- **Elevation & Absorption:** Switch operations to `elevate` (create new canonical bank-level generic entity) or `absorb` (absorb wave into an existing elevated entity).
+- **Side-by-Side Diff Inspector:** Compare source and target response codes, category labels, and question texts with visual discrepancy highlighting.
+- **1-Click Bulk Approval:** Instantly authorize all `FACET_EXACT` matches ($\ge 0.95$ confidence) while keeping fuzzy items for closer human inspection.
+- **Action Switching:** Reconfigure operations between `elevate`, `absorb`, `group`, `alias`, `harmonize`, `merge_multilingual`, `link_semantic`, or `skip`.
+- **Review Gate Sign-Off:** Authorize the plan so `fairwddi harmonize apply` can run without manual bypass flags.
+
+```bash
 # Apply review-gated harmonization plan
 uv run fairwddi harmonize apply ./harm_output/harmonization.plan.yaml
 

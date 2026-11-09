@@ -109,4 +109,3 @@ def generate_generic_urn(
     rand_token = uuid.uuid4().hex[:token_len]
     object_id = f"{pfx}-{slug}-{rand_token}"
     return f"urn:ddi:{eff_agency}:{object_id}:{version}"
-

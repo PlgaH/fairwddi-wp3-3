@@ -323,6 +323,18 @@ flowchart TD
 #### 3. Single-Resource Promotion & Migration (`fairwddi harmonize rename`)
 - Atomically renames a study-specific or legacy URN to a clean canonical URN, updating all cascade references and creating an alias in `URNAlias`.
 
+#### 4. Declarative Plan Actions, Wording Curation & Shared-Stem Question Grids
+- **Target-Aware `elevate` & `absorb` in `.harmonize.plan.yaml`:**
+  - `discover_candidates` and `build_harmonization_plan` inspect whether either resource in a candidate pair is already an elevated generic entity (`UrnRegistry.status == 'elevated'` or `is_elevated: True` in `extended_attributes`).
+  - If the target is already elevated, the plan recommends `action: "absorb"` (enriching the existing canonical resource in-place). If both are study-specific, it recommends `action: "elevate"` (or `action: "alias"` for exact/near-exact equivalence).
+- **Stratified Similarity & Wording Curation (`requires_review: true`):**
+  - `NEAR_EXACT`: Terminal punctuation variants (e.g., trailing `?` or spacing before `?`) and high sequence similarity ($\ge 0.98$).
+  - `INCLUSIVE_WRITING_VARIANT` & `PHRASING_VARIANT`: Inclusive markers (`"confronté(e)"` vs. `"confronté"`) and stylistic shifts (`"Je refuse de répondre"` vs. `"Refuse de répondre"`). Keeps the default wording on `question_text`/`label` and preserves alternate phrasings in `extended_attributes` (`type: "wording_variant"`).
+  - `TYPOGRAPHICAL_VARIANT`: Grammatical/typographical errors (`"Ma mère..."` vs. `"Mon mère..."`). Keeps the valid wording on the canonical field and drops `discarded_variants` while preserving the source URN in `URNAlias`.
+- **Shared-Stem Question Grids (`SHARED_STEM_GRID` & Generic `Group`):**
+  - Questions, categories, or variables sharing a common stem followed by distinct choices/sub-items (e.g., `"Êtes-vous confronté(e) à un ou plusieurs des problèmes suivants concernant votre quartier ? Manque d'espaces verts"` vs. `"... ? Manque de sécurité"`) are classified as `SHARED_STEM_GRID` (`action: "group"`, `requires_review: true`).
+  - Executing `group` creates or updates a generic `Group` entity (`request_ddi_group` with `group_type="question_grid"`, Shared stem in `description`, and sub-item metadata in `extended_attributes`) and records `ddi:inGroup` relationships in `SemanticRelationship`.
+
 ### CLI Interface Summary
 
 ```bash

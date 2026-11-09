@@ -6,4 +6,3 @@ from fairwddi.api.router import api
 from fairwddi.api.server import run_server
 
 __all__ = ["api", "run_server"]
-

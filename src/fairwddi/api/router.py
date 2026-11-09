@@ -91,9 +91,7 @@ def get_overview(request: Any) -> OverviewStats:
     # Reused questions: questions linked to >= 2 distinct StudyUnits OR having URNAliases
     # Fast computation via alias canonical targets
     aliased_question_urns = set(
-        URNAlias.objects.filter(entity_type="QuestionItem").values_list(
-            "canonical_urn", flat=True
-        )
+        URNAlias.objects.filter(entity_type="QuestionItem").values_list("canonical_urn", flat=True)
     )
     reused_count = len(aliased_question_urns)
 
@@ -114,9 +112,7 @@ def list_surveys(request: Any) -> list[SurveyItem]:
     """Return all ingested surveys with variable and question counts."""
     surveys: list[SurveyItem] = []
     for su in StudyUnit.objects.all().order_by("urn"):
-        var_count = InstanceVariable.objects.filter(
-            datafile__study_unit=su
-        ).count()
+        var_count = InstanceVariable.objects.filter(datafile__study_unit=su).count()
         title_str = _extract_display_text(su.label or su.name)
         surveys.append(
             SurveyItem(
@@ -502,9 +498,9 @@ def _build_codelist_summary(cl: CodeList) -> CodeListSummary:
         cat_label = ""
         cat_urn = ""
         if code.category:
-            cat_label = _extract_display_text(
-                code.category.label
-            ) or _extract_display_text(code.category.name)
+            cat_label = _extract_display_text(code.category.label) or _extract_display_text(
+                code.category.name
+            )
             cat_urn = code.category.urn
         codes_info.append(
             CodeItemInfo(
@@ -535,9 +531,7 @@ def _build_codelist_summary(cl: CodeList) -> CodeListSummary:
             q_name = _extract_display_text(qi.name) or (
                 qi.urn.split(":")[-2] if ":" in qi.urn else qi.urn
             )
-            q_text = _extract_display_text(
-                qi.question_text
-            ) or _extract_display_text(qi.name)
+            q_text = _extract_display_text(qi.question_text) or _extract_display_text(qi.name)
             questions_map[qi.urn] = q_text
             break
 
@@ -683,9 +677,7 @@ def list_categories(
                     for iv in rv.instance_variables.all():
                         for dfv in iv.datafile_variables.all():
                             if dfv.datafile and dfv.datafile.study_unit:
-                                s_name = _extract_display_text(
-                                    dfv.datafile.study_unit.name
-                                )
+                                s_name = _extract_display_text(dfv.datafile.study_unit.name)
                                 cl_surveys.add(s_name)
                                 surveys_set.add(s_name)
                 cl_refs.append(
@@ -785,9 +777,7 @@ def get_category(request: Any, urn: str) -> CategorySummary:
                 for iv in rv.instance_variables.all():
                     for dfv in iv.datafile_variables.all():
                         if dfv.datafile and dfv.datafile.study_unit:
-                            s_name = _extract_display_text(
-                                dfv.datafile.study_unit.name
-                            )
+                            s_name = _extract_display_text(dfv.datafile.study_unit.name)
                             cl_surveys.add(s_name)
                             surveys_set.add(s_name)
 

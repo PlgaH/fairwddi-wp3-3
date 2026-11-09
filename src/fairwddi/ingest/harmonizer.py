@@ -9,7 +9,9 @@ Supports:
 
 from __future__ import annotations
 
+import hashlib
 import logging
+import os
 import uuid
 from pathlib import Path
 from typing import Any
@@ -19,7 +21,8 @@ from django.db import transaction
 from fairwddi.ingest.comparator import discover_candidates
 from fairwddi.ingest.loader import compute_resource_hashes
 from fairwddi.ingest.plan import IngestPlan, PlanActionItem, ReviewGate
-from fairwddi.utils.urn import generate_generic_urn, validate_ddi_urn
+from fairwddi.utils.normalize_string import normalize_string
+from fairwddi.utils.urn import generate_generic_urn, slugify, validate_ddi_urn
 
 logger = logging.getLogger(__name__)
 
@@ -170,6 +173,168 @@ def _merge_jsonb_dicts(
     return dict(sorted(merged.items()))
 
 
+def _extract_variant_strings(variants: Any) -> set[str]:
+    """Extract normalized string set from a list/dict of variant specifications."""
+    res: set[str] = set()
+    if not variants:
+        return res
+    if isinstance(variants, str):
+        cleaned = normalize_string(variants)
+        if cleaned:
+            res.add(cleaned)
+    elif isinstance(variants, dict):
+        for v in variants.values():
+            if isinstance(v, str) and normalize_string(v):
+                res.add(normalize_string(v))
+    elif isinstance(variants, list):
+        for item in variants:
+            if isinstance(item, str) and normalize_string(item):
+                res.add(normalize_string(item))
+            elif isinstance(item, dict):
+                for v in item.values():
+                    if isinstance(v, str) and normalize_string(v):
+                        res.add(normalize_string(v))
+    return res
+
+
+def _curate_multilingual_text(
+    items: list[tuple[str, Any]],
+    canonical_text: Any = None,
+    preserved_variants: list[Any] | None = None,
+    discarded_variants: list[Any] | None = None,
+    variant_type: str | None = None,
+    prefer_list_format: bool = False,
+) -> tuple[Any, list[dict[str, Any]]]:
+    """Merge multilingual texts across items, apply canonical_text, and collect wording_variants."""
+    merged: dict[str, str] = {}
+    any_list_input = prefer_list_format
+    collected: list[tuple[str, str, str]] = []
+
+    for src_urn, raw_val in items:
+        if isinstance(raw_val, list):
+            any_list_input = True
+        d = _to_dict_form(raw_val)
+        for lang, text_val in d.items():
+            cleaned = normalize_string(text_val)
+            if not cleaned:
+                continue
+            if lang not in merged:
+                merged[lang] = cleaned
+            collected.append((src_urn, lang, cleaned))
+
+    if canonical_text:
+        if isinstance(canonical_text, str):
+            cleaned_can = normalize_string(canonical_text)
+            if cleaned_can:
+                target_lang = next(iter(merged.keys()), "fr")
+                merged[target_lang] = cleaned_can
+        else:
+            can_dict = _to_dict_form(canonical_text)
+            for lang, val in can_dict.items():
+                cleaned_can = normalize_string(val)
+                if cleaned_can:
+                    merged[lang] = cleaned_can
+
+    discarded_set = _extract_variant_strings(discarded_variants)
+    discarded_lower = {s.lower() for s in discarded_set}
+    preserved_set = (
+        _extract_variant_strings(preserved_variants) if preserved_variants is not None else None
+    )
+    preserved_lower = {s.lower() for s in preserved_set} if preserved_set is not None else None
+
+    variant_entries: list[dict[str, Any]] = []
+    seen_variants: set[tuple[str, str]] = set()
+
+    for src_urn, lang, text_val in collected:
+        primary = merged.get(lang)
+        if not primary or text_val == primary:
+            continue
+        if text_val in discarded_set or text_val.lower() in discarded_lower:
+            continue
+        if preserved_lower is not None:
+            if text_val.lower() not in preserved_lower:
+                continue
+        else:
+            if variant_type in ("punctuation", "typographical_or_grammar"):
+                continue
+
+        key = (lang, text_val)
+        if key not in seen_variants:
+            seen_variants.add(key)
+            variant_entries.append(
+                {
+                    "type": "wording_variant",
+                    "lang": lang,
+                    "value": text_val,
+                    "variant_type": variant_type or "phrasing",
+                    "is_default": False,
+                    "source_urn": src_urn,
+                }
+            )
+
+    # Also include any explicitly requested preserved_variants not already in collected
+    if preserved_set:
+        default_lang = next(iter(merged.keys()), "fr")
+        default_src = items[-1][0] if items else ""
+        for p_val in sorted(preserved_set):
+            if p_val in discarded_set or p_val.lower() in discarded_lower:
+                continue
+            if p_val == merged.get(default_lang):
+                continue
+            key = (default_lang, p_val)
+            if key not in seen_variants:
+                seen_variants.add(key)
+                variant_entries.append(
+                    {
+                        "type": "wording_variant",
+                        "lang": default_lang,
+                        "value": p_val,
+                        "variant_type": variant_type or "phrasing",
+                        "is_default": False,
+                        "source_urn": default_src,
+                    }
+                )
+
+    if not merged:
+        return ([] if any_list_input else {}), variant_entries
+
+    final_val: Any = (
+        [{"lang": k, "value": v} for k, v in sorted(merged.items())]
+        if any_list_input
+        else dict(sorted(merged.items()))
+    )
+    return final_val, variant_entries
+
+
+def _append_unique_ext_attrs(
+    existing: list[Any] | None,
+    new_items: list[dict[str, Any]],
+) -> list[Any]:
+    res = list(existing or [])
+    for item in new_items:
+        if item.get("type") == "wording_variant":
+            already = any(
+                isinstance(e, dict)
+                and e.get("type") == "wording_variant"
+                and e.get("lang") == item.get("lang")
+                and e.get("value") == item.get("value")
+                for e in res
+            )
+            if not already:
+                res.append(item)
+        elif item not in res:
+            res.append(item)
+    return res
+
+
+def _resolve_alias_urn(urn: str) -> str:
+    """Resolve a URN through URNAlias if it has already been aliased/elevated."""
+    from fairwddi.models import URNAlias
+
+    alias_rec = URNAlias.objects.filter(alias_urn=urn).first()
+    return alias_rec.canonical_urn if alias_rec else urn
+
+
 def apply_harmonization(
     plan_or_path: IngestPlan | Path | str,
     auto_approve: bool = False,
@@ -177,6 +342,7 @@ def apply_harmonization(
     """Execute an approved Harmonization Plan and log undo snapshots in EventLog."""
     from fairwddi.models import (
         EventLog,
+        Group,
         InstanceVariable,
         QuestionVariable,
         SemanticRelationship,
@@ -197,16 +363,208 @@ def apply_harmonization(
 
     merged_count = 0
     aliased_count = 0
+    elevated_count = 0
+    absorbed_count = 0
+    grouped_count = 0
     linked_count = 0
     created_aliases: list[str] = []
     created_rel_ids: list[int] = []
     target_snapshots: list[dict[str, Any]] = []
     repointed_ivs: list[dict[str, str]] = []
     repointed_qvs: list[dict[str, Any]] = []
+    sub_job_ids: list[str] = []
+    created_group_urns: list[str] = []
+    group_snapshots: list[dict[str, Any]] = []
 
     with transaction.atomic():
         for act in plan.actions:
-            if not act.approved or not act.target_urn:
+            if not act.approved or act.action == "skip":
+                continue
+
+            # A. Declarative Grouping (e.g. SHARED_STEM_GRID -> Group)
+            if act.action == "group":
+                g_type = act.details.get("group_type", "question_grid")
+                shared_stem = act.details.get("shared_stem", "")
+                agency = os.getenv("DDI_AGENCY", "fr.cdsp")
+                explicit_g_urn = act.details.get("group_urn")
+                if explicit_g_urn and validate_ddi_urn(explicit_g_urn):
+                    g_urn = explicit_g_urn
+                else:
+                    seed_str = shared_stem or f"{act.source_urn}:{act.target_urn}"
+                    stem_hash = hashlib.sha256(seed_str.lower().encode("utf-8")).hexdigest()[:6]
+                    slug = slugify(shared_stem or g_type, max_len=24)
+                    g_urn = f"urn:ddi:{agency}:GRP-{slug}-{stem_hash}:1.0.0"
+
+                grp_obj = Group.objects.filter(urn=g_urn).first()
+                if grp_obj is not None:
+                    if not any(gs["urn"] == g_urn for gs in group_snapshots) and (
+                        g_urn not in created_group_urns
+                    ):
+                        group_snapshots.append(
+                            {
+                                "urn": g_urn,
+                                "references": list(grp_obj.references or []),
+                                "description": grp_obj.description,
+                            }
+                        )
+                    refs = list(grp_obj.references or [])
+                else:
+                    langs = act.details.get("shared_languages") or ["fr"]
+                    lang = langs[0] if isinstance(langs, list) and langs else "fr"
+                    g_name = act.details.get("group_name") or f"Grid: {shared_stem[:40]}"
+                    desc = [{"lang": lang, "value": shared_stem}] if shared_stem else []
+                    grp_obj = Group.objects.create(
+                        urn=g_urn,
+                        name=[{"lang": lang, "value": g_name}],
+                        group_type=g_type,
+                        description=desc,
+                        references=[],
+                    )
+                    created_group_urns.append(g_urn)
+                    refs = []
+
+                member_specs: list[dict[str, Any]] = []
+                if act.source_urn:
+                    m_a: dict[str, Any] = {
+                        "resource_type": act.resource_type,
+                        "urn": act.source_urn,
+                    }
+                    if act.details.get("sub_item_a"):
+                        m_a["sub_item"] = act.details["sub_item_a"]
+                    member_specs.append(m_a)
+                if act.target_urn:
+                    m_b: dict[str, Any] = {
+                        "resource_type": act.resource_type,
+                        "urn": act.target_urn,
+                    }
+                    if act.details.get("sub_item_b"):
+                        m_b["sub_item"] = act.details["sub_item_b"]
+                    member_specs.append(m_b)
+
+                # Also include related RepresentedVariables if grouping QuestionItems
+                if act.resource_type == "QuestionItem":
+                    q_urns = [u for u in (act.source_urn, act.target_urn) if u]
+                    for rv_urn in QuestionVariable.objects.filter(
+                        question_item_id__in=q_urns
+                    ).values_list("represented_variable_id", flat=True):
+                        if rv_urn:
+                            member_specs.append(
+                                {"resource_type": "RepresentedVariable", "urn": rv_urn}
+                            )
+
+                existing_ref_urns = {r.get("urn") for r in refs if isinstance(r, dict)}
+                for m_spec in member_specs:
+                    m_urn = m_spec["urn"]
+                    if m_urn not in existing_ref_urns:
+                        refs.append(m_spec)
+                        existing_ref_urns.add(m_urn)
+                    if UrnRegistry.objects.filter(urn=m_urn).exists():
+                        rel, created = SemanticRelationship.objects.get_or_create(
+                            subject_urn=m_urn,
+                            predicate="ddi:inGroup",
+                            object_urn=g_urn,
+                            defaults={
+                                "subject_type": m_spec["resource_type"],
+                                "object_type": "Group",
+                                "extended_attributes": [
+                                    {
+                                        "type": "provenance",
+                                        "value": f"fairwddi.ingest.harmonize:{plan.job_id}",
+                                    }
+                                ],
+                            },
+                        )
+                        if created:
+                            created_rel_ids.append(rel.id)
+                            linked_count += 1
+
+                grp_obj.references = refs
+                grp_obj.save(update_fields=["references", "updated_at"])
+                grouped_count += 1
+                continue
+
+            if not act.target_urn:
+                continue
+
+            # B. Declarative Absorption (`action: absorb`)
+            if act.action == "absorb":
+                resolved_src = _resolve_alias_urn(act.source_urn)
+                resolved_tgt = _resolve_alias_urn(act.target_urn)
+                if resolved_src == resolved_tgt:
+                    continue
+                abs_res = absorb_resource(
+                    source_urns=[resolved_src],
+                    into_urn=resolved_tgt,
+                    resource_type=act.resource_type,
+                    provenance_note=f"fairwddi.ingest.harmonize:{plan.job_id}:{act.id}",
+                    canonical_text=act.details.get("canonical_text"),
+                    preserved_variants=act.details.get("preserved_variants"),
+                    discarded_variants=act.details.get("discarded_variants"),
+                    variant_type=act.details.get("variant_type"),
+                )
+                absorbed_count += 1
+                linked_count += abs_res.get("semantic_links_created", 0)
+                sub_job_ids.append(abs_res["job_id"])
+                continue
+
+            # C. Declarative Elevation (`action: elevate`)
+            if act.action == "elevate":
+                resolved_src = _resolve_alias_urn(act.source_urn)
+                resolved_tgt = _resolve_alias_urn(act.target_urn)
+                if resolved_src == resolved_tgt:
+                    continue
+
+                # Check if either resolved URN is already an elevated bank resource
+                src_is_elev = UrnRegistry.objects.filter(
+                    urn=resolved_src, status="elevated"
+                ).exists()
+                tgt_is_elev = UrnRegistry.objects.filter(
+                    urn=resolved_tgt, status="elevated"
+                ).exists()
+
+                if tgt_is_elev and not src_is_elev:
+                    abs_res = absorb_resource(
+                        source_urns=[resolved_src],
+                        into_urn=resolved_tgt,
+                        resource_type=act.resource_type,
+                        provenance_note=f"fairwddi.ingest.harmonize:{plan.job_id}:{act.id}",
+                        canonical_text=act.details.get("canonical_text"),
+                        preserved_variants=act.details.get("preserved_variants"),
+                        discarded_variants=act.details.get("discarded_variants"),
+                        variant_type=act.details.get("variant_type"),
+                    )
+                    absorbed_count += 1
+                    linked_count += abs_res.get("semantic_links_created", 0)
+                    sub_job_ids.append(abs_res["job_id"])
+                elif src_is_elev and not tgt_is_elev:
+                    abs_res = absorb_resource(
+                        source_urns=[resolved_tgt],
+                        into_urn=resolved_src,
+                        resource_type=act.resource_type,
+                        provenance_note=f"fairwddi.ingest.harmonize:{plan.job_id}:{act.id}",
+                        canonical_text=act.details.get("canonical_text"),
+                        preserved_variants=act.details.get("preserved_variants"),
+                        discarded_variants=act.details.get("discarded_variants"),
+                        variant_type=act.details.get("variant_type"),
+                    )
+                    absorbed_count += 1
+                    linked_count += abs_res.get("semantic_links_created", 0)
+                    sub_job_ids.append(abs_res["job_id"])
+                else:
+                    elev_res = elevate_resource(
+                        source_urns=[resolved_src, resolved_tgt],
+                        generic_urn=act.details.get("generic_urn"),
+                        resource_type=act.resource_type,
+                        generic_name=act.details.get("generic_name"),
+                        provenance_note=f"fairwddi.ingest.harmonize:{plan.job_id}:{act.id}",
+                        canonical_text=act.details.get("canonical_text"),
+                        preserved_variants=act.details.get("preserved_variants"),
+                        discarded_variants=act.details.get("discarded_variants"),
+                        variant_type=act.details.get("variant_type"),
+                    )
+                    elevated_count += 1
+                    linked_count += elev_res.get("semantic_links_created", 0)
+                    sub_job_ids.append(elev_res["job_id"])
                 continue
 
             model_cls = _get_model_for_type(act.resource_type)
@@ -218,14 +576,16 @@ def apply_harmonization(
             if not src_obj or not tgt_obj:
                 continue
 
-            # 1. Merge multilingual JSONB fields onto target_urn
+            # 1. Merge multilingual JSONB fields & wording variants onto target_urn
             if act.action in ("merge_multilingual", "alias", "harmonize"):
                 snap: dict[str, Any] = {
                     "resource_type": act.resource_type,
                     "urn": tgt_obj.urn,
                     "label": dict(tgt_obj.label)
                     if isinstance(tgt_obj.label, dict)
-                    else tgt_obj.label,
+                    else (
+                        list(tgt_obj.label) if isinstance(tgt_obj.label, list) else tgt_obj.label
+                    ),
                     "description": (
                         dict(tgt_obj.description)
                         if isinstance(tgt_obj.description, dict)
@@ -234,8 +594,33 @@ def apply_harmonization(
                     "hashes": dict(tgt_obj.hashes)
                     if isinstance(tgt_obj.hashes, dict)
                     else tgt_obj.hashes,
+                    "extended_attributes": list(tgt_obj.extended_attributes)
+                    if isinstance(tgt_obj.extended_attributes, list)
+                    else tgt_obj.extended_attributes,
                 }
-                tgt_obj.label = _merge_jsonb_dicts(tgt_obj.label, src_obj.label)
+
+                can_text = act.details.get("canonical_text")
+                pres_vars = act.details.get("preserved_variants")
+                disc_vars = act.details.get("discarded_variants")
+                var_type = act.details.get("variant_type")
+
+                if act.resource_type != "QuestionItem":
+                    curated_lbl, lbl_variants = _curate_multilingual_text(
+                        [(tgt_obj.urn, tgt_obj.label), (src_obj.urn, src_obj.label)],
+                        canonical_text=can_text,
+                        preserved_variants=pres_vars,
+                        discarded_variants=disc_vars,
+                        variant_type=var_type,
+                    )
+                    if curated_lbl:
+                        tgt_obj.label = curated_lbl
+                    if lbl_variants:
+                        tgt_obj.extended_attributes = _append_unique_ext_attrs(
+                            tgt_obj.extended_attributes, lbl_variants
+                        )
+                else:
+                    tgt_obj.label = _merge_jsonb_dicts(tgt_obj.label, src_obj.label)
+
                 tgt_obj.description = _merge_jsonb_dicts(tgt_obj.description, src_obj.description)
 
                 hash_payload: dict[str, Any] = {
@@ -247,16 +632,34 @@ def apply_harmonization(
                     snap["question_text"] = (
                         dict(tgt_obj.question_text)
                         if isinstance(tgt_obj.question_text, dict)
-                        else tgt_obj.question_text
+                        else (
+                            list(tgt_obj.question_text)
+                            if isinstance(tgt_obj.question_text, list)
+                            else tgt_obj.question_text
+                        )
                     )
                     snap["interviewer_instructions"] = (
                         dict(tgt_obj.interviewer_instructions)
                         if isinstance(tgt_obj.interviewer_instructions, dict)
                         else tgt_obj.interviewer_instructions
                     )
-                    tgt_obj.question_text = _merge_jsonb_dicts(
-                        tgt_obj.question_text, src_obj.question_text
+                    curated_qt, qt_variants = _curate_multilingual_text(
+                        [
+                            (tgt_obj.urn, tgt_obj.question_text),
+                            (src_obj.urn, src_obj.question_text),
+                        ],
+                        canonical_text=can_text,
+                        preserved_variants=pres_vars,
+                        discarded_variants=disc_vars,
+                        variant_type=var_type,
+                        prefer_list_format=isinstance(tgt_obj.question_text, list),
                     )
+                    if curated_qt:
+                        tgt_obj.question_text = curated_qt
+                    if qt_variants:
+                        tgt_obj.extended_attributes = _append_unique_ext_attrs(
+                            tgt_obj.extended_attributes, qt_variants
+                        )
                     tgt_obj.interviewer_instructions = _merge_jsonb_dicts(
                         tgt_obj.interviewer_instructions, src_obj.interviewer_instructions
                     )
@@ -319,8 +722,16 @@ def apply_harmonization(
                 linked_count += 1
 
         # Record EventLog for undo
-        anchor_urn = plan.actions[0].target_urn if plan.actions else None
-        if anchor_urn and UrnRegistry.objects.filter(urn=anchor_urn).exists():
+        candidate_anchors = [
+            *created_group_urns,
+            *(a.target_urn for a in plan.actions if a.target_urn),
+            *(a.source_urn for a in plan.actions if a.source_urn),
+        ]
+        anchor_urn = next(
+            (u for u in candidate_anchors if u and UrnRegistry.objects.filter(urn=u).exists()),
+            None,
+        )
+        if anchor_urn:
             EventLog.objects.create(
                 urn=anchor_urn,
                 event_type="harmonized",
@@ -332,14 +743,21 @@ def apply_harmonization(
                     "target_snapshots": target_snapshots,
                     "repointed_ivs": repointed_ivs,
                     "repointed_qvs": repointed_qvs,
+                    "sub_job_ids": sub_job_ids,
+                    "created_group_urns": created_group_urns,
+                    "group_snapshots": group_snapshots,
                 },
             )
 
     logger.info(
-        "Applied harmonization plan %s: %d merged, %d aliased, %d semantic links",
+        "Applied harmonization plan %s: %d merged, %d aliased, %d elevated, "
+        "%d absorbed, %d grouped, %d semantic links",
         plan.job_id,
         merged_count,
         aliased_count,
+        elevated_count,
+        absorbed_count,
+        grouped_count,
         linked_count,
     )
 
@@ -347,6 +765,9 @@ def apply_harmonization(
         "job_id": plan.job_id,
         "merged_multilingual_count": merged_count,
         "aliased_count": aliased_count,
+        "elevated_count": elevated_count,
+        "absorbed_count": absorbed_count,
+        "grouped_count": grouped_count,
         "semantic_links_created": linked_count,
         "repointed_instance_variables": len(repointed_ivs),
     }
@@ -535,9 +956,9 @@ def undo_harmonization(job_id: str) -> dict[str, Any]:
                             represented_variable_id=primary_src
                         )
                     elif resource_type == "ConceptualVariable":
-                        RepresentedVariable.objects.filter(conceptual_variable_id=generic_urn).update(
-                            conceptual_variable_id=primary_src
-                        )
+                        RepresentedVariable.objects.filter(
+                            conceptual_variable_id=generic_urn
+                        ).update(conceptual_variable_id=primary_src)
                     elif resource_type == "CodeList":
                         QuestionItem.objects.filter(code_list_id=generic_urn).update(
                             code_list_id=primary_src
@@ -545,7 +966,9 @@ def undo_harmonization(job_id: str) -> dict[str, Any]:
                         RepresentedVariable.objects.filter(code_list_id=generic_urn).update(
                             code_list_id=primary_src
                         )
-                        Code.objects.filter(code_list_id=generic_urn).update(code_list_id=primary_src)
+                        Code.objects.filter(code_list_id=generic_urn).update(
+                            code_list_id=primary_src
+                        )
                     elif resource_type == "Category":
                         Code.objects.filter(category_id=generic_urn).update(category_id=primary_src)
                     elif resource_type == "Concept":
@@ -589,13 +1012,27 @@ def undo_harmonization(job_id: str) -> dict[str, Any]:
         }
 
     # 2. Handling for standard harmonization jobs
+    from fairwddi.models import Group
+
     created_aliases = data.get("created_aliases", [])
     created_rel_ids = data.get("created_rel_ids", [])
     target_snapshots = data.get("target_snapshots", [])
     repointed_ivs = data.get("repointed_ivs", [])
     repointed_qvs = data.get("repointed_qvs", [])
+    sub_job_ids = data.get("sub_job_ids", [])
+    created_group_urns = data.get("created_group_urns", [])
+    group_snapshots = data.get("group_snapshots", [])
 
+    reverted_sub_jobs = 0
     with transaction.atomic():
+        # Unwind child elevation/absorption jobs in reverse order
+        for sub_id in reversed(sub_job_ids):
+            try:
+                undo_harmonization(sub_id)
+                reverted_sub_jobs += 1
+            except ValueError:
+                pass
+
         for iv_entry in repointed_ivs:
             InstanceVariable.objects.filter(urn=iv_entry["iv_urn"]).update(
                 represented_variable_id=iv_entry["old_rv_urn"]
@@ -615,10 +1052,24 @@ def undo_harmonization(job_id: str) -> dict[str, Any]:
                 obj.label = snap.get("label")
                 obj.description = snap.get("description")
                 obj.hashes = snap.get("hashes")
+                if "extended_attributes" in snap:
+                    obj.extended_attributes = snap.get("extended_attributes")
                 if snap["resource_type"] == "QuestionItem":
                     obj.question_text = snap.get("question_text")
                     obj.interviewer_instructions = snap.get("interviewer_instructions")
                 obj.save()
+
+        # Restore pre-existing Group snapshots and delete newly created Groups
+        for g_snap in reversed(group_snapshots):
+            grp = Group.objects.filter(urn=g_snap["urn"]).first()
+            if grp is not None:
+                grp.references = g_snap.get("references", [])
+                grp.description = g_snap.get("description", [])
+                grp.save(update_fields=["references", "description", "updated_at"])
+
+        if created_group_urns:
+            Group.objects.filter(urn__in=created_group_urns).delete()
+            UrnRegistry.objects.filter(urn__in=created_group_urns).delete()
 
         if created_aliases:
             URNAlias.objects.filter(alias_urn__in=created_aliases).delete()
@@ -631,6 +1082,8 @@ def undo_harmonization(job_id: str) -> dict[str, Any]:
         "job_id": job_id,
         "status": "reverted",
         "restored_targets": len(target_snapshots),
+        "reverted_sub_jobs": reverted_sub_jobs,
+        "removed_groups": len(created_group_urns),
         "removed_aliases": len(created_aliases),
         "removed_semantic_links": len(created_rel_ids),
     }
@@ -647,6 +1100,10 @@ def elevate_resource(
     provenance_note: str = "",
     allow_existing: bool = False,
     is_absorption: bool = False,
+    canonical_text: Any = None,
+    preserved_variants: list[Any] | None = None,
+    discarded_variants: list[Any] | None = None,
+    variant_type: str | None = None,
 ) -> dict[str, Any]:
     """Elevate one or more study-specific resources into a generic harmonized resource.
 
@@ -825,9 +1282,7 @@ def elevate_resource(
             target_pre_snapshot["interviewer_instructions"] = getattr(
                 target_obj, "interviewer_instructions", None
             )
-            target_pre_snapshot["response_domain"] = getattr(
-                target_obj, "response_domain", None
-            )
+            target_pre_snapshot["response_domain"] = getattr(target_obj, "response_domain", None)
         elif resource_type == "RepresentedVariable":
             target_pre_snapshot["value_representation"] = getattr(
                 target_obj, "value_representation", None
@@ -860,6 +1315,46 @@ def elevate_resource(
                     if item not in target_ext:
                         target_ext.append(item)
                 target_obj.extended_attributes = target_ext
+
+        # Apply wording curation & collect phrasing variants if applicable
+        if resource_type == "QuestionItem" and hasattr(target_obj, "question_text"):
+            qt_items = [
+                (target_obj.urn, target_pre_snapshot.get("question_text")),
+                *((s.urn, getattr(s, "question_text", None)) for s in sources),
+            ]
+            curated_qt, qt_vars = _curate_multilingual_text(
+                qt_items,
+                canonical_text=canonical_text,
+                preserved_variants=preserved_variants,
+                discarded_variants=discarded_variants,
+                variant_type=variant_type,
+                prefer_list_format=True,
+            )
+            if curated_qt:
+                target_obj.question_text = curated_qt
+            if qt_vars:
+                target_obj.extended_attributes = _append_unique_ext_attrs(
+                    target_obj.extended_attributes, qt_vars
+                )
+        elif hasattr(target_obj, "label"):
+            lbl_items = [
+                (target_obj.urn, target_pre_snapshot.get("label")),
+                *((s.urn, getattr(s, "label", None)) for s in sources),
+            ]
+            curated_lbl, lbl_vars = _curate_multilingual_text(
+                lbl_items,
+                canonical_text=canonical_text,
+                preserved_variants=preserved_variants,
+                discarded_variants=discarded_variants,
+                variant_type=variant_type,
+                prefer_list_format=isinstance(target_pre_snapshot.get("label"), list),
+            )
+            if curated_lbl:
+                target_obj.label = curated_lbl
+            if lbl_vars:
+                target_obj.extended_attributes = _append_unique_ext_attrs(
+                    target_obj.extended_attributes, lbl_vars
+                )
 
         # Recompute hashes for target_obj
         hash_payload: dict[str, Any] = {
@@ -909,6 +1404,44 @@ def elevate_resource(
                 for item in s.extended_attributes:
                     if item not in merged_ext:
                         merged_ext.append(item)
+
+        if resource_type == "QuestionItem":
+            qt_items = [
+                (s.urn, getattr(s, "question_text", None))
+                for s in sources
+                if getattr(s, "question_text", None)
+            ]
+            if qt_items or canonical_text:
+                curated_qt, qt_vars = _curate_multilingual_text(
+                    qt_items,
+                    canonical_text=canonical_text,
+                    preserved_variants=preserved_variants,
+                    discarded_variants=discarded_variants,
+                    variant_type=variant_type,
+                    prefer_list_format=True,
+                )
+                if curated_qt:
+                    merged_qt = curated_qt
+                if qt_vars:
+                    merged_ext = _append_unique_ext_attrs(merged_ext, qt_vars)
+        else:
+            lbl_items = [
+                (s.urn, getattr(s, "label", None)) for s in sources if getattr(s, "label", None)
+            ]
+            if lbl_items or canonical_text:
+                prefer_list = any(isinstance(getattr(s, "label", None), list) for s in sources)
+                curated_lbl, lbl_vars = _curate_multilingual_text(
+                    lbl_items,
+                    canonical_text=canonical_text,
+                    preserved_variants=preserved_variants,
+                    discarded_variants=discarded_variants,
+                    variant_type=variant_type,
+                    prefer_list_format=prefer_list,
+                )
+                if curated_lbl:
+                    merged_label = curated_lbl
+                if lbl_vars:
+                    merged_ext = _append_unique_ext_attrs(merged_ext, lbl_vars)
 
         hash_payload = {
             "name": eff_name,
@@ -1062,9 +1595,7 @@ def elevate_resource(
                     canonical_urn=generic_urn,
                     entity_type=resource_type,
                     hash_strategy=(
-                        "harmonization_absorption"
-                        if is_absorption
-                        else "harmonization_elevation"
+                        "harmonization_absorption" if is_absorption else "harmonization_elevation"
                     ),
                     source_file=provenance_note or f"fairwddi.harmonize:{job_id}",
                 )
@@ -1098,22 +1629,26 @@ def elevate_resource(
                         question_item_id=generic_urn,
                         represented_variable_id=qv.represented_variable_id,
                     ).exists():
-                        repointed_references.append({
-                            "table": "QuestionVariable",
-                            "action": "deleted_duplicate",
-                            "data": {
-                                "represented_variable_id": qv.represented_variable_id,
-                                "question_item_id": qv.question_item_id,
-                            },
-                        })
+                        repointed_references.append(
+                            {
+                                "table": "QuestionVariable",
+                                "action": "deleted_duplicate",
+                                "data": {
+                                    "represented_variable_id": qv.represented_variable_id,
+                                    "question_item_id": qv.question_item_id,
+                                },
+                            }
+                        )
                         qv.delete()
                     else:
-                        repointed_references.append({
-                            "table": "QuestionVariable",
-                            "filter": {"id": qv.id},
-                            "field": "question_item_id",
-                            "old_val": qv.question_item_id,
-                        })
+                        repointed_references.append(
+                            {
+                                "table": "QuestionVariable",
+                                "filter": {"id": qv.id},
+                                "field": "question_item_id",
+                                "old_val": qv.question_item_id,
+                            }
+                        )
                         qv.question_item_id = generic_urn
                         qv.save(update_fields=["question_item"])
                         qv_updated += 1
@@ -1127,22 +1662,26 @@ def elevate_resource(
                         question_item_id=generic_urn,
                         instrument_id=iq.instrument_id,
                     ).exists():
-                        repointed_references.append({
-                            "table": "InstrumentQuestion",
-                            "action": "deleted_duplicate",
-                            "data": {
-                                "instrument_id": iq.instrument_id,
-                                "question_item_id": iq.question_item_id,
-                            },
-                        })
+                        repointed_references.append(
+                            {
+                                "table": "InstrumentQuestion",
+                                "action": "deleted_duplicate",
+                                "data": {
+                                    "instrument_id": iq.instrument_id,
+                                    "question_item_id": iq.question_item_id,
+                                },
+                            }
+                        )
                         iq.delete()
                     else:
-                        repointed_references.append({
-                            "table": "InstrumentQuestion",
-                            "filter": {"id": iq.id},
-                            "field": "question_item_id",
-                            "old_val": iq.question_item_id,
-                        })
+                        repointed_references.append(
+                            {
+                                "table": "InstrumentQuestion",
+                                "filter": {"id": iq.id},
+                                "field": "question_item_id",
+                                "old_val": iq.question_item_id,
+                            }
+                        )
                         iq.question_item_id = generic_urn
                         iq.save(update_fields=["question_item"])
                         iq_updated += 1
@@ -1150,15 +1689,17 @@ def elevate_resource(
 
             elif resource_type == "RepresentedVariable":
                 iv_updated = 0
-                for iv in list(InstanceVariable.objects.filter(
-                    represented_variable_id__in=sources_list
-                )):
-                    repointed_references.append({
-                        "table": "InstanceVariable",
-                        "filter": {"urn": iv.urn},
-                        "field": "represented_variable_id",
-                        "old_val": iv.represented_variable_id,
-                    })
+                for iv in list(
+                    InstanceVariable.objects.filter(represented_variable_id__in=sources_list)
+                ):
+                    repointed_references.append(
+                        {
+                            "table": "InstanceVariable",
+                            "filter": {"urn": iv.urn},
+                            "field": "represented_variable_id",
+                            "old_val": iv.represented_variable_id,
+                        }
+                    )
                     iv.represented_variable_id = generic_urn
                     iv.save(update_fields=["represented_variable"])
                     iv_updated += 1
@@ -1172,22 +1713,26 @@ def elevate_resource(
                         represented_variable_id=generic_urn,
                         question_item_id=qv.question_item_id,
                     ).exists():
-                        repointed_references.append({
-                            "table": "QuestionVariable",
-                            "action": "deleted_duplicate",
-                            "data": {
-                                "represented_variable_id": qv.represented_variable_id,
-                                "question_item_id": qv.question_item_id,
-                            },
-                        })
+                        repointed_references.append(
+                            {
+                                "table": "QuestionVariable",
+                                "action": "deleted_duplicate",
+                                "data": {
+                                    "represented_variable_id": qv.represented_variable_id,
+                                    "question_item_id": qv.question_item_id,
+                                },
+                            }
+                        )
                         qv.delete()
                     else:
-                        repointed_references.append({
-                            "table": "QuestionVariable",
-                            "filter": {"id": qv.id},
-                            "field": "represented_variable_id",
-                            "old_val": qv.represented_variable_id,
-                        })
+                        repointed_references.append(
+                            {
+                                "table": "QuestionVariable",
+                                "filter": {"id": qv.id},
+                                "field": "represented_variable_id",
+                                "old_val": qv.represented_variable_id,
+                            }
+                        )
                         qv.represented_variable_id = generic_urn
                         qv.save(update_fields=["represented_variable"])
                         qv_updated += 1
@@ -1195,15 +1740,17 @@ def elevate_resource(
 
             elif resource_type == "ConceptualVariable":
                 rv_updated = 0
-                for rv in list(RepresentedVariable.objects.filter(
-                    conceptual_variable_id__in=sources_list
-                )):
-                    repointed_references.append({
-                        "table": "RepresentedVariable",
-                        "filter": {"urn": rv.urn},
-                        "field": "conceptual_variable_id",
-                        "old_val": rv.conceptual_variable_id,
-                    })
+                for rv in list(
+                    RepresentedVariable.objects.filter(conceptual_variable_id__in=sources_list)
+                ):
+                    repointed_references.append(
+                        {
+                            "table": "RepresentedVariable",
+                            "filter": {"urn": rv.urn},
+                            "field": "conceptual_variable_id",
+                            "old_val": rv.conceptual_variable_id,
+                        }
+                    )
                     rv.conceptual_variable_id = generic_urn
                     rv.save(update_fields=["conceptual_variable"])
                     rv_updated += 1
@@ -1212,36 +1759,42 @@ def elevate_resource(
             elif resource_type == "CodeList":
                 qi_updated = 0
                 for qi in list(QuestionItem.objects.filter(code_list_id__in=sources_list)):
-                    repointed_references.append({
-                        "table": "QuestionItem",
-                        "filter": {"urn": qi.urn},
-                        "field": "code_list_id",
-                        "old_val": qi.code_list_id,
-                    })
+                    repointed_references.append(
+                        {
+                            "table": "QuestionItem",
+                            "filter": {"urn": qi.urn},
+                            "field": "code_list_id",
+                            "old_val": qi.code_list_id,
+                        }
+                    )
                     qi.code_list_id = generic_urn
                     qi.save(update_fields=["code_list"])
                     qi_updated += 1
 
                 rv_updated = 0
                 for rv in list(RepresentedVariable.objects.filter(code_list_id__in=sources_list)):
-                    repointed_references.append({
-                        "table": "RepresentedVariable",
-                        "filter": {"urn": rv.urn},
-                        "field": "code_list_id",
-                        "old_val": rv.code_list_id,
-                    })
+                    repointed_references.append(
+                        {
+                            "table": "RepresentedVariable",
+                            "filter": {"urn": rv.urn},
+                            "field": "code_list_id",
+                            "old_val": rv.code_list_id,
+                        }
+                    )
                     rv.code_list_id = generic_urn
                     rv.save(update_fields=["code_list"])
                     rv_updated += 1
 
                 code_updated = 0
                 for c in list(Code.objects.filter(code_list_id__in=sources_list)):
-                    repointed_references.append({
-                        "table": "Code",
-                        "filter": {"urn": c.urn},
-                        "field": "code_list_id",
-                        "old_val": c.code_list_id,
-                    })
+                    repointed_references.append(
+                        {
+                            "table": "Code",
+                            "filter": {"urn": c.urn},
+                            "field": "code_list_id",
+                            "old_val": c.code_list_id,
+                        }
+                    )
                     c.code_list_id = generic_urn
                     c.save(update_fields=["code_list"])
                     code_updated += 1
@@ -1269,12 +1822,14 @@ def elevate_resource(
             elif resource_type == "Category":
                 c_updated = 0
                 for c in list(Code.objects.filter(category_id__in=sources_list)):
-                    repointed_references.append({
-                        "table": "Code",
-                        "filter": {"urn": c.urn},
-                        "field": "category_id",
-                        "old_val": c.category_id,
-                    })
+                    repointed_references.append(
+                        {
+                            "table": "Code",
+                            "filter": {"urn": c.urn},
+                            "field": "category_id",
+                            "old_val": c.category_id,
+                        }
+                    )
                     c.category_id = generic_urn
                     c.save(update_fields=["category"])
                     c_updated += 1
@@ -1285,24 +1840,28 @@ def elevate_resource(
 
                 rv_updated = 0
                 for rv in list(RepresentedVariable.objects.filter(concept_id__in=sources_list)):
-                    repointed_references.append({
-                        "table": "RepresentedVariable",
-                        "filter": {"urn": rv.urn},
-                        "field": "concept_id",
-                        "old_val": rv.concept_id,
-                    })
+                    repointed_references.append(
+                        {
+                            "table": "RepresentedVariable",
+                            "filter": {"urn": rv.urn},
+                            "field": "concept_id",
+                            "old_val": rv.concept_id,
+                        }
+                    )
                     rv.concept_id = generic_urn
                     rv.save(update_fields=["concept"])
                     rv_updated += 1
 
                 cv_updated = 0
                 for cv in list(ConceptualVariable.objects.filter(concept_id__in=sources_list)):
-                    repointed_references.append({
-                        "table": "ConceptualVariable",
-                        "filter": {"urn": cv.urn},
-                        "field": "concept_id",
-                        "old_val": cv.concept_id,
-                    })
+                    repointed_references.append(
+                        {
+                            "table": "ConceptualVariable",
+                            "filter": {"urn": cv.urn},
+                            "field": "concept_id",
+                            "old_val": cv.concept_id,
+                        }
+                    )
                     cv.concept_id = generic_urn
                     cv.save(update_fields=["concept"])
                     cv_updated += 1
@@ -1391,6 +1950,10 @@ def absorb_resource(
     update_references: bool = True,
     retire_sources: bool = True,
     provenance_note: str = "",
+    canonical_text: Any = None,
+    preserved_variants: list[Any] | None = None,
+    discarded_variants: list[Any] | None = None,
+    variant_type: str | None = None,
 ) -> dict[str, Any]:
     """Absorb one or more study resources into an existing harmonized/elevated resource.
 
@@ -1406,6 +1969,10 @@ def absorb_resource(
         update_references: If True, updates foreign keys and junction tables.
         retire_sources: If True, retires source records from primary entity table.
         provenance_note: Audit note stored in URNAlias / EventLog.
+        canonical_text: Optional canonical/default wording override.
+        preserved_variants: Optional list of alternate phrasings to keep in extended_attributes.
+        discarded_variants: Optional list of typos/errata to exclude from extended_attributes.
+        variant_type: Optional classification of wording variant.
 
     Returns:
         Summary dict containing job_id, target_urn, source_urns, and update statistics.
@@ -1420,6 +1987,10 @@ def absorb_resource(
         provenance_note=provenance_note,
         allow_existing=True,
         is_absorption=True,
+        canonical_text=canonical_text,
+        preserved_variants=preserved_variants,
+        discarded_variants=discarded_variants,
+        variant_type=variant_type,
     )
 
 

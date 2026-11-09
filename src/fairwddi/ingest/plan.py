@@ -62,6 +62,8 @@ class PlanActionItem(BaseModel):
         "merge_multilingual",
         "link_semantic",
         "elevate",
+        "absorb",
+        "group",
         "upgrade",
         "skip",
     ]
@@ -273,6 +275,73 @@ class IngestPlan(BaseModel):
             )
             for act in quarantine_actions:
                 lines.append(f"| `{act.resource_type}` | `{act.source_urn}` | {act.notes} |")
+
+        near_or_variant_actions = [
+            a
+            for a in self.actions
+            if a.match_type
+            in (
+                "NEAR_EXACT",
+                "INCLUSIVE_WRITING_VARIANT",
+                "PHRASING_VARIANT",
+                "TYPOGRAPHICAL_VARIANT",
+            )
+        ]
+        if near_or_variant_actions:
+            lines.extend(
+                [
+                    "",
+                    "## High-Similarity & Wording Variant Candidates (Review Flagged)",
+                    "",
+                    "> [!IMPORTANT]",
+                    (
+                        f"> **{len(near_or_variant_actions):,} candidate pairs** exhibit "
+                        "near-exact equivalence, punctuation variance, inclusive writing, or "
+                        "minor phrasing/typo shifts. Review and confirm `alias`, `absorb`, or "
+                        "`elevate` actions."
+                    ),
+                    "",
+                    "| ID | Match Type | Action | Type | Source URN | Target URN | Conf |",
+                    "| :--- | :--- | :--- | :--- | :--- | :--- | :---: |",
+                ]
+            )
+            for act in near_or_variant_actions[:50]:
+                tgt = f"`{act.target_urn}`" if act.target_urn else "-"
+                lines.append(
+                    f"| `{act.id}` | `{act.match_type}` | `{act.action}` | `{act.resource_type}` | "
+                    f"`{act.source_urn}` | {tgt} | {act.confidence:.2f} |"
+                )
+
+        group_actions = [
+            a for a in self.actions if a.action == "group" or a.match_type == "SHARED_STEM_GRID"
+        ]
+        if group_actions:
+            lines.extend(
+                [
+                    "",
+                    "## Shared-Stem Grids & Resource Groups (Review Flagged)",
+                    "",
+                    "> [!NOTE]",
+                    (
+                        f"> **{len(group_actions):,} candidate pairs** share a common "
+                        "question/category stem with distinct sub-items and are proposed for "
+                        "grouping (`Group` with `group_type='question_grid'`)."
+                    ),
+                    "",
+                    "| ID | Group Type | Type | Source URN | Target URN | Shared Stem |",
+                    "| :--- | :--- | :--- | :--- | :--- | :--- |",
+                ]
+            )
+            for act in group_actions[:50]:
+                g_type = act.details.get("group_type", "question_grid")
+                stem = str(act.details.get("shared_stem", "-"))
+                if len(stem) > 60:
+                    stem = stem[:57] + "..."
+                tgt = f"`{act.target_urn}`" if act.target_urn else "-"
+                lines.append(
+                    f"| `{act.id}` | `{g_type}` | `{act.resource_type}` | "
+                    f"`{act.source_urn}` | {tgt} | {stem} |"
+                )
 
         if self.actions:
             lines.extend(

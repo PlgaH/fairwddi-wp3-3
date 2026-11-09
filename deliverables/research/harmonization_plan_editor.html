@@ -1,0 +1,2349 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAIRwDDI Harmonization Plan Editor — Cross-Survey Candidate Review</title>
+  <meta name="description" content="Interactive visual reviewer, candidate diff inspector, question grid builder, wording variant curator, and review gate sign-off for FAIRwDDI Stage 3 cross-survey harmonization plans (.harmonize.plan.yaml)." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- js-yaml library for browser YAML loading and dumping -->
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <style>
+    :root {
+      --bg-base: #0a0e17;
+      --bg-surface: #111827;
+      --bg-elevated: #1e293b;
+      --bg-card: #162032;
+      --bg-hover: #243247;
+      --border: #334155;
+      --border-subtle: #1e293b;
+      --border-focus: #8b5cf6;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --accent-primary: #8b5cf6;
+      --accent-primary-hover: #7c3aed;
+      --accent-cyan: #06b6d4;
+      --accent-purple: #8b5cf6;
+      --accent-indigo: #6366f1;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-pink: #ec4899;
+      --accent-teal: #14b8a6;
+      --accent-slate: #64748b;
+
+      --c-elevate: #8b5cf6;
+      --c-absorb: #3b82f6;
+      --c-group: #6366f1;
+      --c-alias: #06b6d4;
+      --c-merge: #10b981;
+      --c-link: #ec4899;
+      --c-skip: #64748b;
+
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --bg-card: #f8fafc;
+      --bg-hover: #e2e8f0;
+      --border: #cbd5e1;
+      --border-subtle: #e2e8f0;
+      --border-focus: #7c3aed;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* Top Sticky Header */
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      color: white;
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+    }
+    .brand-text h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-stage {
+      background: rgba(139, 92, 246, 0.15);
+      color: #c084fc;
+      border-color: rgba(139, 92, 246, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-job {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border-color: rgba(59, 130, 246, 0.3);
+      font-family: var(--font-mono);
+    }
+    .badge-batch {
+      background: rgba(6, 182, 212, 0.15);
+      color: #22d3ee;
+      border-color: rgba(6, 182, 212, 0.3);
+      font-family: var(--font-mono);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      font-family: inherit;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: white;
+      box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+    .btn-secondary {
+      background: var(--bg-elevated);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--bg-hover);
+      border-color: var(--text-muted);
+    }
+    .btn-switch {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+    .btn-switch:hover {
+      background: rgba(16, 185, 129, 0.25);
+    }
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+    .btn-icon {
+      padding: 7px;
+      border-radius: 6px;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .btn-icon:hover { color: var(--text); background: var(--bg-hover); }
+
+    /* Dropdown wrapper */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      margin-top: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      min-width: 250px;
+      z-index: 50;
+      overflow: hidden;
+    }
+    .dropdown.is-open .dropdown-content { display: block; }
+    .dropdown-item {
+      padding: 9px 14px;
+      font-size: 12px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+    }
+    .dropdown-item:hover { background: var(--bg-hover); }
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      padding: 20px 24px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-width: 1680px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Drag and Drop Full Screen Overlay */
+    #dropzone-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(139, 92, 246, 0.88);
+      backdrop-filter: blur(6px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      color: white;
+      text-align: center;
+      border: 4px dashed rgba(255, 255, 255, 0.6);
+      margin: 16px;
+      border-radius: 16px;
+    }
+    #dropzone-overlay.dragover { display: flex; }
+
+    /* Empty State Card */
+    .empty-state-card {
+      background: var(--bg-surface);
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 64px 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      max-width: 760px;
+      margin: 40px auto;
+      box-shadow: var(--shadow-sm);
+    }
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 4px;
+      filter: drop-shadow(0 4px 8px rgba(139, 92, 246, 0.4));
+    }
+    .empty-state-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .empty-state-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 540px;
+      line-height: 1.6;
+    }
+    .empty-state-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .empty-state-hints {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+      width: 100%;
+      text-align: left;
+    }
+    @media (max-width: 768px) {
+      .empty-state-hints { grid-template-columns: 1fr; }
+    }
+    .hint-item {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 8px;
+    }
+    .hint-icon { font-size: 16px; }
+
+    /* Review Gate Banner */
+    .gate-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    .gate-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--gate-color, #8b5cf6);
+    }
+    .gate-card.gate-pending {
+      --gate-color: #f59e0b;
+      border-color: rgba(245, 158, 11, 0.35);
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.05) 0%, var(--bg-surface) 100%);
+    }
+    .gate-card.gate-approved {
+      --gate-color: #10b981;
+      border-color: rgba(16, 185, 129, 0.35);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, var(--bg-surface) 100%);
+    }
+
+    .gate-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .gate-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+    .gate-approved .gate-status-pill {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .gate-pending .gate-status-pill {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .gate-controls {
+      display: grid;
+      grid-template-columns: 200px 240px 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+    @media (max-width: 1024px) {
+      .gate-controls { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .gate-controls { grid-template-columns: 1fr; }
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .field-input, .field-textarea, .field-select {
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 10px;
+      color: var(--text);
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field-input:focus, .field-textarea:focus, .field-select:focus {
+      border-color: var(--border-focus);
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .kpi-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .kpi-num {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--text);
+    }
+    .kpi-progress {
+      height: 4px;
+      background: var(--bg-elevated);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+    .kpi-progress-bar {
+      height: 100%;
+      background: var(--accent-purple);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    /* Filter & Controls Toolbar */
+    .toolbar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      flex: 1;
+    }
+    .search-box {
+      position: relative;
+      min-width: 240px;
+      flex: 1;
+      max-width: 320px;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 12px 7px 32px;
+      color: var(--text);
+      font-size: 12px;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--border-focus); }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+
+    .filter-chips {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip:hover { color: var(--text); border-color: var(--text-muted); }
+    .chip.active {
+      background: var(--accent-primary);
+      color: white;
+      border-color: var(--accent-primary);
+    }
+    .chip-emerald.active {
+      background: var(--accent-emerald);
+      border-color: var(--accent-emerald);
+    }
+    .chip-indigo.active {
+      background: var(--accent-indigo);
+      border-color: var(--accent-indigo);
+    }
+    .chip-teal.active {
+      background: var(--accent-teal);
+      border-color: var(--accent-teal);
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Table Container */
+    .table-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .table-responsive {
+      max-height: 580px;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+    }
+    thead {
+      background: var(--bg-elevated);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    th {
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+    }
+    tr:hover td {
+      background: var(--bg-hover);
+    }
+    tr.is-unapproved td {
+      background: rgba(245, 158, 11, 0.03);
+    }
+
+    /* Badges */
+    .match-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .match-exact {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .match-grid {
+      background: rgba(99, 102, 241, 0.2);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.4);
+    }
+    .match-variant {
+      background: rgba(20, 184, 166, 0.18);
+      color: #2dd4bf;
+      border: 1px solid rgba(20, 184, 166, 0.35);
+    }
+    .match-similar {
+      background: rgba(245, 158, 11, 0.18);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .match-semantic {
+      background: rgba(236, 72, 153, 0.18);
+      color: #f472b6;
+      border: 1px solid rgba(236, 72, 153, 0.3);
+    }
+
+    .conf-pill {
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+    .conf-high { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .conf-mid { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .conf-low { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
+
+    .type-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .urn-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text);
+      max-width: 260px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+    .urn-copy-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+    .urn-copy-btn:hover { color: var(--accent-primary); }
+
+    /* Action Tag Pills in Table */
+    .action-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+    .act-elevate { background: rgba(139, 92, 246, 0.2); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.4); }
+    .act-absorb { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+    .act-group { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); }
+    .act-alias { background: rgba(6, 182, 212, 0.2); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.4); }
+    .act-merge { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .act-link { background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.4); }
+    .act-skip { background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.4); }
+
+    /* Code diff preview tag */
+    .code-preview-tag {
+      font-size: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+      color: var(--text-muted);
+      margin-right: 4px;
+      display: inline-block;
+      margin-bottom: 2px;
+    }
+
+    /* Grid and Variant callout boxes */
+    .grid-callout {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .variant-callout {
+      background: linear-gradient(135deg, rgba(20, 184, 166, 0.12), rgba(6, 182, 212, 0.08));
+      border: 1px solid rgba(20, 184, 166, 0.35);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Tag / Variant chip manager */
+    .variant-tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .variant-tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .variant-tag.preserved {
+      border-color: rgba(20, 184, 166, 0.4);
+      background: rgba(20, 184, 166, 0.15);
+      color: #2dd4bf;
+    }
+    .variant-tag.discarded {
+      border-color: rgba(244, 63, 94, 0.4);
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+      text-decoration: line-through;
+    }
+    .variant-tag-remove {
+      cursor: pointer;
+      font-weight: bold;
+      opacity: 0.7;
+    }
+    .variant-tag-remove:hover { opacity: 1; }
+
+    /* Pagination */
+    .pagination-bar {
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      background: var(--bg-elevated);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Modal / Drawer */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-backdrop.is-open { display: flex; }
+    .modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 880px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-title { font-size: 15px; font-weight: 700; }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--bg-elevated);
+    }
+
+    /* Side-by-Side Diff Box */
+    .diff-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    @media (max-width: 768px) {
+      .diff-container { grid-template-columns: 1fr; }
+    }
+    .diff-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .diff-col-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 18px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 200;
+    }
+    #toast.is-visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Drag and drop full window overlay -->
+  <div id="dropzone-overlay">
+    <h2>📂 Drop Harmonization Plan YAML / JSON Here</h2>
+    <p>File will load and parse candidates instantly with Question Grids and Wording Variants</p>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">F</div>
+      <div class="brand-text">
+        <h1>FAIRwDDI Harmonization Plan Editor</h1>
+        <p>Stage 3 Cross-Survey Harmonization • Grids, Variants & Elevation/Absorption</p>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-stage" id="badge-stage">STAGE: HARMONIZE</span>
+        <span class="badge badge-job" id="badge-job">NO PLAN LOADED</span>
+        <span class="badge badge-batch" id="badge-batch">No batch</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Switch to Ingest -->
+      <a href="ingest_plan_editor.html" class="btn btn-switch" title="Open Ingest Plan Editor">
+        Ingest Editor ↗
+      </a>
+
+      <!-- Open File -->
+      <button class="btn btn-secondary" onclick="triggerOpenFile()" title="Open .harmonize.plan.yaml or .compare.plan.yaml">
+        📂 Open Plan
+      </button>
+      <input type="file" id="file-input" accept=".yaml,.yml,.json" style="display: none;" onchange="handleFileInput(event)" />
+
+      <!-- Paste Text -->
+      <button class="btn btn-secondary" onclick="openRawModal()" title="Paste YAML or JSON text directly">
+        ✏️ Paste Text
+      </button>
+
+      <!-- Close Plan (shown when plan is active) -->
+      <button class="btn btn-secondary" id="btn-close-plan" onclick="closePlan()" style="display: none;" title="Unload active plan">
+        ✕ Close Plan
+      </button>
+
+      <!-- Save Plan -->
+      <div class="dropdown" id="dropdown-save">
+        <button class="btn btn-primary" id="btn-save-dropdown" onclick="toggleDropdown('dropdown-save')" disabled>
+          💾 Save Plan ▾
+        </button>
+        <div class="dropdown-content">
+          <button class="dropdown-item" onclick="savePlanFile('yaml')">
+            <span>Export as Approved YAML (.yaml)</span>
+          </button>
+          <button class="dropdown-item" onclick="savePlanFile('json')">
+            <span>Export as JSON (.json)</span>
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" onclick="copyPlanToClipboard('yaml')">
+            <span>Copy YAML to Clipboard</span>
+          </button>
+          <button class="dropdown-item" onclick="showCliCommandModal()">
+            <span>💻 Copy fairwddi CLI Command</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Theme Toggle -->
+      <button class="btn-icon" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+        🌓
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Body -->
+  <main>
+
+    <!-- Empty State (Shown when no plan is loaded) -->
+    <div class="empty-state-card" id="empty-state">
+      <div class="empty-state-icon">🎯</div>
+      <h2 class="empty-state-title">No Harmonization Plan Loaded</h2>
+      <p class="empty-state-desc">
+        Open a <code>.harmonize.plan.yaml</code> or <code>.compare.plan.yaml</code> file generated by <code>fairwddi compare discover</code> or <code>fairwddi harmonize plan</code> to review candidates, inspect question grids, curate wording variants, and authorize execution.
+      </p>
+      <div class="empty-state-actions">
+        <button class="btn btn-primary" onclick="triggerOpenFile()" style="padding: 9px 18px; font-size: 13px;">
+          📂 Open Harmonization Plan
+        </button>
+        <button class="btn btn-secondary" onclick="openRawModal()" style="padding: 9px 18px; font-size: 13px;">
+          ✏️ Paste YAML / JSON
+        </button>
+      </div>
+      <div class="empty-state-hints">
+        <div class="hint-item">
+          <span class="hint-icon">⊞</span>
+          <span><strong>Question Grids:</strong> Detects and structures common stems into reusable DDI <code>Group(question_grid)</code> entities.</span>
+        </div>
+        <div class="hint-item">
+          <span class="hint-icon">🔤</span>
+          <span><strong>Wording Variants:</strong> Curate canonical text, preserve inclusive markers or stylistic shifts, and discard typos.</span>
+        </div>
+        <div class="hint-item">
+          <span class="hint-icon">⚡</span>
+          <span><strong>Elevate & Absorb:</strong> Promote study-specific items into bank-wide canonical URNs and absorb subsequent waves.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Plan Content Wrapper (Hidden until a plan is loaded) -->
+    <div id="plan-content" style="display: none; flex-direction: column; gap: 18px;">
+
+      <!-- Review Gate Banner -->
+      <div class="gate-card gate-pending" id="gate-banner">
+        <div class="gate-top-row">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="gate-status-pill" id="gate-pill">
+              <span id="gate-icon">⚠️</span>
+              <span id="gate-label">HARMONIZATION REVIEW GATE PENDING</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);" id="gate-summary-text">
+              Review proposed candidate mappings before applying cross-survey harmonization changes.
+            </span>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-primary btn-sm" onclick="approveHighConfidence()" style="background: linear-gradient(135deg, #10b981, #059669);" title="Approve all 100% / 95% FACET_EXACT matches in 1 click">
+              ⚡ 1-Click Approve FACET_EXACT (≥ 0.95)
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleGateApproval()" id="gate-toggle-btn">
+              Authorize & Approve Plan
+            </button>
+          </div>
+        </div>
+
+        <div class="gate-controls">
+          <div class="field-group">
+            <label class="field-label">Reviewer</label>
+            <input type="text" class="field-input" id="gate-reviewer" placeholder="e.g. cdsp-archivist" onchange="updateGateMetadata()" />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Reviewed At</label>
+            <div style="display: flex; gap: 4px;">
+              <input type="text" class="field-input" id="gate-reviewed-at" placeholder="ISO-8601 Timestamp" style="flex: 1;" onchange="updateGateMetadata()" />
+              <button class="btn btn-secondary btn-sm" onclick="setReviewedAtNow()" title="Set to current UTC time">Now</button>
+            </div>
+          </div>
+
+          <div class="field-group" style="grid-column: span 2;">
+            <label class="field-label">Reviewer Comments / Rationale</label>
+            <input type="text" class="field-input" id="gate-comments" placeholder="e.g. Approved question grid clustering and canonical text overrides." onchange="updateGateMetadata()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Total Candidates</span>
+            <span>🎯</span>
+          </div>
+          <div class="kpi-num" id="kpi-total">0</div>
+          <div style="font-size: 11px; color: var(--text-dim);" id="kpi-threshold-sub">Threshold: ≥ 0.75</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>FACET_EXACT</span>
+            <span style="color: var(--accent-emerald);">●</span>
+          </div>
+          <div class="kpi-num" style="color: var(--accent-emerald);" id="kpi-facet-exact">0</div>
+          <div style="font-size: 11px; color: var(--text-dim);">100% identical domain</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Question Grids</span>
+            <span style="color: var(--accent-indigo);">⊞</span>
+          </div>
+          <div class="kpi-num" style="color: var(--accent-indigo);" id="kpi-grids">0</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Shared question stem</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Wording Variants</span>
+            <span style="color: var(--accent-teal);">🔤</span>
+          </div>
+          <div class="kpi-num" style="color: var(--accent-teal);" id="kpi-variants">0</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Inclusive / phrasing</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Elevate / Absorb</span>
+            <span style="color: var(--accent-purple);">⚡</span>
+          </div>
+          <div class="kpi-num" style="color: var(--accent-purple);" id="kpi-elevate-absorb">0</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Canonical promotion</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Approved Ratio</span>
+            <span id="kpi-approved-badge" style="color: var(--accent-purple);">0%</span>
+          </div>
+          <div class="kpi-num" id="kpi-approved-count">0 / 0</div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar" id="kpi-progress-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Bulk Operations Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="search-input" placeholder="Search candidate URN, stem, text, codes..." oninput="handleSearch(this.value)" />
+          </div>
+
+          <!-- Match Type Filters -->
+          <div class="filter-chips">
+            <span class="chip active" onclick="setFilterMatch('all', this)">All Matches</span>
+            <span class="chip chip-emerald" onclick="setFilterMatch('FACET_EXACT', this)">FACET_EXACT</span>
+            <span class="chip chip-indigo" onclick="setFilterMatch('SHARED_STEM_GRID', this)">Question Grids (STEM)</span>
+            <span class="chip chip-teal" onclick="setFilterMatch('VARIANTS', this)">Variants (Inclusive/Phrasing)</span>
+            <span class="chip" onclick="setFilterMatch('SYNTACTIC_SIMILAR', this)">Syntactic / Fuzzy</span>
+          </div>
+
+          <!-- Action Filters -->
+          <div class="filter-chips" style="border-left: 1px solid var(--border); padding-left: 8px;">
+            <span class="chip active" onclick="setFilterAction('all', this)">All Actions</span>
+            <span class="chip" onclick="setFilterAction('elevate', this)">Elevate</span>
+            <span class="chip" onclick="setFilterAction('absorb', this)">Absorb</span>
+            <span class="chip" onclick="setFilterAction('group', this)">Group (Grid)</span>
+            <span class="chip" onclick="setFilterAction('alias', this)">Alias</span>
+            <span class="chip" onclick="setFilterAction('merge_multilingual', this)">Merge</span>
+          </div>
+
+          <!-- Resource Type Filters -->
+          <div class="filter-chips" style="border-left: 1px solid var(--border); padding-left: 8px;">
+            <span class="chip active" onclick="setFilterType('all', this)">All Types</span>
+            <span class="chip" onclick="setFilterType('QuestionItem', this)">QuestionItem</span>
+            <span class="chip" onclick="setFilterType('CodeList', this)">CodeList</span>
+            <span class="chip" onclick="setFilterType('RepresentedVariable', this)">RepVar</span>
+            <span class="chip" onclick="setFilterType('Category', this)">Category</span>
+          </div>
+
+          <!-- Confidence Threshold Filter -->
+          <div style="display: flex; align-items: center; gap: 6px; border-left: 1px solid var(--border); padding-left: 8px;">
+            <label class="field-label" style="margin: 0;">Min Conf:</label>
+            <select class="field-select" style="padding: 3px 6px; font-size: 11px;" id="conf-threshold-select" onchange="setFilterConfidence(this.value)">
+              <option value="0.0">All (≥ 0.0)</option>
+              <option value="0.75" selected>≥ 0.75</option>
+              <option value="0.85">≥ 0.85</option>
+              <option value="0.95">≥ 0.95 (Exact Only)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="toolbar-right">
+          <button class="btn btn-secondary btn-sm" onclick="approveAllVisible()">
+            ✓ Approve Visible (<span id="visible-count">0</span>)
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="rejectAllVisible()">
+            ✗ Reject Visible
+          </button>
+        </div>
+      </div>
+
+      <!-- Actions Table -->
+      <div class="table-container">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 40px; text-align: center;">
+                  <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this.checked)" title="Toggle all visible" />
+                </th>
+                <th style="width: 75px;">ID</th>
+                <th style="width: 140px;">Harmonize Action</th>
+                <th style="width: 135px;">Match Tier</th>
+                <th style="width: 65px; text-align: center;">Conf</th>
+                <th style="width: 110px;">Resource Type</th>
+                <th>Source (Incoming Resource)</th>
+                <th>Target / Canonical Entity</th>
+                <th>Candidate Details / Feature Preview</th>
+                <th style="width: 85px; text-align: right;">Inspect</th>
+              </tr>
+            </thead>
+            <tbody id="actions-tbody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-bar">
+          <div>
+            Showing <span id="page-start">1</span> to <span id="page-end">50</span> of <span id="total-filtered">0</span> candidates
+          </div>
+          <div class="pagination-controls">
+            <label style="font-size: 11px; margin-right: 8px;">
+              Page Size:
+              <select class="field-select" style="padding: 2px 6px; font-size: 11px;" id="page-size-select" onchange="changePageSize(this.value)">
+                <option value="25">25</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="250">250</option>
+                <option value="all">All</option>
+              </select>
+            </label>
+            <button class="btn btn-secondary btn-sm" id="btn-prev-page" onclick="prevPage()">‹ Prev</button>
+            <span id="page-indicator" style="font-weight: 600; font-family: var(--font-mono);">Page 1 of 1</span>
+            <button class="btn btn-secondary btn-sm" id="btn-next-page" onclick="nextPage()">Next ›</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Modal: Candidate Diff, Question Grid & Variant Inspector -->
+  <div class="modal-backdrop" id="modal-inspector">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="inspect-title">Candidate Harmonization Inspector</h3>
+        <button class="btn-icon" onclick="closeInspector()">✕</button>
+      </div>
+      <div class="modal-body" id="inspect-body">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeInspector()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveItemEdits()">Save Candidate Decision</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Raw Text / YAML Paste -->
+  <div class="modal-backdrop" id="modal-raw">
+    <div class="modal-card" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Paste Harmonization Plan YAML or JSON</h3>
+        <button class="btn-icon" onclick="closeRawModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 12px; color: var(--text-muted);">
+          Paste a candidate discovery or harmonization plan YAML/JSON to inspect and edit candidate decisions.
+        </p>
+        <textarea id="raw-paste-input" class="field-textarea" style="height: 350px; font-family: var(--font-mono); font-size: 11px; white-space: pre;" placeholder="plan_version: '1.0'&#10;stage: harmonize&#10;job_id: harmonize-...&#10;actions:&#10;  - id: harm-0001..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeRawModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="loadRawPaste()">Parse & Load Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: CLI Execution Snippet -->
+  <div class="modal-backdrop" id="modal-cli">
+    <div class="modal-card" style="max-width: 660px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Apply with fairwddi CLI</h3>
+        <button class="btn-icon" onclick="closeCliModal()">✕</button>
+      </div>
+      <div class="modal-body" style="gap: 14px;">
+        <p style="font-size: 12px; color: var(--text-muted);">
+          Once you have reviewed and saved this approved plan, apply all actions (elevate, absorb, group grids, aliases, merges, semantic links) with:
+        </p>
+        <div style="background: var(--bg-base); border: 1px solid var(--border); border-radius: 6px; padding: 12px; font-family: var(--font-mono); font-size: 12px; color: #c084fc; position: relative;">
+          <code id="cli-cmd-text">uv run fairwddi harmonize apply &lt;plan_file.yaml&gt;</code>
+          <button class="btn btn-secondary btn-sm" style="position: absolute; right: 8px; top: 8px;" onclick="copyCliCmd()">Copy</button>
+        </div>
+
+        <div style="font-size: 11px; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;">
+          <strong>Quick CLI Reference:</strong>
+          <div>• <code>uv run fairwddi harmonize elevate -s &lt;src1&gt; -s &lt;src2&gt; -n "Generic Name"</code> — Elevate into canonical bank entity</div>
+          <div>• <code>uv run fairwddi harmonize absorb -s &lt;src&gt; -i &lt;into_urn&gt;</code> — Absorb wave into existing elevated resource</div>
+          <div>• <code>uv run fairwddi harmonize approve-high &lt;plan.yaml&gt; -t 0.95</code> — Triage & auto-approve top-tier matches</div>
+          <div>• <code>uv run fairwddi harmonize undo &lt;job_id&gt;</code> — Roll back entire transaction via EventLog snapshots</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeCliModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast">
+    <span id="toast-icon">✓</span>
+    <span id="toast-msg">Notification message</span>
+  </div>
+
+  <!-- Application Script -->
+  <script>
+    // Application State - starts completely clean without preloaded data
+    let currentPlan = null;
+    let activeFileHandle = null;
+    let searchQuery = "";
+    let filterMatch = "all";
+    let filterAction = "all";
+    let filterType = "all";
+    let minConfidence = 0.75;
+    let currentPage = 1;
+    let pageSize = 50;
+    let inspectingItem = null;
+
+    // Initialize application
+    window.addEventListener("DOMContentLoaded", () => {
+      initDragAndDrop();
+      renderAll();
+    });
+
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const nextTheme = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      html.setAttribute("data-theme", nextTheme);
+      showToast(`Switched to ${nextTheme} theme`);
+    }
+
+    // Dropdown helpers
+    function toggleDropdown(id) {
+      const el = document.getElementById(id);
+      const isOpen = el.classList.contains("is-open");
+      document.querySelectorAll(".dropdown").forEach(d => d.classList.remove("is-open"));
+      if (!isOpen) el.classList.add("is-open");
+    }
+    window.addEventListener("click", (e) => {
+      if (!e.target.closest(".dropdown")) {
+        document.querySelectorAll(".dropdown").forEach(d => d.classList.remove("is-open"));
+      }
+    });
+
+    // Drag and Drop
+    function initDragAndDrop() {
+      const overlay = document.getElementById("dropzone-overlay");
+      window.addEventListener("dragenter", (e) => {
+        e.preventDefault();
+        overlay.classList.add("dragover");
+      });
+      overlay.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        overlay.classList.remove("dragover");
+      });
+      window.addEventListener("dragover", (e) => e.preventDefault());
+      window.addEventListener("drop", (e) => {
+        e.preventDefault();
+        overlay.classList.remove("dragover");
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          loadFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    // File Open
+    async function triggerOpenFile() {
+      if (window.showOpenFilePicker) {
+        try {
+          const [handle] = await window.showOpenFilePicker({
+            types: [{ description: "Harmonization Plans (*.yaml, *.json)", accept: { "text/yaml": [".yaml", ".yml"], "application/json": [".json"] } }]
+          });
+          activeFileHandle = handle;
+          const file = await handle.getFile();
+          loadFile(file);
+          return;
+        } catch (err) {
+          if (err.name !== "AbortError") console.error("Picker error, falling back:", err);
+        }
+      }
+      document.getElementById("file-input").click();
+    }
+
+    function handleFileInput(e) {
+      if (e.target.files && e.target.files.length > 0) {
+        activeFileHandle = null;
+        loadFile(e.target.files[0]);
+      }
+    }
+
+    function loadFile(file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const text = event.target.result;
+          parseAndLoadPlanText(text, file.name);
+          showToast(`Loaded ${file.name} successfully`);
+        } catch (err) {
+          alert("Failed to parse plan file: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function parseAndLoadPlanText(rawText, sourceFileName) {
+      let data = null;
+      if (window.jsyaml && window.jsyaml.load) {
+        try {
+          data = window.jsyaml.load(rawText);
+        } catch (yErr) {
+          data = JSON.parse(rawText);
+        }
+      } else {
+        data = JSON.parse(rawText);
+      }
+
+      if (!data || !Array.isArray(data.actions)) {
+        throw new Error("Invalid plan file: missing 'actions' candidate list.");
+      }
+
+      // Check stage and guide user if needed
+      if (data.stage && data.stage === "ingest") {
+        if (confirm("This file appears to be an Ingestion Plan (stage: ingest). Would you like to switch to the Ingest Plan Editor?")) {
+          window.location.href = "ingest_plan_editor.html";
+          return;
+        }
+      }
+
+      currentPlan = data;
+      if (sourceFileName && !currentPlan.source_file) {
+        currentPlan.source_file = sourceFileName;
+      }
+      currentPage = 1;
+      renderAll();
+    }
+
+    function closePlan() {
+      currentPlan = null;
+      activeFileHandle = null;
+      searchQuery = "";
+      filterMatch = "all";
+      filterAction = "all";
+      filterType = "all";
+      minConfidence = 0.75;
+      currentPage = 1;
+      renderAll();
+      showToast("Harmonization plan unloaded");
+    }
+
+    // Raw modal
+    function openRawModal() {
+      document.getElementById("modal-raw").classList.add("is-open");
+      if (currentPlan) {
+        const dumpStr = window.jsyaml ? window.jsyaml.dump(currentPlan, { indent: 2, lineWidth: -1 }) : JSON.stringify(currentPlan, null, 2);
+        document.getElementById("raw-paste-input").value = dumpStr;
+      } else {
+        document.getElementById("raw-paste-input").value = "";
+      }
+    }
+    function closeRawModal() {
+      document.getElementById("modal-raw").classList.remove("is-open");
+    }
+    function loadRawPaste() {
+      const text = document.getElementById("raw-paste-input").value.trim();
+      if (!text) return;
+      try {
+        parseAndLoadPlanText(text, "pasted_harmonization_plan.yaml");
+        closeRawModal();
+        showToast("Parsed pasted harmonization plan");
+      } catch (err) {
+        alert("Parse error: " + err.message);
+      }
+    }
+
+    // Review Gate Management
+    function toggleGateApproval() {
+      if (!currentPlan) return;
+      currentPlan.review_gate = currentPlan.review_gate || {};
+      currentPlan.review_gate.approved = !currentPlan.review_gate.approved;
+      if (currentPlan.review_gate.approved && !currentPlan.review_gate.reviewed_at) {
+        currentPlan.review_gate.reviewed_at = new Date().toISOString();
+      }
+      renderGateBanner();
+      renderKpis();
+      showToast(currentPlan.review_gate.approved ? "Harmonization review gate APPROVED" : "Review gate marked PENDING");
+    }
+
+    function setReviewedAtNow() {
+      if (!currentPlan) return;
+      const now = new Date().toISOString();
+      document.getElementById("gate-reviewed-at").value = now;
+      currentPlan.review_gate = currentPlan.review_gate || {};
+      currentPlan.review_gate.reviewed_at = now;
+      showToast("Updated reviewed_at timestamp");
+    }
+
+    function updateGateMetadata() {
+      if (!currentPlan) return;
+      currentPlan.review_gate = currentPlan.review_gate || {};
+      currentPlan.review_gate.reviewer = document.getElementById("gate-reviewer").value.trim() || null;
+      currentPlan.review_gate.reviewed_at = document.getElementById("gate-reviewed-at").value.trim() || null;
+      currentPlan.review_gate.comments = document.getElementById("gate-comments").value.trim() || "";
+    }
+
+    // Bulk Operations
+    function approveHighConfidence() {
+      if (!currentPlan) return;
+      let count = 0;
+      (currentPlan.actions || []).forEach(a => {
+        if (a.confidence >= 0.95 || a.match_type === "FACET_EXACT" || a.match_type === "EXACT") {
+          a.approved = true;
+          count++;
+        }
+      });
+      renderAll();
+      showToast(`1-Click Approved ${count} top-confidence candidate(s)`);
+    }
+
+    function approveAllVisible() {
+      const visible = getFilteredActions();
+      visible.forEach(a => a.approved = true);
+      renderAll();
+      showToast(`Approved ${visible.length} candidate(s)`);
+    }
+
+    function rejectAllVisible() {
+      const visible = getFilteredActions();
+      visible.forEach(a => a.approved = false);
+      renderAll();
+      showToast(`Marked ${visible.length} candidate(s) unapproved`);
+    }
+
+    function toggleSelectAll(checked) {
+      const visible = getFilteredActions();
+      visible.forEach(a => a.approved = checked);
+      renderAll();
+    }
+
+    function toggleItemApproval(id, checked) {
+      if (!currentPlan) return;
+      const item = currentPlan.actions.find(a => a.id === id);
+      if (item) {
+        item.approved = checked;
+        renderGateBanner();
+        renderKpis();
+        const row = document.getElementById(`row-${id}`);
+        if (row) row.classList.toggle("is-unapproved", !checked);
+      }
+    }
+
+    function changeItemAction(id, newAction) {
+      if (!currentPlan) return;
+      const item = currentPlan.actions.find(a => a.id === id);
+      if (item) {
+        item.action = newAction;
+        renderAll();
+        showToast(`Changed ${id} action to ${newAction}`);
+      }
+    }
+
+    // Filters and Search
+    function handleSearch(val) {
+      searchQuery = (val || "").toLowerCase().trim();
+      currentPage = 1;
+      renderTable();
+    }
+
+    function setFilterMatch(matchType, chipEl) {
+      filterMatch = matchType;
+      chipEl.parentElement.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+      chipEl.classList.add("active");
+      currentPage = 1;
+      renderTable();
+    }
+
+    function setFilterAction(actType, chipEl) {
+      filterAction = actType;
+      chipEl.parentElement.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+      chipEl.classList.add("active");
+      currentPage = 1;
+      renderTable();
+    }
+
+    function setFilterType(type, chipEl) {
+      filterType = type;
+      chipEl.parentElement.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+      chipEl.classList.add("active");
+      currentPage = 1;
+      renderTable();
+    }
+
+    function setFilterConfidence(val) {
+      minConfidence = parseFloat(val);
+      currentPage = 1;
+      renderTable();
+    }
+
+    function isVariantMatchType(mt) {
+      if (!mt) return false;
+      return [
+        "INCLUSIVE_WRITING_VARIANT",
+        "PHRASING_VARIANT",
+        "TYPOGRAPHICAL_VARIANT",
+        "NEAR_EXACT"
+      ].includes(mt);
+    }
+
+    function getFilteredActions() {
+      if (!currentPlan) return [];
+      const actions = currentPlan.actions || [];
+      return actions.filter(a => {
+        // Match Filter
+        if (filterMatch === "FACET_EXACT" && !(a.match_type === "FACET_EXACT" || a.match_type === "EXACT" || a.confidence >= 0.95)) return false;
+        if (filterMatch === "SHARED_STEM_GRID" && !(a.match_type === "SHARED_STEM_GRID" || a.action === "group")) return false;
+        if (filterMatch === "VARIANTS" && !isVariantMatchType(a.match_type)) return false;
+        if (filterMatch === "SYNTACTIC_SIMILAR" && a.match_type !== "SYNTACTIC_SIMILAR") return false;
+
+        // Action Filter
+        if (filterAction !== "all") {
+          if (filterAction === "elevate" && a.action !== "elevate") return false;
+          if (filterAction === "absorb" && a.action !== "absorb") return false;
+          if (filterAction === "group" && a.action !== "group") return false;
+          if (filterAction === "alias" && a.action !== "alias") return false;
+          if (filterAction === "merge_multilingual" && a.action !== "merge_multilingual") return false;
+        }
+
+        // Type Filter
+        if (filterType !== "all" && a.resource_type !== filterType) return false;
+
+        // Confidence
+        if (a.confidence < minConfidence) return false;
+
+        // Text Search
+        if (searchQuery) {
+          const u1 = (a.source_urn || "").toLowerCase();
+          const u2 = (a.target_urn || "").toLowerCase();
+          const id = (a.id || "").toLowerCase();
+          const notes = (a.notes || "").toLowerCase();
+          const type = (a.resource_type || "").toLowerCase();
+          const act = (a.action || "").toLowerCase();
+          const det = JSON.stringify(a.details || {}).toLowerCase();
+          return u1.includes(searchQuery) || u2.includes(searchQuery) || id.includes(searchQuery) || notes.includes(searchQuery) || type.includes(searchQuery) || act.includes(searchQuery) || det.includes(searchQuery);
+        }
+        return true;
+      });
+    }
+
+    // Pagination
+    function changePageSize(size) {
+      pageSize = size === "all" ? 999999 : parseInt(size, 10);
+      currentPage = 1;
+      renderTable();
+    }
+    function prevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    }
+    function nextPage() {
+      const filtered = getFilteredActions();
+      const maxPages = Math.ceil(filtered.length / pageSize) || 1;
+      if (currentPage < maxPages) {
+        currentPage++;
+        renderTable();
+      }
+    }
+
+    // Render Master
+    function renderAll() {
+      const emptyStateEl = document.getElementById("empty-state");
+      const planContentEl = document.getElementById("plan-content");
+      const btnClosePlan = document.getElementById("btn-close-plan");
+      const btnSaveDropdown = document.getElementById("btn-save-dropdown");
+
+      if (!currentPlan) {
+        emptyStateEl.style.display = "flex";
+        planContentEl.style.display = "none";
+        btnClosePlan.style.display = "none";
+        btnSaveDropdown.disabled = true;
+
+        document.getElementById("badge-stage").textContent = "STAGE: HARMONIZE";
+        document.getElementById("badge-job").textContent = "NO PLAN LOADED";
+        document.getElementById("badge-batch").textContent = "No batch opened";
+        return;
+      }
+
+      emptyStateEl.style.display = "none";
+      planContentEl.style.display = "flex";
+      btnClosePlan.style.display = "inline-flex";
+      btnSaveDropdown.disabled = false;
+
+      renderHeaderBadges();
+      renderGateBanner();
+      renderKpis();
+      renderTable();
+    }
+
+    function renderHeaderBadges() {
+      if (!currentPlan) return;
+      document.getElementById("badge-stage").textContent = `STAGE: ${(currentPlan.stage || "harmonize").toUpperCase()}`;
+      document.getElementById("badge-job").textContent = currentPlan.job_id || "untitled-job";
+      const bId = currentPlan.batch_id !== null && currentPlan.batch_id !== undefined ? `Batch #${currentPlan.batch_id}` : "All Batches";
+      document.getElementById("badge-batch").textContent = bId;
+    }
+
+    function renderGateBanner() {
+      if (!currentPlan) return;
+      const gate = currentPlan.review_gate || {};
+      const card = document.getElementById("gate-banner");
+      const isApproved = !!gate.approved;
+
+      card.className = "gate-card " + (isApproved ? "gate-approved" : "gate-pending");
+      document.getElementById("gate-icon").textContent = isApproved ? "✓" : "⚠️";
+      document.getElementById("gate-label").textContent = isApproved ? "HARMONIZATION REVIEW GATE APPROVED" : "HARMONIZATION REVIEW GATE PENDING";
+      document.getElementById("gate-summary-text").textContent = isApproved 
+        ? "Authorized for execution with 'fairwddi harmonize apply'."
+        : "Human review required before applying cross-survey aliases, elevation, absorption, and grids.";
+      document.getElementById("gate-toggle-btn").textContent = isApproved ? "Mark as Pending Review" : "Authorize & Approve Plan";
+
+      document.getElementById("gate-reviewer").value = gate.reviewer || "";
+      document.getElementById("gate-reviewed-at").value = gate.reviewed_at || "";
+      document.getElementById("gate-comments").value = gate.comments || "";
+    }
+
+    function renderKpis() {
+      if (!currentPlan) return;
+      const actions = currentPlan.actions || [];
+      const total = actions.length;
+      const approvedCount = actions.filter(a => a.approved).length;
+      const facetExactCount = actions.filter(a => a.match_type === "FACET_EXACT" || a.match_type === "EXACT" || a.confidence >= 0.95).length;
+      const gridCount = actions.filter(a => a.match_type === "SHARED_STEM_GRID" || a.action === "group").length;
+      const variantCount = actions.filter(a => isVariantMatchType(a.match_type)).length;
+      const elevAbsorbCount = actions.filter(a => a.action === "elevate" || a.action === "absorb").length;
+
+      document.getElementById("kpi-total").textContent = total.toLocaleString();
+      const thresh = currentPlan.summary?.threshold || minConfidence;
+      document.getElementById("kpi-threshold-sub").textContent = `Threshold: ≥ ${thresh}`;
+      document.getElementById("kpi-facet-exact").textContent = facetExactCount.toLocaleString();
+      document.getElementById("kpi-grids").textContent = gridCount.toLocaleString();
+      document.getElementById("kpi-variants").textContent = variantCount.toLocaleString();
+      document.getElementById("kpi-elevate-absorb").textContent = elevAbsorbCount.toLocaleString();
+      
+      const pct = total > 0 ? Math.round((approvedCount / total) * 100) : 100;
+      document.getElementById("kpi-approved-badge").textContent = `${pct}%`;
+      document.getElementById("kpi-approved-count").textContent = `${approvedCount.toLocaleString()} / ${total.toLocaleString()}`;
+      document.getElementById("kpi-progress-bar").style.width = `${pct}%`;
+    }
+
+    function getMatchBadgeHtml(matchType, confVal) {
+      const mType = matchType || (confVal >= 0.95 ? 'FACET_EXACT' : 'SYNTACTIC_SIMILAR');
+      if (mType === 'SHARED_STEM_GRID') {
+        return `<span class="match-badge match-grid">⊞ STEM GRID</span>`;
+      }
+      if (isVariantMatchType(mType)) {
+        const shortName = mType === 'INCLUSIVE_WRITING_VARIANT' ? 'INCLUSIVE VAR' :
+                          mType === 'PHRASING_VARIANT' ? 'PHRASING VAR' :
+                          mType === 'TYPOGRAPHICAL_VARIANT' ? 'TYPO VAR' : 'NEAR EXACT';
+        return `<span class="match-badge match-variant" title="${escapeHtml(mType)}">🔤 ${shortName}</span>`;
+      }
+      if (mType === 'FACET_EXACT' || mType === 'EXACT') {
+        return `<span class="match-badge match-exact">✓ ${escapeHtml(mType)}</span>`;
+      }
+      if (mType.includes('SEMANTIC')) {
+        return `<span class="match-badge match-semantic">${escapeHtml(mType)}</span>`;
+      }
+      return `<span class="match-badge match-similar">${escapeHtml(mType)}</span>`;
+    }
+
+    function renderTable() {
+      if (!currentPlan) return;
+      const filtered = getFilteredActions();
+      const tbody = document.getElementById("actions-tbody");
+      tbody.innerHTML = "";
+
+      document.getElementById("total-filtered").textContent = filtered.length.toLocaleString();
+      document.getElementById("visible-count").textContent = filtered.length.toLocaleString();
+
+      const maxPages = Math.ceil(filtered.length / pageSize) || 1;
+      if (currentPage > maxPages) currentPage = maxPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIdx = (currentPage - 1) * pageSize;
+      const endIdx = Math.min(startIdx + pageSize, filtered.length);
+      const pageItems = filtered.slice(startIdx, endIdx);
+
+      document.getElementById("page-start").textContent = filtered.length > 0 ? (startIdx + 1).toLocaleString() : 0;
+      document.getElementById("page-end").textContent = endIdx.toLocaleString();
+      document.getElementById("page-indicator").textContent = `Page ${currentPage} of ${maxPages}`;
+      document.getElementById("btn-prev-page").disabled = currentPage <= 1;
+      document.getElementById("btn-next-page").disabled = currentPage >= maxPages;
+
+      if (pageItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 36px; color: var(--text-dim);">No candidates match the active search or filters.</td></tr>`;
+        return;
+      }
+
+      pageItems.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.id = `row-${item.id}`;
+        if (!item.approved) tr.classList.add("is-unapproved");
+
+        const confVal = item.confidence !== undefined ? item.confidence : 1.0;
+        const confClass = confVal >= 0.90 ? 'conf-high' : (confVal >= 0.80 ? 'conf-mid' : 'conf-low');
+
+        // Preview snippet tailored for latest features
+        let previewHtml = "";
+        if (item.action === 'group' || item.match_type === 'SHARED_STEM_GRID') {
+          const stem = item.details?.shared_stem || item.details?.group_name || 'Question Grid';
+          previewHtml = `
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-weight: 600; color: #a5b4fc; font-size: 11px;">⊞ Grid: ${escapeHtml(stem).substring(0, 48)}...</span>
+              <span style="font-size: 10px; color: var(--text-dim);">Sub-items: "${escapeHtml(item.details?.sub_item_a || '')}" / "${escapeHtml(item.details?.sub_item_b || '')}"</span>
+            </div>
+          `;
+        } else if (item.details?.canonical_text || isVariantMatchType(item.match_type) || item.action === 'elevate' || item.action === 'absorb') {
+          const canText = item.details?.canonical_text || item.details?.source_text || item.details?.source_name || '';
+          const txt = typeof canText === 'object' ? Object.values(canText)[0] : String(canText);
+          const vType = item.details?.variant_type || 'wording_variant';
+          previewHtml = `
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-size: 11px; color: #2dd4bf;">🔤 ${escapeHtml(txt).substring(0, 45)}...</span>
+              <span style="font-size: 10px; color: var(--text-dim);">Type: ${escapeHtml(vType)} • ${(item.details?.preserved_variants || []).length} preserved</span>
+            </div>
+          `;
+        } else if (item.details?.codes && Array.isArray(item.details.codes)) {
+          previewHtml = item.details.codes.slice(0, 3).map(c => `<span class="code-preview-tag">${escapeHtml(c)}</span>`).join("");
+          if (item.details.codes.length > 3) previewHtml += `<span style="font-size: 10px; color: var(--text-dim);">+${item.details.codes.length - 3} more</span>`;
+        } else if (item.details?.source_text) {
+          const txt = typeof item.details.source_text === 'object' ? Object.values(item.details.source_text)[0] : item.details.source_text;
+          previewHtml = `<span style="font-size: 11px; color: var(--text-muted);">${escapeHtml(txt).substring(0, 50)}...</span>`;
+        } else {
+          previewHtml = `<span style="font-size: 11px; color: var(--text-dim);">${escapeHtml(item.notes || '-')}</span>`;
+        }
+
+        tr.innerHTML = `
+          <td style="text-align: center;">
+            <input type="checkbox" ${item.approved ? 'checked' : ''} onchange="toggleItemApproval('${item.id}', this.checked)" title="Approve candidate harmonization" />
+          </td>
+          <td style="font-family: var(--font-mono); font-weight: 600; color: var(--text-muted);">${escapeHtml(item.id)}</td>
+          <td>
+            <select class="field-select" style="padding: 2px 6px; font-size: 11px; font-weight: 600;" onchange="changeItemAction('${item.id}', this.value)">
+              <option value="elevate" ${item.action === 'elevate' ? 'selected' : ''}>elevate (Canonical)</option>
+              <option value="absorb" ${item.action === 'absorb' ? 'selected' : ''}>absorb (Into elevated)</option>
+              <option value="group" ${item.action === 'group' ? 'selected' : ''}>group (Question Grid)</option>
+              <option value="alias" ${item.action === 'alias' ? 'selected' : ''}>alias (URNAlias)</option>
+              <option value="harmonize" ${item.action === 'harmonize' ? 'selected' : ''}>harmonize (General)</option>
+              <option value="merge_multilingual" ${item.action === 'merge_multilingual' ? 'selected' : ''}>merge_multilingual</option>
+              <option value="link_semantic" ${item.action === 'link_semantic' ? 'selected' : ''}>link_semantic (SKOS)</option>
+              <option value="skip" ${item.action === 'skip' ? 'selected' : ''}>skip (Keep distinct)</option>
+            </select>
+          </td>
+          <td>${getMatchBadgeHtml(item.match_type, confVal)}</td>
+          <td style="text-align: center;"><span class="conf-pill ${confClass}">${confVal.toFixed(2)}</span></td>
+          <td><span class="type-badge">${escapeHtml(item.resource_type)}</span></td>
+          <td>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-weight: 600; font-size: 11px; color: var(--text);">${escapeHtml(item.details?.source_name || '')}</span>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span class="urn-text" title="${escapeHtml(item.source_urn)}">${escapeHtml(item.source_urn)}</span>
+                <button class="urn-copy-btn" onclick="copyText('${escapeHtml(item.source_urn)}')">📋</button>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-weight: 600; font-size: 11px; color: var(--accent-cyan);">${escapeHtml(item.details?.target_name || item.details?.generic_name || '')}</span>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span class="urn-text" style="color: var(--accent-cyan);" title="${escapeHtml(item.target_urn || item.details?.group_urn || '')}">${escapeHtml(item.target_urn || item.details?.group_urn || '-')}</span>
+                ${item.target_urn ? `<button class="urn-copy-btn" onclick="copyText('${escapeHtml(item.target_urn)}')">📋</button>` : ''}
+              </div>
+            </div>
+          </td>
+          <td>${previewHtml}</td>
+          <td style="text-align: right;">
+            <button class="btn btn-secondary btn-sm" onclick="openInspector('${item.id}')">Inspect 🔍</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Inspector Modal with Side-by-Side Diff & Feature Curators
+    function openInspector(id) {
+      if (!currentPlan) return;
+      const item = currentPlan.actions.find(a => a.id === id);
+      if (!item) return;
+      inspectingItem = JSON.parse(JSON.stringify(item));
+      inspectingItem.details = inspectingItem.details || {};
+
+      document.getElementById("inspect-title").textContent = `Inspect Candidate: ${item.id} (${item.resource_type}) — Action: ${item.action}`;
+      const body = document.getElementById("inspect-body");
+
+      let featureInspectorHtml = "";
+
+      // 1. Question Grid Feature Inspector (action: group or match_type: SHARED_STEM_GRID)
+      if (item.action === 'group' || item.match_type === 'SHARED_STEM_GRID') {
+        const sharedStem = item.details.shared_stem || "";
+        const subA = item.details.sub_item_a || "";
+        const subB = item.details.sub_item_b || "";
+        const gName = item.details.group_name || `Grid: ${sharedStem.substring(0, 36)}`;
+        const gUrn = item.details.group_urn || "";
+
+        featureInspectorHtml = `
+          <div class="grid-callout">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="font-size: 13px; font-weight: 700; color: #a5b4fc; display: flex; align-items: center; gap: 6px;">
+                <span>⊞ Question Grid Structure</span>
+                <span class="badge" style="background: rgba(99, 102, 241, 0.25); color: #c7d2fe;">group_type: question_grid</span>
+              </div>
+              <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">stem_similarity: ${item.details.stem_similarity || '1.0'}</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Detected Shared Stem (Grid Prompt)</label>
+              <textarea class="field-textarea" id="ins-grid-stem" rows="2" style="font-weight: 600; color: #e0e7ff;">${escapeHtml(sharedStem)}</textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
+                <span style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Sub-Item A (Row A)</span>
+                <div style="font-size: 12px; margin-top: 4px; color: var(--text);">${escapeHtml(subA || '(Not separated)')}</div>
+              </div>
+              <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
+                <span style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Sub-Item B (Row B)</span>
+                <div style="font-size: 12px; margin-top: 4px; color: #818cf8;">${escapeHtml(subB || '(Not separated)')}</div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px;">
+              <div class="field-group">
+                <label class="field-label">Group Name</label>
+                <input type="text" class="field-input" id="ins-grid-name" value="${escapeHtml(gName)}" />
+              </div>
+              <div class="field-group">
+                <label class="field-label">Explicit Group URN (Optional)</label>
+                <input type="text" class="field-input" id="ins-grid-urn" value="${escapeHtml(gUrn)}" placeholder="Auto-generated if empty" style="font-family: var(--font-mono); font-size: 11px;" />
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. Wording Variant & Elevation/Absorption Feature Inspector
+      else if (isVariantMatchType(item.match_type) || item.action === 'elevate' || item.action === 'absorb' || item.details.canonical_text) {
+        const canText = item.details.canonical_text || item.details.source_text || item.details.source_name || '';
+        const canTextStr = typeof canText === 'object' ? (canText.fr || canText.en || Object.values(canText)[0] || '') : String(canText);
+        const vType = item.details.variant_type || (item.match_type === 'INCLUSIVE_WRITING_VARIANT' ? 'inclusive_writing' : 'phrasing');
+        const presVars = Array.isArray(item.details.preserved_variants) ? item.details.preserved_variants : [];
+        const discVars = Array.isArray(item.details.discarded_variants) ? item.details.discarded_variants : [];
+
+        featureInspectorHtml = `
+          <div class="variant-callout">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="font-size: 13px; font-weight: 700; color: #2dd4bf; display: flex; align-items: center; gap: 6px;">
+                <span>🔤 Wording Variant & Canonical Text Curation</span>
+              </div>
+              <div class="field-group" style="flex-direction: row; align-items: center; gap: 6px;">
+                <label class="field-label" style="margin: 0;">Variant Type:</label>
+                <select class="field-select" id="ins-variant-type" style="padding: 2px 6px; font-size: 11px;">
+                  <option value="inclusive_writing" ${vType === 'inclusive_writing' ? 'selected' : ''}>inclusive_writing</option>
+                  <option value="phrasing" ${vType === 'phrasing' ? 'selected' : ''}>phrasing</option>
+                  <option value="punctuation" ${vType === 'punctuation' ? 'selected' : ''}>punctuation</option>
+                  <option value="typographical_or_grammar" ${vType === 'typographical_or_grammar' ? 'selected' : ''}>typographical_or_grammar</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Canonical Text Override (Target clean text stored on canonical entity)</label>
+              <textarea class="field-textarea" id="ins-can-text" rows="2" style="font-weight: 600; color: #34d399;">${escapeHtml(canTextStr)}</textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div class="field-group">
+                <label class="field-label">Preserved Variants (Kept in extended_attributes for discovery)</label>
+                <div class="variant-tag-list" id="pres-tag-list">
+                  ${presVars.map((pv, i) => `
+                    <span class="variant-tag preserved">
+                      ${escapeHtml(String(pv))}
+                      <span class="variant-tag-remove" onclick="removePreservedVariant(${i})">×</span>
+                    </span>
+                  `).join("")}
+                  ${presVars.length === 0 ? '<span style="font-size: 11px; color: var(--text-dim);">(None preserved)</span>' : ''}
+                </div>
+                <div style="display: flex; gap: 4px; margin-top: 4px;">
+                  <input type="text" class="field-input" id="ins-new-pres" placeholder="Add preserved phrasing..." style="font-size: 11px; padding: 4px 8px; flex: 1;" />
+                  <button class="btn btn-secondary btn-sm" onclick="addPreservedVariant()">+ Add</button>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label">Discarded Variants (Filtered out / typos)</label>
+                <div class="variant-tag-list" id="disc-tag-list">
+                  ${discVars.map((dv, i) => `
+                    <span class="variant-tag discarded">
+                      ${escapeHtml(String(dv))}
+                      <span class="variant-tag-remove" onclick="removeDiscardedVariant(${i})">×</span>
+                    </span>
+                  `).join("")}
+                  ${discVars.length === 0 ? '<span style="font-size: 11px; color: var(--text-dim);">(None discarded)</span>' : ''}
+                </div>
+                <div style="display: flex; gap: 4px; margin-top: 4px;">
+                  <input type="text" class="field-input" id="ins-new-disc" placeholder="Add typo to discard..." style="font-size: 11px; padding: 4px 8px; flex: 1;" />
+                  <button class="btn btn-secondary btn-sm" onclick="addDiscardedVariant()">+ Add</button>
+                </div>
+              </div>
+            </div>
+
+            ${item.action === 'elevate' ? `
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; border-top: 1px solid var(--border); padding-top: 8px;">
+                <div class="field-group">
+                  <label class="field-label">Generic Resource Name</label>
+                  <input type="text" class="field-input" id="ins-generic-name" value="${escapeHtml(item.details.generic_name || '')}" placeholder="e.g. Political Interest (Generic)" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Explicit Generic URN (Optional)</label>
+                  <input type="text" class="field-input" id="ins-generic-urn" value="${escapeHtml(item.details.generic_urn || '')}" placeholder="urn:ddi:fr.cdsp:..." style="font-family: var(--font-mono); font-size: 11px;" />
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+
+      // 3. Side-by-Side Diff Container
+      let diffHtml = "";
+      if (item.resource_type === "CodeList" && item.details?.codes) {
+        const codesList = item.details.codes;
+        diffHtml = `
+          <div class="diff-container">
+            <div class="diff-col">
+              <div class="diff-col-header">
+                <span>Source CodeList: ${escapeHtml(item.details.source_name || 'Incoming')}</span>
+                <span class="badge badge-job">${codesList.length} options</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto;">
+                ${codesList.map(c => `<div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; font-family: var(--font-mono); font-size: 11px;">${escapeHtml(c)}</div>`).join("")}
+              </div>
+            </div>
+
+            <div class="diff-col">
+              <div class="diff-col-header">
+                <span>Target Canonical: ${escapeHtml(item.details.target_name || 'Target')}</span>
+                <span class="badge badge-stage">FACET Match</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto;">
+                ${codesList.map(c => `<div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; font-family: var(--font-mono); font-size: 11px; color: #34d399;">✓ ${escapeHtml(c)}</div>`).join("")}
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (item.details?.source_text || item.details?.target_text) {
+        const sTxt = typeof item.details.source_text === 'object' ? JSON.stringify(item.details.source_text, null, 2) : String(item.details.source_text || '');
+        const tTxt = typeof item.details.target_text === 'object' ? JSON.stringify(item.details.target_text, null, 2) : String(item.details.target_text || '');
+        diffHtml = `
+          <div class="diff-container">
+            <div class="diff-col">
+              <div class="diff-col-header">Source Question Text</div>
+              <pre style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 12px; white-space: pre-wrap;">${escapeHtml(sTxt)}</pre>
+            </div>
+            <div class="diff-col">
+              <div class="diff-col-header">Target Question Text</div>
+              <pre style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 12px; white-space: pre-wrap; color: #34d399;">${escapeHtml(tTxt)}</pre>
+            </div>
+          </div>
+        `;
+      } else {
+        diffHtml = `
+          <div class="field-group">
+            <label class="field-label">Candidate Match Details</label>
+            <pre style="background: var(--bg-base); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-family: var(--font-mono); font-size: 11px; color: #38bdf8; max-height: 160px; overflow-y: auto;">${escapeHtml(JSON.stringify(item.details || {}, null, 2))}</pre>
+          </div>
+        `;
+      }
+
+      body.innerHTML = `
+        ${featureInspectorHtml}
+        ${diffHtml}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="field-group">
+            <label class="field-label">Harmonization Action</label>
+            <select class="field-select" id="ins-action">
+              <option value="elevate" ${item.action === 'elevate' ? 'selected' : ''}>elevate (Elevate into generic canonical entity)</option>
+              <option value="absorb" ${item.action === 'absorb' ? 'selected' : ''}>absorb (Absorb into existing elevated canonical entity)</option>
+              <option value="group" ${item.action === 'group' ? 'selected' : ''}>group (Group into Question Grid / shared stem)</option>
+              <option value="alias" ${item.action === 'alias' ? 'selected' : ''}>alias (Register URNAlias & re-point references)</option>
+              <option value="harmonize" ${item.action === 'harmonize' ? 'selected' : ''}>harmonize (General canonical harmonization)</option>
+              <option value="merge_multilingual" ${item.action === 'merge_multilingual' ? 'selected' : ''}>merge_multilingual (Combine parallel JSONB translations)</option>
+              <option value="link_semantic" ${item.action === 'link_semantic' ? 'selected' : ''}>link_semantic (Register SKOS exactMatch / closeMatch)</option>
+              <option value="skip" ${item.action === 'skip' ? 'selected' : ''}>skip (Keep distinct; do not harmonize)</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Archivist Approval</label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 6px;">
+              <input type="checkbox" id="ins-approved" ${item.approved ? 'checked' : ''} />
+              Approved for Harmonization
+            </label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Target Canonical / Absorbed URN</label>
+          <input type="text" class="field-input" id="ins-target-urn" value="${escapeHtml(item.target_urn || '')}" style="font-family: var(--font-mono); font-size: 11px;" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Archivist Harmonization Notes</label>
+          <textarea class="field-textarea" id="ins-notes" rows="2">${escapeHtml(item.notes || '')}</textarea>
+        </div>
+      `;
+
+      document.getElementById("modal-inspector").classList.add("is-open");
+    }
+
+    function addPreservedVariant() {
+      const input = document.getElementById("ins-new-pres");
+      const val = input.value.trim();
+      if (!val || !inspectingItem) return;
+      inspectingItem.details.preserved_variants = inspectingItem.details.preserved_variants || [];
+      if (!inspectingItem.details.preserved_variants.includes(val)) {
+        inspectingItem.details.preserved_variants.push(val);
+      }
+      input.value = "";
+      refreshVariantTagLists();
+    }
+
+    function removePreservedVariant(idx) {
+      if (!inspectingItem || !inspectingItem.details.preserved_variants) return;
+      inspectingItem.details.preserved_variants.splice(idx, 1);
+      refreshVariantTagLists();
+    }
+
+    function addDiscardedVariant() {
+      const input = document.getElementById("ins-new-disc");
+      const val = input.value.trim();
+      if (!val || !inspectingItem) return;
+      inspectingItem.details.discarded_variants = inspectingItem.details.discarded_variants || [];
+      if (!inspectingItem.details.discarded_variants.includes(val)) {
+        inspectingItem.details.discarded_variants.push(val);
+      }
+      input.value = "";
+      refreshVariantTagLists();
+    }
+
+    function removeDiscardedVariant(idx) {
+      if (!inspectingItem || !inspectingItem.details.discarded_variants) return;
+      inspectingItem.details.discarded_variants.splice(idx, 1);
+      refreshVariantTagLists();
+    }
+
+    function refreshVariantTagLists() {
+      const presList = inspectingItem.details.preserved_variants || [];
+      const discList = inspectingItem.details.discarded_variants || [];
+
+      const presEl = document.getElementById("pres-tag-list");
+      if (presEl) {
+        presEl.innerHTML = presList.map((pv, i) => `
+          <span class="variant-tag preserved">
+            ${escapeHtml(String(pv))}
+            <span class="variant-tag-remove" onclick="removePreservedVariant(${i})">×</span>
+          </span>
+        `).join("") || '<span style="font-size: 11px; color: var(--text-dim);">(None preserved)</span>';
+      }
+
+      const discEl = document.getElementById("disc-tag-list");
+      if (discEl) {
+        discEl.innerHTML = discList.map((dv, i) => `
+          <span class="variant-tag discarded">
+            ${escapeHtml(String(dv))}
+            <span class="variant-tag-remove" onclick="removeDiscardedVariant(${i})">×</span>
+          </span>
+        `).join("") || '<span style="font-size: 11px; color: var(--text-dim);">(None discarded)</span>';
+      }
+    }
+
+    function closeInspector() {
+      document.getElementById("modal-inspector").classList.remove("is-open");
+      inspectingItem = null;
+    }
+
+    function saveItemEdits() {
+      if (!inspectingItem || !currentPlan) return;
+      const target = currentPlan.actions.find(a => a.id === inspectingItem.id);
+      if (target) {
+        target.action = document.getElementById("ins-action").value;
+        target.approved = document.getElementById("ins-approved").checked;
+        target.target_urn = document.getElementById("ins-target-urn").value.trim() || null;
+        target.notes = document.getElementById("ins-notes").value.trim();
+
+        target.details = target.details || {};
+
+        // Save Grid attributes if present
+        const gridStemEl = document.getElementById("ins-grid-stem");
+        if (gridStemEl) {
+          target.details.shared_stem = gridStemEl.value.trim();
+          target.details.group_name = document.getElementById("ins-grid-name").value.trim();
+          const gUrn = document.getElementById("ins-grid-urn").value.trim();
+          if (gUrn) target.details.group_urn = gUrn;
+        }
+
+        // Save Variant attributes if present
+        const canTextEl = document.getElementById("ins-can-text");
+        if (canTextEl) {
+          target.details.canonical_text = canTextEl.value.trim();
+          target.details.variant_type = document.getElementById("ins-variant-type").value;
+          target.details.preserved_variants = inspectingItem.details.preserved_variants || [];
+          target.details.discarded_variants = inspectingItem.details.discarded_variants || [];
+
+          const genNameEl = document.getElementById("ins-generic-name");
+          if (genNameEl) target.details.generic_name = genNameEl.value.trim();
+          const genUrnEl = document.getElementById("ins-generic-urn");
+          if (genUrnEl && genUrnEl.value.trim()) target.details.generic_urn = genUrnEl.value.trim();
+        }
+      }
+      closeInspector();
+      renderAll();
+      showToast(`Saved candidate decision for ${inspectingItem.id}`);
+    }
+
+    // Save & Export
+    async function savePlanFile(format) {
+      if (!currentPlan) return;
+      toggleDropdown("dropdown-save");
+      updateGateMetadata();
+
+      currentPlan.summary = currentPlan.summary || {};
+      const actions = currentPlan.actions || [];
+      currentPlan.summary.total_actions = actions.length;
+      currentPlan.summary.pending_review_count = actions.filter(a => !a.approved || a.requires_review).length;
+
+      let content = "";
+      let filename = `${currentPlan.job_id || 'harmonization'}.plan.${format}`;
+
+      if (format === "yaml") {
+        if (window.jsyaml && window.jsyaml.dump) {
+          content = window.jsyaml.dump(currentPlan, { indent: 2, lineWidth: -1, noRefs: true });
+        } else {
+          content = JSON.stringify(currentPlan, null, 2);
+        }
+      } else {
+        content = JSON.stringify(currentPlan, null, 2);
+      }
+
+      if (activeFileHandle && window.showSaveFilePicker) {
+        try {
+          const writable = await activeFileHandle.createWritable();
+          await writable.write(content);
+          await writable.close();
+          showToast(`Directly saved back to ${activeFileHandle.name}`);
+          return;
+        } catch (err) {
+          console.warn("Could not save to active handle, falling back:", err);
+        }
+      }
+
+      const blob = new Blob([content], { type: format === 'yaml' ? "text/yaml;charset=utf-8" : "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Downloaded ${filename}`);
+    }
+
+    function copyPlanToClipboard(format) {
+      if (!currentPlan) return;
+      toggleDropdown("dropdown-save");
+      updateGateMetadata();
+      const content = window.jsyaml ? window.jsyaml.dump(currentPlan, { indent: 2, lineWidth: -1 }) : JSON.stringify(currentPlan, null, 2);
+      copyText(content);
+      showToast("Harmonization plan copied to clipboard");
+    }
+
+    function showCliCommandModal() {
+      if (!currentPlan) return;
+      toggleDropdown("dropdown-save");
+      const filename = `${currentPlan.job_id || 'harmonize-bank'}.harmonize.plan.yaml`;
+      document.getElementById("cli-cmd-text").textContent = `uv run fairwddi harmonize apply ${filename}`;
+      document.getElementById("modal-cli").classList.add("is-open");
+    }
+    function closeCliModal() {
+      document.getElementById("modal-cli").classList.remove("is-open");
+    }
+    function copyCliCmd() {
+      copyText(document.getElementById("cli-cmd-text").textContent);
+      showToast("CLI command copied");
+    }
+
+    // Utility Helpers
+    function copyText(str) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(str);
+      } else {
+        const t = document.createElement("textarea");
+        t.value = str;
+        document.body.appendChild(t);
+        t.select();
+        document.execCommand("copy");
+        document.body.removeChild(t);
+      }
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      document.getElementById("toast-msg").textContent = msg;
+      el.classList.add("is-visible");
+      setTimeout(() => el.classList.remove("is-visible"), 2800);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>

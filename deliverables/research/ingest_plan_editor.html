@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAIRwDDI Ingest Plan Editor — Review Gate & Action Authoring</title>
+  <meta name="description" content="Interactive visual editor and review gate sign-off for FAIRwDDI direct file-to-core ingestion plans (.ingest.plan.yaml)." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- js-yaml library for browser YAML loading and dumping -->
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <style>
+    :root {
+      --bg-base: #0a0e17;
+      --bg-surface: #111827;
+      --bg-elevated: #1e293b;
+      --bg-card: #162032;
+      --bg-hover: #243247;
+      --border: #334155;
+      --border-subtle: #1e293b;
+      --border-focus: #3b82f6;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --accent-primary: #3b82f6;
+      --accent-primary-hover: #2563eb;
+      --accent-cyan: #06b6d4;
+      --accent-purple: #8b5cf6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-slate: #64748b;
+
+      --c-create: #10b981;
+      --c-reuse: #3b82f6;
+      --c-alias: #06b6d4;
+      --c-quarantine: #f59e0b;
+      --c-skip: #64748b;
+
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --bg-card: #f8fafc;
+      --bg-hover: #e2e8f0;
+      --border: #cbd5e1;
+      --border-subtle: #e2e8f0;
+      --border-focus: #2563eb;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* Top Sticky Header */
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      color: white;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+    }
+    .brand-text h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-stage {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-job {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border-color: rgba(59, 130, 246, 0.3);
+      font-family: var(--font-mono);
+    }
+    .badge-file {
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text-muted);
+      border-color: var(--border);
+      max-width: 240px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      font-family: inherit;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+    .btn-secondary {
+      background: var(--bg-elevated);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--bg-hover);
+      border-color: var(--text-muted);
+    }
+    .btn-switch {
+      background: rgba(139, 92, 246, 0.15);
+      color: #c084fc;
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+    .btn-switch:hover {
+      background: rgba(139, 92, 246, 0.25);
+    }
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+    .btn-icon {
+      padding: 7px;
+      border-radius: 6px;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .btn-icon:hover { color: var(--text); background: var(--bg-hover); }
+
+    /* Dropdown wrapper */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      margin-top: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      min-width: 240px;
+      z-index: 50;
+      overflow: hidden;
+    }
+    .dropdown.is-open .dropdown-content { display: block; }
+    .dropdown-item {
+      padding: 9px 14px;
+      font-size: 12px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+    .dropdown-item:hover {
+      background: var(--bg-elevated);
+      color: var(--accent-primary);
+    }
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 4px 0;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1650px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Drop zone overlay when dragging a file */
+    #dropzone-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 14, 23, 0.88);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      border: 3px dashed var(--accent-emerald);
+      margin: 12px;
+      border-radius: 16px;
+      pointer-events: none;
+    }
+    #dropzone-overlay.dragover { display: flex; }
+    #dropzone-overlay h2 { font-size: 24px; color: #34d399; }
+    #dropzone-overlay p { color: var(--text-muted); }
+
+    /* Empty State Card (Shown when no plan is loaded) */
+    .empty-state-card {
+      background: var(--bg-surface);
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 60px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      max-width: 820px;
+      margin: 40px auto;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+    .empty-state-icon {
+      font-size: 54px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .empty-state-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .empty-state-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 580px;
+      line-height: 1.6;
+    }
+    .empty-state-desc code {
+      font-family: var(--font-mono);
+      background: var(--bg-elevated);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #34d399;
+    }
+    .empty-state-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .empty-state-hints {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 24px;
+      width: 100%;
+      text-align: left;
+    }
+    .hint-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .hint-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    /* Review Gate Banner */
+    .gate-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    .gate-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--gate-color, #10b981);
+    }
+    .gate-card.gate-pending {
+      --gate-color: #f59e0b;
+      border-color: rgba(245, 158, 11, 0.35);
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.05) 0%, var(--bg-surface) 100%);
+    }
+    .gate-card.gate-approved {
+      --gate-color: #10b981;
+      border-color: rgba(16, 185, 129, 0.35);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, var(--bg-surface) 100%);
+    }
+
+    .gate-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .gate-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+    .gate-approved .gate-status-pill {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .gate-pending .gate-status-pill {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .gate-controls {
+      display: grid;
+      grid-template-columns: 200px 240px 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+    @media (max-width: 1024px) {
+      .gate-controls { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .gate-controls { grid-template-columns: 1fr; }
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .field-input, .field-textarea, .field-select {
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 10px;
+      color: var(--text);
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field-input:focus, .field-textarea:focus, .field-select:focus {
+      border-color: var(--border-focus);
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+    .kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .kpi-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .kpi-num {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--text);
+    }
+    .kpi-progress {
+      height: 4px;
+      background: var(--bg-elevated);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+    .kpi-progress-bar {
+      height: 100%;
+      background: var(--accent-emerald);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    /* Filter & Controls Toolbar */
+    .toolbar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      flex: 1;
+    }
+    .search-box {
+      position: relative;
+      min-width: 260px;
+      flex: 1;
+      max-width: 400px;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 12px 7px 32px;
+      color: var(--text);
+      font-size: 12px;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--border-focus); }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+
+    .filter-chips {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip:hover { color: var(--text); border-color: var(--text-muted); }
+    .chip.active {
+      background: var(--accent-primary);
+      color: white;
+      border-color: var(--accent-primary);
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Table Container */
+    .table-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .table-responsive {
+      max-height: 580px;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+    }
+    thead {
+      background: var(--bg-elevated);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    th {
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+    }
+    tr:hover td {
+      background: var(--bg-hover);
+    }
+    tr.is-unapproved td {
+      background: rgba(245, 158, 11, 0.03);
+    }
+
+    /* Action Badges */
+    .act-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      display: inline-block;
+      text-transform: uppercase;
+    }
+    .act-create { background: rgba(16, 185, 129, 0.18); color: #34d399; }
+    .act-reuse { background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
+    .act-alias { background: rgba(6, 182, 212, 0.18); color: #22d3ee; }
+    .act-quarantine { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+    .act-skip { background: rgba(100, 116, 139, 0.18); color: #94a3b8; }
+
+    .type-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .urn-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text);
+      max-width: 320px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+    .urn-copy-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+    .urn-copy-btn:hover { color: var(--accent-primary); }
+
+    /* Pagination */
+    .pagination-bar {
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      background: var(--bg-elevated);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Modal / Drawer */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-backdrop.is-open { display: flex; }
+    .modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 720px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-title { font-size: 15px; font-weight: 700; }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--bg-elevated);
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 18px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 200;
+    }
+    #toast.is-visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Drag and drop full window overlay -->
+  <div id="dropzone-overlay">
+    <h2>📂 Drop Ingest Plan YAML / JSON Here</h2>
+    <p>File will load and parse instantly in constant memory</p>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">F</div>
+      <div class="brand-text">
+        <h1>FAIRwDDI Ingest Plan Editor</h1>
+        <p>Review-Gated File-to-Core Ingestion Plan Reviewer & Authoring Studio</p>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-stage" id="badge-stage">STAGE: INGEST</span>
+        <span class="badge badge-job" id="badge-job">NO PLAN LOADED</span>
+        <span class="badge badge-file" id="badge-filename" title="Source file">No file opened</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Switch to Harmonization -->
+      <a href="harmonization_plan_editor.html" class="btn btn-switch" title="Open Stage 3 Harmonization Plan Editor">
+        Harmonization Editor ↗
+      </a>
+
+      <!-- Open File -->
+      <button class="btn btn-secondary" onclick="triggerOpenFile()" title="Open .ingest.plan.yaml or .json">
+        📂 Open Plan
+      </button>
+      <input type="file" id="file-input" accept=".yaml,.yml,.json" style="display: none;" onchange="handleFileInput(event)" />
+
+      <!-- Paste Text -->
+      <button class="btn btn-secondary" onclick="openRawModal()" title="Paste YAML or JSON text directly">
+        ✏️ Paste Text
+      </button>
+
+      <!-- Close Plan (shown when plan is active) -->
+      <button class="btn btn-secondary" id="btn-close-plan" onclick="closePlan()" style="display: none;" title="Unload active plan">
+        ✕ Close Plan
+      </button>
+
+      <!-- Save Plan -->
+      <div class="dropdown" id="dropdown-save">
+        <button class="btn btn-primary" id="btn-save-dropdown" onclick="toggleDropdown('dropdown-save')" disabled>
+          💾 Save Plan ▾
+        </button>
+        <div class="dropdown-content">
+          <button class="dropdown-item" onclick="savePlanFile('yaml')">
+            <span>Export as Approved YAML (.yaml)</span>
+          </button>
+          <button class="dropdown-item" onclick="savePlanFile('json')">
+            <span>Export as JSON (.json)</span>
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" onclick="copyPlanToClipboard('yaml')">
+            <span>Copy YAML to Clipboard</span>
+          </button>
+          <button class="dropdown-item" onclick="showCliCommandModal()">
+            <span>💻 Copy fairwddi CLI Command</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Theme Toggle -->
+      <button class="btn-icon" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+        🌓
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Body -->
+  <main>
+
+    <!-- Empty State (Shown when no plan is loaded) -->
+    <div class="empty-state-card" id="empty-state">
+      <div class="empty-state-icon">📂</div>
+      <h2 class="empty-state-title">No Ingestion Plan Loaded</h2>
+      <p class="empty-state-desc">
+        Open an existing <code>.ingest.plan.yaml</code> or <code>.json</code> file generated by <code>fairwddi ingest plan</code>, or drag and drop it here to review and authorize execution.
+      </p>
+      <div class="empty-state-actions">
+        <button class="btn btn-primary" onclick="triggerOpenFile()" style="padding: 9px 18px; font-size: 13px;">
+          📂 Open Plan File
+        </button>
+        <button class="btn btn-secondary" onclick="openRawModal()" style="padding: 9px 18px; font-size: 13px;">
+          ✏️ Paste YAML / JSON
+        </button>
+      </div>
+      <div class="empty-state-hints">
+        <div class="hint-item">
+          <span class="hint-icon">⚡</span>
+          <span><strong>Zero DB Writes:</strong> Ingestion plans verify dry-run allocations before executing mutations.</span>
+        </div>
+        <div class="hint-item">
+          <span class="hint-icon">🛡️</span>
+          <span><strong>Review Gate:</strong> Sign off review items, author URN aliases, and approve execution gates.</span>
+        </div>
+        <div class="hint-item">
+          <span class="hint-icon">🔒</span>
+          <span><strong>100% Client-Side:</strong> Your plan files remain strictly local on your machine.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Plan Content Wrapper (Hidden until a plan is loaded) -->
+    <div id="plan-content" style="display: none; flex-direction: column; gap: 18px;">
+
+      <!-- Review Gate Banner -->
+      <div class="gate-card gate-approved" id="gate-banner">
+        <div class="gate-top-row">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="gate-status-pill" id="gate-pill">
+              <span id="gate-icon">✓</span>
+              <span id="gate-label">REVIEW GATE APPROVED</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);" id="gate-summary-text">
+              All planned actions authorized for PostgreSQL execution.
+            </span>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="toggleGateApproval()" id="gate-toggle-btn">
+              Mark as Pending Review
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="approveAllVisible()">
+              Approve All Items
+            </button>
+          </div>
+        </div>
+
+        <div class="gate-controls">
+          <div class="field-group">
+            <label class="field-label">Reviewer</label>
+            <input type="text" class="field-input" id="gate-reviewer" placeholder="e.g. cdsp-archivist" onchange="updateGateMetadata()" />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Reviewed At</label>
+            <div style="display: flex; gap: 4px;">
+              <input type="text" class="field-input" id="gate-reviewed-at" placeholder="ISO-8601 Timestamp" style="flex: 1;" onchange="updateGateMetadata()" />
+              <button class="btn btn-secondary btn-sm" onclick="setReviewedAtNow()" title="Set to current UTC time">Now</button>
+            </div>
+          </div>
+
+          <div class="field-group" style="grid-column: span 2;">
+            <label class="field-label">Comments / Justification</label>
+            <input type="text" class="field-input" id="gate-comments" placeholder="e.g. Verified census demographic variable aliases and approved core schema import." onchange="updateGateMetadata()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Total Planned Actions</span>
+            <span>⚡</span>
+          </div>
+          <div class="kpi-num" id="kpi-total">0</div>
+          <div style="font-size: 11px; color: var(--text-dim);" id="kpi-streamed-sub">Streamed nodes: 0</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Create (New Entities)</span>
+            <span style="color: var(--c-create);">●</span>
+          </div>
+          <div class="kpi-num" style="color: var(--c-create);" id="kpi-create">0</div>
+          <div style="font-size: 11px; color: var(--text-dim);">New rows in core tables</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Aliased / Deduplicated</span>
+            <span style="color: var(--c-alias);">●</span>
+          </div>
+          <div class="kpi-num" style="color: var(--c-alias);" id="kpi-alias">0</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Reusing existing canonical URNs</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Skipped Wrappers</span>
+            <span style="color: var(--c-skip);">●</span>
+          </div>
+          <div class="kpi-num" style="color: var(--c-skip);" id="kpi-skip">0</div>
+          <div style="font-size: 11px; color: var(--text-dim);">LogicalProduct, DataCollection</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Approved Ratio</span>
+            <span id="kpi-approved-badge" style="color: var(--accent-emerald);">100%</span>
+          </div>
+          <div class="kpi-num" id="kpi-approved-count">0 / 0</div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar" id="kpi-progress-bar" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Pending Review</span>
+            <span style="color: var(--accent-amber);">⚠️</span>
+          </div>
+          <div class="kpi-num" style="color: var(--accent-amber);" id="kpi-pending">0</div>
+          <div style="font-size: 11px; color: var(--text-dim);" id="kpi-errors-sub">0 errors, 0 warnings</div>
+        </div>
+      </div>
+
+      <!-- Filters & Bulk Operations Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="search-input" placeholder="Filter by URN, name, notes, or action..." oninput="handleSearch(this.value)" />
+          </div>
+
+          <div class="filter-chips">
+            <span class="chip active" onclick="setFilterType('all', this)">All Types</span>
+            <span class="chip" onclick="setFilterType('QuestionItem', this)">QuestionItem</span>
+            <span class="chip" onclick="setFilterType('CodeList', this)">CodeList</span>
+            <span class="chip" onclick="setFilterType('Category', this)">Category</span>
+            <span class="chip" onclick="setFilterType('RepresentedVariable', this)">RepresentedVariable</span>
+            <span class="chip" onclick="setFilterType('InstanceVariable', this)">InstanceVariable</span>
+            <span class="chip" onclick="setFilterType('StudyUnit', this)">StudyUnit</span>
+          </div>
+
+          <div class="filter-chips" style="border-left: 1px solid var(--border); padding-left: 8px;">
+            <span class="chip active" onclick="setFilterAction('all', this)">All Actions</span>
+            <span class="chip" onclick="setFilterAction('create', this)">Create</span>
+            <span class="chip" onclick="setFilterAction('alias', this)">Alias</span>
+            <span class="chip" onclick="setFilterAction('elevate', this)">Elevate</span>
+            <span class="chip" onclick="setFilterAction('absorb', this)">Absorb</span>
+            <span class="chip" onclick="setFilterAction('group', this)">Group</span>
+            <span class="chip" onclick="setFilterAction('skip', this)">Skip</span>
+            <span class="chip" onclick="setFilterAction('quarantine', this)">Quarantine</span>
+          </div>
+        </div>
+
+        <div class="toolbar-right">
+          <button class="btn btn-secondary btn-sm" onclick="approveAllVisible()">
+            ✓ Approve Visible (<span id="visible-count">0</span>)
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="rejectAllVisible()">
+            ✗ Reject Visible
+          </button>
+        </div>
+      </div>
+
+      <!-- Actions Table -->
+      <div class="table-container">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 40px; text-align: center;">
+                  <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this.checked)" title="Toggle all visible" />
+                </th>
+                <th style="width: 80px;">ID</th>
+                <th style="width: 100px;">Action</th>
+                <th style="width: 140px;">Resource Type</th>
+                <th>Source URN / Name</th>
+                <th>Target Canonical URN</th>
+                <th style="width: 80px; text-align: center;">Review?</th>
+                <th>Notes / Match Basis</th>
+                <th style="width: 80px; text-align: right;">Inspect</th>
+              </tr>
+            </thead>
+            <tbody id="actions-tbody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-bar">
+          <div>
+            Showing <span id="page-start">1</span> to <span id="page-end">50</span> of <span id="total-filtered">0</span> items
+          </div>
+          <div class="pagination-controls">
+            <label style="font-size: 11px; margin-right: 8px;">
+              Page Size:
+              <select class="field-select" style="padding: 2px 6px; font-size: 11px;" id="page-size-select" onchange="changePageSize(this.value)">
+                <option value="25">25</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="250">250</option>
+                <option value="all">All</option>
+              </select>
+            </label>
+            <button class="btn btn-secondary btn-sm" id="btn-prev-page" onclick="prevPage()">‹ Prev</button>
+            <span id="page-indicator" style="font-weight: 600; font-family: var(--font-mono);">Page 1 of 1</span>
+            <button class="btn btn-secondary btn-sm" id="btn-next-page" onclick="nextPage()">Next ›</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Modal: Item Inspector & Editor -->
+  <div class="modal-backdrop" id="modal-inspector">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="inspect-title">Action Item Details</h3>
+        <button class="btn-icon" onclick="closeInspector()">✕</button>
+      </div>
+      <div class="modal-body" id="inspect-body">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeInspector()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveItemEdits()">Save Item Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Raw Text / YAML Paste -->
+  <div class="modal-backdrop" id="modal-raw">
+    <div class="modal-card" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Paste Plan YAML or JSON</h3>
+        <button class="btn-icon" onclick="closeRawModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 12px; color: var(--text-muted);">
+          Paste an Ingestion Plan YAML or JSON string. The editor will parse and render it.
+        </p>
+        <textarea id="raw-paste-input" class="field-textarea" style="height: 350px; font-family: var(--font-mono); font-size: 11px; white-space: pre;" placeholder="plan_version: '1.0'&#10;stage: ingest&#10;job_id: ingest-...&#10;actions:&#10;  - id: ing-0001..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeRawModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="loadRawPaste()">Parse & Load Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: CLI Execution Snippet -->
+  <div class="modal-backdrop" id="modal-cli">
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Run with fairwddi CLI</h3>
+        <button class="btn-icon" onclick="closeCliModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 12px; color: var(--text-muted);">
+          Once you have saved this approved plan to disk, execute direct ingestion into PostgreSQL with:
+        </p>
+        <div style="background: var(--bg-base); border: 1px solid var(--border); border-radius: 6px; padding: 12px; font-family: var(--font-mono); font-size: 12px; color: #34d399; position: relative;">
+          <code id="cli-cmd-text">uv run fairwddi ingest execute &lt;plan_file.yaml&gt;</code>
+          <button class="btn btn-secondary btn-sm" style="position: absolute; right: 8px; top: 8px;" onclick="copyCliCmd()">Copy</button>
+        </div>
+        <p style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">
+          Note: Because you have marked the Review Gate as approved, the ingestion runner will proceed without needing the <code>--auto-approve</code> flag.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeCliModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast">
+    <span id="toast-icon">✓</span>
+    <span id="toast-msg">Notification message</span>
+  </div>
+
+  <!-- Application Script -->
+  <script>
+    // Application State - starts completely clean (no preloaded sample file)
+    let currentPlan = null;
+    let activeFileHandle = null;
+    let searchQuery = "";
+    let filterType = "all";
+    let filterAction = "all";
+    let currentPage = 1;
+    let pageSize = 50;
+    let inspectingItem = null;
+
+    // Initialize application
+    window.addEventListener("DOMContentLoaded", () => {
+      initDragAndDrop();
+      renderAll();
+    });
+
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const nextTheme = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      html.setAttribute("data-theme", nextTheme);
+      showToast(`Switched to ${nextTheme} theme`);
+    }
+
+    // Dropdown helpers
+    function toggleDropdown(id) {
+      const el = document.getElementById(id);
+      const isOpen = el.classList.contains("is-open");
+      document.querySelectorAll(".dropdown").forEach(d => d.classList.remove("is-open"));
+      if (!isOpen) el.classList.add("is-open");
+    }
+    window.addEventListener("click", (e) => {
+      if (!e.target.closest(".dropdown")) {
+        document.querySelectorAll(".dropdown").forEach(d => d.classList.remove("is-open"));
+      }
+    });
+
+    // Drag and Drop
+    function initDragAndDrop() {
+      const overlay = document.getElementById("dropzone-overlay");
+      window.addEventListener("dragenter", (e) => {
+        e.preventDefault();
+        overlay.classList.add("dragover");
+      });
+      overlay.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        overlay.classList.remove("dragover");
+      });
+      window.addEventListener("dragover", (e) => e.preventDefault());
+      window.addEventListener("drop", (e) => {
+        e.preventDefault();
+        overlay.classList.remove("dragover");
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          loadFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    // File Open
+    async function triggerOpenFile() {
+      if (window.showOpenFilePicker) {
+        try {
+          const [handle] = await window.showOpenFilePicker({
+            types: [{ description: "DDI Ingest Plans (*.yaml, *.json)", accept: { "text/yaml": [".yaml", ".yml"], "application/json": [".json"] } }]
+          });
+          activeFileHandle = handle;
+          const file = await handle.getFile();
+          loadFile(file);
+          return;
+        } catch (err) {
+          if (err.name !== "AbortError") console.error("Picker error, falling back:", err);
+        }
+      }
+      document.getElementById("file-input").click();
+    }
+
+    function handleFileInput(e) {
+      if (e.target.files && e.target.files.length > 0) {
+        activeFileHandle = null;
+        loadFile(e.target.files[0]);
+      }
+    }
+
+    function loadFile(file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const text = event.target.result;
+          parseAndLoadPlanText(text, file.name);
+          showToast(`Loaded ${file.name} successfully`);
+        } catch (err) {
+          alert("Failed to parse plan file: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function parseAndLoadPlanText(rawText, sourceFileName) {
+      let data = null;
+      if (window.jsyaml && window.jsyaml.load) {
+        try {
+          data = window.jsyaml.load(rawText);
+        } catch (yErr) {
+          data = JSON.parse(rawText);
+        }
+      } else {
+        data = JSON.parse(rawText);
+      }
+
+      if (!data || !Array.isArray(data.actions)) {
+        throw new Error("Invalid plan file: missing 'actions' list.");
+      }
+
+      // Check stage and guide user if needed
+      if (data.stage && data.stage === "harmonize") {
+        if (confirm("This file appears to be a Harmonization Plan (stage: harmonize). Would you like to switch to the Harmonization Plan Editor?")) {
+          window.location.href = "harmonization_plan_editor.html";
+          return;
+        }
+      }
+
+      currentPlan = data;
+      if (sourceFileName && !currentPlan.source_file) {
+        currentPlan.source_file = sourceFileName;
+      }
+      currentPage = 1;
+      renderAll();
+    }
+
+    function closePlan() {
+      currentPlan = null;
+      activeFileHandle = null;
+      searchQuery = "";
+      filterType = "all";
+      filterAction = "all";
+      currentPage = 1;
+      renderAll();
+      showToast("Plan unloaded");
+    }
+
+    // Raw modal
+    function openRawModal() {
+      document.getElementById("modal-raw").classList.add("is-open");
+      if (currentPlan) {
+        const dumpStr = window.jsyaml ? window.jsyaml.dump(currentPlan, { indent: 2, lineWidth: -1 }) : JSON.stringify(currentPlan, null, 2);
+        document.getElementById("raw-paste-input").value = dumpStr;
+      } else {
+        document.getElementById("raw-paste-input").value = "";
+      }
+    }
+    function closeRawModal() {
+      document.getElementById("modal-raw").classList.remove("is-open");
+    }
+    function loadRawPaste() {
+      const text = document.getElementById("raw-paste-input").value.trim();
+      if (!text) return;
+      try {
+        parseAndLoadPlanText(text, "pasted_plan.yaml");
+        closeRawModal();
+        showToast("Parsed pasted plan successfully");
+      } catch (err) {
+        alert("Parse error: " + err.message);
+      }
+    }
+
+    // Review Gate Management
+    function toggleGateApproval() {
+      if (!currentPlan) return;
+      currentPlan.review_gate = currentPlan.review_gate || {};
+      currentPlan.review_gate.approved = !currentPlan.review_gate.approved;
+      if (currentPlan.review_gate.approved && !currentPlan.review_gate.reviewed_at) {
+        currentPlan.review_gate.reviewed_at = new Date().toISOString();
+      }
+      renderGateBanner();
+      renderKpis();
+      showToast(currentPlan.review_gate.approved ? "Review gate APPROVED" : "Review gate marked PENDING");
+    }
+
+    function setReviewedAtNow() {
+      if (!currentPlan) return;
+      const now = new Date().toISOString();
+      document.getElementById("gate-reviewed-at").value = now;
+      currentPlan.review_gate = currentPlan.review_gate || {};
+      currentPlan.review_gate.reviewed_at = now;
+      showToast("Updated reviewed_at to current timestamp");
+    }
+
+    function updateGateMetadata() {
+      if (!currentPlan) return;
+      currentPlan.review_gate = currentPlan.review_gate || {};
+      currentPlan.review_gate.reviewer = document.getElementById("gate-reviewer").value.trim() || null;
+      currentPlan.review_gate.reviewed_at = document.getElementById("gate-reviewed-at").value.trim() || null;
+      currentPlan.review_gate.comments = document.getElementById("gate-comments").value.trim() || "";
+    }
+
+    // Bulk Operations
+    function approveAllVisible() {
+      const visible = getFilteredActions();
+      visible.forEach(a => a.approved = true);
+      renderAll();
+      showToast(`Approved ${visible.length} action(s)`);
+    }
+
+    function rejectAllVisible() {
+      const visible = getFilteredActions();
+      visible.forEach(a => a.approved = false);
+      renderAll();
+      showToast(`Marked ${visible.length} action(s) unapproved`);
+    }
+
+    function toggleSelectAll(checked) {
+      const visible = getFilteredActions();
+      visible.forEach(a => a.approved = checked);
+      renderAll();
+    }
+
+    function toggleItemApproval(id, checked) {
+      if (!currentPlan) return;
+      const item = currentPlan.actions.find(a => a.id === id);
+      if (item) {
+        item.approved = checked;
+        renderGateBanner();
+        renderKpis();
+        const row = document.getElementById(`row-${id}`);
+        if (row) row.classList.toggle("is-unapproved", !checked);
+      }
+    }
+
+    function changeItemAction(id, newAction) {
+      if (!currentPlan) return;
+      const item = currentPlan.actions.find(a => a.id === id);
+      if (item) {
+        item.action = newAction;
+        renderAll();
+        showToast(`Changed ${id} action to ${newAction}`);
+      }
+    }
+
+    // Filters and Search
+    function handleSearch(val) {
+      searchQuery = (val || "").toLowerCase().trim();
+      currentPage = 1;
+      renderTable();
+    }
+    function setFilterType(type, chipEl) {
+      filterType = type;
+      chipEl.parentElement.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+      chipEl.classList.add("active");
+      currentPage = 1;
+      renderTable();
+    }
+    function setFilterAction(act, chipEl) {
+      filterAction = act;
+      chipEl.parentElement.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+      chipEl.classList.add("active");
+      currentPage = 1;
+      renderTable();
+    }
+
+    function getFilteredActions() {
+      if (!currentPlan) return [];
+      const actions = currentPlan.actions || [];
+      return actions.filter(a => {
+        if (filterType !== "all" && a.resource_type !== filterType) return false;
+        if (filterAction !== "all" && a.action !== filterAction) return false;
+        if (searchQuery) {
+          const u1 = (a.source_urn || "").toLowerCase();
+          const u2 = (a.target_urn || "").toLowerCase();
+          const id = (a.id || "").toLowerCase();
+          const notes = (a.notes || "").toLowerCase();
+          const type = (a.resource_type || "").toLowerCase();
+          const act = (a.action || "").toLowerCase();
+          const det = JSON.stringify(a.details || {}).toLowerCase();
+          return u1.includes(searchQuery) || u2.includes(searchQuery) || id.includes(searchQuery) || notes.includes(searchQuery) || type.includes(searchQuery) || act.includes(searchQuery) || det.includes(searchQuery);
+        }
+        return true;
+      });
+    }
+
+    // Pagination
+    function changePageSize(size) {
+      pageSize = size === "all" ? 999999 : parseInt(size, 10);
+      currentPage = 1;
+      renderTable();
+    }
+    function prevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    }
+    function nextPage() {
+      const filtered = getFilteredActions();
+      const maxPages = Math.ceil(filtered.length / pageSize) || 1;
+      if (currentPage < maxPages) {
+        currentPage++;
+        renderTable();
+      }
+    }
+
+    // Render Master
+    function renderAll() {
+      const emptyStateEl = document.getElementById("empty-state");
+      const planContentEl = document.getElementById("plan-content");
+      const btnClosePlan = document.getElementById("btn-close-plan");
+      const btnSaveDropdown = document.getElementById("btn-save-dropdown");
+
+      if (!currentPlan) {
+        emptyStateEl.style.display = "flex";
+        planContentEl.style.display = "none";
+        btnClosePlan.style.display = "none";
+        btnSaveDropdown.disabled = true;
+
+        document.getElementById("badge-stage").textContent = "STAGE: INGEST";
+        document.getElementById("badge-job").textContent = "NO PLAN LOADED";
+        document.getElementById("badge-filename").textContent = "No file opened";
+        return;
+      }
+
+      emptyStateEl.style.display = "none";
+      planContentEl.style.display = "flex";
+      btnClosePlan.style.display = "inline-flex";
+      btnSaveDropdown.disabled = false;
+
+      renderHeaderBadges();
+      renderGateBanner();
+      renderKpis();
+      renderTable();
+    }
+
+    function renderHeaderBadges() {
+      if (!currentPlan) return;
+      document.getElementById("badge-stage").textContent = `STAGE: ${(currentPlan.stage || "ingest").toUpperCase()}`;
+      document.getElementById("badge-job").textContent = currentPlan.job_id || "untitled-plan";
+      const srcFile = currentPlan.source_file || (currentPlan.source_path ? currentPlan.source_path.split("/").pop() : "unknown-source");
+      document.getElementById("badge-filename").textContent = srcFile;
+      document.getElementById("badge-filename").title = srcFile;
+    }
+
+    function renderGateBanner() {
+      if (!currentPlan) return;
+      const gate = currentPlan.review_gate || {};
+      const card = document.getElementById("gate-banner");
+      const isApproved = !!gate.approved;
+
+      card.className = "gate-card " + (isApproved ? "gate-approved" : "gate-pending");
+      document.getElementById("gate-icon").textContent = isApproved ? "✓" : "⚠️";
+      document.getElementById("gate-label").textContent = isApproved ? "REVIEW GATE APPROVED" : "REVIEW GATE PENDING";
+      document.getElementById("gate-summary-text").textContent = isApproved 
+        ? "Authorized for execution with 'fairwddi ingest execute'."
+        : "Execution is blocked until human reviewer signs off this plan.";
+      document.getElementById("gate-toggle-btn").textContent = isApproved ? "Mark as Pending Review" : "Authorize & Approve Plan";
+
+      document.getElementById("gate-reviewer").value = gate.reviewer || "";
+      document.getElementById("gate-reviewed-at").value = gate.reviewed_at || "";
+      document.getElementById("gate-comments").value = gate.comments || "";
+    }
+
+    function renderKpis() {
+      if (!currentPlan) return;
+      const actions = currentPlan.actions || [];
+      const total = actions.length;
+      const approvedCount = actions.filter(a => a.approved).length;
+      const createCount = actions.filter(a => a.action === "create").length;
+      const aliasCount = actions.filter(a => a.action === "alias").length;
+      const skipCount = actions.filter(a => a.action === "skip").length;
+      const pendingItems = actions.filter(a => !a.approved || a.requires_review).length;
+
+      document.getElementById("kpi-total").textContent = total.toLocaleString();
+      document.getElementById("kpi-streamed-sub").textContent = `Streamed: ${(currentPlan.summary?.streamed_nodes || total).toLocaleString()} nodes`;
+      document.getElementById("kpi-create").textContent = createCount.toLocaleString();
+      document.getElementById("kpi-alias").textContent = aliasCount.toLocaleString();
+      document.getElementById("kpi-skip").textContent = skipCount.toLocaleString();
+      
+      const pct = total > 0 ? Math.round((approvedCount / total) * 100) : 100;
+      document.getElementById("kpi-approved-badge").textContent = `${pct}%`;
+      document.getElementById("kpi-approved-count").textContent = `${approvedCount.toLocaleString()} / ${total.toLocaleString()}`;
+      document.getElementById("kpi-progress-bar").style.width = `${pct}%`;
+
+      document.getElementById("kpi-pending").textContent = pendingItems.toLocaleString();
+      const errCount = currentPlan.summary?.error_count || 0;
+      const warnCount = currentPlan.summary?.warning_count || 0;
+      document.getElementById("kpi-errors-sub").textContent = `${errCount} errors, ${warnCount} warnings`;
+    }
+
+    function renderTable() {
+      if (!currentPlan) return;
+      const filtered = getFilteredActions();
+      const tbody = document.getElementById("actions-tbody");
+      tbody.innerHTML = "";
+
+      document.getElementById("total-filtered").textContent = filtered.length.toLocaleString();
+      document.getElementById("visible-count").textContent = filtered.length.toLocaleString();
+
+      const maxPages = Math.ceil(filtered.length / pageSize) || 1;
+      if (currentPage > maxPages) currentPage = maxPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIdx = (currentPage - 1) * pageSize;
+      const endIdx = Math.min(startIdx + pageSize, filtered.length);
+      const pageItems = filtered.slice(startIdx, endIdx);
+
+      document.getElementById("page-start").textContent = filtered.length > 0 ? (startIdx + 1).toLocaleString() : 0;
+      document.getElementById("page-end").textContent = endIdx.toLocaleString();
+      document.getElementById("page-indicator").textContent = `Page ${currentPage} of ${maxPages}`;
+      document.getElementById("btn-prev-page").disabled = currentPage <= 1;
+      document.getElementById("btn-next-page").disabled = currentPage >= maxPages;
+
+      if (pageItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 36px; color: var(--text-dim);">No action items match the active search or filters.</td></tr>`;
+        return;
+      }
+
+      pageItems.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.id = `row-${item.id}`;
+        if (!item.approved) tr.classList.add("is-unapproved");
+
+        tr.innerHTML = `
+          <td style="text-align: center;">
+            <input type="checkbox" ${item.approved ? 'checked' : ''} onchange="toggleItemApproval('${item.id}', this.checked)" title="Authorize execution of this item" />
+          </td>
+          <td style="font-family: var(--font-mono); font-weight: 600; color: var(--text-muted);">${escapeHtml(item.id)}</td>
+          <td>
+            <select class="field-select" style="padding: 2px 6px; font-size: 11px; font-weight: 600;" onchange="changeItemAction('${item.id}', this.value)">
+              <option value="create" ${item.action === 'create' ? 'selected' : ''}>CREATE</option>
+              <option value="alias" ${item.action === 'alias' ? 'selected' : ''}>ALIAS</option>
+              <option value="reuse" ${item.action === 'reuse' ? 'selected' : ''}>REUSE</option>
+              <option value="elevate" ${item.action === 'elevate' ? 'selected' : ''}>ELEVATE</option>
+              <option value="absorb" ${item.action === 'absorb' ? 'selected' : ''}>ABSORB</option>
+              <option value="group" ${item.action === 'group' ? 'selected' : ''}>GROUP</option>
+              <option value="skip" ${item.action === 'skip' ? 'selected' : ''}>SKIP</option>
+              <option value="quarantine" ${item.action === 'quarantine' ? 'selected' : ''}>QUARANTINE</option>
+            </select>
+          </td>
+          <td><span class="type-badge">${escapeHtml(item.resource_type)}</span></td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span class="urn-text" title="${escapeHtml(item.source_urn)}">${escapeHtml(item.source_urn)}</span>
+              <button class="urn-copy-btn" onclick="copyText('${escapeHtml(item.source_urn)}')">📋</button>
+            </div>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span class="urn-text" style="color: ${item.target_urn ? 'var(--accent-cyan)' : 'var(--text-dim)'};" title="${escapeHtml(item.target_urn || 'None')}">${escapeHtml(item.target_urn || '-')}</span>
+              ${item.target_urn ? `<button class="urn-copy-btn" onclick="copyText('${escapeHtml(item.target_urn)}')">📋</button>` : ''}
+            </div>
+          </td>
+          <td style="text-align: center;">
+            ${item.requires_review ? '<span title="Flagged for manual archivist review" style="color: var(--accent-amber);">⚠️ Yes</span>' : '<span style="color: var(--text-dim);">No</span>'}
+          </td>
+          <td style="font-size: 11px; color: var(--text-muted); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(item.notes || '')}">
+            ${escapeHtml(item.notes || '-')}
+          </td>
+          <td style="text-align: right;">
+            <button class="btn btn-secondary btn-sm" onclick="openInspector('${item.id}')">Inspect</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Item Inspector Modal
+    function openInspector(id) {
+      if (!currentPlan) return;
+      const item = currentPlan.actions.find(a => a.id === id);
+      if (!item) return;
+      inspectingItem = JSON.parse(JSON.stringify(item));
+
+      document.getElementById("inspect-title").textContent = `Inspect Action: ${item.id} (${item.resource_type})`;
+      const body = document.getElementById("inspect-body");
+
+      body.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="field-group">
+            <label class="field-label">Action Operation</label>
+            <select class="field-select" id="ins-action">
+              <option value="create" ${item.action === 'create' ? 'selected' : ''}>create (Insert new row)</option>
+              <option value="alias" ${item.action === 'alias' ? 'selected' : ''}>alias (Link to canonical URN via URNAlias)</option>
+              <option value="reuse" ${item.action === 'reuse' ? 'selected' : ''}>reuse (Exact match)</option>
+              <option value="elevate" ${item.action === 'elevate' ? 'selected' : ''}>elevate (Elevate into generic canonical entity)</option>
+              <option value="absorb" ${item.action === 'absorb' ? 'selected' : ''}>absorb (Absorb into existing elevated canonical entity)</option>
+              <option value="group" ${item.action === 'group' ? 'selected' : ''}>group (Group into Question Grid / shared stem)</option>
+              <option value="skip" ${item.action === 'skip' ? 'selected' : ''}>skip (Do not insert)</option>
+              <option value="quarantine" ${item.action === 'quarantine' ? 'selected' : ''}>quarantine (Flagged metadata drift)</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Approval Status</label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 6px;">
+              <input type="checkbox" id="ins-approved" ${item.approved ? 'checked' : ''} />
+              Authorized for Execution
+            </label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Source URN</label>
+          <input type="text" class="field-input" id="ins-source-urn" value="${escapeHtml(item.source_urn || '')}" style="font-family: var(--font-mono); font-size: 11px;" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Target Canonical URN</label>
+          <input type="text" class="field-input" id="ins-target-urn" value="${escapeHtml(item.target_urn || '')}" style="font-family: var(--font-mono); font-size: 11px;" placeholder="Optional target canonical URN" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Archivist Notes</label>
+          <textarea class="field-textarea" id="ins-notes" rows="2">${escapeHtml(item.notes || '')}</textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Resource Details & Hashes</label>
+          <pre style="background: var(--bg-base); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-family: var(--font-mono); font-size: 11px; color: #38bdf8; max-height: 180px; overflow-y: auto;">${escapeHtml(JSON.stringify(item.details || {}, null, 2))}</pre>
+        </div>
+      `;
+
+      document.getElementById("modal-inspector").classList.add("is-open");
+    }
+
+    function closeInspector() {
+      document.getElementById("modal-inspector").classList.remove("is-open");
+      inspectingItem = null;
+    }
+
+    function saveItemEdits() {
+      if (!inspectingItem || !currentPlan) return;
+      const target = currentPlan.actions.find(a => a.id === inspectingItem.id);
+      if (target) {
+        target.action = document.getElementById("ins-action").value;
+        target.approved = document.getElementById("ins-approved").checked;
+        target.source_urn = document.getElementById("ins-source-urn").value.trim();
+        target.target_urn = document.getElementById("ins-target-urn").value.trim() || null;
+        target.notes = document.getElementById("ins-notes").value.trim();
+      }
+      closeInspector();
+      renderAll();
+      showToast(`Saved changes for ${inspectingItem.id}`);
+    }
+
+    // Save & Export
+    async function savePlanFile(format) {
+      if (!currentPlan) return;
+      toggleDropdown("dropdown-save");
+      updateGateMetadata();
+
+      currentPlan.summary = currentPlan.summary || {};
+      const actions = currentPlan.actions || [];
+      currentPlan.summary.total_actions = actions.length;
+      currentPlan.summary.create = actions.filter(a => a.action === "create").length;
+      currentPlan.summary.alias = actions.filter(a => a.action === "alias").length;
+      currentPlan.summary.reuse = actions.filter(a => a.action === "reuse").length;
+      currentPlan.summary.skip = actions.filter(a => a.action === "skip").length;
+      currentPlan.summary.quarantine = actions.filter(a => a.action === "quarantine").length;
+      currentPlan.summary.pending_review_count = actions.filter(a => !a.approved || a.requires_review).length;
+
+      let content = "";
+      let filename = `${currentPlan.job_id || 'ingest'}.plan.${format}`;
+
+      if (format === "yaml") {
+        if (window.jsyaml && window.jsyaml.dump) {
+          content = window.jsyaml.dump(currentPlan, { indent: 2, lineWidth: -1, noRefs: true });
+        } else {
+          content = JSON.stringify(currentPlan, null, 2);
+        }
+      } else {
+        content = JSON.stringify(currentPlan, null, 2);
+      }
+
+      if (activeFileHandle && window.showSaveFilePicker) {
+        try {
+          const writable = await activeFileHandle.createWritable();
+          await writable.write(content);
+          await writable.close();
+          showToast(`Directly saved back to ${activeFileHandle.name}`);
+          return;
+        } catch (err) {
+          console.warn("Could not save to active handle, falling back:", err);
+        }
+      }
+
+      const blob = new Blob([content], { type: format === 'yaml' ? "text/yaml;charset=utf-8" : "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Downloaded ${filename}`);
+    }
+
+    function copyPlanToClipboard(format) {
+      if (!currentPlan) return;
+      toggleDropdown("dropdown-save");
+      updateGateMetadata();
+      const content = window.jsyaml ? window.jsyaml.dump(currentPlan, { indent: 2, lineWidth: -1 }) : JSON.stringify(currentPlan, null, 2);
+      copyText(content);
+      showToast("Plan copied to clipboard");
+    }
+
+    function showCliCommandModal() {
+      if (!currentPlan) return;
+      toggleDropdown("dropdown-save");
+      const filename = `${currentPlan.job_id || 'survey'}.ingest.plan.yaml`;
+      document.getElementById("cli-cmd-text").textContent = `uv run fairwddi ingest execute ${filename}`;
+      document.getElementById("modal-cli").classList.add("is-open");
+    }
+    function closeCliModal() {
+      document.getElementById("modal-cli").classList.remove("is-open");
+    }
+    function copyCliCmd() {
+      copyText(document.getElementById("cli-cmd-text").textContent);
+      showToast("CLI command copied");
+    }
+
+    // Utility Helpers
+    function copyText(str) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(str);
+      } else {
+        const t = document.createElement("textarea");
+        t.value = str;
+        document.body.appendChild(t);
+        t.select();
+        document.execCommand("copy");
+        document.body.removeChild(t);
+      }
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      document.getElementById("toast-msg").textContent = msg;
+      el.classList.add("is-visible");
+      setTimeout(() => el.classList.remove("is-visible"), 2800);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>

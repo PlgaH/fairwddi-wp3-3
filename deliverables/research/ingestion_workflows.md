@@ -173,6 +173,10 @@ fairwddi ingest plan ./ingest_output/FSD3562_eng.ddi40.jsonl \
   - `quarantine`: Drift conflicts detected.
 - Database remains completely unmodified.
 
+> [!TIP]
+> **Interactive Review Gate Authoring:**
+> Archivists can load `./ingest_output/FSD3562_eng.ddi40.ingest.plan.yaml` into the browser-based **Ingest Plan Editor** ([`deliverables/research/ingest_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/ingest_plan_editor.html)) to inspect planned operations, author canonical URN aliases, approve items in bulk, and sign off the review gate prior to PostgreSQL execution.
+
 #### Step 4: Execute Core Ingestion
 Executes the approved plan within an atomic PostgreSQL transaction.
 
@@ -576,7 +580,26 @@ flowchart LR
 
 ---
 
-### 6.3 Variable Cascade URN Transparency
+### 6.3 Interactive Harmonization Plan Review, Stratified Matching & Question Grids
+
+Archivists can review candidate matches discovered by `fairwddi compare discover` or planned via `fairwddi harmonize plan` in the standalone **Harmonization Plan Editor** ([`deliverables/research/harmonization_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/harmonization_plan_editor.html)) or via the generated YAML/Markdown harmonization plans:
+
+- **Stratified Match Classification & Review Flagging (`requires_review: true`):**
+  - `NEAR_EXACT`: Terminal punctuation variants (e.g., trailing `?` or French spacing before `?`) and sequence similarity $\ge 0.98$. Recommends `alias` (or `absorb` if the target is already elevated).
+  - `INCLUSIVE_WRITING_VARIANT`: Inclusive/gendered marker variations (e.g., `"confronté(e)"` vs. `"confronté"`). Recommends `elevate` (or `absorb`), preserving alternate phrasings in `extended_attributes` (`type: "wording_variant"`).
+  - `PHRASING_VARIANT`: Stylistic or pronominal shifts (e.g., `"Je refuse de répondre"` vs. `"Refuse de répondre"`). Recommends `elevate` (or `absorb`), keeping canonical wording on the primary field and storing alternates in `extended_attributes`.
+  - `TYPOGRAPHICAL_VARIANT`: Single-word grammatical or typographical mistakes (e.g., `"Ma mère..."` vs. `"Mon mère..."`). Recommends `elevate` (or `absorb`), retaining the valid wording and dropping `discarded_variants` while preserving the source URN in `URNAlias`.
+  - `SHARED_STEM_GRID`: Questions, categories, or variables sharing a common stem followed by distinct choices/sub-items (e.g., `"Êtes-vous confronté(e) à un ou plusieurs des problèmes suivants concernant votre quartier ? Manque d'espaces verts"` vs. `"... ? Manque de sécurité"`). Recommends `group`, creating or updating a generic `Group` (`group_type="question_grid"`) and recording `ddi:inGroup` in `SemanticRelationship`.
+  - `SYNTACTIC_SIMILAR`: Moderate similarity ($0.85 \le \text{sim} < 0.98$). Recommends `link_semantic` (`skos:closeMatch`).
+- **Declarative Plan Actions (`elevate`, `absorb`, `group`, `alias`, `merge_multilingual`, `link_semantic`, `skip`):**
+  - Target-aware planning automatically recommends `absorb` when one resource is already an elevated canonical item (`status = 'elevated'`) and `elevate` when both are study-specific.
+  - Use `fairwddi harmonize approve-high <plan.yaml> --min-confidence 0.96` to bulk-approve high-confidence and near-exact items while disabling lower-confidence candidates.
+- **CodeList & Question Text Side-by-Side Diff:** Compares incoming survey wave response codes and question wordings against canonical candidates.
+- **Execution Ready:** Emits validated `.harmonize.plan.yaml` with an approved review gate ready for `fairwddi harmonize apply` (and full rollback via `fairwddi harmonize undo <job_id>`).
+
+---
+
+### 6.4 Variable Cascade URN Transparency
 
 In DDI-Codebook, a variable (`<var>`) conflates the abstract question wording and response scale with the physical column in a dataset. In DDI-Lifecycle and the ReQuest core, this is split into two distinct entities:
 
