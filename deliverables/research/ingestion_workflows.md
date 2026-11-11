@@ -3,7 +3,7 @@
 > **Project:** FAIRwDDI WP3 ST3 — Implementation of DDI Architecture for ReQuest  
 > **Organization:** Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS  
 > **Target Subsystem:** [`fairwddi.ingest`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/src/fairwddi/ingest/__init__.py)  
-> **Status:** Operational Research Deliverable  
+> **Status:** Operational Research Deliverable
 
 ---
 
@@ -20,6 +20,7 @@ The FAIRwDDI Phase 2 ingestion engine supports three primary operational workflo
 ## 2. Workflow 1: DDI-Codebook Classic (Monolingual)
 
 ### 2.1 Use Case & Preconditions
+
 - **Input:** Standard DDI-Codebook 2.5 XML file (e.g. `FSD3562_eng.ddic.xml`).
 - **Characteristics:** Monolingual metadata, flat variable listing (`<var>`), embedded question text (`<qstn>`), embedded category statistics (`<catStat>`), and dataset dimensions (`<fileDscr>`).
 - **Target:** Upgrade to canonical DDI-L 4.0 on disk, synthesize `ConceptualVariable` $\rightarrow$ `RepresentedVariable` $\rightarrow$ `InstanceVariable`, bulk-insert frequency counts, and record an `IngestBatch` receipt.
@@ -40,6 +41,7 @@ flowchart TD
 ### 2.2 Step-by-Step Execution
 
 #### Step 1: Preflight Readiness Check
+
 Audits the DDI-C XML structure, verifies XML well-formedness, inspects study identification, and checks if the file has already been ingested.
 
 ```bash
@@ -48,15 +50,18 @@ fairwddi preflight check tests/fixtures/FSD3562_eng.ddic.xml \
   --output-dir ./ingest_output
 ```
 
-*Expected Output:*
+_Expected Output:_
+
 - Emits `./ingest_output/FSD3562_eng.ddic.preflight.plan.yaml` and `.report.md`.
 - Summary reports: `specification: DDI-C`, `version: 2.5`, `is_multilingual: false`, `variable_count: 74`.
 - If zero errors are reported, `is_ready_to_execute()` evaluates to `True`.
 
 #### Step 2: Explicit DDI-C $\rightarrow$ DDI-L 4.0 Upgrade on Disk
+
 Converts DDI-C into canonical DDI-Lifecycle 4.0 format. Categories and code lists sharing identical response options across variables are automatically deduplicated.
 
 When empirical observation statistics (frequencies or summary statistics) are present, the upgrade engine produces **two decoupled files**:
+
 1. **Primary Question Bank & Study File (`*.ddi40.json` / `*.ddi40.jsonl`):** Reusable `StudyUnit`, `LogicalProduct`, schemes, `QuestionItem`, `Variable`, `CodeList`, `Category`, and `PhysicalInstance` layout.
 2. **Dedicated Secondary Statistics File (`*.stats.ddi40.json`):** Strongly-typed `VariableStatistics` elements documenting empirical observations (`TotalResponses`, `SummaryStatisticType`, and `UnfilteredCategoryStatisticsType`).
 
@@ -70,9 +75,10 @@ fairwddi preflight upgrade tests/fixtures/FSD3562_eng.ddic.xml \
   --harmonize-codes
 ```
 
-*Rich CLI Output Summary:*
+_Rich CLI Output Summary:_
+
 ```text
-                         DDI-C to DDI-L Upgrade Summary                         
+                         DDI-C to DDI-L Upgrade Summary
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Metric                    ┃ Value                                            ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
@@ -92,6 +98,7 @@ fairwddi preflight upgrade tests/fixtures/FSD3562_eng.ddic.xml \
 > [!TIP]
 > **Standalone Upgrades with `dartfx-ddi`:**
 > The conversion engine is part of `ddi-toolkit` and can be run independently of the `fairwddi` application via the `dartfx-ddi` CLI:
+>
 > ```bash
 > dartfx-ddi ddic2l FSD3562_eng.ddic.xml \
 >   --output ./ingest_output/FSD3562_eng.ddi40.json \
@@ -100,12 +107,14 @@ fairwddi preflight upgrade tests/fixtures/FSD3562_eng.ddic.xml \
 >   --harmonize-codes
 > ```
 
-*Key Parameters:*
+_Key Parameters:_
+
 - `--format ddi4-json`: Emits formatted DDI 4.0 JSON (`ddi4-jsonl`, `ddi4-xml`, and `ddi33-xml` also supported).
 - `--id-strategy hierarchical`: Derives semantic, human-readable URNs (`urn:ddi:{agency}:{study_var}:{version}`).
 - `--harmonize-codes`: Consolidates redundant code lists across survey variables and computes reduction metrics.
 
-*Dedicated Statistics Output (`FSD3562_eng.stats.ddi40.json`):*
+_Dedicated Statistics Output (`FSD3562_eng.stats.ddi40.json`):_
+
 ```json
 {
   "topLevelReferences": [
@@ -131,19 +140,19 @@ fairwddi preflight upgrade tests/fixtures/FSD3562_eng.ddic.xml \
       "TotalResponses": 1200,
       "SummaryStatistic": [
         {
-          "TypeOfSummaryStatistic": {"StringValue": "vald"},
-          "Statistic": {"DecimalValue": 1200.0, "IsWeighted": false}
+          "TypeOfSummaryStatistic": { "StringValue": "vald" },
+          "Statistic": { "DecimalValue": 1200.0, "IsWeighted": false }
         }
       ],
       "UnfilteredCategoryStatistics": [
         {
           "VariableCategory": [
             {
-              "CategoryValue": {"Value": {"StringValue": "1"}},
+              "CategoryValue": { "Value": { "StringValue": "1" } },
               "CategoryStatistic": [
                 {
-                  "TypeOfCategoryStatistic": {"StringValue": "freq"},
-                  "Statistic": {"DecimalValue": 600.0, "IsWeighted": false}
+                  "TypeOfCategoryStatistic": { "StringValue": "freq" },
+                  "Statistic": { "DecimalValue": 600.0, "IsWeighted": false }
                 }
               ]
             }
@@ -156,6 +165,7 @@ fairwddi preflight upgrade tests/fixtures/FSD3562_eng.ddic.xml \
 ```
 
 #### Step 3: Zero-Write Ingestion Plan
+
 Streams the upgraded `.ddi40.jsonl` file, checks existing URNs in `UrnRegistry`, verifies content hashes for drift detection, and plans core entity allocations.
 
 ```bash
@@ -164,7 +174,8 @@ fairwddi ingest plan ./ingest_output/FSD3562_eng.ddi40.jsonl \
   --output-dir ./ingest_output
 ```
 
-*Expected Output:*
+_Expected Output:_
+
 - Emits `./ingest_output/FSD3562_eng.ddi40.ingest.plan.yaml` and `.report.md`.
 - Summary registers planned entity counts:
   - `planned_frequency_rows`: Total categorical frequencies to insert.
@@ -178,13 +189,15 @@ fairwddi ingest plan ./ingest_output/FSD3562_eng.ddi40.jsonl \
 > Archivists can load `./ingest_output/FSD3562_eng.ddi40.ingest.plan.yaml` into the browser-based **Ingest Plan Editor** ([`deliverables/research/ingest_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/ingest_plan_editor.html)) to inspect planned operations, author canonical URN aliases, approve items in bulk, and sign off the review gate prior to PostgreSQL execution.
 
 #### Step 4: Execute Core Ingestion
+
 Executes the approved plan within an atomic PostgreSQL transaction.
 
 ```bash
 fairwddi ingest execute ./ingest_output/FSD3562_eng.ddi40.ingest.plan.yaml
 ```
 
-*What Happens in PostgreSQL:*
+_What Happens in PostgreSQL:_
+
 1. Inserts `StudyUnit` and `Datafile` records.
 2. Creates `Category`, `CodeList`, and `CodeItem` records.
 3. Synthesizes `RepresentedVariable` and `InstanceVariable` cascade records.
@@ -193,13 +206,15 @@ fairwddi ingest execute ./ingest_output/FSD3562_eng.ddi40.ingest.plan.yaml
 6. Creates a single `IngestBatch` receipt row with status `completed`.
 
 #### Step 5: Verification & Inspection
+
 Verify the batch status and entity counts:
 
 ```bash
 fairwddi ingest status 1
 ```
 
-*To Roll Back (Undo):*
+_To Roll Back (Undo):_
+
 ```bash
 fairwddi ingest undo 1
 ```
@@ -246,6 +261,7 @@ print(f"Batch #{res['batch_id']} completed: {res['created_count']} resources cre
 ## 3. Workflow 2: DDI-Codebook Multilingual (Merged fr/en)
 
 ### 3.1 Use Case & Preconditions
+
 - **Input:** Multilingual DDI-Codebook 2.5 XML file (e.g. `cdsp_bilingual.ddic.xml`).
 - **Origin:** Generated by merging language-specific DDI-C files using `dartfx.ddi.ddicodebook.converters.i18n`. Contains parallel language tags (`xml:lang="fr"`, `xml:lang="en"`).
 - **Target:** Preserve ISO 639-1 language dictionaries in PostgreSQL `JSONB`, structure bilingual `QuestionItem` records with interviewer instructions, and populate categorical frequencies.
@@ -265,6 +281,7 @@ flowchart TD
 ### 3.2 Step-by-Step Execution
 
 #### Step 1: Preflight & Language Parity Audit
+
 Verifies that all language streams are intact and checks for missing translations.
 
 ```bash
@@ -273,12 +290,14 @@ fairwddi preflight check cdsp_bilingual.ddic.xml \
   --output-dir ./ingest_output
 ```
 
-*Audit Checks Performed:*
+_Audit Checks Performed:_
+
 - Scans `<titl xml:lang="...">`, `<labl xml:lang="...">`, `<qstnLit xml:lang="...">`, and `<catgry><labl xml:lang="...">`.
 - Identifies languages: `languages: ["fr", "en"]`.
 - Validates that primary question items have corresponding French and English wordings.
 
 #### Step 2: Multilingual DDI-C $\rightarrow$ DDI-L 4.0 Upgrade
+
 The `ddi-toolkit` converter extracts parallel language elements into standard DDI 4 multilingual structures:
 
 ```bash
@@ -290,23 +309,33 @@ fairwddi preflight upgrade cdsp_bilingual.ddic.xml \
   --harmonize-codes
 ```
 
-*Structure Emitted in DDI 4 JSON:*
+_Structure Emitted in DDI 4 JSON:_
+
 ```json
 {
   "$type": "QuestionItem",
   "URN": "urn:ddi:fr.cdsp:qi_Q1_TRUST:1.0.0",
-  "QuestionItemName": [{"String": {"language": "fr", "value": "Q1_TRUST"}}],
+  "QuestionItemName": [{ "String": { "language": "fr", "value": "Q1_TRUST" } }],
   "QuestionText": [
-    {"Content": {"language": "fr", "value": "Avez-vous confiance dans le Parlement ?"}},
-    {"Content": {"language": "en", "value": "Do you trust the Parliament?"}}
+    {
+      "Content": {
+        "language": "fr",
+        "value": "Avez-vous confiance dans le Parlement ?"
+      }
+    },
+    { "Content": { "language": "en", "value": "Do you trust the Parliament?" } }
   ],
   "UserAttributePair": [
-    {"Key": "ddi:interviewer_instructions", "Value": "{\"fr\": \"Montrer la carte 1\", \"en\": \"Show card 1\"}"}
+    {
+      "Key": "ddi:interviewer_instructions",
+      "Value": "{\"fr\": \"Montrer la carte 1\", \"en\": \"Show card 1\"}"
+    }
   ]
 }
 ```
 
 #### Step 3: Plan Direct Ingestion
+
 Inspects multilingual payloads and plans insertions:
 
 ```bash
@@ -316,13 +345,14 @@ fairwddi ingest plan ./ingest_output/cdsp_bilingual.ddi40.json \
 ```
 
 #### Step 4: Execute Direct Ingestion
+
 Executes insertion into core PostgreSQL tables:
 
 ```bash
 fairwddi ingest execute ./ingest_output/cdsp_bilingual.ddi40.json
 ```
 
-*Database Verification in PostgreSQL:*
+_Database Verification in PostgreSQL:_
 All multilingual fields are stored as JSONB objects with ISO 639-1 keys:
 
 ```sql
@@ -341,6 +371,7 @@ SELECT urn, question_text, extended_attributes FROM request_ddi_questionitem LIM
 ## 4. Workflow 3: DDI-Lifecycle 3.3 XML (Study Waves & Question Banks)
 
 ### 4.1 Use Case & Preconditions
+
 - **Input:** Standard DDI-Lifecycle 3.3 XML file (e.g. `sample_cso.ddi33.xml`).
 - **Characteristics:** Deeply nested XML fragments with `<r:URN>`, `<d:QuestionItem>`, `<d:Sequence>`, `<d:QuestionConstruct>`, `<d:Instrument>`, `<l:Category>`, `<l:CodeList>`, and `<p:PhysicalInstance>`.
 - **Target:** Direct low-memory XML streaming (`lxml.iterparse`), resolving control construct questionnaires into `InstrumentQuestion` shortcuts, mapping `PhysicalInstance` to `Datafile`, and importing `VariableStatistics`.
@@ -358,6 +389,7 @@ flowchart TD
 ### 4.2 Step-by-Step Execution
 
 #### Step 1: Preflight Check & Reference Audit
+
 DDI-Lifecycle documents rely heavily on internal and external reference pointers (`<r:Reference>`). Preflight audits ensure no broken reference chains exist before ingestion:
 
 ```bash
@@ -366,12 +398,14 @@ fairwddi preflight check tests/fixtures/sample_cso.ddi33.xml \
   --output-dir ./ingest_output
 ```
 
-*Preflight Audit Output:*
+_Preflight Audit Output:_
+
 - Inspects reference targets: ensures all `<r:ID>` and `<r:URN>` references resolve within the package or exist in `UrnRegistry`.
 - Computes structural metrics: counts of `QuestionItem`, `Category`, `CodeList`, `Instrument`.
 - Evaluates quality metrics: checks for empty labels or missing question wordings.
 
 #### Step 2: Generate Direct Ingestion Plan
+
 DDI-L 3.3 XML does not require pre-conversion; it streams directly into `plan_ingestion()`:
 
 ```bash
@@ -380,20 +414,23 @@ fairwddi ingest plan tests/fixtures/sample_cso.ddi33.xml \
   --output-dir ./ingest_output
 ```
 
-*Flattening Logic Applied During Planning:*
+_Flattening Logic Applied During Planning:_
+
 - Detects `Instrument` and following `ControlConstructScheme` / `Sequence`.
 - Identifies `QuestionConstruct` references pointing to `QuestionItem`.
 - Generates planned `InstrumentQuestion` actions with ordered paths (e.g. `/Instrument/Seq_Main/1`).
 - Extracts `VariableStatistics` fragments and plans bulk frequency rows.
 
 #### Step 3: Execute Ingestion
+
 Streams the XML document into PostgreSQL core tables:
 
 ```bash
 fairwddi ingest execute ./ingest_output/sample_cso.ddi33.ingest.plan.yaml
 ```
 
-*Core Verification:*
+_Core Verification:_
+
 ```sql
 -- Check Instrument-Question routing shortcut
 SELECT i.urn AS instrument, q.urn AS question, iq.path, iq."order"
@@ -427,17 +464,17 @@ fairwddi ingest run tests/fixtures/FSD3562_eng.ddic.xml \
 
 ### Pipeline Execution Flags
 
-| Flag | Type | Description |
-| :--- | :---: | :--- |
-| `file_path` | Argument | Path to incoming DDI-C (`.xml`) or DDI-L (`.xml`, `.json`, `.jsonl`) file. |
-| `--profile` | Option | Import profile name (default: `request`) or path to custom YAML profile. |
-| `--output-dir` | Option | Destination directory for plans, conversion files, and markdown reports. |
-| `--agency` | Option | DDI maintenance agency override for URN minting (e.g. `fr.cdsp`, `fi.fsd`). |
-| `--id-strategy` | Option | ID strategy: `hierarchical`, `content_hash`, `prefix`, `original`, `uuid`, `sequential`. |
-| `--plan-only` | Flag | Generate preflight and ingestion plans without executing database writes. |
-| `--harmonize` | Flag | Automatically run candidate discovery and execute approved harmonizations after ingestion. |
-| `--force-reload` | Flag | Roll back and replace any existing `IngestBatch` matching this file's SHA-256. |
-| `--auto-approve` | Flag | Automatically mark review gates as approved, executing even when warnings exist. |
+| Flag             |   Type   | Description                                                                                |
+| :--------------- | :------: | :----------------------------------------------------------------------------------------- |
+| `file_path`      | Argument | Path to incoming DDI-C (`.xml`) or DDI-L (`.xml`, `.json`, `.jsonl`) file.                 |
+| `--profile`      |  Option  | Import profile name (default: `request`) or path to custom YAML profile.                   |
+| `--output-dir`   |  Option  | Destination directory for plans, conversion files, and markdown reports.                   |
+| `--agency`       |  Option  | DDI maintenance agency override for URN minting (e.g. `fr.cdsp`, `fi.fsd`).                |
+| `--id-strategy`  |  Option  | ID strategy: `hierarchical`, `content_hash`, `prefix`, `original`, `uuid`, `sequential`.   |
+| `--plan-only`    |   Flag   | Generate preflight and ingestion plans without executing database writes.                  |
+| `--harmonize`    |   Flag   | Automatically run candidate discovery and execute approved harmonizations after ingestion. |
+| `--force-reload` |   Flag   | Roll back and replace any existing `IngestBatch` matching this file's SHA-256.             |
+| `--auto-approve` |   Flag   | Automatically mark review gates as approved, executing even when warnings exist.           |
 
 ### Pipeline Return Structure
 
@@ -525,6 +562,7 @@ sequenceDiagram
 ```
 
 #### Detailed Breakdown of Actions:
+
 1. **Initial Creation (Wave 1):**
    - In Wave 1 (2013), all questions are new. Each entity is assigned an action of `create`.
    - The incoming URN is registered as the primary master key in `UrnRegistry`.
@@ -563,13 +601,15 @@ flowchart LR
 ```
 
 #### 1. Elevation (`fairwddi harmonize elevate`)
+
 - When two or more study-specific questions/variables are identified as equivalent across waves, an archivist elevates them into a **brand-new generic resource** with a canonical bank URN (e.g. `urn:ddi:fr.cdsp:QI-trust-institutions:1.0.0`).
 - The generic entity fuses multilingual labels, question texts, and instructions across sources, recalculates SHA-256 content hashes, and registers in `UrnRegistry` with `status = 'elevated'`.
 - All active relational pointers across the DDI cascade (`QuestionVariable`, `InstrumentQuestion`, `RepresentedVariable`, `InstanceVariable`, etc.) are repointed to the new generic URN.
 - The original study URNs are recorded in `URNAlias` (`alias_urn -> canonical_urn`) and marked as `superseded` in `UrnRegistry`.
 
 #### 2. Absorption (`fairwddi harmonize absorb`)
-- When a subsequent survey wave is ingested (e.g. Wave 3) or an archivist discovers an existing study resource corresponding to a previously elevated question, the archivist **absorbs** the new study item into the *already existing* harmonized resource.
+
+- When a subsequent survey wave is ingested (e.g. Wave 3) or an archivist discovers an existing study resource corresponding to a previously elevated question, the archivist **absorbs** the new study item into the _already existing_ harmonized resource.
 - **In-Place Multilingual Fusion:** Any new translations or instructions provided by the absorbed item are dynamically merged into the target entity, and its SHA-256 fingerprint is updated.
 - **Audit Provenance:** `target_obj.extended_attributes` and `UrnRegistry.extended_attributes` record structured absorption provenance (`job_id`, `absorbed_urns`, `note`).
 - **Cascade Repointing & Aliasing:** Foreign keys linking to the absorbed item are updated to point to the canonical target, and an alias is registered in `URNAlias`.
@@ -589,7 +629,8 @@ Archivists can review candidate matches discovered by `fairwddi compare discover
   - `INCLUSIVE_WRITING_VARIANT`: Inclusive/gendered marker variations (e.g., `"confronté(e)"` vs. `"confronté"`). Recommends `elevate` (or `absorb`), preserving alternate phrasings in `extended_attributes` (`type: "wording_variant"`).
   - `PHRASING_VARIANT`: Stylistic or pronominal shifts (e.g., `"Je refuse de répondre"` vs. `"Refuse de répondre"`). Recommends `elevate` (or `absorb`), keeping canonical wording on the primary field and storing alternates in `extended_attributes`.
   - `TYPOGRAPHICAL_VARIANT`: Single-word grammatical or typographical mistakes (e.g., `"Ma mère..."` vs. `"Mon mère..."`). Recommends `elevate` (or `absorb`), retaining the valid wording and dropping `discarded_variants` while preserving the source URN in `URNAlias`.
-  - `SHARED_STEM_GRID`: Questions, categories, or variables sharing a common stem followed by distinct choices/sub-items (e.g., `"Êtes-vous confronté(e) à un ou plusieurs des problèmes suivants concernant votre quartier ? Manque d'espaces verts"` vs. `"... ? Manque de sécurité"`). Recommends `group`, creating or updating a generic `Group` (`group_type="question_grid"`) and recording `ddi:inGroup` in `SemanticRelationship`.
+  - `SHARED_STEM_GRID`: Questions or variables sharing a common stem followed by distinct choices/sub-items (e.g., `"Êtes-vous confronté(e) à un ou plusieurs des problèmes suivants concernant votre quartier ? Manque d'espaces verts"` vs. `"... ? Manque de sécurité"`). Recommends `group`, creating or updating a generic `Group` (`group_type="question_grid"`) and recording `ddi:inGroup` in `SemanticRelationship`.
+  - `SAME_CONCEPT_DIFFERENT_SCALE`: `RepresentedVariable` pairs sharing identical or near-exact labels but backed by divergent response scales (`CodeList`). Action is strictly downgraded to `link_semantic` (`skos:closeMatch`) to protect value domain integrity and prevent accidental aliasing across incompatible response scales.
   - `SYNTACTIC_SIMILAR`: Moderate similarity ($0.85 \le \text{sim} < 0.98$). Recommends `link_semantic` (`skos:closeMatch`).
 - **Declarative Plan Actions (`elevate`, `absorb`, `group`, `alias`, `merge_multilingual`, `link_semantic`, `skip`):**
   - Target-aware planning automatically recommends `absorb` when one resource is already an elevated canonical item (`status = 'elevated'`) and `elevate` when both are study-specific.
@@ -628,6 +669,7 @@ In accordance with the lightweight profile guarantee, packaging envelopes such a
 ### 6.6 Preflight Question Harmonization (`--harmonize-questions`)
 
 During the preflight upgrade stage from DDI-Codebook to DDI-Lifecycle (`fairwddi preflight upgrade`), the `--harmonize-questions` option clusters repeated questions across variables within the same survey before database loading. The preflight report displays exact metrics:
+
 - Raw question count extracted from variables.
 - Duplicates removed.
 - Percentage reduction achieved.

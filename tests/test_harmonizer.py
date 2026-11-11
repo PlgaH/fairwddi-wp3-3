@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from dartfx.ddi.harmonizer import MatchType
 
 from fairwddi.ingest.comparator import discover_candidates
 from fairwddi.ingest.harmonizer import (
@@ -17,6 +18,7 @@ from fairwddi.ingest.harmonizer import (
 )
 from fairwddi.models import (
     Category,
+    CodeItem,
     CodeList,
     ConceptualVariable,
     Group,
@@ -517,7 +519,12 @@ def test_shared_stem_question_grid_detection_and_generic_group(tmp_path: Path) -
     cands = discover_candidates(resource_type="QuestionItem", threshold=0.75)
     assert len(cands) == 1
     cand = cands[0]
-    assert cand["match_type"] == "SHARED_STEM_GRID"
+    assert cand["match_type"] in (
+        MatchType.SHARED_STEM,
+        MatchType.SHARED_STEM_GRID,
+        "SHARED_STEM",
+        "SHARED_STEM_GRID",
+    )
     assert cand["recommended_action"] == "group"
     assert cand["requires_review"] is True
     assert cand["details"]["group_type"] == "question_grid"
@@ -690,3 +697,92 @@ def test_phrasing_inclusive_and_typo_variants_in_plan(tmp_path: Path) -> None:
     assert undo_res["reverted_sub_jobs"] == 3
     assert QuestionItem.objects.filter(urn=q_inc.urn).exists() is True
     assert Category.objects.filter(urn=cat_mon.urn).exists() is True
+
+
+@pytest.mark.django_db
+def test_represented_variable_codelist_aware_comparison_and_downgrade(tmp_path: Path) -> None:
+    """Test that RepresentedVariable comparisons verify CodeList compatibility."""
+    # 1. Setup two CodeLists with distinct response scales
+    cl_5pt = CodeList.objects.create(
+        urn="urn:ddi:fr.cdsp:cl_scale_5pt:1.0.0",
+        name=[{"value": "cl_scale_5pt"}],
+    )
+    cl_10pt = CodeList.objects.create(
+        urn="urn:ddi:fr.cdsp:cl_scale_10pt:1.0.0",
+        name=[{"value": "cl_scale_10pt"}],
+    )
+    cl_5pt_dup = CodeList.objects.create(
+        urn="urn:ddi:fr.cdsp:cl_scale_5pt_dup:1.0.0",
+        name=[{"value": "cl_scale_5pt_dup"}],
+    )
+
+    cat_yes = Category.objects.create(
+        urn="urn:ddi:fr.cdsp:cat_yes_test:1.0.0",
+        name=[{"value": "yes"}],
+        label={"fr": "Oui"},
+    )
+    cat_no = Category.objects.create(
+        urn="urn:ddi:fr.cdsp:cat_no_test:1.0.0",
+        name=[{"value": "no"}],
+        label={"fr": "Non"},
+    )
+
+    # cl_5pt and cl_5pt_dup share identical code items
+    CodeItem.objects.create(code_list=cl_5pt, code_value="1", category=cat_yes, order=1)
+    CodeItem.objects.create(code_list=cl_5pt, code_value="2", category=cat_no, order=2)
+    CodeItem.objects.create(code_list=cl_5pt_dup, code_value="1", category=cat_yes, order=1)
+    CodeItem.objects.create(code_list=cl_5pt_dup, code_value="2", category=cat_no, order=2)
+
+    # cl_10pt has different code items
+    CodeItem.objects.create(code_list=cl_10pt, code_value="10", category=cat_yes, order=1)
+
+    # 2. Setup RepresentedVariables:
+    # rv_a (5pt) vs rv_b (10pt): identical label, divergent CodeList -> SAME_CONCEPT_DIFFERENT_SCALE
+    rv_a = RepresentedVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2014.rv_trust:1.0.0",
+        name=[{"value": "rv_trust_2014"}],
+        label={"fr": "Confiance dans le parlement national"},
+        code_list=cl_5pt,
+    )
+    rv_b = RepresentedVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2015.rv_trust:1.0.0",
+        name=[{"value": "rv_trust_2015"}],
+        label={"fr": "Confiance dans le parlement national"},
+        code_list=cl_10pt,
+    )
+    # rv_c (5pt_dup): identical label, compatible CodeList with rv_a -> FACET_EXACT
+    rv_c = RepresentedVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:elipss.2016.rv_trust:1.0.0",
+        name=[{"value": "rv_trust_2016"}],
+        label={"fr": "Confiance dans le parlement national"},
+        code_list=cl_5pt_dup,
+    )
+
+    cands = discover_candidates(resource_type="RepresentedVariable", threshold=0.75)
+    # Filter candidates for (rv_a, rv_b) and (rv_a, rv_c)
+    cand_ab = next(c for c in cands if {c["source_urn"], c["target_urn"]} == {rv_a.urn, rv_b.urn})
+    cand_ac = next(c for c in cands if {c["source_urn"], c["target_urn"]} == {rv_a.urn, rv_c.urn})
+
+    # rv_a vs rv_b: Divergent scale -> link_semantic
+    assert cand_ab["match_type"] in (
+        MatchType.SAME_CONCEPT_DIVERGENT_DOMAIN,
+        MatchType.SAME_CONCEPT_DIFFERENT_SCALE,
+        "SAME_CONCEPT_DIVERGENT_DOMAIN",
+        "SAME_CONCEPT_DIFFERENT_SCALE",
+    )
+    assert cand_ab["recommended_action"] == "link_semantic"
+    assert cand_ab["requires_review"] is True
+    assert cand_ab["details"]["codelist_status"] == "divergent"
+    assert "divergent response scales" in cand_ab["details"]["note"]
+
+    # rv_a vs rv_c: Compatible scale -> alias
+    assert cand_ac["match_type"] == "FACET_EXACT"
+    assert cand_ac["recommended_action"] == "alias"
+    assert cand_ac["requires_review"] is False
+    assert cand_ac["details"]["codelist_status"] == "identical_code_items"
+
+    # Plan markdown includes divergent scale section
+    plan = plan_harmonization(resource_type="RepresentedVariable", output_dir=tmp_path)
+    md = plan.to_markdown()
+    assert "Divergent Response Scale Candidates" in md
+    assert "cl_scale_10pt" in md

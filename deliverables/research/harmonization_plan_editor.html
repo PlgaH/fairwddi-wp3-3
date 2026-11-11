@@ -1150,8 +1150,10 @@
           <div class="filter-chips">
             <span class="chip active" onclick="setFilterMatch('all', this)">All Matches</span>
             <span class="chip chip-emerald" onclick="setFilterMatch('FACET_EXACT', this)">FACET_EXACT</span>
-            <span class="chip chip-indigo" onclick="setFilterMatch('SHARED_STEM_GRID', this)">Question Grids (STEM)</span>
+            <span class="chip chip-indigo" onclick="setFilterMatch('SHARED_STEM', this)">Shared Stems (Grids)</span>
+            <span class="chip chip-amber" onclick="setFilterMatch('DIVERGENT_DOMAIN', this)">Divergent Domains</span>
             <span class="chip chip-teal" onclick="setFilterMatch('VARIANTS', this)">Variants (Inclusive/Phrasing)</span>
+            <span class="chip chip-cyan" onclick="setFilterMatch('MULTILINGUAL_OVERLAP', this)">Multilingual</span>
             <span class="chip" onclick="setFilterMatch('SYNTACTIC_SIMILAR', this)">Syntactic / Fuzzy</span>
           </div>
 
@@ -1632,8 +1634,10 @@
       return actions.filter(a => {
         // Match Filter
         if (filterMatch === "FACET_EXACT" && !(a.match_type === "FACET_EXACT" || a.match_type === "EXACT" || a.confidence >= 0.95)) return false;
-        if (filterMatch === "SHARED_STEM_GRID" && !(a.match_type === "SHARED_STEM_GRID" || a.action === "group")) return false;
+        if ((filterMatch === "SHARED_STEM" || filterMatch === "SHARED_STEM_GRID") && !(a.match_type === "SHARED_STEM" || a.match_type === "SHARED_STEM_GRID" || a.action === "group")) return false;
+        if ((filterMatch === "DIVERGENT_DOMAIN" || filterMatch === "SAME_CONCEPT_DIVERGENT_DOMAIN") && !(a.match_type === "SAME_CONCEPT_DIVERGENT_DOMAIN" || a.match_type === "SAME_CONCEPT_DIFFERENT_SCALE")) return false;
         if (filterMatch === "VARIANTS" && !isVariantMatchType(a.match_type)) return false;
+        if (filterMatch === "MULTILINGUAL_OVERLAP" && a.match_type !== "MULTILINGUAL_OVERLAP") return false;
         if (filterMatch === "SYNTACTIC_SIMILAR" && a.match_type !== "SYNTACTIC_SIMILAR") return false;
 
         // Action Filter
@@ -1770,8 +1774,14 @@
 
     function getMatchBadgeHtml(matchType, confVal) {
       const mType = matchType || (confVal >= 0.95 ? 'FACET_EXACT' : 'SYNTACTIC_SIMILAR');
-      if (mType === 'SHARED_STEM_GRID') {
+      if (mType === 'SHARED_STEM_GRID' || mType === 'SHARED_STEM') {
         return `<span class="match-badge match-grid">⊞ STEM GRID</span>`;
+      }
+      if (mType === 'SAME_CONCEPT_DIVERGENT_DOMAIN' || mType === 'SAME_CONCEPT_DIFFERENT_SCALE') {
+        return `<span class="match-badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);" title="${escapeHtml(mType)}">⚡ DIVERGENT DOMAIN</span>`;
+      }
+      if (mType === 'MULTILINGUAL_OVERLAP') {
+        return `<span class="match-badge" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.4);" title="${escapeHtml(mType)}">🌐 MULTILINGUAL</span>`;
       }
       if (isVariantMatchType(mType)) {
         const shortName = mType === 'INCLUSIVE_WRITING_VARIANT' ? 'INCLUSIVE VAR' :
@@ -1826,12 +1836,21 @@
 
         // Preview snippet tailored for latest features
         let previewHtml = "";
-        if (item.action === 'group' || item.match_type === 'SHARED_STEM_GRID') {
+        if (item.action === 'group' || item.match_type === 'SHARED_STEM_GRID' || item.match_type === 'SHARED_STEM') {
           const stem = item.details?.shared_stem || item.details?.group_name || 'Question Grid';
           previewHtml = `
             <div style="display: flex; flex-direction: column; gap: 2px;">
-              <span style="font-weight: 600; color: #a5b4fc; font-size: 11px;">⊞ Grid: ${escapeHtml(stem).substring(0, 48)}...</span>
+              <span style="font-weight: 600; color: #a5b4fc; font-size: 11px;">⊞ Stem: ${escapeHtml(stem).substring(0, 48)}...</span>
               <span style="font-size: 10px; color: var(--text-dim);">Sub-items: "${escapeHtml(item.details?.sub_item_a || '')}" / "${escapeHtml(item.details?.sub_item_b || '')}"</span>
+            </div>
+          `;
+        } else if (item.match_type === 'SAME_CONCEPT_DIVERGENT_DOMAIN' || item.match_type === 'SAME_CONCEPT_DIFFERENT_SCALE') {
+          const srcCl = item.details?.source_codelist_urn || 'Uncoded';
+          const tgtCl = item.details?.target_codelist_urn || 'Uncoded';
+          previewHtml = `
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-weight: 600; color: #fbbf24; font-size: 11px;">⚡ Same Concept, Divergent Domain</span>
+              <span style="font-size: 10px; color: var(--text-dim);">CodeLists: <code>${escapeHtml(srcCl.split(':').slice(-2, -1)[0] || srcCl)}</code> &ne; <code>${escapeHtml(tgtCl.split(':').slice(-2, -1)[0] || tgtCl)}</code></span>
             </div>
           `;
         } else if (item.details?.canonical_text || isVariantMatchType(item.match_type) || item.action === 'elevate' || item.action === 'absorb') {
@@ -1914,8 +1933,8 @@
 
       let featureInspectorHtml = "";
 
-      // 1. Question Grid Feature Inspector (action: group or match_type: SHARED_STEM_GRID)
-      if (item.action === 'group' || item.match_type === 'SHARED_STEM_GRID') {
+      // 1. Question Grid Feature Inspector (action: group or match_type: SHARED_STEM / SHARED_STEM_GRID)
+      if (item.action === 'group' || item.match_type === 'SHARED_STEM_GRID' || item.match_type === 'SHARED_STEM') {
         const sharedStem = item.details.shared_stem || "";
         const subA = item.details.sub_item_a || "";
         const subB = item.details.sub_item_b || "";
@@ -1958,6 +1977,36 @@
                 <input type="text" class="field-input" id="ins-grid-urn" value="${escapeHtml(gUrn)}" placeholder="Auto-generated if empty" style="font-family: var(--font-mono); font-size: 11px;" />
               </div>
             </div>
+          </div>
+        `;
+      }
+
+      // 2. Divergent Value Domain / Scale Feature Inspector
+      else if (item.match_type === 'SAME_CONCEPT_DIVERGENT_DOMAIN' || item.match_type === 'SAME_CONCEPT_DIFFERENT_SCALE') {
+        const srcCl = item.details?.source_codelist_urn || '(Not coded)';
+        const tgtCl = item.details?.target_codelist_urn || '(Not coded)';
+        const clStatus = item.details?.codelist_status || 'divergent';
+        const note = item.details?.note || 'RepresentedVariables share semantics but use divergent response scales.';
+        featureInspectorHtml = `
+          <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+            <div style="font-size: 13px; font-weight: 700; color: #fbbf24; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>⚡ Divergent Value Domain / Response Scale</span>
+              </div>
+              <span class="badge" style="background: rgba(245, 158, 11, 0.25); color: #fde68a;">Action: link_semantic</span>
+            </div>
+            <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px;">${escapeHtml(note)}</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
+                <span style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Source CodeList URN</span>
+                <div style="font-size: 11px; font-family: var(--font-mono); color: #fde68a; margin-top: 4px; word-break: break-all;">${escapeHtml(srcCl)}</div>
+              </div>
+              <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
+                <span style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Target CodeList URN</span>
+                <div style="font-size: 11px; font-family: var(--font-mono); color: #fde68a; margin-top: 4px; word-break: break-all;">${escapeHtml(tgtCl)}</div>
+              </div>
+            </div>
+            <div style="margin-top: 8px; font-size: 10px; color: var(--text-dim);">CodeList Compatibility: <strong style="color: #fbbf24;">${escapeHtml(clStatus)}</strong></div>
           </div>
         `;
       }

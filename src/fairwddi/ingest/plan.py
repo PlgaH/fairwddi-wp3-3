@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
+from dartfx.ddi.harmonizer import MatchType
 from pydantic import BaseModel, Field
 
 
@@ -71,7 +72,7 @@ class PlanActionItem(BaseModel):
     source_urn: str
     target_urn: str | None = None
     confidence: float = 1.0
-    match_type: str | None = None
+    match_type: MatchType | str | None = None
     requires_review: bool = False
     approved: bool = True
     details: dict[str, Any] = Field(default_factory=dict)
@@ -281,6 +282,10 @@ class IngestPlan(BaseModel):
             for a in self.actions
             if a.match_type
             in (
+                MatchType.NEAR_EXACT.value,
+                MatchType.INCLUSIVE_WRITING_VARIANT.value,
+                MatchType.PHRASING_VARIANT.value,
+                MatchType.TYPOGRAPHICAL_VARIANT.value,
                 "NEAR_EXACT",
                 "INCLUSIVE_WRITING_VARIANT",
                 "PHRASING_VARIANT",
@@ -313,7 +318,16 @@ class IngestPlan(BaseModel):
                 )
 
         group_actions = [
-            a for a in self.actions if a.action == "group" or a.match_type == "SHARED_STEM_GRID"
+            a
+            for a in self.actions
+            if a.action == "group"
+            or a.match_type
+            in (
+                MatchType.SHARED_STEM.value,
+                "SHARED_STEM",
+                MatchType.SHARED_STEM_GRID.value,
+                "SHARED_STEM_GRID",
+            )
         ]
         if group_actions:
             lines.extend(
@@ -341,6 +355,43 @@ class IngestPlan(BaseModel):
                 lines.append(
                     f"| `{act.id}` | `{g_type}` | `{act.resource_type}` | "
                     f"`{act.source_urn}` | {tgt} | {stem} |"
+                )
+
+        scale_divergent_actions = [
+            a
+            for a in self.actions
+            if a.match_type
+            in (
+                MatchType.SAME_CONCEPT_DIVERGENT_DOMAIN.value,
+                "SAME_CONCEPT_DIVERGENT_DOMAIN",
+                MatchType.SAME_CONCEPT_DIFFERENT_SCALE.value,
+                "SAME_CONCEPT_DIFFERENT_SCALE",
+            )
+        ]
+        if scale_divergent_actions:
+            lines.extend(
+                [
+                    "",
+                    "## Divergent Response Scale Candidates (Review Flagged)",
+                    "",
+                    "> [!WARNING]",
+                    (
+                        f"> **{len(scale_divergent_actions):,} candidate pairs** share variable "
+                        "labels but use divergent response scales (`CodeList`). Action is "
+                        "downgraded to `link_semantic` to preserve value domain integrity."
+                    ),
+                    "",
+                    "| ID | Type | Source URN | Target URN | Source CodeList | Target CodeList |",
+                    "| :--- | :--- | :--- | :--- | :--- | :--- |",
+                ]
+            )
+            for act in scale_divergent_actions[:50]:
+                tgt = f"`{act.target_urn}`" if act.target_urn else "-"
+                src_cl = act.details.get("source_codelist_urn") or "-"
+                tgt_cl = act.details.get("target_codelist_urn") or "-"
+                lines.append(
+                    f"| `{act.id}` | `{act.resource_type}` | `{act.source_urn}` | {tgt} | "
+                    f"`{src_cl}` | `{tgt_cl}` |"
                 )
 
         if self.actions:

@@ -1,6 +1,7 @@
 """Stage 3a (Comparison & Discovery): Cross-survey candidate discovery and similarity comparison.
 
-Evaluates ReQuest resources (Category, CodeList, QuestionItem, RepresentedVariable) across tiers:
+Evaluates ReQuest resources (Category, CodeList, QuestionItem, RepresentedVariable) across tiers
+delegating string algorithms, stem detection, and variant classification to dartfx.ddi.harmonizer:
 1. EXACT (1.00): Identical content hash.
 2. FACET_EXACT (0.95): Identical normalized label or question_text hash across present languages.
 3. MULTILINGUAL_OVERLAP (0.92): Exact match in at least one shared language with complementary
@@ -9,102 +10,55 @@ Evaluates ReQuest resources (Category, CodeList, QuestionItem, RepresentedVariab
 5. INCLUSIVE_WRITING_VARIANT (0.98): Identical after stripping inclusive gender/plural markers.
 6. TYPOGRAPHICAL_VARIANT (0.95): Single-word typographical or grammatical error variant.
 7. PHRASING_VARIANT (0.92 - 0.94): Stylistic or pronominal phrasing variation.
-8. SHARED_STEM_GRID (0.88): Shared question/category stem followed by distinct sub-items/choices.
-9. SUBSTANTIVE_PERMUTATION (0.88): CodeLists sharing identical substantive categories.
-10. CATEGORIES_EXACT_CODES_DIFFERENT (0.85): CodeLists with identical categories, different codes.
-11. SYNTACTIC_SIMILAR (0.75 - 0.91): General normalized string similarity on label/question_text.
+8. SHARED_STEM / SHARED_STEM_GRID (0.88): Shared prompt or stem with distinct sub-items.
+9. SAME_CONCEPT_DIVERGENT_DOMAIN / SAME_CONCEPT_DIFFERENT_SCALE (0.88): Equivalent concept/label
+   with divergent CodeLists. Action downgraded to link_semantic.
+10. SUBSTANTIVE_PERMUTATION (0.88): CodeLists sharing identical substantive categories.
+11. CATEGORIES_EXACT_CODES_DIFFERENT (0.85): CodeLists with identical categories, different codes.
+12. SYNTACTIC_SIMILAR (0.75 - 0.91): General normalized string similarity on label/question_text.
 """
 
 from __future__ import annotations
 
 import difflib
-import os
-import re
 import uuid
 from pathlib import Path
 from typing import Any
 
+from dartfx.ddi.harmonizer import (
+    MatchType,
+    TextNormalizer,
+    TextVariantComparator,
+    compare_multilingual_texts,
+    detect_shared_stem,
+)
+
 from fairwddi.ingest.plan import IngestPlan, PlanActionItem, ReviewGate
-from fairwddi.utils.normalize_string import normalize_string
 
-_INCLUSIVE_PATTERN = re.compile(
-    r"\(\s*(?:e|es|s|ne|nes|ve|ves|trice|trices|ère|ères|se|ses|x)\s*\)"
-    r"|[\u00b7\u22c5\.]\s*(?:e|es|s|ne|nes)\b",
-    re.IGNORECASE,
-)
-
-_LEADING_PRONOUN_PATTERN = re.compile(
-    r"^(?:je\s+|j['’]\s*|moi\s*,?\s+|nous\s+|on\s+|i\s+|we\s+)",
-    re.IGNORECASE,
-)
-
-_FEMININE_NOUNS_AFTER_MON = {
-    "mère",
-    "mere",
-    "soeur",
-    "sœur",
-    "fille",
-    "femme",
-    "tante",
-    "grand-mère",
-    "grand-mere",
-    "famille",
-    "maison",
-    "voiture",
-    "santé",
-    "sante",
-    "vie",
-}
+_normalizer = TextNormalizer()
 
 
 def _raw_lang_dict(d: Any) -> dict[str, str]:
     """Extract language-keyed dictionary preserving original casing (with whitespace normalized)."""
-    if not d:
-        return {}
-    if isinstance(d, list):
-        res: dict[str, str] = {}
-        for item in d:
-            if isinstance(item, dict):
-                lang = (
-                    item.get("lang")
-                    or item.get("@lang")
-                    or item.get("language")
-                    or item.get("@language")
-                    or "en"
-                )
-                val = item.get("value") or item.get("@value") or item.get("text") or ""
-                cleaned = normalize_string(str(val))
-                if cleaned:
-                    res[str(lang).lower()] = cleaned
-        return res
-    if isinstance(d, dict):
-        return {
-            str(k).lower(): normalize_string(str(v)) for k, v in d.items() if v and str(v).strip()
-        }
-    return {}
+    return TextNormalizer.extract_multilingual_dict(d, lowercase=False)
 
 
 def _norm_lang_dict(d: Any) -> dict[str, str]:
-    return {k: v.lower() for k, v in _raw_lang_dict(d).items()}
+    return TextNormalizer.extract_multilingual_dict(d, lowercase=True)
 
 
 def _normalize_text_loose(text: str) -> str:
     """Strip trailing/leading punctuation, quotes, and French punctuation spacing."""
-    cleaned = normalize_string(text, french_punctuation=False).lower()
-    cleaned = re.sub(r"\s+([?!:;])", r"\1", cleaned)
-    cleaned = re.sub(r"[\s\?\!\.\:\;\,\…\"\'\«\»]+$", "", cleaned)
-    cleaned = re.sub(r"^[\s\?\!\.\:\;\,\…\"\'\«\»]+", "", cleaned)
-    return " ".join(cleaned.split())
+    return _normalizer.normalize_loose(text, lang="fr")
 
 
 def _strip_inclusive_markers(text: str) -> str:
     """Remove parenthetical or midpoint French inclusive gender/plural markers."""
-    cleaned = _INCLUSIVE_PATTERN.sub("", text)
-    return " ".join(cleaned.split())
+    return _normalizer.strip_inclusive_markers(text, lang="fr")
 
 
 def _has_inclusive_markers(text: str) -> bool:
-    return bool(_INCLUSIVE_PATTERN.search(text))
+    return _normalizer.has_inclusive_markers(text, lang="fr")
 
 
 def _text_similarity(a: str, b: str) -> float:
@@ -121,67 +75,14 @@ def _detect_shared_stem(
     min_stem_len: int = 20,
 ) -> dict[str, Any] | None:
     """Detect if two strings share a common question/category stem and distinct sub-items."""
-    if not raw_a or not raw_b:
-        return None
-
-    # 1. Explicit delimiter split (e.g. "... concernant votre quartier ? Manque d'espaces verts")
-    delim_re = re.compile(r"^(.{20,}?[\?\:\;\—\–])\s+(.+)$")
-    ma = delim_re.match(raw_a.strip())
-    mb = delim_re.match(raw_b.strip())
-    if ma and mb:
-        stem_a, sub_a = ma.group(1).strip(), ma.group(2).strip()
-        stem_b, sub_b = mb.group(1).strip(), mb.group(2).strip()
-        stem_sim = _text_similarity(
-            _strip_inclusive_markers(_normalize_text_loose(stem_a)),
-            _strip_inclusive_markers(_normalize_text_loose(stem_b)),
-        )
-        sub_sim = _text_similarity(
-            _normalize_text_loose(sub_a),
-            _normalize_text_loose(sub_b),
-        )
-        if stem_sim >= 0.90 and sub_a and sub_b and sub_sim < 0.80:
-            canonical_stem = stem_a if len(stem_a) >= len(stem_b) else stem_b
-            return {
-                "group_type": "question_grid",
-                "shared_stem": canonical_stem,
-                "sub_item_a": sub_a,
-                "sub_item_b": sub_b,
-                "stem_similarity": stem_sim,
-                "stem_ratio": round(len(canonical_stem) / max(len(raw_a), len(raw_b)), 4),
-            }
-
-    # 2. Common prefix on word boundaries without shared trailing suffix
-    norm_a = raw_a.strip()
-    norm_b = raw_b.strip()
-    common_pref = os.path.commonprefix([norm_a.lower(), norm_b.lower()])
-    if len(common_pref) >= max(35, min_stem_len):
-        # Snap back to last whitespace or punctuation boundary
-        boundary = re.search(r"^(.*[\s\?\:\;\-\—\–])", common_pref)
-        if boundary:
-            cut = len(boundary.group(1))
-            stem = norm_a[:cut].strip()
-            sub_a = norm_a[cut:].strip()
-            sub_b = norm_b[cut:].strip()
-            common_suff = os.path.commonprefix([sub_a.lower()[::-1], sub_b.lower()[::-1]])
-            if (
-                len(stem) >= 30
-                and sub_a
-                and sub_b
-                and len(common_suff) < 5
-                and len(stem) / max(len(norm_a), len(norm_b)) >= 0.55
-                and _text_similarity(_normalize_text_loose(sub_a), _normalize_text_loose(sub_b))
-                < 0.80
-            ):
-                return {
-                    "group_type": "question_grid",
-                    "shared_stem": stem,
-                    "sub_item_a": sub_a,
-                    "sub_item_b": sub_b,
-                    "stem_similarity": 1.0,
-                    "stem_ratio": round(len(stem) / max(len(norm_a), len(norm_b)), 4),
-                }
-
-    return None
+    res = detect_shared_stem(
+        raw_a,
+        raw_b,
+        min_stem_len=min_stem_len,
+        context="question_grid",
+        lang="fr",
+    )
+    return res.model_dump() if res is not None else None
 
 
 def _detect_wording_or_typo_variant(
@@ -191,196 +92,26 @@ def _detect_wording_or_typo_variant(
     best_sim: float,
 ) -> tuple[str, float, dict[str, Any]] | None:
     """Classify stylistic/pronominal phrasing variants vs grammatical/typographical errors."""
-    loose_a = _normalize_text_loose(raw_a)
-    loose_b = _normalize_text_loose(raw_b)
-
-    # 1. Leading pronoun / stylistic shift (e.g., "Je refuse de répondre" vs "Refuse de répondre")
-    stripped_pro_a = _LEADING_PRONOUN_PATTERN.sub("", loose_a).strip()
-    stripped_pro_b = _LEADING_PRONOUN_PATTERN.sub("", loose_b).strip()
-    if stripped_pro_a == stripped_pro_b and stripped_pro_a:
-        canonical = raw_a if len(raw_a) >= len(raw_b) else raw_b
-        variant = raw_b if canonical == raw_a else raw_a
-        return (
-            "PHRASING_VARIANT",
-            0.94,
-            {
-                "variant_type": "stylistic",
-                "canonical_text": {lang: canonical},
-                "preserved_variants": [variant],
-                "discarded_variants": [],
-            },
-        )
-
-    # 2. Single-token typo or grammatical error in multi-word text
-    #    e.g., "Ma mère était déjà décédée à l'époque" vs "Mon mère était déjà décédée à l'époque"
-    words_a = loose_a.split()
-    words_b = loose_b.split()
-    if len(words_a) == len(words_b) and len(words_a) >= 4:
-        diffs = [
-            (idx, wa, wb)
-            for idx, (wa, wb) in enumerate(zip(words_a, words_b, strict=False))
-            if wa != wb
-        ]
-        if len(diffs) == 1:
-            idx, wa, wb = diffs[0]
-            # Exclude single-letter codes/grades (e.g. "catégorie c" vs "catégorie b") or numbers
-            if len(wa) >= 2 and len(wb) >= 2 and not wa.isdigit() and not wb.isdigit():
-                word_sim = _text_similarity(wa, wb)
-                # Either high word similarity (typo like vancances/vacances) or grammar (ma/mon)
-                is_possessive_pair = {wa, wb} <= {"ma", "mon", "mes", "ta", "ton", "sa", "son"}
-                if word_sim >= 0.65 or is_possessive_pair:
-                    next_word = words_a[idx + 1] if idx + 1 < len(words_a) else ""
-                    # Determine which one is the grammatical error vs canonical
-                    if is_possessive_pair and next_word in _FEMININE_NOUNS_AFTER_MON:
-                        bad_is_a = wa in ("mon", "ton", "son")
-                    else:
-                        # Default: target (raw_b) is canonical unless raw_a is known clean
-                        bad_is_a = True
-                    canonical = raw_b if bad_is_a else raw_a
-                    discarded = raw_a if bad_is_a else raw_b
-                    return (
-                        "TYPOGRAPHICAL_VARIANT",
-                        0.96,
-                        {
-                            "variant_type": "typographical_or_grammar",
-                            "divergence": [wa, wb],
-                            "canonical_text": {lang: canonical},
-                            "preserved_variants": [],
-                            "discarded_variants": [discarded],
-                        },
-                    )
-
+    cmp = TextVariantComparator(normalizer=_normalizer, language=lang)
+    res = cmp.compare(raw_a, raw_b)
+    if res is not None:
+        meta = dict(res.metadata)
+        if "canonical_text" in meta and isinstance(meta["canonical_text"], str):
+            meta["canonical_text"] = {lang: meta["canonical_text"]}
+        return res.match_type.value, res.score, meta
     return None
 
 
 def _compare_multilingual_texts(
     ml_a: dict[str, str] | list[Any] | None,
     ml_b: dict[str, str] | list[Any] | None,
+    threshold: float = 0.75,
 ) -> tuple[str | None, float, dict[str, Any]]:
     """Compare two multilingual text dictionaries and return (match_type, confidence, details)."""
-    raw_a = _raw_lang_dict(ml_a)
-    raw_b = _raw_lang_dict(ml_b)
-    na = {k: v.lower() for k, v in raw_a.items()}
-    nb = {k: v.lower() for k, v in raw_b.items()}
-    if not na or not nb:
+    res = compare_multilingual_texts(ml_a, ml_b, threshold=threshold, normalizer=_normalizer)
+    if res.match_type == MatchType.DISTINCT or res.score < threshold:
         return None, 0.0, {}
-
-    if na == nb:
-        return "FACET_EXACT", 0.95, {"languages": list(na.keys())}
-
-    shared_langs = sorted(set(na.keys()) & set(nb.keys()))
-    if shared_langs:
-        exact_shared = [lng for lng in shared_langs if na[lng] == nb[lng]]
-        if exact_shared:
-            new_langs_in_a = sorted(set(na.keys()) - set(nb.keys()))
-            new_langs_in_b = sorted(set(nb.keys()) - set(na.keys()))
-            return (
-                "MULTILINGUAL_OVERLAP",
-                0.92,
-                {
-                    "matched_languages": exact_shared,
-                    "source_extra_languages": new_langs_in_a,
-                    "target_extra_languages": new_langs_in_b,
-                },
-            )
-
-        best_lang = max(shared_langs, key=lambda lng: _text_similarity(na[lng], nb[lng]))
-        best_sim = _text_similarity(na[best_lang], nb[best_lang])
-        ra = raw_a[best_lang]
-        rb = raw_b[best_lang]
-
-        # 1. Loose punctuation equivalence (e.g., trailing '?' or French spacing before '?')
-        loose_a = _normalize_text_loose(ra)
-        loose_b = _normalize_text_loose(rb)
-        if loose_a and loose_a == loose_b:
-            # Prefer version without stray trailing '?' if one has it and the other doesn't,
-            # or keep target by default
-            canonical = ra if rb.endswith("?") and not ra.endswith("?") else rb
-            discarded = rb if canonical == ra else ra
-            return (
-                "NEAR_EXACT",
-                0.98,
-                {
-                    "shared_languages": shared_langs,
-                    "similarity": best_sim,
-                    "variant_type": "punctuation",
-                    "punctuation_variant": True,
-                    "canonical_text": {best_lang: canonical},
-                    "preserved_variants": [],
-                    "discarded_variants": [discarded],
-                },
-            )
-
-        # 2. Inclusive writing variant (e.g., "confronté(e)" vs "confronté")
-        inc_a = _strip_inclusive_markers(loose_a)
-        inc_b = _strip_inclusive_markers(loose_b)
-        if inc_a and inc_a == inc_b:
-            canonical = ra if _has_inclusive_markers(ra) else rb
-            variant = rb if canonical == ra else ra
-            return (
-                "INCLUSIVE_WRITING_VARIANT",
-                0.98,
-                {
-                    "shared_languages": shared_langs,
-                    "similarity": best_sim,
-                    "variant_type": "inclusive_writing",
-                    "canonical_text": {best_lang: canonical},
-                    "preserved_variants": [variant],
-                    "discarded_variants": [],
-                },
-            )
-
-        # 3. Shared-stem question grid / battery detection
-        stem_info = _detect_shared_stem(ra, rb)
-        if stem_info is not None:
-            return (
-                "SHARED_STEM_GRID",
-                0.88,
-                {
-                    "shared_languages": shared_langs,
-                    "similarity": best_sim,
-                    **stem_info,
-                },
-            )
-
-        # 4. Stylistic phrasing variant or single-word grammatical/typo error
-        variant_match = _detect_wording_or_typo_variant(ra, rb, best_lang, best_sim)
-        if variant_match is not None:
-            v_type, v_conf, v_details = variant_match
-            return (
-                v_type,
-                v_conf,
-                {
-                    "shared_languages": shared_langs,
-                    "similarity": best_sim,
-                    **v_details,
-                },
-            )
-
-        # 5. High-similarity NEAR_EXACT (>= 0.98)
-        if best_sim >= 0.98:
-            return (
-                "NEAR_EXACT",
-                round(max(0.96, best_sim), 4),
-                {
-                    "shared_languages": shared_langs,
-                    "similarity": best_sim,
-                    "variant_type": "near_exact",
-                    "canonical_text": {best_lang: rb},
-                    "preserved_variants": [],
-                    "discarded_variants": [ra],
-                },
-            )
-
-        # 6. General SYNTACTIC_SIMILAR (0.75 <= best_sim < 0.98)
-        if best_sim >= 0.75:
-            return (
-                "SYNTACTIC_SIMILAR",
-                round(min(0.91, best_sim), 4),
-                {"shared_languages": shared_langs, "similarity": best_sim},
-            )
-
-    return None, 0.0, {}
+    return res.match_type.value, res.score, dict(res.metadata)
 
 
 def _is_record_elevated(urn: str, ext_attrs: Any, elevated_urns: set[str]) -> bool:
@@ -505,6 +236,10 @@ def _load_resource_records(
                 and not any(q_low in str(v).lower() for v in text_dict.values())
             ):
                 continue
+            cl_hash = None
+            if rv.code_list:
+                cl_hashes = rv.code_list.hashes or {}
+                cl_hash = cl_hashes.get("codes") or cl_hashes.get("content")
             records.append(
                 {
                     "urn": rv.urn,
@@ -512,6 +247,7 @@ def _load_resource_records(
                     "name": rv.name,
                     "text": text_map,
                     "codelist_urn": rv.code_list_id,
+                    "codelist_hash": cl_hash,
                     "question_urns": q_urns,
                     "content_hash": (rv.hashes or {}).get("content"),
                     "is_elevated": _is_record_elevated(
@@ -523,10 +259,89 @@ def _load_resource_records(
     return records
 
 
+def _get_codelist_code_pairs(
+    cl_urn: str, cache: dict[str, list[tuple[str, str]]]
+) -> list[tuple[str, str]]:
+    """Retrieve normalized (code_value, category_label) pairs for a CodeList URN."""
+    if cl_urn in cache:
+        return cache[cl_urn]
+    from fairwddi.models import CodeItem
+
+    items = list(
+        CodeItem.objects.filter(code_list_id=cl_urn)
+        .select_related("category")
+        .order_by("order", "code_value")
+    )
+    pairs: list[tuple[str, str]] = []
+    for ci in items:
+        lbl = ""
+        if ci.category:
+            lbl_dict = _raw_lang_dict(ci.category.label)
+            lbl = next(iter(lbl_dict.values()), ci.category.urn if ci.category else "")
+        pairs.append((str(ci.code_value).strip(), str(lbl).strip().lower()))
+    cache[cl_urn] = pairs
+    return pairs
+
+
+def _check_codelist_compatibility(
+    cl_a: str | None,
+    cl_b: str | None,
+    cl_hash_a: str | None = None,
+    cl_hash_b: str | None = None,
+    alias_map: dict[str, str] | None = None,
+    codes_cache: dict[str, list[tuple[str, str]]] | None = None,
+) -> tuple[bool, str]:
+    """Check if two CodeLists are identical, aliased, content-equivalent, or divergent."""
+    if not cl_a and not cl_b:
+        return True, "both_uncoded"
+    if bool(cl_a) != bool(cl_b):
+        return False, "coded_vs_uncoded"
+    if cl_a == cl_b:
+        return True, "identical_urn"
+
+    # Aliased through URNAlias
+    def _res(u: str) -> str:
+        curr = u
+        visited = set()
+        while curr not in visited:
+            visited.add(curr)
+            if alias_map is not None:
+                if curr not in alias_map:
+                    break
+                curr = alias_map[curr]
+            else:
+                from fairwddi.models import URNAlias
+
+                al = URNAlias.objects.filter(alias_urn=curr).first()
+                if not al:
+                    break
+                curr = al.canonical_urn
+        return curr
+
+    canon_a = _res(cl_a)  # type: ignore[arg-type]
+    canon_b = _res(cl_b)  # type: ignore[arg-type]
+    if canon_a and canon_b and canon_a == canon_b:
+        return True, "aliased"
+
+    if cl_hash_a and cl_hash_b and cl_hash_a == cl_hash_b:
+        return True, "identical_codes_hash"
+
+    cache = codes_cache if codes_cache is not None else {}
+    if cl_a and cl_b:
+        pairs_a = _get_codelist_code_pairs(cl_a, cache)
+        pairs_b = _get_codelist_code_pairs(cl_b, cache)
+        if pairs_a and pairs_b and pairs_a == pairs_b:
+            return True, "identical_code_items"
+
+    return False, "divergent"
+
+
 def _compare_pair(
     rec_a: dict[str, Any],
     rec_b: dict[str, Any],
     threshold: float = 0.75,
+    alias_map: dict[str, str] | None = None,
+    codes_cache: dict[str, list[tuple[str, str]]] | None = None,
 ) -> dict[str, Any] | None:
     """Compare two resource records of the same type and return a candidate dict if >= threshold."""
     r_type = rec_a["resource_type"]
@@ -537,21 +352,62 @@ def _compare_pair(
 
     is_tgt_elevated = bool(rec_b.get("is_elevated"))
 
+    # For RepresentedVariable, assess CodeList compatibility upfront
+    cl_compat = True
+    cl_status = "not_applicable"
+    if r_type == "RepresentedVariable":
+        cl_a = rec_a.get("codelist_urn")
+        cl_b = rec_b.get("codelist_urn")
+        cl_compat, cl_status = _check_codelist_compatibility(
+            cl_a,
+            cl_b,
+            cl_hash_a=rec_a.get("codelist_hash"),
+            cl_hash_b=rec_b.get("codelist_hash"),
+            alias_map=alias_map,
+            codes_cache=codes_cache,
+        )
+
     # 1. Exact content hash match
     if rec_a.get("content_hash") and rec_a.get("content_hash") == rec_b.get("content_hash"):
+        if r_type == "RepresentedVariable" and not cl_compat:
+            return {
+                "resource_type": r_type,
+                "source_urn": urn_a,
+                "target_urn": urn_b,
+                "match_type": MatchType.SAME_CONCEPT_DIVERGENT_DOMAIN.value,
+                "confidence": 0.88,
+                "recommended_action": "link_semantic",
+                "requires_review": True,
+                "details": {
+                    "source_name": rec_a["name"],
+                    "target_name": rec_b["name"],
+                    "target_is_elevated": is_tgt_elevated,
+                    "codelist_status": cl_status,
+                    "source_codelist_urn": rec_a.get("codelist_urn"),
+                    "target_codelist_urn": rec_b.get("codelist_urn"),
+                    "note": (
+                        "RepresentedVariables share content hash but use divergent response "
+                        "scales (CodeLists). Action downgraded to link_semantic."
+                    ),
+                },
+            }
+        details: dict[str, Any] = {
+            "source_name": rec_a["name"],
+            "target_name": rec_b["name"],
+            "target_is_elevated": is_tgt_elevated,
+        }
+        if r_type == "RepresentedVariable":
+            details["codelist_status"] = cl_status
+            details["codelist_urn"] = rec_a.get("codelist_urn") or rec_b.get("codelist_urn")
         return {
             "resource_type": r_type,
             "source_urn": urn_a,
             "target_urn": urn_b,
-            "match_type": "EXACT",
+            "match_type": MatchType.EXACT.value,
             "confidence": 1.0,
             "recommended_action": "absorb" if is_tgt_elevated else "alias",
             "requires_review": False,
-            "details": {
-                "source_name": rec_a["name"],
-                "target_name": rec_b["name"],
-                "target_is_elevated": is_tgt_elevated,
-            },
+            "details": details,
         }
 
     # 2. CodeList structural comparison
@@ -566,7 +422,7 @@ def _compare_pair(
                     "resource_type": "CodeList",
                     "source_urn": urn_a,
                     "target_urn": urn_b,
-                    "match_type": "FACET_EXACT",
+                    "match_type": MatchType.FACET_EXACT.value,
                     "confidence": 0.95,
                     "recommended_action": "absorb" if is_tgt_elevated else "alias",
                     "requires_review": False,
@@ -586,7 +442,7 @@ def _compare_pair(
                     "resource_type": "CodeList",
                     "source_urn": urn_a,
                     "target_urn": urn_b,
-                    "match_type": "SUBSTANTIVE_PERMUTATION",
+                    "match_type": MatchType.SUBSTANTIVE_PERMUTATION.value,
                     "confidence": 0.88,
                     "recommended_action": "link_semantic",
                     "requires_review": True,
@@ -605,7 +461,7 @@ def _compare_pair(
                     "resource_type": "CodeList",
                     "source_urn": urn_a,
                     "target_urn": urn_b,
-                    "match_type": "CATEGORIES_EXACT_CODES_DIFFERENT",
+                    "match_type": MatchType.CATEGORIES_EXACT_CODES_DIFFERENT.value,
                     "confidence": 0.85,
                     "recommended_action": "link_semantic",
                     "requires_review": True,
@@ -621,26 +477,14 @@ def _compare_pair(
             vals_b = [v for v, _, _ in codes_b]
             text_a = rec_a.get("text")
             text_b = rec_b.get("text")
-            langs_a = (
-                set(text_a.keys())
-                if isinstance(text_a, dict)
-                else {item["lang"] for item in text_a if isinstance(item, dict) and "lang" in item}
-                if isinstance(text_a, list)
-                else set()
-            )
-            langs_b = (
-                set(text_b.keys())
-                if isinstance(text_b, dict)
-                else {item["lang"] for item in text_b if isinstance(item, dict) and "lang" in item}
-                if isinstance(text_b, list)
-                else set()
-            )
+            langs_a = set(_raw_lang_dict(text_a).keys())
+            langs_b = set(_raw_lang_dict(text_b).keys())
             if vals_a == vals_b and langs_a and langs_b and langs_a != langs_b:
                 return {
                     "resource_type": "CodeList",
                     "source_urn": urn_a,
                     "target_urn": urn_b,
-                    "match_type": "MULTILINGUAL_OVERLAP",
+                    "match_type": MatchType.MULTILINGUAL_OVERLAP.value,
                     "confidence": 0.90,
                     "recommended_action": "absorb" if is_tgt_elevated else "merge_multilingual",
                     "requires_review": True,
@@ -658,28 +502,68 @@ def _compare_pair(
     # 3. Text/Label comparison (Category, QuestionItem, RepresentedVariable)
     m_type, conf, details = _compare_multilingual_texts(rec_a.get("text"), rec_b.get("text"))
     if m_type and conf >= threshold:
-        if m_type == "SHARED_STEM_GRID":
-            rec_action = "group"
+        if m_type in (MatchType.SHARED_STEM.value, "SHARED_STEM", "SHARED_STEM_GRID"):
+            if r_type not in ("QuestionItem", "RepresentedVariable"):
+                # Categories do not form question grids; fall back to syntactic similarity
+                m_type = MatchType.SYNTACTIC_SIMILAR.value
+                rec_action = "link_semantic"
+                req_rev = True
+            else:
+                rec_action = "group"
+                req_rev = True
+                if r_type == "RepresentedVariable":
+                    details["codelist_status"] = cl_status
+                    details["source_codelist_urn"] = rec_a.get("codelist_urn")
+                    details["target_codelist_urn"] = rec_b.get("codelist_urn")
+        elif r_type == "RepresentedVariable" and not cl_compat:
+            m_type = MatchType.SAME_CONCEPT_DIVERGENT_DOMAIN.value
+            rec_action = "link_semantic"
             req_rev = True
-        elif m_type == "MULTILINGUAL_OVERLAP":
+            conf = round(min(conf, 0.88), 4)
+            details["codelist_status"] = cl_status
+            details["source_codelist_urn"] = rec_a.get("codelist_urn")
+            details["target_codelist_urn"] = rec_b.get("codelist_urn")
+            details["note"] = (
+                "RepresentedVariables share label semantics but use divergent response scales "
+                "(CodeLists). Action downgraded to link_semantic to preserve value domain "
+                "integrity."
+            )
+        elif m_type == MatchType.MULTILINGUAL_OVERLAP.value:
             rec_action = "absorb" if is_tgt_elevated else "merge_multilingual"
             req_rev = False
-        elif m_type == "FACET_EXACT":
+        elif m_type in (
+            MatchType.FACET_EXACT.value,
+            MatchType.EXACT_IDENTICAL.value,
+            MatchType.NORMALIZED_EXACT.value,
+        ):
             rec_action = "absorb" if is_tgt_elevated else "alias"
             req_rev = False
-        elif m_type == "NEAR_EXACT":
+        elif m_type == MatchType.NEAR_EXACT.value:
             rec_action = "absorb" if is_tgt_elevated else "alias"
             req_rev = True
         elif m_type in (
-            "INCLUSIVE_WRITING_VARIANT",
-            "PHRASING_VARIANT",
-            "TYPOGRAPHICAL_VARIANT",
+            MatchType.INCLUSIVE_WRITING_VARIANT.value,
+            MatchType.PHRASING_VARIANT.value,
+            MatchType.TYPOGRAPHICAL_VARIANT.value,
         ):
             rec_action = "absorb" if is_tgt_elevated else "elevate"
             req_rev = True
         else:
             rec_action = "link_semantic"
             req_rev = True
+
+        if (
+            r_type == "RepresentedVariable"
+            and cl_compat
+            and m_type
+            not in (
+                MatchType.SHARED_STEM.value,
+                "SHARED_STEM",
+                "SHARED_STEM_GRID",
+            )
+        ):
+            details["codelist_status"] = cl_status
+            details["codelist_urn"] = rec_a.get("codelist_urn") or rec_b.get("codelist_urn")
 
         return {
             "resource_type": r_type,
@@ -719,13 +603,16 @@ def discover_candidates(
         threshold: Minimum similarity confidence score (0.0 to 1.0, default 0.75).
         limit: Maximum number of ranked candidate pairs to return.
     """
-    from fairwddi.models import IngestBatch, InstanceVariable
+    from fairwddi.models import IngestBatch, InstanceVariable, URNAlias
 
     target_types = (
         [resource_type]
         if resource_type
         else ["Category", "CodeList", "QuestionItem", "RepresentedVariable"]
     )
+
+    alias_map = dict(URNAlias.objects.values_list("alias_urn", "canonical_urn"))
+    codes_cache: dict[str, list[tuple[str, str]]] = {}
 
     scoped_urns: set[str] | None = None
     if batch_id is not None:
@@ -772,7 +659,13 @@ def discover_candidates(
                     continue
                 seen_pairs.add(pair_key)
 
-                cand = _compare_pair(src_item, tgt_item, threshold=threshold)
+                cand = _compare_pair(
+                    src_item,
+                    tgt_item,
+                    threshold=threshold,
+                    alias_map=alias_map,
+                    codes_cache=codes_cache,
+                )
                 if cand is not None:
                     candidates.append(cand)
 

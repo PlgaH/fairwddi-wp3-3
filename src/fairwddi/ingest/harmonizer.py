@@ -441,7 +441,7 @@ def apply_harmonization(
                         m_b["sub_item"] = act.details["sub_item_b"]
                     member_specs.append(m_b)
 
-                # Also include related RepresentedVariables if grouping QuestionItems
+                # Also include related RepresentedVariables or QuestionItems via QuestionVariable
                 if act.resource_type == "QuestionItem":
                     q_urns = [u for u in (act.source_urn, act.target_urn) if u]
                     for rv_urn in QuestionVariable.objects.filter(
@@ -451,6 +451,13 @@ def apply_harmonization(
                             member_specs.append(
                                 {"resource_type": "RepresentedVariable", "urn": rv_urn}
                             )
+                elif act.resource_type == "RepresentedVariable":
+                    rv_urns = [u for u in (act.source_urn, act.target_urn) if u]
+                    for q_urn in QuestionVariable.objects.filter(
+                        represented_variable_id__in=rv_urns
+                    ).values_list("question_item_id", flat=True):
+                        if q_urn:
+                            member_specs.append({"resource_type": "QuestionItem", "urn": q_urn})
 
                 existing_ref_urns = {r.get("urn") for r in refs if isinstance(r, dict)}
                 for m_spec in member_specs:
