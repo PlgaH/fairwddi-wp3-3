@@ -1,0 +1,471 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLI Operational Reference &mdash; FAIRwDDI Lifecycle 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Ingestion &amp; Pipeline Operations" href="ingestion_ops.html" />
+    <link rel="prev" title="Installation &amp; Environment Setup" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+<div class="portal-return-bar">
+  <a href="../index.html">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to FAIRwDDI Architecture Portal & Explorer
+  </a>
+  <span class="badge">CDSP • Sciences Po / CNRS</span>
+</div>
+ 
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+  
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FAIRwDDI Lifecycle
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+  <div style="margin-top: 10px; margin-bottom: 6px; padding: 0 4px;">
+    <a href="../index.html" style="font-size: 0.82rem; color: #38bdf8 !important; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Main Portal
+    </a>
+  </div>
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Administrator Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#key-operational-responsibilities">Key Operational Responsibilities</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#guide-outline">Guide Outline</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="architecture.html">System Architecture &amp; Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="architecture.html#hardware-operating-system-recommendations">Hardware &amp; Operating System Recommendations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="architecture.html#software-dependencies">Software Dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="architecture.html#database-architecture">Database Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html">Installation &amp; Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="installation.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="installation.html#configuration-env">Configuration (.env)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="installation.html#database-provisioning">Database Provisioning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="installation.html#verifying-installation">Verifying Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">CLI Operational Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#global-options">Global Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#vocabulary-administration-fairwddi-vocab">Vocabulary Administration (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">vocab</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ingestion-pipeline-fairwddi-ingest">Ingestion Pipeline (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">ingest</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ingestion_ops.html">Ingestion &amp; Pipeline Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ingestion_ops.html#the-2-stage-ingestion-lifecycle">The 2-Stage Ingestion Lifecycle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ingestion_ops.html#the-4-phase-comparison-cascade">The 4-Phase Comparison Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ingestion_ops.html#reviewing-ingestion-plans">Reviewing Ingestion Plans</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ingestion_ops.html#executing-batch-transactions">Executing Batch Transactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ingestion_ops.html#handling-quarantine-records">Handling Quarantine Records</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ingestion_ops.html#rolling-back-a-batch">Rolling Back a Batch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="deployment.html">Production Deployment &amp; Maintenance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="deployment.html#service-architecture">Service Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deployment.html#asgi-application-server-setup">ASGI Application Server Setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deployment.html#nginx-reverse-proxy-configuration">Nginx Reverse Proxy Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deployment.html#database-maintenance-index-optimization">Database Maintenance &amp; Index Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deployment.html#backup-and-disaster-recovery">Backup and Disaster Recovery</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../developer/index.html#architectural-principles">Architectural Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../developer/variable_cascade.html">The DDI Variable Cascade</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#the-three-tiers-of-the-cascade">The Three Tiers of the Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#tier-definitions">Tier Definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#standards-crosswalk">Standards Crosswalk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#orm-traversal-examples">ORM Traversal Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/data_model.html">The 30-Model Database Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/data_model.html#abstract-base-classes">Abstract Base Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/data_model.html#layer-model-breakdown">Layer &amp; Model Breakdown</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/data_model.html#polymorphic-cross-resource-relations">Polymorphic Cross-Resource Relations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/urn_registry.html">Universal URN Master Registry (UrnRegistry)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#the-problem-it-solves">The Problem It Solves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#the-supertype-master-pattern">The Supertype Master Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#lifecycle-guarantees">Lifecycle Guarantees</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#canonical-urn-syntax">Canonical URN Syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/multilingual_jsonb.html">Multilingual JSONB Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#jsonb-data-model">JSONB Data Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#string-normalization-pipeline">String Normalization Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#querying-multilingual-fields">Querying Multilingual Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#postgresql-17-icu-collations">PostgreSQL 17 ICU Collations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/fingerprinting.html">Content Fingerprinting &amp; Deduplication</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#the-multi-algorithm-approach">The Multi-Algorithm Approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#canonical-json-serialization">Canonical JSON Serialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#simple-vs-compound-hashing">Simple vs Compound Hashing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#deterministic-16-character-urn-hashes">Deterministic 16-Character URN Hashes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/ingest_engine.html">The Ingestion Engine (fairwddi.ingest)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/ingest_engine.html#package-architecture">Package Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/ingest_engine.html#format-detection-detector-py">Format Detection (detector.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/ingest_engine.html#streaming-xml-iteration-streaming-py">Streaming XML Iteration (streaming.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/ingest_engine.html#comparator-and-execution-plan-comparator-py-plan-py">Comparator and Execution Plan (comparator.py &amp; plan.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/ingest_engine.html#batch-transaction-loading-loader-py">Batch Transaction Loading (loader.py)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#api-architecture">API Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#endpoints-overview">Endpoints Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#example-endpoint-implementation">Example Endpoint Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#interactive-database-explorer">Interactive Database Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/dartfx_integration.html">Data Artifex DDI Toolkit Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#overview-of-dartfx-ddi">Overview of dartfx-ddi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#ddi-lifecycle-fragment-streaming">DDI-Lifecycle Fragment Streaming</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#multilingual-codebook-merging">Multilingual Codebook Merging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#ddi-cdi-assistant-framework">DDI-CDI Assistant Framework</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributor/index.html">Contributor Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../contributor/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/environment.html">Development Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#pre-commit-hooks">Pre-commit Hooks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#running-quick-sanity-checks">Running Quick Sanity Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/conventions.html">Coding Conventions &amp; Standards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#python-stack-tooling">Python Stack &amp; Tooling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#code-formatting-linting-ruff">Code Formatting &amp; Linting (Ruff)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#type-annotations-static-typing">Type Annotations &amp; Static Typing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#django-migrations-zero-data-loss">Django Migrations &amp; Zero-Data-Loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#ddi-naming-conventions">DDI Naming Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/testing.html">Testing Guide &amp; Practices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#testing-stack">Testing Stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#running-tests">Running Tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#isolated-sqlite-test-configuration">Isolated SQLite Test Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#testing-ingestion-streaming">Testing Ingestion &amp; Streaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/workflows.html">Development Workflows &amp; Pull Requests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#git-branching-strategy">Git Branching Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#pull-request-checklist">Pull Request Checklist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#building-documentation-locally">Building Documentation Locally</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">Python API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/index.html#modules">Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../api/models.html">Models (fairwddi.models)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api/models.html#module-fairwddi.models.base">Base Infrastructure &amp; Supertype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/models.html#module-fairwddi.models.concept">Concept Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/models.html#module-fairwddi.models.representation">Representation Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/models.html#module-fairwddi.models.instrument">Instrument &amp; Question Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/models.html#module-fairwddi.models.dataset">Dataset Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/models.html#module-fairwddi.models.organization">Organization &amp; Grouping Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/models.html#module-fairwddi.models.infrastructure">Batch &amp; Ingestion Infrastructure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/models.html#module-fairwddi.models.event">Audit &amp; Event Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api/schemas.html">Pydantic Schemas (fairwddi.schemas)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api/schemas.html#module-fairwddi.schemas.common">Common Value Objects &amp; Primitives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/schemas.html#module-fairwddi.schemas.entities">Entity Schemas</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api/db.html">Database Layer (fairwddi.db)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api/db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/db.html#module-fairwddi.db.seed">Seed &amp; Fixture Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/db.html#module-fairwddi.db.wipe">Wipe Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api/ingest.html">Ingestion &amp; Pipeline (fairwddi.ingest)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api/ingest.html#module-fairwddi.ingest.detector">Format Detection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/ingest.html#module-fairwddi.ingest.streaming">Streaming XML Parsing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/ingest.html#module-fairwddi.ingest.profiles">Extraction Profiles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/ingest.html#module-fairwddi.ingest.preflight">Preflight Static Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/ingest.html#module-fairwddi.ingest.comparator">Database Comparison</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/ingest.html#module-fairwddi.ingest.plan">Ingestion Execution Plan</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/ingest.html#module-fairwddi.ingest.loader">Batch Loader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/ingest.html#module-fairwddi.ingest.pipeline">Pipeline Orchestration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/ingest.html#module-fairwddi.ingest.harmonizer">Harmonization &amp; Cross-Survey Clustering</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api/api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api/api_ref.html#module-fairwddi.api.router">Router &amp; Endpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/api_ref.html#module-fairwddi.api.schemas">API Request &amp; Response Schemas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/api_ref.html#module-fairwddi.api.views">Views &amp; Route Handlers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/api_ref.html#module-fairwddi.api.server">ASGI Server Runner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/api_ref.html#module-fairwddi.api.explorer_html">Interactive Model Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api/utils.html">Utilities (fairwddi.utils)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api/utils.html#module-fairwddi.utils.urn">URN Helpers (urn.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/utils.html#module-fairwddi.utils.normalize_string">String Normalization (normalize_string.py)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Standards &amp; Project Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#reference-documents">Reference Documents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/glossary.html">DDI Canonical Terminology Glossary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/deliverables.html">Project Deliverables &amp; Research Reports</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/deliverables.html#core-deliverables">Core Deliverables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/deliverables.html#specialized-technical-research-papers">Specialized Technical Research Papers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/deliverables.html#interactive-exploration">Interactive Exploration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/changelog.html">Changelog &amp; Project Roadmap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/changelog.html#project-timeline-overview">Project Timeline Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/changelog.html#release-history">Release History</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FAIRwDDI Lifecycle</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Administrator Guide</a></li>
+      <li class="breadcrumb-item active">CLI Operational Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/admin/cli_operations.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cli-operational-reference">
+<h1>CLI Operational Reference<a class="headerlink" href="#cli-operational-reference" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">fairwddi</span></code> command-line interface (built with <a class="reference external" href="https://typer.tiangolo.com/">Typer</a> and <a class="reference external" href="https://rich.readthedocs.io/">Rich</a>) is the primary management utility for database tasks, XML validation, ingestion planning, harmonizing variables, and serving the REST API.</p>
+<section id="global-options">
+<h2>Global Options<a class="headerlink" href="#global-options" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fairwddi<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>COMMAND<span class="w"> </span><span class="o">[</span>ARGS<span class="o">]</span>...
+
+Options:
+<span class="w">  </span>--version<span class="w">       </span>Show<span class="w"> </span>package<span class="w"> </span>version<span class="w"> </span>and<span class="w"> </span>exit.
+<span class="w">  </span>--help<span class="w">          </span>Show<span class="w"> </span><span class="nb">help</span><span class="w"> </span>message<span class="w"> </span>and<span class="w"> </span>exit.
+
+Commands:
+<span class="w">  </span>info<span class="w">            </span>Display<span class="w"> </span>runtime<span class="w"> </span>environment,<span class="w"> </span>database<span class="w"> </span>connection,<span class="w"> </span>and<span class="w"> </span>package<span class="w"> </span>details.
+<span class="w">  </span>db<span class="w">              </span>Database<span class="w"> </span>initialization,<span class="w"> </span>status<span class="w"> </span>inspection,<span class="w"> </span>DDL<span class="w"> </span>export,<span class="w"> </span>and<span class="w"> </span>seeding.
+<span class="w">  </span>vocab<span class="w">           </span>Controlled<span class="w"> </span>vocabulary<span class="w"> </span>and<span class="w"> </span>SKOS<span class="w"> </span>taxonomy<span class="w"> </span>administration.
+<span class="w">  </span>preflight<span class="w">       </span>Static<span class="w"> </span>analysis<span class="w"> </span>and<span class="w"> </span>profile<span class="w"> </span>validation<span class="w"> </span>of<span class="w"> </span>incoming<span class="w"> </span>DDI<span class="w"> </span>XML<span class="w"> </span>files.
+<span class="w">  </span>compare<span class="w">         </span>Batch<span class="w"> </span>comparison<span class="w"> </span>between<span class="w"> </span>XML<span class="w"> </span>files<span class="w"> </span>and<span class="w"> </span>database<span class="w"> </span>records.
+<span class="w">  </span>ingest<span class="w">          </span>Execute,<span class="w"> </span>monitor,<span class="w"> </span>and<span class="w"> </span>rollback<span class="w"> </span>ingestion<span class="w"> </span>execution<span class="w"> </span>plans.
+<span class="w">  </span>harmonize<span class="w">       </span>Interactive<span class="w"> </span>cross-survey<span class="w"> </span>variable<span class="w"> </span>clustering<span class="w"> </span>and<span class="w"> </span>harmonization.
+<span class="w">  </span>serve<span class="w">           </span>Launch<span class="w"> </span>the<span class="w"> </span>ASGI<span class="w"> </span>REST<span class="w"> </span>API<span class="w"> </span>server<span class="w"> </span>with<span class="w"> </span>live<span class="w"> </span>Swagger<span class="w"> </span>documentation.
+</pre></div>
+</div>
+</section>
+<section id="database-management-fairwddi-db">
+<h2>Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)<a class="headerlink" href="#database-management-fairwddi-db" title="Link to this heading"></a></h2>
+<p>Inspect, migrate, seed, and manage PostgreSQL schema state:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check connection status, table counts, and pending migrations</span>
+fairwddi<span class="w"> </span>db<span class="w"> </span>status
+
+<span class="c1"># Apply all migrations and initialize the UrnRegistry</span>
+fairwddi<span class="w"> </span>db<span class="w"> </span>init
+
+<span class="c1"># Seed development / demonstration fixtures</span>
+fairwddi<span class="w"> </span>db<span class="w"> </span>seed
+
+<span class="c1"># Export raw PostgreSQL 17 DDL to a file</span>
+fairwddi<span class="w"> </span>db<span class="w"> </span>export-ddl<span class="w"> </span>--output<span class="w"> </span>postgres_17_schema.sql
+
+<span class="c1"># Wipe database (requires confirmation flag)</span>
+fairwddi<span class="w"> </span>db<span class="w"> </span>wipe<span class="w"> </span>--confirm-irreversible-loss
+
+<span class="c1"># Recreate database from scratch (wipe + init + seed)</span>
+fairwddi<span class="w"> </span>db<span class="w"> </span>recreate<span class="w"> </span>--confirm-irreversible-loss
+</pre></div>
+</div>
+</section>
+<section id="vocabulary-administration-fairwddi-vocab">
+<h2>Vocabulary Administration (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">vocab</span></code>)<a class="headerlink" href="#vocabulary-administration-fairwddi-vocab" title="Link to this heading"></a></h2>
+<p>Manage SKOS controlled vocabularies (e.g., CESSDA ELSST):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check loaded vocabularies and concept counts</span>
+fairwddi<span class="w"> </span>vocab<span class="w"> </span>check
+
+<span class="c1"># Load SKOS RDF/XML file into the Concept and ConceptScheme tables</span>
+fairwddi<span class="w"> </span>vocab<span class="w"> </span>load-skos<span class="w"> </span>/path/to/elsst_fr_en.rdf<span class="w"> </span>--vocabulary-name<span class="w"> </span><span class="s2">&quot;ELSST&quot;</span><span class="w"> </span>--agency<span class="w"> </span><span class="s2">&quot;eu.cessda&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="preflight-analysis-fairwddi-preflight">
+<h2>Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)<a class="headerlink" href="#preflight-analysis-fairwddi-preflight" title="Link to this heading"></a></h2>
+<p>Validate DDI XML files before ingestion:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Inspect XML file encoding, namespaces, format version, and root elements</span>
+fairwddi<span class="w"> </span>preflight<span class="w"> </span>check<span class="w"> </span>survey_wave_1.xml
+
+<span class="c1"># Extract resource counts and profile characteristics</span>
+fairwddi<span class="w"> </span>preflight<span class="w"> </span>profiles<span class="w"> </span>survey_wave_1.xml<span class="w"> </span>--output<span class="w"> </span>profile_report.json
+
+<span class="c1"># Test upgrade crosswalks (e.g., DDI-Codebook 2.5 to 2.6 or DDI 3.3 to 4.0)</span>
+fairwddi<span class="w"> </span>preflight<span class="w"> </span>upgrade<span class="w"> </span>legacy_codebook.xml<span class="w"> </span>--target-version<span class="w"> </span><span class="m">2</span>.6
+</pre></div>
+</div>
+</section>
+<section id="ingestion-pipeline-fairwddi-ingest">
+<h2>Ingestion Pipeline (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">ingest</span></code>)<a class="headerlink" href="#ingestion-pipeline-fairwddi-ingest" title="Link to this heading"></a></h2>
+<p>Orchestrate safe, plan-based batch ingestion:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 1: Generate a non-destructive comparison plan against existing database</span>
+fairwddi<span class="w"> </span>ingest<span class="w"> </span>plan<span class="w"> </span>survey_ddi33.xml<span class="w"> </span>--report-out<span class="w"> </span>survey_plan.yaml
+
+<span class="c1"># Step 2: Review plan summary and proposed actions (Create, Link, Re-version, Quarantine)</span>
+fairwddi<span class="w"> </span>ingest<span class="w"> </span>plan<span class="w"> </span>survey_ddi33.xml<span class="w"> </span>--dry-run
+
+<span class="c1"># Step 3: Execute the plan transactionally</span>
+fairwddi<span class="w"> </span>ingest<span class="w"> </span>execute<span class="w"> </span>survey_plan.yaml
+
+<span class="c1"># List recent ingestion batches and receipts</span>
+fairwddi<span class="w"> </span>ingest<span class="w"> </span>list<span class="w"> </span>--limit<span class="w"> </span><span class="m">10</span>
+
+<span class="c1"># Check detailed status of a specific batch receipt</span>
+fairwddi<span class="w"> </span>ingest<span class="w"> </span>status<span class="w"> </span>&lt;batch_id&gt;
+
+<span class="c1"># Rollback an ingestion batch cleanly</span>
+fairwddi<span class="w"> </span>ingest<span class="w"> </span>undo<span class="w"> </span>&lt;batch_id&gt;<span class="w"> </span>--confirm
+</pre></div>
+</div>
+</section>
+<section id="harmonization-fairwddi-harmonize">
+<h2>Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)<a class="headerlink" href="#harmonization-fairwddi-harmonize" title="Link to this heading"></a></h2>
+<p>Cluster, compare, and harmonize variables across studies:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate a harmonization plan proposing concept linkages</span>
+fairwddi<span class="w"> </span>harmonize<span class="w"> </span>plan<span class="w"> </span>--threshold<span class="w"> </span><span class="m">0</span>.85<span class="w"> </span>--output<span class="w"> </span>harmonization_plan.yaml
+
+<span class="c1"># Approve all high-confidence (&gt;= 0.95) proposals automatically</span>
+fairwddi<span class="w"> </span>harmonize<span class="w"> </span>approve-high<span class="w"> </span>harmonization_plan.yaml
+
+<span class="c1"># Apply the approved harmonization linkages to the database</span>
+fairwddi<span class="w"> </span>harmonize<span class="w"> </span>apply<span class="w"> </span>harmonization_plan.yaml
+
+<span class="c1"># Elevate a RepresentedVariable to a new ConceptualVariable</span>
+fairwddi<span class="w"> </span>harmonize<span class="w"> </span>elevate<span class="w"> </span>&lt;rep_var_urn&gt;<span class="w"> </span>--name<span class="w"> </span><span class="s2">&quot;POL_ATTITUDE&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="api-server-fairwddi-serve">
+<h2>API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)<a class="headerlink" href="#api-server-fairwddi-serve" title="Link to this heading"></a></h2>
+<p>Start the ASGI web service running <cite>django-ninja</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start server on default port (8000)</span>
+<span class="n">fairwddi</span> <span class="n">serve</span>
+
+<span class="c1"># Start with custom host, port, and auto-reload for development</span>
+<span class="n">fairwddi</span> <span class="n">serve</span> <span class="o">--</span><span class="n">host</span> <span class="mf">0.0.0.0</span> <span class="o">--</span><span class="n">port</span> <span class="mi">8080</span> <span class="o">--</span><span class="n">reload</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation &amp; Environment Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ingestion_ops.html" class="btn btn-neutral float-right" title="Ingestion &amp; Pipeline Operations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

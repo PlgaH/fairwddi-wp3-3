@@ -24,6 +24,7 @@ def run_ingestion_pipeline(
     """Execute the multi-stage FAIRwDDI ingestion pipeline on a metadata file.
 
     Stages:
+
     1. Preflight check (and explicit DDI-C -> DDI-L 4.0 upgrade on disk if input is DDI-C).
     2. Direct Ingestion Plan (`plan_ingestion`) with zero DB writes.
     3. Direct Ingestion Apply (`apply_ingestion`) into ReQuest core tables + `IngestBatch` receipt

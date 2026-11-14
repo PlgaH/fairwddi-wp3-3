@@ -1,0 +1,1098 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>fairwddi.db.seed &mdash; FAIRwDDI Lifecycle 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FAIRwDDI Lifecycle
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/index.html">Administrator Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../admin/index.html#key-operational-responsibilities">Key Operational Responsibilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../admin/index.html#guide-outline">Guide Outline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/architecture.html">System Architecture &amp; Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#hardware-operating-system-recommendations">Hardware &amp; Operating System Recommendations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#software-dependencies">Software Dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#database-architecture">Database Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/installation.html">Installation &amp; Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#configuration-env">Configuration (.env)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#database-provisioning">Database Provisioning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#verifying-installation">Verifying Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/cli_operations.html">CLI Operational Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#global-options">Global Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#vocabulary-administration-fairwddi-vocab">Vocabulary Administration (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">vocab</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#ingestion-pipeline-fairwddi-ingest">Ingestion Pipeline (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">ingest</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/ingestion_ops.html">Ingestion &amp; Pipeline Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#the-2-stage-ingestion-lifecycle">The 2-Stage Ingestion Lifecycle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#the-4-phase-comparison-cascade">The 4-Phase Comparison Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#reviewing-ingestion-plans">Reviewing Ingestion Plans</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#executing-batch-transactions">Executing Batch Transactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#handling-quarantine-records">Handling Quarantine Records</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#rolling-back-a-batch">Rolling Back a Batch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/deployment.html">Production Deployment &amp; Maintenance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#service-architecture">Service Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#asgi-application-server-setup">ASGI Application Server Setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#nginx-reverse-proxy-configuration">Nginx Reverse Proxy Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#database-maintenance-index-optimization">Database Maintenance &amp; Index Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#backup-and-disaster-recovery">Backup and Disaster Recovery</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/index.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../developer/index.html#architectural-principles">Architectural Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../developer/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/variable_cascade.html">The DDI Variable Cascade</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#the-three-tiers-of-the-cascade">The Three Tiers of the Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#tier-definitions">Tier Definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#standards-crosswalk">Standards Crosswalk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#orm-traversal-examples">ORM Traversal Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/data_model.html">The 30-Model Database Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#abstract-base-classes">Abstract Base Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#layer-model-breakdown">Layer &amp; Model Breakdown</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#polymorphic-cross-resource-relations">Polymorphic Cross-Resource Relations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/urn_registry.html">Universal URN Master Registry (UrnRegistry)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#the-problem-it-solves">The Problem It Solves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#the-supertype-master-pattern">The Supertype Master Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#lifecycle-guarantees">Lifecycle Guarantees</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#canonical-urn-syntax">Canonical URN Syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/multilingual_jsonb.html">Multilingual JSONB Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#jsonb-data-model">JSONB Data Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#string-normalization-pipeline">String Normalization Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#querying-multilingual-fields">Querying Multilingual Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#postgresql-17-icu-collations">PostgreSQL 17 ICU Collations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/fingerprinting.html">Content Fingerprinting &amp; Deduplication</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#the-multi-algorithm-approach">The Multi-Algorithm Approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#canonical-json-serialization">Canonical JSON Serialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#simple-vs-compound-hashing">Simple vs Compound Hashing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#deterministic-16-character-urn-hashes">Deterministic 16-Character URN Hashes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/ingest_engine.html">The Ingestion Engine (fairwddi.ingest)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#package-architecture">Package Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#format-detection-detector-py">Format Detection (detector.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#streaming-xml-iteration-streaming-py">Streaming XML Iteration (streaming.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#comparator-and-execution-plan-comparator-py-plan-py">Comparator and Execution Plan (comparator.py &amp; plan.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#batch-transaction-loading-loader-py">Batch Transaction Loading (loader.py)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#api-architecture">API Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#endpoints-overview">Endpoints Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#example-endpoint-implementation">Example Endpoint Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#interactive-database-explorer">Interactive Database Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/dartfx_integration.html">Data Artifex DDI Toolkit Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#overview-of-dartfx-ddi">Overview of dartfx-ddi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#ddi-lifecycle-fragment-streaming">DDI-Lifecycle Fragment Streaming</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#multilingual-codebook-merging">Multilingual Codebook Merging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#ddi-cdi-assistant-framework">DDI-CDI Assistant Framework</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributor/index.html">Contributor Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributor/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/environment.html">Development Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#pre-commit-hooks">Pre-commit Hooks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#running-quick-sanity-checks">Running Quick Sanity Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/conventions.html">Coding Conventions &amp; Standards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#python-stack-tooling">Python Stack &amp; Tooling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#code-formatting-linting-ruff">Code Formatting &amp; Linting (Ruff)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#type-annotations-static-typing">Type Annotations &amp; Static Typing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#django-migrations-zero-data-loss">Django Migrations &amp; Zero-Data-Loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#ddi-naming-conventions">DDI Naming Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/testing.html">Testing Guide &amp; Practices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#testing-stack">Testing Stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#running-tests">Running Tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#isolated-sqlite-test-configuration">Isolated SQLite Test Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#testing-ingestion-streaming">Testing Ingestion &amp; Streaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/workflows.html">Development Workflows &amp; Pull Requests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#git-branching-strategy">Git Branching Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#pull-request-checklist">Pull Request Checklist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#building-documentation-locally">Building Documentation Locally</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Python API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/index.html#modules">Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/models.html">Models (fairwddi.models)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.base">Base Infrastructure &amp; Supertype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.concept">Concept Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.representation">Representation Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.instrument">Instrument &amp; Question Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.dataset">Dataset Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.organization">Organization &amp; Grouping Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.infrastructure">Batch &amp; Ingestion Infrastructure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.event">Audit &amp; Event Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/schemas.html">Pydantic Schemas (fairwddi.schemas)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/schemas.html#module-fairwddi.schemas.common">Common Value Objects &amp; Primitives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/schemas.html#module-fairwddi.schemas.entities">Entity Schemas</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/db.html">Database Layer (fairwddi.db)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.seed">Seed &amp; Fixture Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.wipe">Wipe Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/ingest.html">Ingestion &amp; Pipeline (fairwddi.ingest)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.detector">Format Detection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.streaming">Streaming XML Parsing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.profiles">Extraction Profiles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.preflight">Preflight Static Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.comparator">Database Comparison</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.plan">Ingestion Execution Plan</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.loader">Batch Loader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.pipeline">Pipeline Orchestration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.harmonizer">Harmonization &amp; Cross-Survey Clustering</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.router">Router &amp; Endpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.schemas">API Request &amp; Response Schemas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.views">Views &amp; Route Handlers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.server">ASGI Server Runner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.explorer_html">Interactive Model Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/utils.html">Utilities (fairwddi.utils)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/utils.html#module-fairwddi.utils.urn">URN Helpers (urn.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/utils.html#module-fairwddi.utils.normalize_string">String Normalization (normalize_string.py)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/index.html">Standards &amp; Project Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../reference/index.html#reference-documents">Reference Documents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/glossary.html">DDI Canonical Terminology Glossary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/deliverables.html">Project Deliverables &amp; Research Reports</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#core-deliverables">Core Deliverables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#specialized-technical-research-papers">Specialized Technical Research Papers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#interactive-exploration">Interactive Exploration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/changelog.html">Changelog &amp; Project Roadmap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/changelog.html#project-timeline-overview">Project Timeline Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/changelog.html#release-history">Release History</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FAIRwDDI Lifecycle</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fairwddi.db.seed</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for fairwddi.db.seed</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Database seeder for FAIRwDDI.</span>
+
+<span class="sd">Populates the database with multilingual DDI model sample data (DDI 4 / DDI-CDI / DDI-L 3.3)</span>
+<span class="sd">across all architectural layers using standard canonical DDI 3.3 / 4.0 URNs.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+
+<div class="viewcode-block" id="seed_sample_data">
+<a class="viewcode-back" href="../../../api/db.html#fairwddi.db.seed.seed_sample_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">seed_sample_data</span><span class="p">(</span><span class="n">reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Seed the database with standard DDI model demonstration entities.</span>
+
+<span class="sd">    If reset is True, clears existing records first.</span>
+<span class="sd">    Returns a summary dictionary of created entity counts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.models</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">Category</span><span class="p">,</span>
+        <span class="n">CategoryScheme</span><span class="p">,</span>
+        <span class="n">Code</span><span class="p">,</span>
+        <span class="n">CodeList</span><span class="p">,</span>
+        <span class="n">Concept</span><span class="p">,</span>
+        <span class="n">ConceptScheme</span><span class="p">,</span>
+        <span class="n">ConceptualVariable</span><span class="p">,</span>
+        <span class="n">ConceptualVariableScheme</span><span class="p">,</span>
+        <span class="n">Datafile</span><span class="p">,</span>
+        <span class="n">DatafileVariable</span><span class="p">,</span>
+        <span class="n">DatafileVariableFrequency</span><span class="p">,</span>
+        <span class="n">EventLog</span><span class="p">,</span>
+        <span class="n">Frequency</span><span class="p">,</span>
+        <span class="n">Group</span><span class="p">,</span>
+        <span class="n">IngestBatch</span><span class="p">,</span>
+        <span class="n">InstanceVariable</span><span class="p">,</span>
+        <span class="n">InstanceVariableScheme</span><span class="p">,</span>
+        <span class="n">Instrument</span><span class="p">,</span>
+        <span class="n">InstrumentQuestion</span><span class="p">,</span>
+        <span class="n">Organization</span><span class="p">,</span>
+        <span class="n">QuestionItem</span><span class="p">,</span>
+        <span class="n">QuestionScheme</span><span class="p">,</span>
+        <span class="n">QuestionVariable</span><span class="p">,</span>
+        <span class="n">RepresentedVariable</span><span class="p">,</span>
+        <span class="n">RepresentedVariableScheme</span><span class="p">,</span>
+        <span class="n">SemanticRelationship</span><span class="p">,</span>
+        <span class="n">StudyInstrument</span><span class="p">,</span>
+        <span class="n">StudyUnit</span><span class="p">,</span>
+        <span class="n">URNAlias</span><span class="p">,</span>
+        <span class="n">UrnRegistry</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">reset</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.db.wipe</span><span class="w"> </span><span class="kn">import</span> <span class="n">wipe_database</span>
+
+        <span class="n">wipe_database</span><span class="p">()</span>
+
+    <span class="n">agency</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DDI_AGENCY&quot;</span><span class="p">,</span> <span class="s2">&quot;fr.cdsp&quot;</span><span class="p">)</span>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># 1. Organizational Hierarchy</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="n">organization</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:Organization.CDSP:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Centre de Données Socio-Politiques&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Center for Socio-Political Data&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;organization_type&quot;</span><span class="p">:</span> <span class="s2">&quot;distributor&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;acronym&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;CDSP&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;uri&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;https://cdsp.sciences-po.fr/&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;cdsp@sciencespo.fr&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Group (e.g. BPF Study Series Group)</span>
+    <span class="n">group_bpf</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Group</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:group-bpf-series:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Baromètre Politique Français (BPF)&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;French Political Barometer (BPF)&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="p">(</span>
+                        <span class="s2">&quot;Série d&#39;enquêtes électorales et politiques françaises menées par le CDSP.&quot;</span>
+                    <span class="p">),</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;French political barometer survey series conducted by CDSP.&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;group_type&quot;</span><span class="p">:</span> <span class="s2">&quot;study_series&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;references&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="s2">&quot;StudyUnit&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:bpf-2007-w01:1.0.0&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="s2">&quot;StudyUnit&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:bpf-2007-w02:1.0.0&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;group_hash_bpf_001&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># 2. Concept Layer (Controlled Vocabularies &amp; Thesauri)</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="n">concept_scheme</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ConceptScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:cs-politics-thesaurus:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Schéma de concepts politiques&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Political Concepts Scheme&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Concepts et thématiques de science politique basés sur ELSST.&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">root_concept</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Concept</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:concept-elsst-pol:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;scheme&quot;</span><span class="p">:</span> <span class="n">concept_scheme</span><span class="p">,</span>
+            <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;https://elsst.cessda.eu/id/4/Politics&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;vocabulary&quot;</span><span class="p">:</span> <span class="s2">&quot;ELSST&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;notation&quot;</span><span class="p">:</span> <span class="s2">&quot;POL&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;concept_type&quot;</span><span class="p">:</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Politique&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Politics&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Affaires politiques, gouvernement et institutions.&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;concept_hash_pol&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scope_note&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;CESSDA Core Concept&quot;</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">sub_concept</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Concept</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:concept-elsst-pol-att:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;scheme&quot;</span><span class="p">:</span> <span class="n">concept_scheme</span><span class="p">,</span>
+            <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;https://elsst.cessda.eu/id/4/PoliticalAttitudes&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;vocabulary&quot;</span><span class="p">:</span> <span class="s2">&quot;ELSST&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;notation&quot;</span><span class="p">:</span> <span class="s2">&quot;POL.ATT&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;concept_type&quot;</span><span class="p">:</span> <span class="s2">&quot;concept&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="n">root_concept</span><span class="p">,</span>
+            <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Attitudes et comportements politiques&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Political attitudes and behavior&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;definition&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="p">(</span>
+                        <span class="s2">&quot;Dispositions, orientations et opinions citoyennes &quot;</span>
+                        <span class="s2">&quot;envers le système politique.&quot;</span>
+                    <span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;concept_hash_pol_att&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">cv_scheme</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ConceptualVariableScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:cvs-attitudes-core:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Schéma de variables conceptuelles politiques&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Political Conceptual Variables Scheme&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Variables conceptuelles mesurant les attitudes politiques.&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">cv_interest</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ConceptualVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:cv-political-interest:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;scheme&quot;</span><span class="p">:</span> <span class="n">cv_scheme</span><span class="p">,</span>
+            <span class="s2">&quot;concept&quot;</span><span class="p">:</span> <span class="n">sub_concept</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;INTERET_POLITIQUE&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;POLITICAL_INTEREST&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Intérêt pour la politique&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Interest in politics&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Mesure du niveau d&#39;intérêt subjectif pour les questions politiques.&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;hash_cv_interest_001&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;variable_type&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;attitudinal&quot;</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># 3. Representation Layer &amp; Instruments</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># QuestionScheme</span>
+    <span class="n">qs_politics</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QuestionScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:qs-politics-core:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Schéma de questions politiques&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Political Questions Scheme&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Questions relatives à l&#39;attention et l&#39;intérêt politique&quot;</span><span class="p">}</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">qi_interest</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QuestionItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:qi-fr-interest-pol:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;QI_INTERET_POL&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;QI_POL_INTEREST&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;scheme&quot;</span><span class="p">:</span> <span class="n">qs_politics</span><span class="p">,</span>
+            <span class="s2">&quot;question_text&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="p">(</span>
+                        <span class="s2">&quot;De façon générale, diriez-vous que vous vous intéressez à la politique ?&quot;</span>
+                    <span class="p">),</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Generally speaking, would you say you are interested in politics?&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;qi_hash_pol_interest_001&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;pre_question_text&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                <span class="s2">&quot;Passons maintenant à quelques questions sur votre &quot;</span>
+                                <span class="s2">&quot;perception de la politique.&quot;</span>
+                            <span class="p">),</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;interviewer_instructions&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Lire les modalités de réponse si nécessaire.&quot;</span><span class="p">}</span>
+                    <span class="p">],</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># CategoryScheme</span>
+    <span class="n">cat_scheme</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">CategoryScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:cs-interest-4pt:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Échelle d&#39;intérêt à 4 niveaux&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Beaucoup, assez, un peu, pas du tout&quot;</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Categories belonging directly to CategoryScheme</span>
+    <span class="n">cat_defs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;id_str&quot;</span><span class="p">:</span> <span class="s2">&quot;cat-pol-beaucoup&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fr&quot;</span><span class="p">:</span> <span class="s2">&quot;Beaucoup&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;en&quot;</span><span class="p">:</span> <span class="s2">&quot;A lot&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;is_missing&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;id_str&quot;</span><span class="p">:</span> <span class="s2">&quot;cat-pol-assez&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fr&quot;</span><span class="p">:</span> <span class="s2">&quot;Assez&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;en&quot;</span><span class="p">:</span> <span class="s2">&quot;Somewhat&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;is_missing&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;id_str&quot;</span><span class="p">:</span> <span class="s2">&quot;cat-pol-un-peu&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fr&quot;</span><span class="p">:</span> <span class="s2">&quot;Un peu&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;en&quot;</span><span class="p">:</span> <span class="s2">&quot;A little&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s2">&quot;is_missing&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;id_str&quot;</span><span class="p">:</span> <span class="s2">&quot;cat-pol-pas-du-tout&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fr&quot;</span><span class="p">:</span> <span class="s2">&quot;Pas du tout&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;en&quot;</span><span class="p">:</span> <span class="s2">&quot;Not at all&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s2">&quot;is_missing&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;id_str&quot;</span><span class="p">:</span> <span class="s2">&quot;cat-nsp&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fr&quot;</span><span class="p">:</span> <span class="s2">&quot;Ne sait pas (NSP)&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;en&quot;</span><span class="p">:</span> <span class="s2">&quot;Don&#39;t know&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s2">&quot;is_missing&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;id_str&quot;</span><span class="p">:</span> <span class="s2">&quot;cat-refus&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fr&quot;</span><span class="p">:</span> <span class="s2">&quot;Refus de répondre&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;en&quot;</span><span class="p">:</span> <span class="s2">&quot;Refused&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+            <span class="s2">&quot;is_missing&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">]</span>
+
+    <span class="n">categories</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Category</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">cat_def</span> <span class="ow">in</span> <span class="n">cat_defs</span><span class="p">:</span>
+        <span class="n">cat</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+            <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">cat_def</span><span class="p">[</span><span class="s1">&#39;id_str&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:1.0.0&quot;</span><span class="p">,</span>
+            <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">cat_def</span><span class="p">[</span><span class="s2">&quot;fr&quot;</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">cat_def</span><span class="p">[</span><span class="s2">&quot;en&quot;</span><span class="p">]},</span>
+                <span class="p">],</span>
+                <span class="s2">&quot;scheme&quot;</span><span class="p">:</span> <span class="n">cat_scheme</span><span class="p">,</span>
+                <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="n">cat_def</span><span class="p">[</span><span class="s2">&quot;order&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;is_missing&quot;</span><span class="p">:</span> <span class="n">cat_def</span><span class="p">[</span><span class="s2">&quot;is_missing&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">cat_def</span><span class="p">[</span><span class="s2">&quot;fr&quot;</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">cat_def</span><span class="p">[</span><span class="s2">&quot;en&quot;</span><span class="p">]},</span>
+                <span class="p">],</span>
+                <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;hash_</span><span class="si">{</span><span class="n">cat_def</span><span class="p">[</span><span class="s1">&#39;id_str&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">},</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="n">categories</span><span class="p">[</span><span class="n">cat_def</span><span class="p">[</span><span class="s2">&quot;id_str&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">cat</span>
+
+    <span class="c1"># CodeList &amp; Codes</span>
+    <span class="n">code_list</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">CodeList</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:cl-interest-4pt:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Codes échelle intérêt politique (1-4, 88, 99)&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;scheme&quot;</span><span class="p">:</span> <span class="n">cat_scheme</span><span class="p">,</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;cl_hash_interest_4pt&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">code_mappings</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;cat-pol-beaucoup&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;cat-pol-assez&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;cat-pol-un-peu&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;cat-pol-pas-du-tout&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;88&quot;</span><span class="p">,</span> <span class="s2">&quot;cat-nsp&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;99&quot;</span><span class="p">,</span> <span class="s2">&quot;cat-refus&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">cat_key</span><span class="p">,</span> <span class="n">ord_val</span><span class="p">,</span> <span class="n">is_miss</span> <span class="ow">in</span> <span class="n">code_mappings</span><span class="p">:</span>
+        <span class="n">Code</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+            <span class="n">code_list</span><span class="o">=</span><span class="n">code_list</span><span class="p">,</span>
+            <span class="n">code_value</span><span class="o">=</span><span class="n">val</span><span class="p">,</span>
+            <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">categories</span><span class="p">[</span><span class="n">cat_key</span><span class="p">],</span>
+                <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="n">ord_val</span><span class="p">,</span>
+                <span class="s2">&quot;is_missing&quot;</span><span class="p">:</span> <span class="n">is_miss</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Link QuestionItem to CodeList</span>
+    <span class="n">qi_interest</span><span class="o">.</span><span class="n">code_list</span> <span class="o">=</span> <span class="n">code_list</span>
+    <span class="n">qi_interest</span><span class="o">.</span><span class="n">response_domain</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;code&quot;</span><span class="p">,</span> <span class="s2">&quot;code_list_urn&quot;</span><span class="p">:</span> <span class="n">code_list</span><span class="o">.</span><span class="n">urn</span><span class="p">}</span>
+    <span class="n">qi_interest</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="c1"># RepresentedVariableScheme</span>
+    <span class="n">rv_scheme</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">RepresentedVariableScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:rvs-bpf-core:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Schéma de variables représentées&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Represented Variables Scheme&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Variables représentées avec modalités de réponse.&quot;</span><span class="p">}</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># RepresentedVariable</span>
+    <span class="n">rv_interest</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">RepresentedVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:rv-fr-political-interest:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;scheme&quot;</span><span class="p">:</span> <span class="n">rv_scheme</span><span class="p">,</span>
+            <span class="s2">&quot;conceptual_variable&quot;</span><span class="p">:</span> <span class="n">cv_interest</span><span class="p">,</span>
+            <span class="s2">&quot;code_list&quot;</span><span class="p">:</span> <span class="n">code_list</span><span class="p">,</span>
+            <span class="s2">&quot;value_representation&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;code&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;code_list_urn&quot;</span><span class="p">:</span> <span class="n">code_list</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;RV_INTERET_POL_4PT&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Intérêt politique (échelle 4 pts)&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Mesure de l&#39;intérêt politique (4 pts).&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;rv_hash_pol_interest_001&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># QuestionVariable junction</span>
+    <span class="n">QuestionVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">question_item</span><span class="o">=</span><span class="n">qi_interest</span><span class="p">,</span>
+        <span class="n">represented_variable</span><span class="o">=</span><span class="n">rv_interest</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/RepresentedVariable/QuestionItem&quot;</span><span class="p">,</span> <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Instrument &amp; InstrumentQuestion</span>
+    <span class="n">instrument</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Instrument</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:inst-bpf-2007:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Questionnaire BPF 2007 Vague 1&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Questionnaire Principal BPF 2007&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Questionnaire administré en face-à-face.&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;inst_hash_bpf_2007&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">InstrumentQuestion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+        <span class="n">question_item</span><span class="o">=</span><span class="n">qi_interest</span><span class="p">,</span>
+        <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/Instrument/Sequence/POL_MODULE/Q01&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># 4. Dataset Layer (StudyUnit &amp; InstanceVariables)</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="n">study_wave1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">StudyUnit</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:bpf-2007-w01:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;BPF_2007_W1&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Baromètre Politique Français - Vague 1 (Mars 2007)&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;French Political Barometer - Wave 1 (March 2007)&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;external_ref&quot;</span><span class="p">:</span> <span class="s2">&quot;10.7303/cdsp-bpf2007-w01&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="mi">2007</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Enquête pré-électorale présidentielle (échantillon 4000 électeurs).&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;su_hash_bpf_w01&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">study_wave2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">StudyUnit</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:bpf-2007-w02:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;BPF_2007_W2&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Baromètre Politique Français - Vague 2 (Avril 2007)&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;French Political Barometer - Wave 2 (April 2007)&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;external_ref&quot;</span><span class="p">:</span> <span class="s2">&quot;10.7303/cdsp-bpf2007-w02&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="mi">2007</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Enquête post-premier tour présidentielle 2007.&quot;</span><span class="p">}</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;su_hash_bpf_w02&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># InstanceVariableScheme</span>
+    <span class="n">iv_scheme</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">InstanceVariableScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:ivs-bpf-2007:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Schéma de variables d&#39;instance BPF 2007&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;BPF 2007 Instance Variables Scheme&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Variables physiques des fichiers de données BPF 2007.&quot;</span><span class="p">}</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Datafiles relating InstanceVariables to StudyUnits</span>
+    <span class="n">datafile_w1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Datafile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:datafile-bpf-2007-w01:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;study_unit&quot;</span><span class="p">:</span> <span class="n">study_wave1</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;bpf_2007_w01.sav&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Fichier de données SPSS de la Vague 1.&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;format&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;application/x-spss-sav&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;case_count&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;1500&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;df_hash_w1&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">datafile_w2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Datafile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:datafile-bpf-2007-w02:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;study_unit&quot;</span><span class="p">:</span> <span class="n">study_wave2</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;bpf_2007_w02.sav&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Fichier de données SPSS de la Vague 2.&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;format&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;application/x-spss-sav&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;case_count&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;1480&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;df_hash_w2&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Harmonized InstanceVariables instantiated across study waves and datafiles</span>
+    <span class="n">iv_w1_q01</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">InstanceVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:bpf-2007-w01-q01:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;scheme&quot;</span><span class="p">:</span> <span class="n">iv_scheme</span><span class="p">,</span>
+            <span class="s2">&quot;represented_variable&quot;</span><span class="p">:</span> <span class="n">rv_interest</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;q01_pol_interest&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Intérêt pour la politique (Vague 1)&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Colonne q01_pol_interest dans le fichier SPSS vague 1.&quot;</span><span class="p">}</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;universe&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Ensemble des électeurs inscrits&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;notes&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Variable administrée en début de questionnaire&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;iv_hash_w1_q01&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">iv_w2_q01</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">InstanceVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:bpf-2007-w02-q01:1.0.0&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;scheme&quot;</span><span class="p">:</span> <span class="n">iv_scheme</span><span class="p">,</span>
+            <span class="s2">&quot;represented_variable&quot;</span><span class="p">:</span> <span class="n">rv_interest</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;q01_pol_interest&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Intérêt pour la politique (Vague 2)&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;fr&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Colonne q01_pol_interest dans le fichier SPSS vague 2.&quot;</span><span class="p">}</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;universe&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Ensemble des électeurs inscrits&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;notes&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Variable répétée à l&#39;identique de la Vague 1&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;iv_hash_w2_q01&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># DatafileVariable junctions relating Datafile to InstanceVariables with ordering and statistics</span>
+    <span class="n">DatafileVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">datafile</span><span class="o">=</span><span class="n">datafile_w1</span><span class="p">,</span>
+        <span class="n">instance_variable</span><span class="o">=</span><span class="n">iv_w1_q01</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;statistics&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;mean&quot;</span><span class="p">:</span> <span class="mf">2.14</span><span class="p">,</span>
+                <span class="s2">&quot;stddev&quot;</span><span class="p">:</span> <span class="mf">0.88</span><span class="p">,</span>
+                <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="mf">4.0</span><span class="p">,</span>
+                <span class="s2">&quot;valid_cases&quot;</span><span class="p">:</span> <span class="mi">935</span><span class="p">,</span>
+                <span class="s2">&quot;missing_cases&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">DatafileVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">datafile</span><span class="o">=</span><span class="n">datafile_w2</span><span class="p">,</span>
+        <span class="n">instance_variable</span><span class="o">=</span><span class="n">iv_w2_q01</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;statistics&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;mean&quot;</span><span class="p">:</span> <span class="mf">2.22</span><span class="p">,</span>
+                <span class="s2">&quot;stddev&quot;</span><span class="p">:</span> <span class="mf">0.91</span><span class="p">,</span>
+                <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="mf">4.0</span><span class="p">,</span>
+                <span class="s2">&quot;valid_cases&quot;</span><span class="p">:</span> <span class="mi">1050</span><span class="p">,</span>
+                <span class="s2">&quot;missing_cases&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Frequencies (categorical variable count statistics)</span>
+    <span class="n">DatafileVariableFrequency</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">datafile</span><span class="o">=</span><span class="n">datafile_w1</span><span class="p">,</span>
+        <span class="n">instance_variable</span><span class="o">=</span><span class="n">iv_w1_q01</span><span class="p">,</span>
+        <span class="n">code_value</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mf">425.0</span><span class="p">,</span> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">DatafileVariableFrequency</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">datafile</span><span class="o">=</span><span class="n">datafile_w1</span><span class="p">,</span>
+        <span class="n">instance_variable</span><span class="o">=</span><span class="n">iv_w1_q01</span><span class="p">,</span>
+        <span class="n">code_value</span><span class="o">=</span><span class="s2">&quot;2&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mf">510.5</span><span class="p">,</span> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="s2">&quot;poidstot&quot;</span><span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># StudyInstrument relationship mapping with path</span>
+    <span class="n">StudyInstrument</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">study_unit</span><span class="o">=</span><span class="n">study_wave1</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/StudyUnit/Instrument/MainQuestionnaire&quot;</span><span class="p">,</span> <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">StudyInstrument</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">study_unit</span><span class="o">=</span><span class="n">study_wave2</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/StudyUnit/Instrument/MainQuestionnaire&quot;</span><span class="p">,</span> <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># 5. Infrastructure, Provenance, Staging &amp; Event Logging</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="n">UrnRegistry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="n">rv_interest</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="s2">&quot;RepresentedVariable&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;seed&quot;</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">UrnRegistry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="s2">&quot;https://elsst.cessda.eu/id/4/PoliticalAttitudes&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Concept&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;vocabulary&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;ELSST&quot;</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">URNAlias</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">alias_urn</span><span class="o">=</span><span class="s2">&quot;raw:colectica:098f6bcd-4621-3373-8ade-4e832627b4f6:1&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;canonical_urn&quot;</span><span class="p">:</span> <span class="n">rv_interest</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+            <span class="s2">&quot;entity_type&quot;</span><span class="p">:</span> <span class="s2">&quot;RepresentedVariable&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hash_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;v1_strict_sha256&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_file&quot;</span><span class="p">:</span> <span class="s2">&quot;bpf_2007_w01_source.xml&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">IngestBatch</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;ddi_l_4_closer_sample.json&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;source_format&quot;</span><span class="p">:</span> <span class="s2">&quot;ddi-l:4.0:json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;file_sha256&quot;</span><span class="p">:</span> <span class="s2">&quot;e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;completed&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;source_system&quot;</span><span class="p">:</span> <span class="s2">&quot;CLOSER&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;target_agency&quot;</span><span class="p">:</span> <span class="n">agency</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;created_urns&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">rv_interest</span><span class="o">.</span><span class="n">urn</span><span class="p">],</span>
+            <span class="s2">&quot;stats&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;represented_variables&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">EventLog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="n">rv_interest</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+        <span class="n">event_type</span><span class="o">=</span><span class="s2">&quot;seeded&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;event_data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;initial_seed&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;agency&quot;</span><span class="p">:</span> <span class="n">agency</span><span class="p">,</span>
+                <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># 6. Semantic Graph (RDF Triple-like Relationships)</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="n">SemanticRelationship</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">subject_urn</span><span class="o">=</span><span class="n">sub_concept</span><span class="o">.</span><span class="n">uri</span><span class="p">,</span>
+        <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;skos:exactMatch&quot;</span><span class="p">,</span>
+        <span class="n">object_urn</span><span class="o">=</span><span class="s2">&quot;https://elsst.cessda.eu/id/4/PoliticalAttitudes&quot;</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;subject_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Concept&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Concept&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;thesaurus&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;ELSST&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mapping_source&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;CESSDA ELSST v4&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">SemanticRelationship</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">subject_urn</span><span class="o">=</span><span class="n">cv_interest</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+        <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;skos:relatedMatch&quot;</span><span class="p">,</span>
+        <span class="n">object_urn</span><span class="o">=</span><span class="n">sub_concept</span><span class="o">.</span><span class="n">uri</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;subject_type&quot;</span><span class="p">:</span> <span class="s2">&quot;ConceptualVariable&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Concept&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;alignment_method&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;curated&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;confidence&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.98</span><span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">SemanticRelationship</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">subject_urn</span><span class="o">=</span><span class="n">qi_interest</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+        <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;skos:narrowMatch&quot;</span><span class="p">,</span>
+        <span class="n">object_urn</span><span class="o">=</span><span class="n">cv_interest</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+        <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;subject_type&quot;</span><span class="p">:</span> <span class="s2">&quot;QuestionItem&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;ConceptualVariable&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;extended_attributes&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;alignment_type&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;indicator_measure&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;organizations&quot;</span><span class="p">:</span> <span class="n">Organization</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="n">Group</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;concept_schemes&quot;</span><span class="p">:</span> <span class="n">ConceptScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;concepts&quot;</span><span class="p">:</span> <span class="n">Concept</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;conceptual_variable_schemes&quot;</span><span class="p">:</span> <span class="n">ConceptualVariableScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;conceptual_variables&quot;</span><span class="p">:</span> <span class="n">ConceptualVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;question_schemes&quot;</span><span class="p">:</span> <span class="n">QuestionScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;question_items&quot;</span><span class="p">:</span> <span class="n">QuestionItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;question_variables&quot;</span><span class="p">:</span> <span class="n">QuestionVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;instruments&quot;</span><span class="p">:</span> <span class="n">Instrument</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;instrument_questions&quot;</span><span class="p">:</span> <span class="n">InstrumentQuestion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;category_schemes&quot;</span><span class="p">:</span> <span class="n">CategoryScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;code_lists&quot;</span><span class="p">:</span> <span class="n">CodeList</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;codes&quot;</span><span class="p">:</span> <span class="n">Code</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;represented_variable_schemes&quot;</span><span class="p">:</span> <span class="n">RepresentedVariableScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;represented_variables&quot;</span><span class="p">:</span> <span class="n">RepresentedVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;study_units&quot;</span><span class="p">:</span> <span class="n">StudyUnit</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;datafiles&quot;</span><span class="p">:</span> <span class="n">Datafile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;instance_variable_schemes&quot;</span><span class="p">:</span> <span class="n">InstanceVariableScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;instance_variables&quot;</span><span class="p">:</span> <span class="n">InstanceVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;datafile_variables&quot;</span><span class="p">:</span> <span class="n">DatafileVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;datafile_variable_frequencies&quot;</span><span class="p">:</span> <span class="n">DatafileVariableFrequency</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;frequencies&quot;</span><span class="p">:</span> <span class="n">Frequency</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;study_instruments&quot;</span><span class="p">:</span> <span class="n">StudyInstrument</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;urn_registries&quot;</span><span class="p">:</span> <span class="n">UrnRegistry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;urn_aliases&quot;</span><span class="p">:</span> <span class="n">URNAlias</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;ingest_batches&quot;</span><span class="p">:</span> <span class="n">IngestBatch</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;event_logs&quot;</span><span class="p">:</span> <span class="n">EventLog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s2">&quot;semantic_relationships&quot;</span><span class="p">:</span> <span class="n">SemanticRelationship</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+    <span class="p">}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

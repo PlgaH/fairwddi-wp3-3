@@ -1,0 +1,1077 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>fairwddi.ingest.comparator &mdash; FAIRwDDI Lifecycle 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FAIRwDDI Lifecycle
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/index.html">Administrator Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../admin/index.html#key-operational-responsibilities">Key Operational Responsibilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../admin/index.html#guide-outline">Guide Outline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/architecture.html">System Architecture &amp; Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#hardware-operating-system-recommendations">Hardware &amp; Operating System Recommendations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#software-dependencies">Software Dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#database-architecture">Database Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/installation.html">Installation &amp; Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#configuration-env">Configuration (.env)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#database-provisioning">Database Provisioning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#verifying-installation">Verifying Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/cli_operations.html">CLI Operational Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#global-options">Global Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#vocabulary-administration-fairwddi-vocab">Vocabulary Administration (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">vocab</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#ingestion-pipeline-fairwddi-ingest">Ingestion Pipeline (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">ingest</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/ingestion_ops.html">Ingestion &amp; Pipeline Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#the-2-stage-ingestion-lifecycle">The 2-Stage Ingestion Lifecycle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#the-4-phase-comparison-cascade">The 4-Phase Comparison Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#reviewing-ingestion-plans">Reviewing Ingestion Plans</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#executing-batch-transactions">Executing Batch Transactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#handling-quarantine-records">Handling Quarantine Records</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#rolling-back-a-batch">Rolling Back a Batch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/deployment.html">Production Deployment &amp; Maintenance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#service-architecture">Service Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#asgi-application-server-setup">ASGI Application Server Setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#nginx-reverse-proxy-configuration">Nginx Reverse Proxy Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#database-maintenance-index-optimization">Database Maintenance &amp; Index Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#backup-and-disaster-recovery">Backup and Disaster Recovery</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/index.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../developer/index.html#architectural-principles">Architectural Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../developer/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/variable_cascade.html">The DDI Variable Cascade</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#the-three-tiers-of-the-cascade">The Three Tiers of the Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#tier-definitions">Tier Definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#standards-crosswalk">Standards Crosswalk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#orm-traversal-examples">ORM Traversal Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/data_model.html">The 30-Model Database Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#abstract-base-classes">Abstract Base Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#layer-model-breakdown">Layer &amp; Model Breakdown</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#polymorphic-cross-resource-relations">Polymorphic Cross-Resource Relations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/urn_registry.html">Universal URN Master Registry (UrnRegistry)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#the-problem-it-solves">The Problem It Solves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#the-supertype-master-pattern">The Supertype Master Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#lifecycle-guarantees">Lifecycle Guarantees</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#canonical-urn-syntax">Canonical URN Syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/multilingual_jsonb.html">Multilingual JSONB Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#jsonb-data-model">JSONB Data Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#string-normalization-pipeline">String Normalization Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#querying-multilingual-fields">Querying Multilingual Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#postgresql-17-icu-collations">PostgreSQL 17 ICU Collations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/fingerprinting.html">Content Fingerprinting &amp; Deduplication</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#the-multi-algorithm-approach">The Multi-Algorithm Approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#canonical-json-serialization">Canonical JSON Serialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#simple-vs-compound-hashing">Simple vs Compound Hashing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#deterministic-16-character-urn-hashes">Deterministic 16-Character URN Hashes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/ingest_engine.html">The Ingestion Engine (fairwddi.ingest)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#package-architecture">Package Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#format-detection-detector-py">Format Detection (detector.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#streaming-xml-iteration-streaming-py">Streaming XML Iteration (streaming.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#comparator-and-execution-plan-comparator-py-plan-py">Comparator and Execution Plan (comparator.py &amp; plan.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#batch-transaction-loading-loader-py">Batch Transaction Loading (loader.py)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#api-architecture">API Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#endpoints-overview">Endpoints Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#example-endpoint-implementation">Example Endpoint Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#interactive-database-explorer">Interactive Database Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/dartfx_integration.html">Data Artifex DDI Toolkit Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#overview-of-dartfx-ddi">Overview of dartfx-ddi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#ddi-lifecycle-fragment-streaming">DDI-Lifecycle Fragment Streaming</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#multilingual-codebook-merging">Multilingual Codebook Merging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#ddi-cdi-assistant-framework">DDI-CDI Assistant Framework</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributor/index.html">Contributor Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributor/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/environment.html">Development Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#pre-commit-hooks">Pre-commit Hooks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#running-quick-sanity-checks">Running Quick Sanity Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/conventions.html">Coding Conventions &amp; Standards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#python-stack-tooling">Python Stack &amp; Tooling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#code-formatting-linting-ruff">Code Formatting &amp; Linting (Ruff)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#type-annotations-static-typing">Type Annotations &amp; Static Typing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#django-migrations-zero-data-loss">Django Migrations &amp; Zero-Data-Loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#ddi-naming-conventions">DDI Naming Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/testing.html">Testing Guide &amp; Practices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#testing-stack">Testing Stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#running-tests">Running Tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#isolated-sqlite-test-configuration">Isolated SQLite Test Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#testing-ingestion-streaming">Testing Ingestion &amp; Streaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/workflows.html">Development Workflows &amp; Pull Requests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#git-branching-strategy">Git Branching Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#pull-request-checklist">Pull Request Checklist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#building-documentation-locally">Building Documentation Locally</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Python API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/index.html#modules">Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/models.html">Models (fairwddi.models)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.base">Base Infrastructure &amp; Supertype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.concept">Concept Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.representation">Representation Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.instrument">Instrument &amp; Question Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.dataset">Dataset Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.organization">Organization &amp; Grouping Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.infrastructure">Batch &amp; Ingestion Infrastructure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.event">Audit &amp; Event Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/schemas.html">Pydantic Schemas (fairwddi.schemas)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/schemas.html#module-fairwddi.schemas.common">Common Value Objects &amp; Primitives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/schemas.html#module-fairwddi.schemas.entities">Entity Schemas</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/db.html">Database Layer (fairwddi.db)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.seed">Seed &amp; Fixture Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.wipe">Wipe Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/ingest.html">Ingestion &amp; Pipeline (fairwddi.ingest)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.detector">Format Detection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.streaming">Streaming XML Parsing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.profiles">Extraction Profiles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.preflight">Preflight Static Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.comparator">Database Comparison</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.plan">Ingestion Execution Plan</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.loader">Batch Loader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.pipeline">Pipeline Orchestration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.harmonizer">Harmonization &amp; Cross-Survey Clustering</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.router">Router &amp; Endpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.schemas">API Request &amp; Response Schemas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.views">Views &amp; Route Handlers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.server">ASGI Server Runner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.explorer_html">Interactive Model Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/utils.html">Utilities (fairwddi.utils)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/utils.html#module-fairwddi.utils.urn">URN Helpers (urn.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/utils.html#module-fairwddi.utils.normalize_string">String Normalization (normalize_string.py)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/index.html">Standards &amp; Project Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../reference/index.html#reference-documents">Reference Documents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/glossary.html">DDI Canonical Terminology Glossary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/deliverables.html">Project Deliverables &amp; Research Reports</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#core-deliverables">Core Deliverables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#specialized-technical-research-papers">Specialized Technical Research Papers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#interactive-exploration">Interactive Exploration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/changelog.html">Changelog &amp; Project Roadmap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/changelog.html#project-timeline-overview">Project Timeline Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/changelog.html#release-history">Release History</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FAIRwDDI Lifecycle</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fairwddi.ingest.comparator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for fairwddi.ingest.comparator</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Stage 3a (Comparison &amp; Discovery): Cross-survey candidate discovery and similarity comparison.</span>
+
+<span class="sd">Evaluates ReQuest resources (Category, CodeList, QuestionItem, RepresentedVariable) across tiers</span>
+<span class="sd">delegating string algorithms, stem detection, and variant classification to dartfx.ddi.harmonizer:</span>
+
+<span class="sd">1. EXACT (1.00): Identical content hash.</span>
+<span class="sd">2. FACET_EXACT (0.95): Identical normalized label or question_text hash across present languages.</span>
+<span class="sd">3. MULTILINGUAL_OVERLAP (0.92): Exact match in at least one shared language with complementary</span>
+<span class="sd">   translations, or complementary language labels on matching code structures.</span>
+<span class="sd">4. NEAR_EXACT (0.96 - 0.98): Identical after loose punctuation normalization or &gt;= 0.98 similarity.</span>
+<span class="sd">5. INCLUSIVE_WRITING_VARIANT (0.98): Identical after stripping inclusive gender/plural markers.</span>
+<span class="sd">6. TYPOGRAPHICAL_VARIANT (0.95): Single-word typographical or grammatical error variant.</span>
+<span class="sd">7. PHRASING_VARIANT (0.92 - 0.94): Stylistic or pronominal phrasing variation.</span>
+<span class="sd">8. SHARED_STEM / SHARED_STEM_GRID (0.88): Shared prompt or stem with distinct sub-items.</span>
+<span class="sd">9. SAME_CONCEPT_DIVERGENT_DOMAIN / SAME_CONCEPT_DIFFERENT_SCALE (0.88): Equivalent concept/label</span>
+<span class="sd">   with divergent CodeLists. Action downgraded to link_semantic.</span>
+<span class="sd">10. SUBSTANTIVE_PERMUTATION (0.88): CodeLists sharing identical substantive categories.</span>
+<span class="sd">11. CATEGORIES_EXACT_CODES_DIFFERENT (0.85): CodeLists with identical categories, different codes.</span>
+<span class="sd">12. SYNTACTIC_SIMILAR (0.75 - 0.91): General normalized string similarity on label/question_text.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">difflib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dartfx.ddi.harmonizer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MatchType</span><span class="p">,</span>
+    <span class="n">TextNormalizer</span><span class="p">,</span>
+    <span class="n">TextVariantComparator</span><span class="p">,</span>
+    <span class="n">compare_multilingual_texts</span><span class="p">,</span>
+    <span class="n">detect_shared_stem</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.ingest.plan</span><span class="w"> </span><span class="kn">import</span> <span class="n">IngestPlan</span><span class="p">,</span> <span class="n">PlanActionItem</span><span class="p">,</span> <span class="n">ReviewGate</span>
+
+<span class="n">_normalizer</span> <span class="o">=</span> <span class="n">TextNormalizer</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_raw_lang_dict</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract language-keyed dictionary preserving original casing (with whitespace normalized).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">TextNormalizer</span><span class="o">.</span><span class="n">extract_multilingual_dict</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">lowercase</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_norm_lang_dict</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">TextNormalizer</span><span class="o">.</span><span class="n">extract_multilingual_dict</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">lowercase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_text_loose</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Strip trailing/leading punctuation, quotes, and French punctuation spacing.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_normalizer</span><span class="o">.</span><span class="n">normalize_loose</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s2">&quot;fr&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_strip_inclusive_markers</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove parenthetical or midpoint French inclusive gender/plural markers.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_normalizer</span><span class="o">.</span><span class="n">strip_inclusive_markers</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s2">&quot;fr&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_has_inclusive_markers</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_normalizer</span><span class="o">.</span><span class="n">has_inclusive_markers</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s2">&quot;fr&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_text_similarity</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">a</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">b</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">b</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">1.0</span>
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">difflib</span><span class="o">.</span><span class="n">SequenceMatcher</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">ratio</span><span class="p">(),</span> <span class="mi">4</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_detect_shared_stem</span><span class="p">(</span>
+    <span class="n">raw_a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">raw_b</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">min_stem_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect if two strings share a common question/category stem and distinct sub-items.&quot;&quot;&quot;</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">detect_shared_stem</span><span class="p">(</span>
+        <span class="n">raw_a</span><span class="p">,</span>
+        <span class="n">raw_b</span><span class="p">,</span>
+        <span class="n">min_stem_len</span><span class="o">=</span><span class="n">min_stem_len</span><span class="p">,</span>
+        <span class="n">context</span><span class="o">=</span><span class="s2">&quot;question_grid&quot;</span><span class="p">,</span>
+        <span class="n">lang</span><span class="o">=</span><span class="s2">&quot;fr&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_detect_wording_or_typo_variant</span><span class="p">(</span>
+    <span class="n">raw_a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">raw_b</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">lang</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">best_sim</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Classify stylistic/pronominal phrasing variants vs grammatical/typographical errors.&quot;&quot;&quot;</span>
+    <span class="n">cmp</span> <span class="o">=</span> <span class="n">TextVariantComparator</span><span class="p">(</span><span class="n">normalizer</span><span class="o">=</span><span class="n">_normalizer</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="n">lang</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">cmp</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">raw_a</span><span class="p">,</span> <span class="n">raw_b</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;canonical_text&quot;</span> <span class="ow">in</span> <span class="n">meta</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;canonical_text&quot;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;canonical_text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">lang</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;canonical_text&quot;</span><span class="p">]}</span>
+        <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">match_type</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">score</span><span class="p">,</span> <span class="n">meta</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_compare_multilingual_texts</span><span class="p">(</span>
+    <span class="n">ml_a</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ml_b</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compare two multilingual text dictionaries and return (match_type, confidence, details).&quot;&quot;&quot;</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">compare_multilingual_texts</span><span class="p">(</span><span class="n">ml_a</span><span class="p">,</span> <span class="n">ml_b</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">normalizer</span><span class="o">=</span><span class="n">_normalizer</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">match_type</span> <span class="o">==</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">DISTINCT</span> <span class="ow">or</span> <span class="n">res</span><span class="o">.</span><span class="n">score</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="p">{}</span>
+    <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">match_type</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">score</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_record_elevated</span><span class="p">(</span><span class="n">urn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ext_attrs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">elevated_urns</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">urn</span> <span class="ow">in</span> <span class="n">elevated_urns</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ext_attrs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ext_attrs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;is_elevated&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;elevation&quot;</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_load_resource_records</span><span class="p">(</span>
+    <span class="n">resource_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load lightweight comparison records from the ReQuest database for a given resource type.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.models</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">Category</span><span class="p">,</span>
+        <span class="n">CodeItem</span><span class="p">,</span>
+        <span class="n">CodeList</span><span class="p">,</span>
+        <span class="n">QuestionItem</span><span class="p">,</span>
+        <span class="n">QuestionVariable</span><span class="p">,</span>
+        <span class="n">RepresentedVariable</span><span class="p">,</span>
+        <span class="n">UrnRegistry</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">elevated_urns</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">UrnRegistry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">&quot;elevated&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="n">records</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">q_low</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">if</span> <span class="n">query</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">resource_type</span> <span class="o">==</span> <span class="s2">&quot;Category&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">):</span>
+            <span class="n">text_map</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">label</span> <span class="ow">or</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">q_low</span>
+                <span class="ow">and</span> <span class="n">q_low</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cat</span><span class="o">.</span><span class="n">urn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">q_low</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">text_map</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="n">cat</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Category&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">cat</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text_map</span><span class="p">,</span>
+                    <span class="s2">&quot;content_hash&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">hashes</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;is_elevated&quot;</span><span class="p">:</span> <span class="n">_is_record_elevated</span><span class="p">(</span>
+                        <span class="n">cat</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">extended_attributes</span><span class="p">,</span> <span class="n">elevated_urns</span>
+                    <span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">resource_type</span> <span class="o">==</span> <span class="s2">&quot;QuestionItem&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">QuestionItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">):</span>
+            <span class="n">text_map</span> <span class="o">=</span> <span class="n">qi</span><span class="o">.</span><span class="n">question_text</span> <span class="ow">or</span> <span class="n">qi</span><span class="o">.</span><span class="n">label</span> <span class="ow">or</span> <span class="p">{}</span>
+            <span class="n">text_dict</span> <span class="o">=</span> <span class="n">_raw_lang_dict</span><span class="p">(</span><span class="n">text_map</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">q_low</span>
+                <span class="ow">and</span> <span class="n">q_low</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">q_low</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">text_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="s2">&quot;QuestionItem&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">qi</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text_map</span><span class="p">,</span>
+                    <span class="s2">&quot;content_hash&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">hashes</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;is_elevated&quot;</span><span class="p">:</span> <span class="n">_is_record_elevated</span><span class="p">(</span>
+                        <span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span> <span class="n">qi</span><span class="o">.</span><span class="n">extended_attributes</span><span class="p">,</span> <span class="n">elevated_urns</span>
+                    <span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">resource_type</span> <span class="o">==</span> <span class="s2">&quot;CodeList&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">cl</span> <span class="ow">in</span> <span class="n">CodeList</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">):</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">CodeItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">code_list</span><span class="o">=</span><span class="n">cl</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">select_related</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="s2">&quot;code_value&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">code_pairs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+                <span class="n">cat_lbl_dict</span> <span class="o">=</span> <span class="n">_norm_lang_dict</span><span class="p">(</span><span class="n">ci</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">label</span><span class="p">)</span> <span class="k">if</span> <span class="n">ci</span><span class="o">.</span><span class="n">category</span> <span class="k">else</span> <span class="p">{}</span>
+                <span class="n">cat_lbl</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">cat_lbl_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">ci</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">urn</span> <span class="k">if</span> <span class="n">ci</span><span class="o">.</span><span class="n">category</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">code_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">str</span><span class="p">(</span><span class="n">ci</span><span class="o">.</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">cat_lbl</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">ci</span><span class="o">.</span><span class="n">is_missing</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">q_low</span> <span class="ow">and</span> <span class="n">q_low</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cl</span><span class="o">.</span><span class="n">urn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="n">q_low</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">q_low</span> <span class="ow">in</span> <span class="n">lbl</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">lbl</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">code_pairs</span><span class="p">):</span>
+                    <span class="k">continue</span>
+            <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="n">cl</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="s2">&quot;CodeList&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">cl</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">cl</span><span class="o">.</span><span class="n">label</span> <span class="ow">or</span> <span class="p">{},</span>
+                    <span class="s2">&quot;codes&quot;</span><span class="p">:</span> <span class="n">code_pairs</span><span class="p">,</span>
+                    <span class="s2">&quot;content_hash&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">hashes</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;is_elevated&quot;</span><span class="p">:</span> <span class="n">_is_record_elevated</span><span class="p">(</span>
+                        <span class="n">cl</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span> <span class="n">cl</span><span class="o">.</span><span class="n">extended_attributes</span><span class="p">,</span> <span class="n">elevated_urns</span>
+                    <span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">resource_type</span> <span class="o">==</span> <span class="s2">&quot;RepresentedVariable&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">RepresentedVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">select_related</span><span class="p">(</span>
+            <span class="s2">&quot;code_list&quot;</span><span class="p">,</span> <span class="s2">&quot;conceptual_variable&quot;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">):</span>
+            <span class="n">q_urns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">QuestionVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">represented_variable</span><span class="o">=</span><span class="n">rv</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;order&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s2">&quot;question_item_id&quot;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">text_map</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">label</span> <span class="ow">or</span> <span class="p">{}</span>
+            <span class="n">text_dict</span> <span class="o">=</span> <span class="n">_raw_lang_dict</span><span class="p">(</span><span class="n">text_map</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">q_low</span>
+                <span class="ow">and</span> <span class="n">q_low</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">urn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">q_low</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">text_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">cl_hash</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">rv</span><span class="o">.</span><span class="n">code_list</span><span class="p">:</span>
+                <span class="n">cl_hashes</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">code_list</span><span class="o">.</span><span class="n">hashes</span> <span class="ow">or</span> <span class="p">{}</span>
+                <span class="n">cl_hash</span> <span class="o">=</span> <span class="n">cl_hashes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codes&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cl_hashes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span>
+            <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="s2">&quot;RepresentedVariable&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text_map</span><span class="p">,</span>
+                    <span class="s2">&quot;codelist_urn&quot;</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">code_list_id</span><span class="p">,</span>
+                    <span class="s2">&quot;codelist_hash&quot;</span><span class="p">:</span> <span class="n">cl_hash</span><span class="p">,</span>
+                    <span class="s2">&quot;question_urns&quot;</span><span class="p">:</span> <span class="n">q_urns</span><span class="p">,</span>
+                    <span class="s2">&quot;content_hash&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">hashes</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;is_elevated&quot;</span><span class="p">:</span> <span class="n">_is_record_elevated</span><span class="p">(</span>
+                        <span class="n">rv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span> <span class="n">rv</span><span class="o">.</span><span class="n">extended_attributes</span><span class="p">,</span> <span class="n">elevated_urns</span>
+                    <span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">records</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_codelist_code_pairs</span><span class="p">(</span>
+    <span class="n">cl_urn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cache</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve normalized (code_value, category_label) pairs for a CodeList URN.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cl_urn</span> <span class="ow">in</span> <span class="n">cache</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cache</span><span class="p">[</span><span class="n">cl_urn</span><span class="p">]</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodeItem</span>
+
+    <span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="n">CodeItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">code_list_id</span><span class="o">=</span><span class="n">cl_urn</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">select_related</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="s2">&quot;code_value&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">pairs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="n">lbl</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ci</span><span class="o">.</span><span class="n">category</span><span class="p">:</span>
+            <span class="n">lbl_dict</span> <span class="o">=</span> <span class="n">_raw_lang_dict</span><span class="p">(</span><span class="n">ci</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">lbl</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">lbl_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">ci</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">urn</span> <span class="k">if</span> <span class="n">ci</span><span class="o">.</span><span class="n">category</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">pairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">str</span><span class="p">(</span><span class="n">ci</span><span class="o">.</span><span class="n">code_value</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="nb">str</span><span class="p">(</span><span class="n">lbl</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span>
+    <span class="n">cache</span><span class="p">[</span><span class="n">cl_urn</span><span class="p">]</span> <span class="o">=</span> <span class="n">pairs</span>
+    <span class="k">return</span> <span class="n">pairs</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_codelist_compatibility</span><span class="p">(</span>
+    <span class="n">cl_a</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cl_b</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cl_hash_a</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cl_hash_b</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">alias_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">codes_cache</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if two CodeLists are identical, aliased, content-equivalent, or divergent.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cl_a</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cl_b</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;both_uncoded&quot;</span>
+    <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">cl_a</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">cl_b</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;coded_vs_uncoded&quot;</span>
+    <span class="k">if</span> <span class="n">cl_a</span> <span class="o">==</span> <span class="n">cl_b</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;identical_urn&quot;</span>
+
+    <span class="c1"># Aliased through URNAlias</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_res</span><span class="p">(</span><span class="n">u</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">curr</span> <span class="o">=</span> <span class="n">u</span>
+        <span class="n">visited</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">curr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">:</span>
+            <span class="n">visited</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">curr</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">alias_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">curr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">alias_map</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">curr</span> <span class="o">=</span> <span class="n">alias_map</span><span class="p">[</span><span class="n">curr</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">URNAlias</span>
+
+                <span class="n">al</span> <span class="o">=</span> <span class="n">URNAlias</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">alias_urn</span><span class="o">=</span><span class="n">curr</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">al</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">curr</span> <span class="o">=</span> <span class="n">al</span><span class="o">.</span><span class="n">canonical_urn</span>
+        <span class="k">return</span> <span class="n">curr</span>
+
+    <span class="n">canon_a</span> <span class="o">=</span> <span class="n">_res</span><span class="p">(</span><span class="n">cl_a</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+    <span class="n">canon_b</span> <span class="o">=</span> <span class="n">_res</span><span class="p">(</span><span class="n">cl_b</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+    <span class="k">if</span> <span class="n">canon_a</span> <span class="ow">and</span> <span class="n">canon_b</span> <span class="ow">and</span> <span class="n">canon_a</span> <span class="o">==</span> <span class="n">canon_b</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;aliased&quot;</span>
+
+    <span class="k">if</span> <span class="n">cl_hash_a</span> <span class="ow">and</span> <span class="n">cl_hash_b</span> <span class="ow">and</span> <span class="n">cl_hash_a</span> <span class="o">==</span> <span class="n">cl_hash_b</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;identical_codes_hash&quot;</span>
+
+    <span class="n">cache</span> <span class="o">=</span> <span class="n">codes_cache</span> <span class="k">if</span> <span class="n">codes_cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">cl_a</span> <span class="ow">and</span> <span class="n">cl_b</span><span class="p">:</span>
+        <span class="n">pairs_a</span> <span class="o">=</span> <span class="n">_get_codelist_code_pairs</span><span class="p">(</span><span class="n">cl_a</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+        <span class="n">pairs_b</span> <span class="o">=</span> <span class="n">_get_codelist_code_pairs</span><span class="p">(</span><span class="n">cl_b</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pairs_a</span> <span class="ow">and</span> <span class="n">pairs_b</span> <span class="ow">and</span> <span class="n">pairs_a</span> <span class="o">==</span> <span class="n">pairs_b</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;identical_code_items&quot;</span>
+
+    <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;divergent&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_compare_pair</span><span class="p">(</span>
+    <span class="n">rec_a</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">rec_b</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
+    <span class="n">alias_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">codes_cache</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compare two resource records of the same type and return a candidate dict if &gt;= threshold.&quot;&quot;&quot;</span>
+    <span class="n">r_type</span> <span class="o">=</span> <span class="n">rec_a</span><span class="p">[</span><span class="s2">&quot;resource_type&quot;</span><span class="p">]</span>
+    <span class="n">urn_a</span> <span class="o">=</span> <span class="n">rec_a</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">]</span>
+    <span class="n">urn_b</span> <span class="o">=</span> <span class="n">rec_b</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">urn_a</span> <span class="o">==</span> <span class="n">urn_b</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">is_tgt_elevated</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;is_elevated&quot;</span><span class="p">))</span>
+
+    <span class="c1"># For RepresentedVariable, assess CodeList compatibility upfront</span>
+    <span class="n">cl_compat</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">cl_status</span> <span class="o">=</span> <span class="s2">&quot;not_applicable&quot;</span>
+    <span class="k">if</span> <span class="n">r_type</span> <span class="o">==</span> <span class="s2">&quot;RepresentedVariable&quot;</span><span class="p">:</span>
+        <span class="n">cl_a</span> <span class="o">=</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">)</span>
+        <span class="n">cl_b</span> <span class="o">=</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">)</span>
+        <span class="n">cl_compat</span><span class="p">,</span> <span class="n">cl_status</span> <span class="o">=</span> <span class="n">_check_codelist_compatibility</span><span class="p">(</span>
+            <span class="n">cl_a</span><span class="p">,</span>
+            <span class="n">cl_b</span><span class="p">,</span>
+            <span class="n">cl_hash_a</span><span class="o">=</span><span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_hash&quot;</span><span class="p">),</span>
+            <span class="n">cl_hash_b</span><span class="o">=</span><span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_hash&quot;</span><span class="p">),</span>
+            <span class="n">alias_map</span><span class="o">=</span><span class="n">alias_map</span><span class="p">,</span>
+            <span class="n">codes_cache</span><span class="o">=</span><span class="n">codes_cache</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># 1. Exact content hash match</span>
+    <span class="k">if</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content_hash&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content_hash&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content_hash&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">r_type</span> <span class="o">==</span> <span class="s2">&quot;RepresentedVariable&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cl_compat</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="n">r_type</span><span class="p">,</span>
+                <span class="s2">&quot;source_urn&quot;</span><span class="p">:</span> <span class="n">urn_a</span><span class="p">,</span>
+                <span class="s2">&quot;target_urn&quot;</span><span class="p">:</span> <span class="n">urn_b</span><span class="p">,</span>
+                <span class="s2">&quot;match_type&quot;</span><span class="p">:</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">SAME_CONCEPT_DIVERGENT_DOMAIN</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="mf">0.88</span><span class="p">,</span>
+                <span class="s2">&quot;recommended_action&quot;</span><span class="p">:</span> <span class="s2">&quot;link_semantic&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;requires_review&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;source_name&quot;</span><span class="p">:</span> <span class="n">rec_a</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;target_name&quot;</span><span class="p">:</span> <span class="n">rec_b</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;target_is_elevated&quot;</span><span class="p">:</span> <span class="n">is_tgt_elevated</span><span class="p">,</span>
+                    <span class="s2">&quot;codelist_status&quot;</span><span class="p">:</span> <span class="n">cl_status</span><span class="p">,</span>
+                    <span class="s2">&quot;source_codelist_urn&quot;</span><span class="p">:</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;target_codelist_urn&quot;</span><span class="p">:</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;note&quot;</span><span class="p">:</span> <span class="p">(</span>
+                        <span class="s2">&quot;RepresentedVariables share content hash but use divergent response &quot;</span>
+                        <span class="s2">&quot;scales (CodeLists). Action downgraded to link_semantic.&quot;</span>
+                    <span class="p">),</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+        <span class="n">details</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;source_name&quot;</span><span class="p">:</span> <span class="n">rec_a</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;target_name&quot;</span><span class="p">:</span> <span class="n">rec_b</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;target_is_elevated&quot;</span><span class="p">:</span> <span class="n">is_tgt_elevated</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">r_type</span> <span class="o">==</span> <span class="s2">&quot;RepresentedVariable&quot;</span><span class="p">:</span>
+            <span class="n">details</span><span class="p">[</span><span class="s2">&quot;codelist_status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cl_status</span>
+            <span class="n">details</span><span class="p">[</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="n">r_type</span><span class="p">,</span>
+            <span class="s2">&quot;source_urn&quot;</span><span class="p">:</span> <span class="n">urn_a</span><span class="p">,</span>
+            <span class="s2">&quot;target_urn&quot;</span><span class="p">:</span> <span class="n">urn_b</span><span class="p">,</span>
+            <span class="s2">&quot;match_type&quot;</span><span class="p">:</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">EXACT</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="s2">&quot;recommended_action&quot;</span><span class="p">:</span> <span class="s2">&quot;absorb&quot;</span> <span class="k">if</span> <span class="n">is_tgt_elevated</span> <span class="k">else</span> <span class="s2">&quot;alias&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;requires_review&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="n">details</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="c1"># 2. CodeList structural comparison</span>
+    <span class="k">if</span> <span class="n">r_type</span> <span class="o">==</span> <span class="s2">&quot;CodeList&quot;</span><span class="p">:</span>
+        <span class="n">codes_a</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codes&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">codes_b</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codes&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">if</span> <span class="n">codes_a</span> <span class="ow">and</span> <span class="n">codes_b</span><span class="p">:</span>
+            <span class="n">pairs_a</span> <span class="o">=</span> <span class="p">[(</span><span class="n">v</span><span class="p">,</span> <span class="n">lbl</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">lbl</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">codes_a</span><span class="p">]</span>
+            <span class="n">pairs_b</span> <span class="o">=</span> <span class="p">[(</span><span class="n">v</span><span class="p">,</span> <span class="n">lbl</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">lbl</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">codes_b</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">pairs_a</span> <span class="o">==</span> <span class="n">pairs_b</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="s2">&quot;CodeList&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;source_urn&quot;</span><span class="p">:</span> <span class="n">urn_a</span><span class="p">,</span>
+                    <span class="s2">&quot;target_urn&quot;</span><span class="p">:</span> <span class="n">urn_b</span><span class="p">,</span>
+                    <span class="s2">&quot;match_type&quot;</span><span class="p">:</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">FACET_EXACT</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+                    <span class="s2">&quot;recommended_action&quot;</span><span class="p">:</span> <span class="s2">&quot;absorb&quot;</span> <span class="k">if</span> <span class="n">is_tgt_elevated</span> <span class="k">else</span> <span class="s2">&quot;alias&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;requires_review&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;source_name&quot;</span><span class="p">:</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;target_name&quot;</span><span class="p">:</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;code_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">pairs_a</span><span class="p">),</span>
+                        <span class="s2">&quot;codes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">lbl</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">lbl</span> <span class="ow">in</span> <span class="n">pairs_a</span><span class="p">[:</span><span class="mi">5</span><span class="p">]],</span>
+                        <span class="s2">&quot;target_is_elevated&quot;</span><span class="p">:</span> <span class="n">is_tgt_elevated</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="p">}</span>
+
+            <span class="n">subst_a</span> <span class="o">=</span> <span class="p">{(</span><span class="n">v</span><span class="p">,</span> <span class="n">lbl</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">lbl</span><span class="p">,</span> <span class="n">miss</span> <span class="ow">in</span> <span class="n">codes_a</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">miss</span> <span class="ow">and</span> <span class="n">lbl</span><span class="p">}</span>
+            <span class="n">subst_b</span> <span class="o">=</span> <span class="p">{(</span><span class="n">v</span><span class="p">,</span> <span class="n">lbl</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">lbl</span><span class="p">,</span> <span class="n">miss</span> <span class="ow">in</span> <span class="n">codes_b</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">miss</span> <span class="ow">and</span> <span class="n">lbl</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">subst_a</span> <span class="ow">and</span> <span class="n">subst_a</span> <span class="o">==</span> <span class="n">subst_b</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="s2">&quot;CodeList&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;source_urn&quot;</span><span class="p">:</span> <span class="n">urn_a</span><span class="p">,</span>
+                    <span class="s2">&quot;target_urn&quot;</span><span class="p">:</span> <span class="n">urn_b</span><span class="p">,</span>
+                    <span class="s2">&quot;match_type&quot;</span><span class="p">:</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">SUBSTANTIVE_PERMUTATION</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="mf">0.88</span><span class="p">,</span>
+                    <span class="s2">&quot;recommended_action&quot;</span><span class="p">:</span> <span class="s2">&quot;link_semantic&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;requires_review&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;source_name&quot;</span><span class="p">:</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;target_name&quot;</span><span class="p">:</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;substantive_codes&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">subst_a</span><span class="p">),</span>
+                        <span class="s2">&quot;codes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">lbl</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">lbl</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">subst_a</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]],</span>
+                    <span class="p">},</span>
+                <span class="p">}</span>
+
+            <span class="n">cats_a</span> <span class="o">=</span> <span class="p">{</span><span class="n">lbl</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">lbl</span><span class="p">,</span> <span class="n">miss</span> <span class="ow">in</span> <span class="n">codes_a</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">miss</span> <span class="ow">and</span> <span class="n">lbl</span><span class="p">}</span>
+            <span class="n">cats_b</span> <span class="o">=</span> <span class="p">{</span><span class="n">lbl</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">lbl</span><span class="p">,</span> <span class="n">miss</span> <span class="ow">in</span> <span class="n">codes_b</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">miss</span> <span class="ow">and</span> <span class="n">lbl</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">cats_a</span> <span class="ow">and</span> <span class="n">cats_a</span> <span class="o">==</span> <span class="n">cats_b</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="s2">&quot;CodeList&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;source_urn&quot;</span><span class="p">:</span> <span class="n">urn_a</span><span class="p">,</span>
+                    <span class="s2">&quot;target_urn&quot;</span><span class="p">:</span> <span class="n">urn_b</span><span class="p">,</span>
+                    <span class="s2">&quot;match_type&quot;</span><span class="p">:</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">CATEGORIES_EXACT_CODES_DIFFERENT</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="mf">0.85</span><span class="p">,</span>
+                    <span class="s2">&quot;recommended_action&quot;</span><span class="p">:</span> <span class="s2">&quot;link_semantic&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;requires_review&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;source_name&quot;</span><span class="p">:</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;target_name&quot;</span><span class="p">:</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;shared_categories&quot;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cats_a</span><span class="p">),</span>
+                    <span class="p">},</span>
+                <span class="p">}</span>
+
+            <span class="c1"># Check if code values are identical with complementary languages in labels</span>
+            <span class="n">vals_a</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">codes_a</span><span class="p">]</span>
+            <span class="n">vals_b</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">codes_b</span><span class="p">]</span>
+            <span class="n">text_a</span> <span class="o">=</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+            <span class="n">text_b</span> <span class="o">=</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+            <span class="n">langs_a</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">_raw_lang_dict</span><span class="p">(</span><span class="n">text_a</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">langs_b</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">_raw_lang_dict</span><span class="p">(</span><span class="n">text_b</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">vals_a</span> <span class="o">==</span> <span class="n">vals_b</span> <span class="ow">and</span> <span class="n">langs_a</span> <span class="ow">and</span> <span class="n">langs_b</span> <span class="ow">and</span> <span class="n">langs_a</span> <span class="o">!=</span> <span class="n">langs_b</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="s2">&quot;CodeList&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;source_urn&quot;</span><span class="p">:</span> <span class="n">urn_a</span><span class="p">,</span>
+                    <span class="s2">&quot;target_urn&quot;</span><span class="p">:</span> <span class="n">urn_b</span><span class="p">,</span>
+                    <span class="s2">&quot;match_type&quot;</span><span class="p">:</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">MULTILINGUAL_OVERLAP</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="mf">0.90</span><span class="p">,</span>
+                    <span class="s2">&quot;recommended_action&quot;</span><span class="p">:</span> <span class="s2">&quot;absorb&quot;</span> <span class="k">if</span> <span class="n">is_tgt_elevated</span> <span class="k">else</span> <span class="s2">&quot;merge_multilingual&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;requires_review&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;code_values&quot;</span><span class="p">:</span> <span class="n">vals_a</span><span class="p">,</span>
+                        <span class="s2">&quot;source_languages&quot;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">langs_a</span><span class="p">),</span>
+                        <span class="s2">&quot;target_languages&quot;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">langs_b</span><span class="p">),</span>
+                        <span class="s2">&quot;target_is_elevated&quot;</span><span class="p">:</span> <span class="n">is_tgt_elevated</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="p">}</span>
+
+        <span class="c1"># CodeList identity is strictly structural; do not fall through to text/label comparison</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># 3. Text/Label comparison (Category, QuestionItem, RepresentedVariable)</span>
+    <span class="n">m_type</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="n">details</span> <span class="o">=</span> <span class="n">_compare_multilingual_texts</span><span class="p">(</span><span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">),</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">m_type</span> <span class="ow">and</span> <span class="n">conf</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">m_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MatchType</span><span class="o">.</span><span class="n">SHARED_STEM</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;SHARED_STEM&quot;</span><span class="p">,</span> <span class="s2">&quot;SHARED_STEM_GRID&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">r_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;QuestionItem&quot;</span><span class="p">,</span> <span class="s2">&quot;RepresentedVariable&quot;</span><span class="p">):</span>
+                <span class="c1"># Categories do not form question grids; fall back to syntactic similarity</span>
+                <span class="n">m_type</span> <span class="o">=</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">SYNTACTIC_SIMILAR</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">rec_action</span> <span class="o">=</span> <span class="s2">&quot;link_semantic&quot;</span>
+                <span class="n">req_rev</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rec_action</span> <span class="o">=</span> <span class="s2">&quot;group&quot;</span>
+                <span class="n">req_rev</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">r_type</span> <span class="o">==</span> <span class="s2">&quot;RepresentedVariable&quot;</span><span class="p">:</span>
+                    <span class="n">details</span><span class="p">[</span><span class="s2">&quot;codelist_status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cl_status</span>
+                    <span class="n">details</span><span class="p">[</span><span class="s2">&quot;source_codelist_urn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">)</span>
+                    <span class="n">details</span><span class="p">[</span><span class="s2">&quot;target_codelist_urn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">r_type</span> <span class="o">==</span> <span class="s2">&quot;RepresentedVariable&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cl_compat</span><span class="p">:</span>
+            <span class="n">m_type</span> <span class="o">=</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">SAME_CONCEPT_DIVERGENT_DOMAIN</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">rec_action</span> <span class="o">=</span> <span class="s2">&quot;link_semantic&quot;</span>
+            <span class="n">req_rev</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">conf</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="mf">0.88</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">details</span><span class="p">[</span><span class="s2">&quot;codelist_status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cl_status</span>
+            <span class="n">details</span><span class="p">[</span><span class="s2">&quot;source_codelist_urn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">)</span>
+            <span class="n">details</span><span class="p">[</span><span class="s2">&quot;target_codelist_urn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">)</span>
+            <span class="n">details</span><span class="p">[</span><span class="s2">&quot;note&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;RepresentedVariables share label semantics but use divergent response scales &quot;</span>
+                <span class="s2">&quot;(CodeLists). Action downgraded to link_semantic to preserve value domain &quot;</span>
+                <span class="s2">&quot;integrity.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">m_type</span> <span class="o">==</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">MULTILINGUAL_OVERLAP</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">rec_action</span> <span class="o">=</span> <span class="s2">&quot;absorb&quot;</span> <span class="k">if</span> <span class="n">is_tgt_elevated</span> <span class="k">else</span> <span class="s2">&quot;merge_multilingual&quot;</span>
+            <span class="n">req_rev</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="n">m_type</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="n">MatchType</span><span class="o">.</span><span class="n">FACET_EXACT</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">MatchType</span><span class="o">.</span><span class="n">EXACT_IDENTICAL</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">MatchType</span><span class="o">.</span><span class="n">NORMALIZED_EXACT</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">rec_action</span> <span class="o">=</span> <span class="s2">&quot;absorb&quot;</span> <span class="k">if</span> <span class="n">is_tgt_elevated</span> <span class="k">else</span> <span class="s2">&quot;alias&quot;</span>
+            <span class="n">req_rev</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="n">m_type</span> <span class="o">==</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">NEAR_EXACT</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">rec_action</span> <span class="o">=</span> <span class="s2">&quot;absorb&quot;</span> <span class="k">if</span> <span class="n">is_tgt_elevated</span> <span class="k">else</span> <span class="s2">&quot;alias&quot;</span>
+            <span class="n">req_rev</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">m_type</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="n">MatchType</span><span class="o">.</span><span class="n">INCLUSIVE_WRITING_VARIANT</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">MatchType</span><span class="o">.</span><span class="n">PHRASING_VARIANT</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">MatchType</span><span class="o">.</span><span class="n">TYPOGRAPHICAL_VARIANT</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">rec_action</span> <span class="o">=</span> <span class="s2">&quot;absorb&quot;</span> <span class="k">if</span> <span class="n">is_tgt_elevated</span> <span class="k">else</span> <span class="s2">&quot;elevate&quot;</span>
+            <span class="n">req_rev</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rec_action</span> <span class="o">=</span> <span class="s2">&quot;link_semantic&quot;</span>
+            <span class="n">req_rev</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">r_type</span> <span class="o">==</span> <span class="s2">&quot;RepresentedVariable&quot;</span>
+            <span class="ow">and</span> <span class="n">cl_compat</span>
+            <span class="ow">and</span> <span class="n">m_type</span>
+            <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="n">MatchType</span><span class="o">.</span><span class="n">SHARED_STEM</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s2">&quot;SHARED_STEM&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;SHARED_STEM_GRID&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">details</span><span class="p">[</span><span class="s2">&quot;codelist_status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cl_status</span>
+            <span class="n">details</span><span class="p">[</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codelist_urn&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="n">r_type</span><span class="p">,</span>
+            <span class="s2">&quot;source_urn&quot;</span><span class="p">:</span> <span class="n">urn_a</span><span class="p">,</span>
+            <span class="s2">&quot;target_urn&quot;</span><span class="p">:</span> <span class="n">urn_b</span><span class="p">,</span>
+            <span class="s2">&quot;match_type&quot;</span><span class="p">:</span> <span class="n">m_type</span><span class="p">,</span>
+            <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="n">conf</span><span class="p">,</span>
+            <span class="s2">&quot;recommended_action&quot;</span><span class="p">:</span> <span class="n">rec_action</span><span class="p">,</span>
+            <span class="s2">&quot;requires_review&quot;</span><span class="p">:</span> <span class="n">req_rev</span><span class="p">,</span>
+            <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;source_text&quot;</span><span class="p">:</span> <span class="n">rec_a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;target_text&quot;</span><span class="p">:</span> <span class="n">rec_b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;target_is_elevated&quot;</span><span class="p">:</span> <span class="n">is_tgt_elevated</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">details</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="discover_candidates">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.comparator.discover_candidates">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">discover_candidates</span><span class="p">(</span>
+    <span class="n">resource_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">study_urn</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Discover harmonization candidate pairs across the ReQuest database.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        resource_type: Optional filter (&#39;Category&#39;, &#39;CodeList&#39;, &#39;QuestionItem&#39;,</span>
+<span class="sd">                       &#39;RepresentedVariable&#39;). If None, searches across all 4 core types.</span>
+<span class="sd">        study_urn: Optional StudyUnit URN to scope source candidates to.</span>
+<span class="sd">        batch_id: Optional IngestBatch ID to scope source candidates to.</span>
+<span class="sd">        query: Optional substring filter on URN or text/label.</span>
+<span class="sd">        threshold: Minimum similarity confidence score (0.0 to 1.0, default 0.75).</span>
+<span class="sd">        limit: Maximum number of ranked candidate pairs to return.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">IngestBatch</span><span class="p">,</span> <span class="n">InstanceVariable</span><span class="p">,</span> <span class="n">URNAlias</span>
+
+    <span class="n">target_types</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">[</span><span class="n">resource_type</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">resource_type</span>
+        <span class="k">else</span> <span class="p">[</span><span class="s2">&quot;Category&quot;</span><span class="p">,</span> <span class="s2">&quot;CodeList&quot;</span><span class="p">,</span> <span class="s2">&quot;QuestionItem&quot;</span><span class="p">,</span> <span class="s2">&quot;RepresentedVariable&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">alias_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">URNAlias</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s2">&quot;alias_urn&quot;</span><span class="p">,</span> <span class="s2">&quot;canonical_urn&quot;</span><span class="p">))</span>
+    <span class="n">codes_cache</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">scoped_urns</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">batch_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">IngestBatch</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">batch_id</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">batch</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;IngestBatch #</span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2"> does not exist.&quot;</span><span class="p">)</span>
+        <span class="n">scoped_urns</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">created_urns</span> <span class="ow">or</span> <span class="p">[])</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">reused_urns</span> <span class="ow">or</span> <span class="p">[])</span>
+    <span class="k">elif</span> <span class="n">study_urn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">iv_rvs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+            <span class="n">InstanceVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">datafiles__study_unit_id</span><span class="o">=</span><span class="n">study_urn</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">represented_variable__isnull</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s2">&quot;represented_variable_id&quot;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">scoped_urns</span> <span class="o">=</span> <span class="n">iv_rvs</span>
+
+    <span class="n">candidates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">seen_pairs</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">r_type</span> <span class="ow">in</span> <span class="n">target_types</span><span class="p">:</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="n">_load_resource_records</span><span class="p">(</span><span class="n">r_type</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+                <span class="n">item_a</span> <span class="o">=</span> <span class="n">records</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">item_b</span> <span class="o">=</span> <span class="n">records</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">scoped_urns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">item_a</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">scoped_urns</span> <span class="ow">and</span> <span class="n">item_b</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">scoped_urns</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="c1"># Ensure source_urn is the one from the scoped batch/study</span>
+                    <span class="k">if</span> <span class="n">item_b</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">scoped_urns</span> <span class="ow">and</span> <span class="n">item_a</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">scoped_urns</span><span class="p">:</span>
+                        <span class="n">src_item</span><span class="p">,</span> <span class="n">tgt_item</span> <span class="o">=</span> <span class="n">item_b</span><span class="p">,</span> <span class="n">item_a</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">src_item</span><span class="p">,</span> <span class="n">tgt_item</span> <span class="o">=</span> <span class="n">item_a</span><span class="p">,</span> <span class="n">item_b</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">src_item</span><span class="p">,</span> <span class="n">tgt_item</span> <span class="o">=</span> <span class="n">item_a</span><span class="p">,</span> <span class="n">item_b</span>
+
+                <span class="c1"># If src_item is already elevated and tgt_item is study-specific,</span>
+                <span class="c1"># orient so study-specific is absorbed into elevated target</span>
+                <span class="k">if</span> <span class="n">src_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;is_elevated&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tgt_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;is_elevated&quot;</span><span class="p">):</span>
+                    <span class="n">src_item</span><span class="p">,</span> <span class="n">tgt_item</span> <span class="o">=</span> <span class="n">tgt_item</span><span class="p">,</span> <span class="n">src_item</span>
+
+                <span class="n">pair_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">src_item</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">],</span> <span class="n">tgt_item</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">pair_key</span> <span class="ow">in</span> <span class="n">seen_pairs</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">seen_pairs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pair_key</span><span class="p">)</span>
+
+                <span class="n">cand</span> <span class="o">=</span> <span class="n">_compare_pair</span><span class="p">(</span>
+                    <span class="n">src_item</span><span class="p">,</span>
+                    <span class="n">tgt_item</span><span class="p">,</span>
+                    <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                    <span class="n">alias_map</span><span class="o">=</span><span class="n">alias_map</span><span class="p">,</span>
+                    <span class="n">codes_cache</span><span class="o">=</span><span class="n">codes_cache</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">cand</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cand</span><span class="p">)</span>
+
+    <span class="n">candidates</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">c</span><span class="p">[</span><span class="s2">&quot;confidence&quot;</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="s2">&quot;resource_type&quot;</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="s2">&quot;source_urn&quot;</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">candidates</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="compare_batch">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.comparator.compare_batch">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compare_batch</span><span class="p">(</span>
+    <span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="n">resource_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IngestPlan</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compare resources from an IngestBatch against the bank and return a Compare Plan.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">IngestBatch</span>
+
+    <span class="n">batch</span> <span class="o">=</span> <span class="n">IngestBatch</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">batch_id</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">batch</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;IngestBatch #</span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2"> does not exist.&quot;</span><span class="p">)</span>
+
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">discover_candidates</span><span class="p">(</span>
+        <span class="n">resource_type</span><span class="o">=</span><span class="n">resource_type</span><span class="p">,</span>
+        <span class="n">batch_id</span><span class="o">=</span><span class="n">batch_id</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">actions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PlanActionItem</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">by_match_type</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">by_resource_type</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">cand</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">m_type</span> <span class="o">=</span> <span class="n">cand</span><span class="p">[</span><span class="s2">&quot;match_type&quot;</span><span class="p">]</span>
+        <span class="n">r_type</span> <span class="o">=</span> <span class="n">cand</span><span class="p">[</span><span class="s2">&quot;resource_type&quot;</span><span class="p">]</span>
+        <span class="n">by_match_type</span><span class="p">[</span><span class="n">m_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">by_match_type</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m_type</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">by_resource_type</span><span class="p">[</span><span class="n">r_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">by_resource_type</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">r_type</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">PlanActionItem</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;cmp-</span><span class="si">{</span><span class="n">idx</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;compare&quot;</span><span class="p">,</span>
+                <span class="n">action</span><span class="o">=</span><span class="n">cand</span><span class="p">[</span><span class="s2">&quot;recommended_action&quot;</span><span class="p">],</span>
+                <span class="n">resource_type</span><span class="o">=</span><span class="n">cand</span><span class="p">[</span><span class="s2">&quot;resource_type&quot;</span><span class="p">],</span>
+                <span class="n">source_urn</span><span class="o">=</span><span class="n">cand</span><span class="p">[</span><span class="s2">&quot;source_urn&quot;</span><span class="p">],</span>
+                <span class="n">target_urn</span><span class="o">=</span><span class="n">cand</span><span class="p">[</span><span class="s2">&quot;target_urn&quot;</span><span class="p">],</span>
+                <span class="n">confidence</span><span class="o">=</span><span class="n">cand</span><span class="p">[</span><span class="s2">&quot;confidence&quot;</span><span class="p">],</span>
+                <span class="n">match_type</span><span class="o">=</span><span class="n">m_type</span><span class="p">,</span>
+                <span class="n">requires_review</span><span class="o">=</span><span class="n">cand</span><span class="p">[</span><span class="s2">&quot;requires_review&quot;</span><span class="p">],</span>
+                <span class="n">details</span><span class="o">=</span><span class="n">cand</span><span class="p">[</span><span class="s2">&quot;details&quot;</span><span class="p">],</span>
+                <span class="n">notes</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">m_type</span><span class="si">}</span><span class="s2"> match (confidence=</span><span class="si">{</span><span class="n">cand</span><span class="p">[</span><span class="s1">&#39;confidence&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">job_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;compare-batch-</span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">plan</span> <span class="o">=</span> <span class="n">IngestPlan</span><span class="p">(</span>
+        <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;compare&quot;</span><span class="p">,</span>
+        <span class="n">job_id</span><span class="o">=</span><span class="n">job_id</span><span class="p">,</span>
+        <span class="n">source_file</span><span class="o">=</span><span class="n">batch</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span>
+        <span class="n">source_format</span><span class="o">=</span><span class="n">batch</span><span class="o">.</span><span class="n">source_format</span><span class="p">,</span>
+        <span class="n">batch_id</span><span class="o">=</span><span class="n">batch_id</span><span class="p">,</span>
+        <span class="n">summary</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;total_candidates&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">),</span>
+            <span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="n">threshold</span><span class="p">,</span>
+            <span class="s2">&quot;by_match_type&quot;</span><span class="p">:</span> <span class="n">by_match_type</span><span class="p">,</span>
+            <span class="s2">&quot;by_resource_type&quot;</span><span class="p">:</span> <span class="n">by_resource_type</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">actions</span><span class="o">=</span><span class="n">actions</span><span class="p">,</span>
+        <span class="n">review_gate</span><span class="o">=</span><span class="n">ReviewGate</span><span class="p">(</span><span class="n">approved</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)),</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+        <span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">stem</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span>
+        <span class="n">plan</span><span class="o">.</span><span class="n">to_yaml</span><span class="p">(</span><span class="n">out_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s2">.batch</span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">.compare.plan.yaml&quot;</span><span class="p">)</span>
+        <span class="n">plan</span><span class="o">.</span><span class="n">to_markdown</span><span class="p">(</span><span class="n">out_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s2">.batch</span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">.compare.report.md&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">plan</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,879 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>fairwddi.ingest.streaming &mdash; FAIRwDDI Lifecycle 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FAIRwDDI Lifecycle
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/index.html">Administrator Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../admin/index.html#key-operational-responsibilities">Key Operational Responsibilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../admin/index.html#guide-outline">Guide Outline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/architecture.html">System Architecture &amp; Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#hardware-operating-system-recommendations">Hardware &amp; Operating System Recommendations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#software-dependencies">Software Dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#database-architecture">Database Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/installation.html">Installation &amp; Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#configuration-env">Configuration (.env)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#database-provisioning">Database Provisioning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#verifying-installation">Verifying Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/cli_operations.html">CLI Operational Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#global-options">Global Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#vocabulary-administration-fairwddi-vocab">Vocabulary Administration (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">vocab</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#ingestion-pipeline-fairwddi-ingest">Ingestion Pipeline (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">ingest</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/ingestion_ops.html">Ingestion &amp; Pipeline Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#the-2-stage-ingestion-lifecycle">The 2-Stage Ingestion Lifecycle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#the-4-phase-comparison-cascade">The 4-Phase Comparison Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#reviewing-ingestion-plans">Reviewing Ingestion Plans</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#executing-batch-transactions">Executing Batch Transactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#handling-quarantine-records">Handling Quarantine Records</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#rolling-back-a-batch">Rolling Back a Batch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/deployment.html">Production Deployment &amp; Maintenance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#service-architecture">Service Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#asgi-application-server-setup">ASGI Application Server Setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#nginx-reverse-proxy-configuration">Nginx Reverse Proxy Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#database-maintenance-index-optimization">Database Maintenance &amp; Index Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#backup-and-disaster-recovery">Backup and Disaster Recovery</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/index.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../developer/index.html#architectural-principles">Architectural Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../developer/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/variable_cascade.html">The DDI Variable Cascade</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#the-three-tiers-of-the-cascade">The Three Tiers of the Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#tier-definitions">Tier Definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#standards-crosswalk">Standards Crosswalk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#orm-traversal-examples">ORM Traversal Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/data_model.html">The 30-Model Database Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#abstract-base-classes">Abstract Base Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#layer-model-breakdown">Layer &amp; Model Breakdown</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#polymorphic-cross-resource-relations">Polymorphic Cross-Resource Relations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/urn_registry.html">Universal URN Master Registry (UrnRegistry)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#the-problem-it-solves">The Problem It Solves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#the-supertype-master-pattern">The Supertype Master Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#lifecycle-guarantees">Lifecycle Guarantees</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#canonical-urn-syntax">Canonical URN Syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/multilingual_jsonb.html">Multilingual JSONB Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#jsonb-data-model">JSONB Data Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#string-normalization-pipeline">String Normalization Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#querying-multilingual-fields">Querying Multilingual Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#postgresql-17-icu-collations">PostgreSQL 17 ICU Collations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/fingerprinting.html">Content Fingerprinting &amp; Deduplication</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#the-multi-algorithm-approach">The Multi-Algorithm Approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#canonical-json-serialization">Canonical JSON Serialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#simple-vs-compound-hashing">Simple vs Compound Hashing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#deterministic-16-character-urn-hashes">Deterministic 16-Character URN Hashes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/ingest_engine.html">The Ingestion Engine (fairwddi.ingest)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#package-architecture">Package Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#format-detection-detector-py">Format Detection (detector.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#streaming-xml-iteration-streaming-py">Streaming XML Iteration (streaming.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#comparator-and-execution-plan-comparator-py-plan-py">Comparator and Execution Plan (comparator.py &amp; plan.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#batch-transaction-loading-loader-py">Batch Transaction Loading (loader.py)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#api-architecture">API Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#endpoints-overview">Endpoints Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#example-endpoint-implementation">Example Endpoint Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#interactive-database-explorer">Interactive Database Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/dartfx_integration.html">Data Artifex DDI Toolkit Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#overview-of-dartfx-ddi">Overview of dartfx-ddi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#ddi-lifecycle-fragment-streaming">DDI-Lifecycle Fragment Streaming</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#multilingual-codebook-merging">Multilingual Codebook Merging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#ddi-cdi-assistant-framework">DDI-CDI Assistant Framework</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributor/index.html">Contributor Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributor/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/environment.html">Development Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#pre-commit-hooks">Pre-commit Hooks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#running-quick-sanity-checks">Running Quick Sanity Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/conventions.html">Coding Conventions &amp; Standards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#python-stack-tooling">Python Stack &amp; Tooling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#code-formatting-linting-ruff">Code Formatting &amp; Linting (Ruff)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#type-annotations-static-typing">Type Annotations &amp; Static Typing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#django-migrations-zero-data-loss">Django Migrations &amp; Zero-Data-Loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#ddi-naming-conventions">DDI Naming Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/testing.html">Testing Guide &amp; Practices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#testing-stack">Testing Stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#running-tests">Running Tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#isolated-sqlite-test-configuration">Isolated SQLite Test Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#testing-ingestion-streaming">Testing Ingestion &amp; Streaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/workflows.html">Development Workflows &amp; Pull Requests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#git-branching-strategy">Git Branching Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#pull-request-checklist">Pull Request Checklist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#building-documentation-locally">Building Documentation Locally</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Python API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/index.html#modules">Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/models.html">Models (fairwddi.models)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.base">Base Infrastructure &amp; Supertype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.concept">Concept Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.representation">Representation Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.instrument">Instrument &amp; Question Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.dataset">Dataset Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.organization">Organization &amp; Grouping Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.infrastructure">Batch &amp; Ingestion Infrastructure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.event">Audit &amp; Event Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/schemas.html">Pydantic Schemas (fairwddi.schemas)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/schemas.html#module-fairwddi.schemas.common">Common Value Objects &amp; Primitives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/schemas.html#module-fairwddi.schemas.entities">Entity Schemas</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/db.html">Database Layer (fairwddi.db)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.seed">Seed &amp; Fixture Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.wipe">Wipe Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/ingest.html">Ingestion &amp; Pipeline (fairwddi.ingest)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.detector">Format Detection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.streaming">Streaming XML Parsing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.profiles">Extraction Profiles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.preflight">Preflight Static Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.comparator">Database Comparison</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.plan">Ingestion Execution Plan</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.loader">Batch Loader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.pipeline">Pipeline Orchestration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.harmonizer">Harmonization &amp; Cross-Survey Clustering</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.router">Router &amp; Endpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.schemas">API Request &amp; Response Schemas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.views">Views &amp; Route Handlers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.server">ASGI Server Runner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.explorer_html">Interactive Model Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/utils.html">Utilities (fairwddi.utils)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/utils.html#module-fairwddi.utils.urn">URN Helpers (urn.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/utils.html#module-fairwddi.utils.normalize_string">String Normalization (normalize_string.py)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/index.html">Standards &amp; Project Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../reference/index.html#reference-documents">Reference Documents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/glossary.html">DDI Canonical Terminology Glossary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/deliverables.html">Project Deliverables &amp; Research Reports</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#core-deliverables">Core Deliverables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#specialized-technical-research-papers">Specialized Technical Research Papers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#interactive-exploration">Interactive Exploration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/changelog.html">Changelog &amp; Project Roadmap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/changelog.html#project-timeline-overview">Project Timeline Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/changelog.html#release-history">Release History</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FAIRwDDI Lifecycle</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fairwddi.ingest.streaming</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for fairwddi.ingest.streaming</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Streaming parsers and resource extractors for DDI metadata formats.</span>
+
+<span class="sd">Streams DDI-Lifecycle 3.x XML, DDI-Lifecycle 4.0 JSON/JSONL, and DDI-Codebook 2.5 XML</span>
+<span class="sd">in constant O(1) memory, yielding structured in-memory `RawResourceNode` payloads</span>
+<span class="sd">directly to preflight and core ingestion without intermediate database staging.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Self</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">lxml</span><span class="w"> </span><span class="kn">import</span> <span class="n">etree</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ConfigDict</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">model_validator</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.ingest.detector</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetadataFormatInfo</span><span class="p">,</span> <span class="n">detect_metadata_format</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.ingest.profiles</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImportProfile</span>
+
+
+<div class="viewcode-block" id="RawResourceNode">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.RawResourceNode">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RawResourceNode</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Individual extracted metadata element yielded during streaming.&quot;&quot;&quot;</span>
+
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">validate_assignment</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">resource_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;DDI resource class name (e.g. QuestionItem, Variable).&quot;</span>
+    <span class="p">)</span>
+    <span class="n">raw_urn</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Raw incoming URN or deterministic ID.&quot;</span><span class="p">)</span>
+    <span class="n">raw_value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Pre-normalized raw JSON dictionary.&quot;</span><span class="p">)</span>
+    <span class="n">referenced_urns</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">set</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Referenced resource URNs.&quot;</span><span class="p">)</span>
+    <span class="n">content_fingerprint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Deterministic SHA-256 content fingerprint.&quot;</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="RawResourceNode.compute_content_fingerprint">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.RawResourceNode.compute_content_fingerprint">[docs]</a>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_content_fingerprint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_fingerprint</span><span class="p">:</span>
+            <span class="n">canonical_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_value</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">content_fingerprint</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">canonical_json</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="RawResourceNode.to_json">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.RawResourceNode.to_json">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return canonical JSON representation of the resource payload.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_value</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="xml_to_json_dict">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.xml_to_json_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">xml_to_json_dict</span><span class="p">(</span><span class="n">elem</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursively convert an lxml XML element to a clean structured JSON dict or scalar.&quot;&quot;&quot;</span>
+    <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">attr_name</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">localname</span> <span class="k">if</span> <span class="s2">&quot;}&quot;</span> <span class="ow">in</span> <span class="n">k</span> <span class="k">else</span> <span class="n">k</span>
+        <span class="k">if</span> <span class="s2">&quot;lang&quot;</span> <span class="ow">in</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">attr_name</span> <span class="o">=</span> <span class="s2">&quot;xml:lang&quot;</span>
+        <span class="n">result</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;@</span><span class="si">{</span><span class="n">attr_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+    <span class="n">text</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="n">children_by_tag</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+        <span class="n">c_tag</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="o">.</span><span class="n">localname</span>
+        <span class="n">c_dict</span> <span class="o">=</span> <span class="n">xml_to_json_dict</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">c_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">children_by_tag</span><span class="p">:</span>
+            <span class="n">children_by_tag</span><span class="p">[</span><span class="n">c_tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">children_by_tag</span><span class="p">[</span><span class="n">c_tag</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c_dict</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">c_tag</span><span class="p">,</span> <span class="n">items</span> <span class="ow">in</span> <span class="n">children_by_tag</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">c_tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">c_tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">items</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">children_by_tag</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">text</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;#text&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="s2">&quot;#text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">text</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<div class="viewcode-block" id="resource_to_json">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.resource_to_json">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">resource_to_json</span><span class="p">(</span><span class="n">resource</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Serialize any metadata resource (model instance, XML element, or dict) to a JSON dict.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="s2">&quot;to_json&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">to_json</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">res</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">model_dump</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">resource</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">by_alias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="s2">&quot;dict&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">resource</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">resource</span>
+    <span class="k">if</span> <span class="n">etree</span><span class="o">.</span><span class="n">iselement</span><span class="p">(</span><span class="n">resource</span><span class="p">):</span>
+        <span class="n">converted</span> <span class="o">=</span> <span class="n">xml_to_json_dict</span><span class="p">(</span><span class="n">resource</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">converted</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">converted</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;#text&quot;</span><span class="p">:</span> <span class="n">converted</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">resource</span><span class="p">)}</span></div>
+
+
+
+<div class="viewcode-block" id="xml_elem_to_dict">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.xml_elem_to_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">xml_elem_to_dict</span><span class="p">(</span><span class="n">elem</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for backwards compatibility: converts XML element to JSON dictionary.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">resource_to_json</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span></div>
+
+
+
+<span class="n">REFERENCE_TAG_PREFIXES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;ConceptReference&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CodeListReference&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;QuestionReference&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;VariableReference&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CategoryReference&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InterviewerInstructionReference&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="extract_referenced_urns_from_xml">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.extract_referenced_urns_from_xml">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_referenced_urns_from_xml</span><span class="p">(</span><span class="n">elem</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract referenced URNs from Reference elements within an XML tree.&quot;&quot;&quot;</span>
+    <span class="n">refs</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">elem</span><span class="o">.</span><span class="n">iter</span><span class="p">():</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="o">.</span><span class="n">localname</span>
+        <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;Reference&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">REFERENCE_TAG_PREFIXES</span><span class="p">:</span>
+            <span class="n">urn</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;{ddi:reusable:3_3}URN&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;.//{ddi:reusable:3_3}URN&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;URN&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;.//URN&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">urn</span><span class="p">:</span>
+                <span class="n">refs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">urn</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="n">ref_id</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;{ddi:reusable:3_3}ID&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ref_id</span><span class="p">:</span>
+                <span class="n">refs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ref_id</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">refs</span></div>
+
+
+
+<div class="viewcode-block" id="extract_referenced_urns_from_json">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.extract_referenced_urns_from_json">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_referenced_urns_from_json</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursively extract referenced URNs from a JSON dictionary.&quot;&quot;&quot;</span>
+    <span class="n">refs</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;Reference&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;Reference&quot;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="n">urn</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;URN&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">urn</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">urn</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">refs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">urn</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">refs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">refs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">extract_referenced_urns_from_json</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
+            <span class="n">refs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">extract_referenced_urns_from_json</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">refs</span></div>
+
+
+
+<span class="n">DDI_IDENTIFIABLE_RESOURCE_TAGS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;QuestionItem&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;QuestionGrid&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;QuestionConstruct&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;QuestionGroup&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;QuestionScheme&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;StatementItem&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Instruction&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InterviewerInstruction&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InterviewerInstructionScheme&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Category&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CategorySet&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CategoryGroup&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CategoryScheme&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CodeList&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CodeListScheme&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CodeItem&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ManagedMissingValuesRepresentation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ManagedRepresentationScheme&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;StatisticalClassification&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ClassificationFamily&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ClassificationSeries&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ClassificationLevel&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ClassificationItem&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Variable&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InstanceVariable&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RepresentedVariable&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RepresentedVariableGroup&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RepresentedVariableScheme&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ConceptualVariable&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ConceptualVariableGroup&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ConceptualVariableScheme&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;VariableGroup&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;VariableScheme&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Instrument&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InstrumentScheme&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ControlConstructScheme&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Sequence&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;IfThenElse&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Loop&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ComputationItem&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Concept&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ConceptGroup&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ConceptScheme&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ConceptualComponent&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Universe&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;UniverseScheme&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;StudyUnit&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PhysicalInstance&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;VariableStatistics&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Group&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DataCollection&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DataRelationship&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Organization&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;OrganizationScheme&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="stream_ddi_l_xml">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.stream_ddi_l_xml">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stream_ddi_l_xml</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="n">ImportProfile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">RawResourceNode</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stream DDI-Lifecycle 3.x XML files element-by-element using iterparse.&quot;&quot;&quot;</span>
+    <span class="n">has_fragments</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">_event</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">etree</span><span class="o">.</span><span class="n">iterparse</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;start&quot;</span><span class="p">,)):</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span><span class="o">.</span><span class="n">localname</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;FragmentInstance&quot;</span><span class="p">,</span> <span class="s2">&quot;Fragment&quot;</span><span class="p">):</span>
+            <span class="n">has_fragments</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">break</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">iterparse</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,))</span>
+
+    <span class="k">for</span> <span class="n">_event</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">context</span><span class="p">:</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span><span class="o">.</span><span class="n">localname</span>
+
+        <span class="k">if</span> <span class="n">has_fragments</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="o">!=</span> <span class="s2">&quot;Fragment&quot;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">elem</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                <span class="k">continue</span>
+            <span class="n">target_elem</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">r_type</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="n">target_elem</span><span class="p">)</span><span class="o">.</span><span class="n">localname</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DDI_IDENTIFIABLE_RESOURCE_TAGS</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">target_elem</span> <span class="o">=</span> <span class="n">elem</span>
+            <span class="n">r_type</span> <span class="o">=</span> <span class="n">tag</span>
+
+        <span class="k">if</span> <span class="n">r_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;Fragment&quot;</span><span class="p">,</span> <span class="s2">&quot;FragmentInstance&quot;</span><span class="p">,</span> <span class="s2">&quot;DDIInstance&quot;</span><span class="p">,</span> <span class="s2">&quot;TopLevelReference&quot;</span><span class="p">):</span>
+            <span class="n">elem</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">continue</span>
+
+        <span class="n">urn</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">target_elem</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;{ddi:reusable:3_3}URN&quot;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">target_elem</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;.//{ddi:reusable:3_3}URN&quot;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">target_elem</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;{ddi:reusable:3_2}URN&quot;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">target_elem</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;.//{ddi:reusable:3_2}URN&quot;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">target_elem</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;URN&quot;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">target_elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">urn</span><span class="p">:</span>
+            <span class="n">elem_id</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">target_elem</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;{ddi:reusable:3_3}ID&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">target_elem</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">target_elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">target_elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">agency</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">target_elem</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;{ddi:reusable:3_3}Agency&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">target_elem</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;Agency&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="s2">&quot;unknown.agency&quot;</span>
+            <span class="p">)</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">target_elem</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;{ddi:reusable:3_3}Version&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">target_elem</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="s2">&quot;Version&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="s2">&quot;1&quot;</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">elem_id</span><span class="p">:</span>
+                <span class="n">urn</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">elem_id</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">urn</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;urn:ddi:anonymous:</span><span class="si">{</span><span class="n">r_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="n">target_elem</span><span class="p">)</span><span class="si">}</span><span class="s2">:1.0.0&quot;</span>
+
+        <span class="n">refs</span> <span class="o">=</span> <span class="n">extract_referenced_urns_from_xml</span><span class="p">(</span><span class="n">target_elem</span><span class="p">)</span>
+        <span class="n">raw_dict</span> <span class="o">=</span> <span class="n">resource_to_json</span><span class="p">(</span><span class="n">target_elem</span><span class="p">)</span>
+
+        <span class="k">yield</span> <span class="n">RawResourceNode</span><span class="p">(</span>
+            <span class="n">resource_type</span><span class="o">=</span><span class="n">r_type</span><span class="p">,</span>
+            <span class="n">raw_urn</span><span class="o">=</span><span class="n">urn</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+            <span class="n">raw_value</span><span class="o">=</span><span class="n">raw_dict</span><span class="p">,</span>
+            <span class="n">referenced_urns</span><span class="o">=</span><span class="n">refs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">elem</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">elem</span><span class="o">.</span><span class="n">getprevious</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">elem</span><span class="o">.</span><span class="n">getparent</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_flatten_nested_ddi4_dict</span><span class="p">(</span><span class="n">root_item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unpack nested DDI 4.0 RC1 resources from a root StudyUnit or ResourcePackage dict.&quot;&quot;&quot;</span>
+    <span class="n">flattened</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">seen_urns</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_visit</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+                <span class="n">_visit</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="n">r_type</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;$type&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ResourceType&quot;</span><span class="p">)</span>
+        <span class="n">is_substantive</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span>
+            <span class="n">r_type</span>
+            <span class="ow">and</span> <span class="n">r_type</span> <span class="ow">in</span> <span class="n">DDI_IDENTIFIABLE_RESOURCE_TAGS</span>
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="o">-</span> <span class="p">{</span><span class="s2">&quot;$type&quot;</span><span class="p">,</span> <span class="s2">&quot;ResourceType&quot;</span><span class="p">,</span> <span class="s2">&quot;URN&quot;</span><span class="p">,</span> <span class="s2">&quot;urn&quot;</span><span class="p">,</span> <span class="s2">&quot;Agency&quot;</span><span class="p">,</span> <span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;Version&quot;</span><span class="p">,</span> <span class="s2">&quot;TypeOfObject&quot;</span><span class="p">}</span>
+            <span class="p">)</span>
+            <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;Reference&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+                <span class="n">_visit</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_substantive</span><span class="p">:</span>
+            <span class="n">urn</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;URN&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">urn</span> <span class="ow">or</span> <span class="n">urn</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen_urns</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">urn</span><span class="p">:</span>
+                    <span class="n">seen_urns</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">urn</span><span class="p">))</span>
+                <span class="n">flattened</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+    <span class="n">_visit</span><span class="p">(</span><span class="n">root_item</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">flattened</span> <span class="ow">or</span> <span class="p">[</span><span class="n">root_item</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dict_to_resource_node</span><span class="p">(</span><span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">RawResourceNode</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a DDI 4.0 JSON dict into a RawResourceNode.&quot;&quot;&quot;</span>
+    <span class="n">r_type</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;$type&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ResourceType&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;Resource&quot;</span>
+    <span class="n">urn</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;URN&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">urn</span><span class="p">:</span>
+        <span class="n">item_id</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+        <span class="n">agency</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Agency&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;unknown.agency&quot;</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Version&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">item_id</span><span class="p">:</span>
+            <span class="n">urn</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">urn</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;urn:ddi:anonymous:</span><span class="si">{</span><span class="n">r_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="si">}</span><span class="s2">:1.0.0&quot;</span>
+
+    <span class="n">refs</span> <span class="o">=</span> <span class="n">extract_referenced_urns_from_json</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="n">raw_dict</span> <span class="o">=</span> <span class="n">resource_to_json</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">RawResourceNode</span><span class="p">(</span>
+        <span class="n">resource_type</span><span class="o">=</span><span class="n">r_type</span><span class="p">,</span>
+        <span class="n">raw_urn</span><span class="o">=</span><span class="n">urn</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+        <span class="n">raw_value</span><span class="o">=</span><span class="n">raw_dict</span><span class="p">,</span>
+        <span class="n">referenced_urns</span><span class="o">=</span><span class="n">refs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="stream_ddi_l_json">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.stream_ddi_l_json">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stream_ddi_l_json</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="n">ImportProfile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">RawResourceNode</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stream DDI-Lifecycle 4.0 / Colectica JSON files item by item.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;items&quot;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;items&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;items&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="n">_flatten_nested_ddi4_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">yield</span> <span class="n">_dict_to_resource_node</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="stream_ddi_l_jsonl">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.stream_ddi_l_jsonl">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stream_ddi_l_jsonl</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="n">ImportProfile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">RawResourceNode</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stream DDI-Lifecycle 4.0 JSON Lines (.jsonl) files in O(1) memory.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">stripped</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">stripped</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">_dict_to_resource_node</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="stream_ddi_c_xml">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.stream_ddi_c_xml">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stream_ddi_c_xml</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="n">ImportProfile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">RawResourceNode</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse DDI-Codebook 2.5 XML files using dartfx-ddi and stream resources.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">dartfx.ddi.ddicodebook.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">loadxml</span>
+
+    <span class="n">codebook</span> <span class="o">=</span> <span class="n">loadxml</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">codebook</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">by_alias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">study_id</span> <span class="o">=</span> <span class="s2">&quot;stdy-001&quot;</span>
+    <span class="n">stdy_dscr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stdyDscr&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stdy_dscr</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">stdy_dscr</span><span class="p">:</span>
+        <span class="n">stdy_dscr</span> <span class="o">=</span> <span class="n">stdy_dscr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">stdy_dscr</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stdy_dscr</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">citation</span> <span class="o">=</span> <span class="n">stdy_dscr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;citation&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">citation</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">citation</span><span class="p">:</span>
+            <span class="n">citation</span> <span class="o">=</span> <span class="n">citation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">titl_stmt</span> <span class="o">=</span> <span class="n">citation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;titlStmt&quot;</span><span class="p">,</span> <span class="p">{})</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">citation</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">titl_stmt</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">titl_stmt</span><span class="p">:</span>
+            <span class="n">titl_stmt</span> <span class="o">=</span> <span class="n">titl_stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">id_no</span> <span class="o">=</span> <span class="n">titl_stmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;IDNo&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">titl_stmt</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">id_no</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">id_no</span><span class="p">:</span>
+            <span class="n">first_id</span> <span class="o">=</span> <span class="n">id_no</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">study_id</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">first_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">first_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;#text&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;stdy-001&quot;</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_id</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+                <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">first_id</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">id_no</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">study_id</span> <span class="o">=</span> <span class="n">id_no</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">id_no</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;#text&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;stdy-001&quot;</span>
+        <span class="k">yield</span> <span class="n">RawResourceNode</span><span class="p">(</span>
+            <span class="n">resource_type</span><span class="o">=</span><span class="s2">&quot;StudyUnit&quot;</span><span class="p">,</span>
+            <span class="n">raw_urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:codebook:study:</span><span class="si">{</span><span class="n">study_id</span><span class="si">}</span><span class="s2">:1.0.0&quot;</span><span class="p">,</span>
+            <span class="n">raw_value</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;stdyDscr&quot;</span><span class="p">:</span> <span class="n">stdy_dscr</span><span class="p">},</span>
+            <span class="n">referenced_urns</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+    <span class="n">file_dscr_list</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fileDscr&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_dscr_list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">file_dscr_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">file_dscr_list</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">f_dscr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">file_dscr_list</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f_dscr</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">f_id</span> <span class="o">=</span> <span class="n">f_dscr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;@ID&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">f_dscr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;F</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">yield</span> <span class="n">RawResourceNode</span><span class="p">(</span>
+                <span class="n">resource_type</span><span class="o">=</span><span class="s2">&quot;PhysicalInstance&quot;</span><span class="p">,</span>
+                <span class="n">raw_urn</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;urn:ddi:codebook:file:</span><span class="si">{</span><span class="n">study_id</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">f_id</span><span class="si">}</span><span class="s2">:1.0.0&quot;</span><span class="p">,</span>
+                <span class="n">raw_value</span><span class="o">=</span><span class="n">f_dscr</span><span class="p">,</span>
+                <span class="n">referenced_urns</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
+            <span class="p">)</span>
+
+    <span class="n">data_dscr_list</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dataDscr&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_dscr_list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">data_dscr_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_dscr_list</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">data_dscr</span> <span class="ow">in</span> <span class="n">data_dscr_list</span><span class="p">:</span>
+        <span class="n">vars_list</span> <span class="o">=</span> <span class="n">data_dscr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;var&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vars_list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">vars_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">vars_list</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">vars_list</span><span class="p">:</span>
+            <span class="n">var_name</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;@name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">var</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;var&quot;</span>
+            <span class="n">var_urn</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;urn:ddi:codebook:var:</span><span class="si">{</span><span class="n">study_id</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">:1.0.0&quot;</span>
+
+            <span class="n">refs</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="n">categories</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;catgry&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">categories</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">categories</span> <span class="o">=</span> <span class="p">[</span><span class="n">categories</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">categories</span><span class="p">:</span>
+                <span class="n">cl_urn</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;urn:ddi:codebook:codelist:</span><span class="si">{</span><span class="n">study_id</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">:1.0.0&quot;</span>
+                <span class="n">refs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cl_urn</span><span class="p">)</span>
+
+                <span class="n">cat_refs</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">cat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">categories</span><span class="p">):</span>
+                    <span class="n">cat_val</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;catValu&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;cat-</span><span class="si">{</span><span class="n">idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cat_val</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">cat_val</span><span class="p">:</span>
+                        <span class="n">cat_val</span> <span class="o">=</span> <span class="n">cat_val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cat_val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                        <span class="n">cat_val</span> <span class="o">=</span> <span class="n">cat_val</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cat_val</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;#text&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;cat-</span><span class="si">{</span><span class="n">idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">cat_urn</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;urn:ddi:codebook:cat:</span><span class="si">{</span><span class="n">study_id</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">cat_val</span><span class="si">}</span><span class="s2">:1.0.0&quot;</span>
+                    <span class="n">cat_refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cat_urn</span><span class="p">)</span>
+                    <span class="k">yield</span> <span class="n">RawResourceNode</span><span class="p">(</span>
+                        <span class="n">resource_type</span><span class="o">=</span><span class="s2">&quot;Category&quot;</span><span class="p">,</span>
+                        <span class="n">raw_urn</span><span class="o">=</span><span class="n">cat_urn</span><span class="p">,</span>
+                        <span class="n">raw_value</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">cat</span><span class="p">,</span> <span class="s2">&quot;variable_name&quot;</span><span class="p">:</span> <span class="n">var_name</span><span class="p">},</span>
+                        <span class="n">referenced_urns</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
+                    <span class="p">)</span>
+
+                <span class="k">yield</span> <span class="n">RawResourceNode</span><span class="p">(</span>
+                    <span class="n">resource_type</span><span class="o">=</span><span class="s2">&quot;CodeList&quot;</span><span class="p">,</span>
+                    <span class="n">raw_urn</span><span class="o">=</span><span class="n">cl_urn</span><span class="p">,</span>
+                    <span class="n">raw_value</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;code_list_name&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">_codes&quot;</span><span class="p">,</span> <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="n">cat_refs</span><span class="p">},</span>
+                    <span class="n">referenced_urns</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">cat_refs</span><span class="p">),</span>
+                <span class="p">)</span>
+
+            <span class="k">yield</span> <span class="n">RawResourceNode</span><span class="p">(</span>
+                <span class="n">resource_type</span><span class="o">=</span><span class="s2">&quot;Variable&quot;</span><span class="p">,</span>
+                <span class="n">raw_urn</span><span class="o">=</span><span class="n">var_urn</span><span class="p">,</span>
+                <span class="n">raw_value</span><span class="o">=</span><span class="n">var</span><span class="p">,</span>
+                <span class="n">referenced_urns</span><span class="o">=</span><span class="n">refs</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="stream_resources">
+<a class="viewcode-back" href="../../../api/ingest.html#fairwddi.ingest.streaming.stream_resources">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stream_resources</span><span class="p">(</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">profile</span><span class="p">:</span> <span class="n">ImportProfile</span><span class="p">,</span>
+    <span class="n">format_info</span><span class="p">:</span> <span class="n">MetadataFormatInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">RawResourceNode</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unified dispatcher streaming RawResourceNode instances based on detected format.&quot;&quot;&quot;</span>
+    <span class="n">resolved_format</span> <span class="o">=</span> <span class="n">format_info</span> <span class="ow">or</span> <span class="n">detect_metadata_format</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">resolved_format</span><span class="o">.</span><span class="n">specification</span> <span class="o">==</span> <span class="s2">&quot;DDI-L&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">resolved_format</span><span class="o">.</span><span class="n">serialization</span> <span class="o">==</span> <span class="s2">&quot;jsonl&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">stream_ddi_l_jsonl</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resolved_format</span><span class="o">.</span><span class="n">serialization</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">stream_ddi_l_json</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stream_ddi_l_xml</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">resolved_format</span><span class="o">.</span><span class="n">specification</span> <span class="o">==</span> <span class="s2">&quot;DDI-C&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stream_ddi_c_xml</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">resolved_format</span><span class="o">.</span><span class="n">serialization</span> <span class="o">==</span> <span class="s2">&quot;jsonl&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stream_ddi_l_jsonl</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">resolved_format</span><span class="o">.</span><span class="n">serialization</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;json-ld&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">stream_ddi_l_json</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">stream_ddi_l_xml</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

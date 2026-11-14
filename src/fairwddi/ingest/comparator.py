@@ -2,6 +2,7 @@
 
 Evaluates ReQuest resources (Category, CodeList, QuestionItem, RepresentedVariable) across tiers
 delegating string algorithms, stem detection, and variant classification to dartfx.ddi.harmonizer:
+
 1. EXACT (1.00): Identical content hash.
 2. FACET_EXACT (0.95): Identical normalized label or question_text hash across present languages.
 3. MULTILINGUAL_OVERLAP (0.92): Exact match in at least one shared language with complementary

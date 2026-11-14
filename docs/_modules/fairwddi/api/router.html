@@ -1,0 +1,1161 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>fairwddi.api.router &mdash; FAIRwDDI Lifecycle 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FAIRwDDI Lifecycle
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/index.html">Administrator Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../admin/index.html#key-operational-responsibilities">Key Operational Responsibilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../admin/index.html#guide-outline">Guide Outline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/architecture.html">System Architecture &amp; Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#hardware-operating-system-recommendations">Hardware &amp; Operating System Recommendations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#software-dependencies">Software Dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#database-architecture">Database Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/installation.html">Installation &amp; Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#configuration-env">Configuration (.env)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#database-provisioning">Database Provisioning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#verifying-installation">Verifying Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/cli_operations.html">CLI Operational Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#global-options">Global Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#vocabulary-administration-fairwddi-vocab">Vocabulary Administration (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">vocab</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#ingestion-pipeline-fairwddi-ingest">Ingestion Pipeline (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">ingest</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/ingestion_ops.html">Ingestion &amp; Pipeline Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#the-2-stage-ingestion-lifecycle">The 2-Stage Ingestion Lifecycle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#the-4-phase-comparison-cascade">The 4-Phase Comparison Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#reviewing-ingestion-plans">Reviewing Ingestion Plans</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#executing-batch-transactions">Executing Batch Transactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#handling-quarantine-records">Handling Quarantine Records</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#rolling-back-a-batch">Rolling Back a Batch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/deployment.html">Production Deployment &amp; Maintenance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#service-architecture">Service Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#asgi-application-server-setup">ASGI Application Server Setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#nginx-reverse-proxy-configuration">Nginx Reverse Proxy Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#database-maintenance-index-optimization">Database Maintenance &amp; Index Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#backup-and-disaster-recovery">Backup and Disaster Recovery</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/index.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../developer/index.html#architectural-principles">Architectural Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../developer/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/variable_cascade.html">The DDI Variable Cascade</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#the-three-tiers-of-the-cascade">The Three Tiers of the Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#tier-definitions">Tier Definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#standards-crosswalk">Standards Crosswalk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#orm-traversal-examples">ORM Traversal Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/data_model.html">The 30-Model Database Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#abstract-base-classes">Abstract Base Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#layer-model-breakdown">Layer &amp; Model Breakdown</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#polymorphic-cross-resource-relations">Polymorphic Cross-Resource Relations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/urn_registry.html">Universal URN Master Registry (UrnRegistry)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#the-problem-it-solves">The Problem It Solves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#the-supertype-master-pattern">The Supertype Master Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#lifecycle-guarantees">Lifecycle Guarantees</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#canonical-urn-syntax">Canonical URN Syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/multilingual_jsonb.html">Multilingual JSONB Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#jsonb-data-model">JSONB Data Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#string-normalization-pipeline">String Normalization Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#querying-multilingual-fields">Querying Multilingual Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#postgresql-17-icu-collations">PostgreSQL 17 ICU Collations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/fingerprinting.html">Content Fingerprinting &amp; Deduplication</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#the-multi-algorithm-approach">The Multi-Algorithm Approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#canonical-json-serialization">Canonical JSON Serialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#simple-vs-compound-hashing">Simple vs Compound Hashing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#deterministic-16-character-urn-hashes">Deterministic 16-Character URN Hashes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/ingest_engine.html">The Ingestion Engine (fairwddi.ingest)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#package-architecture">Package Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#format-detection-detector-py">Format Detection (detector.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#streaming-xml-iteration-streaming-py">Streaming XML Iteration (streaming.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#comparator-and-execution-plan-comparator-py-plan-py">Comparator and Execution Plan (comparator.py &amp; plan.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#batch-transaction-loading-loader-py">Batch Transaction Loading (loader.py)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#api-architecture">API Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#endpoints-overview">Endpoints Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#example-endpoint-implementation">Example Endpoint Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#interactive-database-explorer">Interactive Database Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/dartfx_integration.html">Data Artifex DDI Toolkit Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#overview-of-dartfx-ddi">Overview of dartfx-ddi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#ddi-lifecycle-fragment-streaming">DDI-Lifecycle Fragment Streaming</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#multilingual-codebook-merging">Multilingual Codebook Merging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#ddi-cdi-assistant-framework">DDI-CDI Assistant Framework</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributor/index.html">Contributor Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributor/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/environment.html">Development Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#pre-commit-hooks">Pre-commit Hooks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#running-quick-sanity-checks">Running Quick Sanity Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/conventions.html">Coding Conventions &amp; Standards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#python-stack-tooling">Python Stack &amp; Tooling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#code-formatting-linting-ruff">Code Formatting &amp; Linting (Ruff)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#type-annotations-static-typing">Type Annotations &amp; Static Typing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#django-migrations-zero-data-loss">Django Migrations &amp; Zero-Data-Loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#ddi-naming-conventions">DDI Naming Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/testing.html">Testing Guide &amp; Practices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#testing-stack">Testing Stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#running-tests">Running Tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#isolated-sqlite-test-configuration">Isolated SQLite Test Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#testing-ingestion-streaming">Testing Ingestion &amp; Streaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/workflows.html">Development Workflows &amp; Pull Requests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#git-branching-strategy">Git Branching Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#pull-request-checklist">Pull Request Checklist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#building-documentation-locally">Building Documentation Locally</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Python API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/index.html#modules">Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/models.html">Models (fairwddi.models)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.base">Base Infrastructure &amp; Supertype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.concept">Concept Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.representation">Representation Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.instrument">Instrument &amp; Question Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.dataset">Dataset Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.organization">Organization &amp; Grouping Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.infrastructure">Batch &amp; Ingestion Infrastructure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.event">Audit &amp; Event Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/schemas.html">Pydantic Schemas (fairwddi.schemas)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/schemas.html#module-fairwddi.schemas.common">Common Value Objects &amp; Primitives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/schemas.html#module-fairwddi.schemas.entities">Entity Schemas</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/db.html">Database Layer (fairwddi.db)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.seed">Seed &amp; Fixture Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.wipe">Wipe Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/ingest.html">Ingestion &amp; Pipeline (fairwddi.ingest)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.detector">Format Detection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.streaming">Streaming XML Parsing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.profiles">Extraction Profiles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.preflight">Preflight Static Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.comparator">Database Comparison</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.plan">Ingestion Execution Plan</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.loader">Batch Loader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.pipeline">Pipeline Orchestration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.harmonizer">Harmonization &amp; Cross-Survey Clustering</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.router">Router &amp; Endpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.schemas">API Request &amp; Response Schemas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.views">Views &amp; Route Handlers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.server">ASGI Server Runner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.explorer_html">Interactive Model Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/utils.html">Utilities (fairwddi.utils)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/utils.html#module-fairwddi.utils.urn">URN Helpers (urn.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/utils.html#module-fairwddi.utils.normalize_string">String Normalization (normalize_string.py)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/index.html">Standards &amp; Project Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../reference/index.html#reference-documents">Reference Documents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/glossary.html">DDI Canonical Terminology Glossary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/deliverables.html">Project Deliverables &amp; Research Reports</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#core-deliverables">Core Deliverables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#specialized-technical-research-papers">Specialized Technical Research Papers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#interactive-exploration">Interactive Exploration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/changelog.html">Changelog &amp; Project Roadmap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/changelog.html#project-timeline-overview">Project Timeline Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/changelog.html#release-history">Release History</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FAIRwDDI Lifecycle</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fairwddi.api.router</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for fairwddi.api.router</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Ninja API Router for FAIRwDDI Question Bank &amp; Harmonization Explorer.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">unquote</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.db.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">configure_django_for_cli</span>
+
+<span class="n">configure_django_for_cli</span><span class="p">()</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ninja</span><span class="w"> </span><span class="kn">import</span> <span class="n">NinjaAPI</span><span class="p">,</span> <span class="n">Query</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.api.schemas</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AliasItem</span><span class="p">,</span>
+    <span class="n">CategoryReference</span><span class="p">,</span>
+    <span class="n">CategorySummary</span><span class="p">,</span>
+    <span class="n">CodeItemInfo</span><span class="p">,</span>
+    <span class="n">CodeListQuestionRef</span><span class="p">,</span>
+    <span class="n">CodeListSummary</span><span class="p">,</span>
+    <span class="n">GraphLink</span><span class="p">,</span>
+    <span class="n">GraphNode</span><span class="p">,</span>
+    <span class="n">MatrixRow</span><span class="p">,</span>
+    <span class="n">MatrixWaveEntry</span><span class="p">,</span>
+    <span class="n">OverviewStats</span><span class="p">,</span>
+    <span class="n">QuestionCascadeGraph</span><span class="p">,</span>
+    <span class="n">QuestionItemSummary</span><span class="p">,</span>
+    <span class="n">RepresentedVariableUsage</span><span class="p">,</span>
+    <span class="n">SurveyItem</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.models</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Category</span><span class="p">,</span>
+    <span class="n">CodeList</span><span class="p">,</span>
+    <span class="n">IngestBatch</span><span class="p">,</span>
+    <span class="n">InstanceVariable</span><span class="p">,</span>
+    <span class="n">QuestionItem</span><span class="p">,</span>
+    <span class="n">StudyUnit</span><span class="p">,</span>
+    <span class="n">URNAlias</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">api</span> <span class="o">=</span> <span class="n">NinjaAPI</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;FAIRwDDI Question Bank API&quot;</span><span class="p">,</span>
+    <span class="n">version</span><span class="o">=</span><span class="s2">&quot;0.1.0&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;DDI-Lifecycle 4.0 / CDI Question Bank, Variable Cascade &amp; Harmonization API&quot;</span><span class="p">,</span>
+    <span class="n">urls_namespace</span><span class="o">=</span><span class="s2">&quot;fairwddi_api&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_display_text</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">preferred_lang</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fr&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract a user-readable string from multilingual dict, list, or scalar.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">val</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">val</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">preferred_lang</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="n">preferred_lang</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;fr&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="n">lang</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">val</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">values</span><span class="p">())))</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;language&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">preferred_lang</span> <span class="ow">and</span> <span class="s2">&quot;value&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lang&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">preferred_lang</span> <span class="ow">and</span> <span class="s2">&quot;value&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">preferred_lang</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="n">preferred_lang</span><span class="p">])</span>
+                <span class="k">if</span> <span class="s2">&quot;value&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">item</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_overview">
+<a class="viewcode-back" href="../../../api/api_ref.html#fairwddi.api.router.get_overview">[docs]</a>
+<span class="nd">@api</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/overview&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">OverviewStats</span><span class="p">,</span> <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;Global bank overview and reuse statistics&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_overview</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OverviewStats</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return counts of surveys, questions, harmonized questions, and URN aliases.&quot;&quot;&quot;</span>
+    <span class="n">total_surveys</span> <span class="o">=</span> <span class="n">StudyUnit</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">total_questions</span> <span class="o">=</span> <span class="n">QuestionItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">total_variables</span> <span class="o">=</span> <span class="n">InstanceVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">total_categories</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">total_codelists</span> <span class="o">=</span> <span class="n">CodeList</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">total_aliases</span> <span class="o">=</span> <span class="n">URNAlias</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">total_batches</span> <span class="o">=</span> <span class="n">IngestBatch</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+    <span class="c1"># Reused questions: questions linked to &gt;= 2 distinct StudyUnits OR having URNAliases</span>
+    <span class="c1"># Fast computation via alias canonical targets</span>
+    <span class="n">aliased_question_urns</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+        <span class="n">URNAlias</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;QuestionItem&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s2">&quot;canonical_urn&quot;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">reused_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">aliased_question_urns</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">OverviewStats</span><span class="p">(</span>
+        <span class="n">survey_count</span><span class="o">=</span><span class="n">total_surveys</span><span class="p">,</span>
+        <span class="n">question_count</span><span class="o">=</span><span class="n">total_questions</span><span class="p">,</span>
+        <span class="n">reused_question_count</span><span class="o">=</span><span class="n">reused_count</span><span class="p">,</span>
+        <span class="n">variable_count</span><span class="o">=</span><span class="n">total_variables</span><span class="p">,</span>
+        <span class="n">category_count</span><span class="o">=</span><span class="n">total_categories</span><span class="p">,</span>
+        <span class="n">codelist_count</span><span class="o">=</span><span class="n">total_codelists</span><span class="p">,</span>
+        <span class="n">alias_count</span><span class="o">=</span><span class="n">total_aliases</span><span class="p">,</span>
+        <span class="n">batch_count</span><span class="o">=</span><span class="n">total_batches</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="list_surveys">
+<a class="viewcode-back" href="../../../api/api_ref.html#fairwddi.api.router.list_surveys">[docs]</a>
+<span class="nd">@api</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/surveys&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="nb">list</span><span class="p">[</span><span class="n">SurveyItem</span><span class="p">],</span> <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;List all ingested survey waves&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_surveys</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SurveyItem</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return all ingested surveys with variable and question counts.&quot;&quot;&quot;</span>
+    <span class="n">surveys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SurveyItem</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">su</span> <span class="ow">in</span> <span class="n">StudyUnit</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">):</span>
+        <span class="n">var_count</span> <span class="o">=</span> <span class="n">InstanceVariable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">datafile__study_unit</span><span class="o">=</span><span class="n">su</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="n">title_str</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">su</span><span class="o">.</span><span class="n">label</span> <span class="ow">or</span> <span class="n">su</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">surveys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">SurveyItem</span><span class="p">(</span>
+                <span class="n">urn</span><span class="o">=</span><span class="n">su</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">_extract_display_text</span><span class="p">(</span><span class="n">su</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">su</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">title_str</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">variable_count</span><span class="o">=</span><span class="n">var_count</span><span class="p">,</span>
+                <span class="n">created_at</span><span class="o">=</span><span class="n">su</span><span class="o">.</span><span class="n">created_at</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span> <span class="k">if</span> <span class="n">su</span><span class="o">.</span><span class="n">created_at</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">surveys</span></div>
+
+
+
+<div class="viewcode-block" id="list_questions">
+<a class="viewcode-back" href="../../../api/api_ref.html#fairwddi.api.router.list_questions">[docs]</a>
+<span class="nd">@api</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/questions&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="nb">list</span><span class="p">[</span><span class="n">QuestionItemSummary</span><span class="p">],</span> <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;Search and filter questions&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_questions</span><span class="p">(</span>
+    <span class="n">request</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">q</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Keyword search across text, name, or URN&quot;</span><span class="p">),</span>
+    <span class="n">reused_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span>
+        <span class="kc">False</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Filter for cross-survey harmonized questions only&quot;</span>
+    <span class="p">),</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">500</span><span class="p">),</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">QuestionItemSummary</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Search questions with survey reuse badges and URN aliases.&quot;&quot;&quot;</span>
+    <span class="n">qs</span> <span class="o">=</span> <span class="n">QuestionItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">prefetch_related</span><span class="p">(</span>
+        <span class="s2">&quot;variable_associations__represented_variable__instance_variables__datafile_variables__datafile__study_unit&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Pre-fetch all QuestionItem aliases into a lookup dict</span>
+    <span class="n">alias_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">URNAlias</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;QuestionItem&quot;</span><span class="p">):</span>
+        <span class="n">alias_map</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">canonical_urn</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">alias_urn</span><span class="p">)</span>
+
+    <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QuestionItemSummary</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">qs</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">):</span>
+        <span class="n">text_disp</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">question_text</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">aliases</span> <span class="o">=</span> <span class="n">alias_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="c1"># Collect unique surveys and variable names</span>
+        <span class="n">surveys_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">var_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">iv_urns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">qv</span> <span class="ow">in</span> <span class="n">qi</span><span class="o">.</span><span class="n">variable_associations</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">qv</span><span class="o">.</span><span class="n">represented_variable</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">rv</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">iv</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">instance_variables</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="n">iv_urns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iv</span><span class="o">.</span><span class="n">urn</span><span class="p">)</span>
+                <span class="n">vname</span> <span class="o">=</span> <span class="n">iv</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="n">iv</span><span class="o">.</span><span class="n">urn</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vname</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">vname</span><span class="p">:</span>
+                    <span class="n">vname</span> <span class="o">=</span> <span class="n">vname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">iv</span><span class="o">.</span><span class="n">urn</span><span class="p">)</span>
+                <span class="n">var_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">vname</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">dfv</span> <span class="ow">in</span> <span class="n">iv</span><span class="o">.</span><span class="n">datafile_variables</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span> <span class="ow">and</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">study_unit</span><span class="p">:</span>
+                        <span class="n">s_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">study_unit</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                        <span class="n">surveys_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s_name</span><span class="p">)</span>
+
+        <span class="n">is_reused</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surveys_set</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">aliases</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">reused_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_reused</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">q</span><span class="p">:</span>
+            <span class="n">q_lower</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">text_match</span> <span class="o">=</span> <span class="n">q_lower</span> <span class="ow">in</span> <span class="n">text_disp</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">q_lower</span> <span class="ow">in</span> <span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">var_match</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">q_lower</span> <span class="ow">in</span> <span class="n">vn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">vn</span> <span class="ow">in</span> <span class="n">var_names</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">text_match</span> <span class="ow">or</span> <span class="n">var_match</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">QuestionItemSummary</span><span class="p">(</span>
+                <span class="n">urn</span><span class="o">=</span><span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">_extract_display_text</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                <span class="n">question_text</span><span class="o">=</span><span class="n">qi</span><span class="o">.</span><span class="n">question_text</span><span class="p">,</span>
+                <span class="n">text_display</span><span class="o">=</span><span class="n">text_disp</span><span class="p">,</span>
+                <span class="n">surveys</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">surveys_set</span><span class="p">)),</span>
+                <span class="n">survey_count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">surveys_set</span><span class="p">),</span>
+                <span class="n">variable_names</span><span class="o">=</span><span class="n">var_names</span><span class="p">,</span>
+                <span class="n">instance_variables</span><span class="o">=</span><span class="n">iv_urns</span><span class="p">,</span>
+                <span class="n">aliases</span><span class="o">=</span><span class="n">aliases</span><span class="p">,</span>
+                <span class="n">is_reused</span><span class="o">=</span><span class="n">is_reused</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">results</span><span class="p">[</span><span class="n">offset</span> <span class="p">:</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">limit</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="get_question_cascade">
+<a class="viewcode-back" href="../../../api/api_ref.html#fairwddi.api.router.get_question_cascade">[docs]</a>
+<span class="nd">@api</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+    <span class="s2">&quot;/questions/{path:urn}/cascade&quot;</span><span class="p">,</span>
+    <span class="n">response</span><span class="o">=</span><span class="n">QuestionCascadeGraph</span><span class="p">,</span>
+    <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;Get full DDI Variable Cascade graph for a QuestionItem&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_question_cascade</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">urn</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuestionCascadeGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the complete node-link graph centered on this question.&quot;&quot;&quot;</span>
+    <span class="n">urn</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">urn</span><span class="p">)</span>
+    <span class="n">qi</span> <span class="o">=</span> <span class="n">QuestionItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">urn</span><span class="o">=</span><span class="n">urn</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">qi</span><span class="p">:</span>
+        <span class="c1"># Fallback: check if urn is an alias</span>
+        <span class="n">alias</span> <span class="o">=</span> <span class="n">URNAlias</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">alias_urn</span><span class="o">=</span><span class="n">urn</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">alias</span><span class="p">:</span>
+            <span class="n">qi</span> <span class="o">=</span> <span class="n">QuestionItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">urn</span><span class="o">=</span><span class="n">alias</span><span class="o">.</span><span class="n">canonical_urn</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">qi</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;QuestionItem &#39;</span><span class="si">{</span><span class="n">urn</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span><span class="p">)</span>
+
+    <span class="n">nodes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">GraphNode</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">links</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">GraphLink</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">q_text</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">question_text</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># 1. Central Question Node</span>
+    <span class="n">nodes</span><span class="p">[</span><span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">]</span> <span class="o">=</span> <span class="n">GraphNode</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">_extract_display_text</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;Question&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;QuestionItem&quot;</span><span class="p">,</span>
+        <span class="n">sublabel</span><span class="o">=</span><span class="n">q_text</span><span class="p">[:</span><span class="mi">80</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;...&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">q_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">80</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="n">data</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+            <span class="s2">&quot;question_text&quot;</span><span class="p">:</span> <span class="n">qi</span><span class="o">.</span><span class="n">question_text</span><span class="p">,</span>
+            <span class="s2">&quot;instructions&quot;</span><span class="p">:</span> <span class="n">qi</span><span class="o">.</span><span class="n">interviewer_instructions</span><span class="p">,</span>
+            <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="n">qi</span><span class="o">.</span><span class="n">hashes</span> <span class="ow">or</span> <span class="p">{},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># 2. Inbound URN Aliases</span>
+    <span class="n">aliases</span> <span class="o">=</span> <span class="n">URNAlias</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">canonical_urn</span><span class="o">=</span><span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
+        <span class="n">nodes</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">alias_urn</span><span class="p">]</span> <span class="o">=</span> <span class="n">GraphNode</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">alias_urn</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Alias (</span><span class="si">{</span><span class="n">a</span><span class="o">.</span><span class="n">hash_strategy</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;URNAlias&quot;</span><span class="p">,</span>
+            <span class="n">sublabel</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">alias_urn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">alias_urn</span> <span class="k">else</span> <span class="n">a</span><span class="o">.</span><span class="n">alias_urn</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;alias_urn&quot;</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">alias_urn</span><span class="p">,</span> <span class="s2">&quot;strategy&quot;</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">hash_strategy</span><span class="p">,</span> <span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">source_file</span><span class="p">},</span>
+        <span class="p">)</span>
+        <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">GraphLink</span><span class="p">(</span>
+                <span class="n">source</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">alias_urn</span><span class="p">,</span>
+                <span class="n">target</span><span class="o">=</span><span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;alias&quot;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;aliases_to&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="c1"># 3. RepresentedVariables &amp; InstanceVariables</span>
+    <span class="k">for</span> <span class="n">qv</span> <span class="ow">in</span> <span class="n">qi</span><span class="o">.</span><span class="n">variable_associations</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">qv</span><span class="o">.</span><span class="n">represented_variable</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rv</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">rv_label</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;RepresentedVariable&quot;</span>
+        <span class="n">nodes</span><span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">urn</span><span class="p">]</span> <span class="o">=</span> <span class="n">GraphNode</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">rv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">rv_label</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;RepresentedVariable&quot;</span><span class="p">,</span>
+            <span class="n">sublabel</span><span class="o">=</span><span class="s2">&quot;Representation&quot;</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span> <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="n">rv</span><span class="o">.</span><span class="n">hashes</span> <span class="ow">or</span> <span class="p">{}},</span>
+        <span class="p">)</span>
+        <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">GraphLink</span><span class="p">(</span>
+                <span class="n">source</span><span class="o">=</span><span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                <span class="n">target</span><span class="o">=</span><span class="n">rv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cascade&quot;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;represents&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Conceptual Variable (Upstream)</span>
+        <span class="k">if</span> <span class="n">rv</span><span class="o">.</span><span class="n">conceptual_variable</span><span class="p">:</span>
+            <span class="n">cv</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">conceptual_variable</span>
+            <span class="n">cv_label</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;ConceptualVariable&quot;</span>
+            <span class="n">nodes</span><span class="p">[</span><span class="n">cv</span><span class="o">.</span><span class="n">urn</span><span class="p">]</span> <span class="o">=</span> <span class="n">GraphNode</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">cv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">cv_label</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;ConceptualVariable&quot;</span><span class="p">,</span>
+                <span class="n">sublabel</span><span class="o">=</span><span class="s2">&quot;Abstract Concept&quot;</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">urn</span><span class="p">},</span>
+            <span class="p">)</span>
+            <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">GraphLink</span><span class="p">(</span>
+                    <span class="n">source</span><span class="o">=</span><span class="n">cv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="n">target</span><span class="o">=</span><span class="n">rv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;concept&quot;</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;concept_of&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># CodeList (Response categories)</span>
+        <span class="k">if</span> <span class="n">rv</span><span class="o">.</span><span class="n">code_list</span><span class="p">:</span>
+            <span class="n">cl</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">code_list</span>
+            <span class="n">cl_label</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;CodeList&quot;</span>
+
+            <span class="n">codes_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">cl</span><span class="o">.</span><span class="n">codes</span><span class="o">.</span><span class="n">select_related</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="s2">&quot;code_value&quot;</span><span class="p">):</span>
+                <span class="n">cat_label</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="n">cat_urn</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">category</span><span class="p">:</span>
+                    <span class="n">cat_label</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">label</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_extract_display_text</span><span class="p">(</span>
+                        <span class="n">code</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">name</span>
+                    <span class="p">)</span>
+                    <span class="n">cat_urn</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">urn</span>
+                <span class="n">codes_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">code_value</span><span class="p">),</span>
+                        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">cat_label</span><span class="p">,</span>
+                        <span class="s2">&quot;is_missing&quot;</span><span class="p">:</span> <span class="n">code</span><span class="o">.</span><span class="n">is_missing</span><span class="p">,</span>
+                        <span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="n">code</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                        <span class="s2">&quot;category_urn&quot;</span><span class="p">:</span> <span class="n">cat_urn</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+
+            <span class="n">nodes</span><span class="p">[</span><span class="n">cl</span><span class="o">.</span><span class="n">urn</span><span class="p">]</span> <span class="o">=</span> <span class="n">GraphNode</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">cl</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">cl_label</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;CodeList&quot;</span><span class="p">,</span>
+                <span class="n">sublabel</span><span class="o">=</span><span class="s2">&quot;Code List&quot;</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="n">cl</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">description</span><span class="p">),</span>
+                    <span class="s2">&quot;code_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">codes_list</span><span class="p">),</span>
+                    <span class="s2">&quot;codes&quot;</span><span class="p">:</span> <span class="n">codes_list</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+            <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">GraphLink</span><span class="p">(</span>
+                    <span class="n">source</span><span class="o">=</span><span class="n">rv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="n">target</span><span class="o">=</span><span class="n">cl</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;membership&quot;</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;response_domain&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># InstanceVariables (Downstream realizations across survey waves)</span>
+        <span class="k">for</span> <span class="n">iv</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">instance_variables</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">vname</span> <span class="o">=</span> <span class="n">iv</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vname</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">vname</span><span class="p">:</span>
+                <span class="n">vname</span> <span class="o">=</span> <span class="n">vname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">iv</span><span class="o">.</span><span class="n">urn</span><span class="p">)</span>
+            <span class="n">iv_label</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vname</span> <span class="ow">or</span> <span class="n">iv</span><span class="o">.</span><span class="n">urn</span><span class="p">)</span>
+
+            <span class="n">dfv</span> <span class="o">=</span> <span class="n">iv</span><span class="o">.</span><span class="n">datafile_variables</span><span class="o">.</span><span class="n">first</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">iv</span><span class="p">,</span> <span class="s2">&quot;datafile_variables&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">study_name</span> <span class="o">=</span> <span class="s2">&quot;Dataset&quot;</span>
+            <span class="k">if</span> <span class="n">dfv</span> <span class="ow">and</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span> <span class="ow">and</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">study_unit</span><span class="p">:</span>
+                <span class="n">study_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">study_unit</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="n">stats</span> <span class="o">=</span> <span class="n">dfv</span><span class="o">.</span><span class="n">statistics</span> <span class="k">if</span> <span class="n">dfv</span> <span class="ow">and</span> <span class="n">dfv</span><span class="o">.</span><span class="n">statistics</span> <span class="k">else</span> <span class="p">{}</span>
+
+            <span class="n">nodes</span><span class="p">[</span><span class="n">iv</span><span class="o">.</span><span class="n">urn</span><span class="p">]</span> <span class="o">=</span> <span class="n">GraphNode</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">iv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">iv_label</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;InstanceVariable&quot;</span><span class="p">,</span>
+                <span class="n">sublabel</span><span class="o">=</span><span class="n">study_name</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="n">iv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="s2">&quot;study_unit&quot;</span><span class="p">:</span> <span class="n">study_name</span><span class="p">,</span>
+                    <span class="s2">&quot;statistics&quot;</span><span class="p">:</span> <span class="n">stats</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+            <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">GraphLink</span><span class="p">(</span>
+                    <span class="n">source</span><span class="o">=</span><span class="n">rv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="n">target</span><span class="o">=</span><span class="n">iv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;realization&quot;</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;realized_in&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">QuestionCascadeGraph</span><span class="p">(</span>
+        <span class="n">question_urn</span><span class="o">=</span><span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+        <span class="n">question_text</span><span class="o">=</span><span class="n">q_text</span><span class="p">,</span>
+        <span class="n">nodes</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+        <span class="n">links</span><span class="o">=</span><span class="n">links</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_harmonization_matrix">
+<a class="viewcode-back" href="../../../api/api_ref.html#fairwddi.api.router.get_harmonization_matrix">[docs]</a>
+<span class="nd">@api</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+    <span class="s2">&quot;/harmonization/matrix&quot;</span><span class="p">,</span>
+    <span class="n">response</span><span class="o">=</span><span class="nb">list</span><span class="p">[</span><span class="n">MatrixRow</span><span class="p">],</span>
+    <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;Cross-wave survey harmonization matrix&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_harmonization_matrix</span><span class="p">(</span>
+    <span class="n">request</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">200</span><span class="p">),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatrixRow</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compare question realizations side-by-side across survey waves.&quot;&quot;&quot;</span>
+    <span class="c1"># Build alias map</span>
+    <span class="n">alias_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">URNAlias</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;QuestionItem&quot;</span><span class="p">):</span>
+        <span class="n">alias_map</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">canonical_urn</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">alias_urn</span><span class="p">)</span>
+
+    <span class="n">rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MatrixRow</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">qs</span> <span class="o">=</span> <span class="n">QuestionItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">prefetch_related</span><span class="p">(</span>
+        <span class="s2">&quot;variable_associations__represented_variable__instance_variables__datafile__study_unit&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">qs</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">):</span>
+        <span class="n">q_text</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">question_text</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">aliases</span> <span class="o">=</span> <span class="n">alias_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="n">waves_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MatrixWaveEntry</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">qv</span> <span class="ow">in</span> <span class="n">qi</span><span class="o">.</span><span class="n">variable_associations</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">qv</span><span class="o">.</span><span class="n">represented_variable</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">rv</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">iv</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">instance_variables</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="n">dfv</span> <span class="o">=</span> <span class="n">iv</span><span class="o">.</span><span class="n">datafile_variables</span><span class="o">.</span><span class="n">first</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">iv</span><span class="p">,</span> <span class="s2">&quot;datafile_variables&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">su_name</span> <span class="o">=</span> <span class="s2">&quot;Unknown&quot;</span>
+                <span class="n">df_name</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">dfv</span> <span class="ow">and</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="p">:</span>
+                    <span class="n">df_name</span> <span class="o">=</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">file_name</span>
+                    <span class="k">if</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">study_unit</span><span class="p">:</span>
+                        <span class="n">su_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">study_unit</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+                <span class="c1"># Determine wave identifier (e.g. 2013, 2014, or short study name)</span>
+                <span class="n">wave_key</span> <span class="o">=</span> <span class="n">su_name</span>
+                <span class="k">if</span> <span class="s2">&quot;2013&quot;</span> <span class="ow">in</span> <span class="n">su_name</span><span class="p">:</span>
+                    <span class="n">wave_key</span> <span class="o">=</span> <span class="s2">&quot;ELIPSS 2013&quot;</span>
+                <span class="k">elif</span> <span class="s2">&quot;2014&quot;</span> <span class="ow">in</span> <span class="n">su_name</span><span class="p">:</span>
+                    <span class="n">wave_key</span> <span class="o">=</span> <span class="s2">&quot;ELIPSS 2014&quot;</span>
+
+                <span class="n">vname</span> <span class="o">=</span> <span class="n">iv</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vname</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">vname</span><span class="p">:</span>
+                    <span class="n">vname</span> <span class="o">=</span> <span class="n">vname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">iv</span><span class="o">.</span><span class="n">urn</span><span class="p">)</span>
+
+                <span class="n">waves_data</span><span class="p">[</span><span class="n">wave_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">MatrixWaveEntry</span><span class="p">(</span>
+                    <span class="n">variable_name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">vname</span> <span class="ow">or</span> <span class="n">iv</span><span class="o">.</span><span class="n">urn</span><span class="p">),</span>
+                    <span class="n">instance_variable_urn</span><span class="o">=</span><span class="n">iv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="n">datafile_name</span><span class="o">=</span><span class="n">df_name</span><span class="p">,</span>
+                    <span class="n">frequency_count</span><span class="o">=</span><span class="n">iv</span><span class="o">.</span><span class="n">frequencies</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">iv</span><span class="p">,</span> <span class="s2">&quot;frequencies&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="n">is_shared</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">waves_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">aliases</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">is_shared</span><span class="p">:</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">MatrixRow</span><span class="p">(</span>
+                    <span class="n">canonical_urn</span><span class="o">=</span><span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="n">question_text</span><span class="o">=</span><span class="n">q_text</span><span class="p">,</span>
+                    <span class="n">waves</span><span class="o">=</span><span class="n">waves_data</span><span class="p">,</span>
+                    <span class="n">is_shared</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">aliases</span><span class="o">=</span><span class="n">aliases</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">rows</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="list_aliases">
+<a class="viewcode-back" href="../../../api/api_ref.html#fairwddi.api.router.list_aliases">[docs]</a>
+<span class="nd">@api</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/aliases&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="nb">list</span><span class="p">[</span><span class="n">AliasItem</span><span class="p">],</span> <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;List all URN aliases&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_aliases</span><span class="p">(</span>
+    <span class="n">request</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">entity_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Filter by entity type (e.g. QuestionItem, Category)&quot;</span><span class="p">),</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">1000</span><span class="p">),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">AliasItem</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return all recorded URN aliases with canonical targets and hash strategy.&quot;&quot;&quot;</span>
+    <span class="n">qs</span> <span class="o">=</span> <span class="n">URNAlias</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">entity_type</span><span class="p">:</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">entity_type</span><span class="o">=</span><span class="n">entity_type</span><span class="p">)</span>
+
+    <span class="n">items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AliasItem</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">qs</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;-id&quot;</span><span class="p">)[:</span><span class="n">limit</span><span class="p">]:</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">AliasItem</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="n">alias_urn</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">alias_urn</span><span class="p">,</span>
+                <span class="n">canonical_urn</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">canonical_urn</span><span class="p">,</span>
+                <span class="n">entity_type</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">entity_type</span><span class="p">,</span>
+                <span class="n">hash_strategy</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">hash_strategy</span><span class="p">,</span>
+                <span class="n">source_file</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">source_file</span><span class="p">,</span>
+                <span class="n">created_at</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">created_at</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span> <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">created_at</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">items</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_codelist_summary</span><span class="p">(</span><span class="n">cl</span><span class="p">:</span> <span class="n">CodeList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CodeListSummary</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a complete summary of a CodeList and its variable cascade footprint.&quot;&quot;&quot;</span>
+    <span class="n">cl_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cl</span><span class="o">.</span><span class="n">urn</span>
+    <span class="n">cl_desc</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+
+    <span class="n">codes_info</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CodeItemInfo</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">cl</span><span class="o">.</span><span class="n">codes</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="s2">&quot;code_value&quot;</span><span class="p">):</span>
+        <span class="n">cat_label</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">cat_urn</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">category</span><span class="p">:</span>
+            <span class="n">cat_label</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">label</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_extract_display_text</span><span class="p">(</span>
+                <span class="n">code</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">name</span>
+            <span class="p">)</span>
+            <span class="n">cat_urn</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">urn</span>
+        <span class="n">codes_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">CodeItemInfo</span><span class="p">(</span>
+                <span class="n">code_value</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">code_value</span><span class="p">),</span>
+                <span class="n">category_label</span><span class="o">=</span><span class="n">cat_label</span><span class="p">,</span>
+                <span class="n">category_urn</span><span class="o">=</span><span class="n">cat_urn</span><span class="p">,</span>
+                <span class="n">is_missing</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">is_missing</span><span class="p">),</span>
+                <span class="n">order</span><span class="o">=</span><span class="n">code</span><span class="o">.</span><span class="n">order</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">rv_usages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">RepresentedVariableUsage</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">var_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">questions_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">surveys_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">cl</span><span class="o">.</span><span class="n">represented_variables</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">):</span>
+        <span class="n">rv_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">rv</span><span class="o">.</span><span class="n">urn</span>
+        <span class="n">rv_label</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">var_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rv_name</span><span class="p">)</span>
+
+        <span class="n">q_urn</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">q_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">q_text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">qa</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">question_associations</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">qi</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">question_item</span>
+            <span class="n">q_urn</span> <span class="o">=</span> <span class="n">qi</span><span class="o">.</span><span class="n">urn</span>
+            <span class="n">q_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">qi</span><span class="o">.</span><span class="n">urn</span> <span class="k">else</span> <span class="n">qi</span><span class="o">.</span><span class="n">urn</span>
+            <span class="p">)</span>
+            <span class="n">q_text</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">question_text</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">qi</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">questions_map</span><span class="p">[</span><span class="n">qi</span><span class="o">.</span><span class="n">urn</span><span class="p">]</span> <span class="o">=</span> <span class="n">q_text</span>
+            <span class="k">break</span>
+
+        <span class="n">rv_surveys</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">iv_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">iv</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">instance_variables</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">):</span>
+            <span class="n">iv_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">iv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">iv</span><span class="o">.</span><span class="n">urn</span>
+            <span class="n">iv_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iv_name</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">dfv</span> <span class="ow">in</span> <span class="n">iv</span><span class="o">.</span><span class="n">datafile_variables</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span> <span class="ow">and</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">study_unit</span><span class="p">:</span>
+                    <span class="n">s_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">study_unit</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">surveys_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s_name</span><span class="p">)</span>
+                    <span class="n">rv_surveys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s_name</span><span class="p">)</span>
+
+        <span class="n">rv_usages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">RepresentedVariableUsage</span><span class="p">(</span>
+                <span class="n">urn</span><span class="o">=</span><span class="n">rv</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">rv_name</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">rv_label</span> <span class="k">if</span> <span class="n">rv_label</span> <span class="ow">and</span> <span class="n">rv_label</span> <span class="o">!=</span> <span class="n">rv_name</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">question_urn</span><span class="o">=</span><span class="n">q_urn</span><span class="p">,</span>
+                <span class="n">question_name</span><span class="o">=</span><span class="n">q_name</span><span class="p">,</span>
+                <span class="n">question_text</span><span class="o">=</span><span class="n">q_text</span><span class="p">,</span>
+                <span class="n">instance_variables</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">iv_names</span><span class="p">))),</span>
+                <span class="n">surveys</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">rv_surveys</span><span class="p">)),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">is_reused</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">surveys_set</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">CodeListSummary</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="n">cl</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">cl_name</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">cl_desc</span><span class="p">,</span>
+        <span class="n">code_count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">codes_info</span><span class="p">),</span>
+        <span class="n">codes</span><span class="o">=</span><span class="n">codes_info</span><span class="p">,</span>
+        <span class="n">variable_count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">var_names</span><span class="p">),</span>
+        <span class="n">variable_names</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">var_names</span><span class="p">))),</span>
+        <span class="n">represented_variables</span><span class="o">=</span><span class="n">rv_usages</span><span class="p">,</span>
+        <span class="n">questions</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">CodeListQuestionRef</span><span class="p">(</span>
+                <span class="n">urn</span><span class="o">=</span><span class="n">u</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">u</span> <span class="k">else</span> <span class="n">u</span><span class="p">,</span>
+                <span class="n">text</span><span class="o">=</span><span class="n">t</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">questions_map</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">],</span>
+        <span class="n">surveys</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">surveys_set</span><span class="p">)),</span>
+        <span class="n">is_reused</span><span class="o">=</span><span class="n">is_reused</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="list_codelists">
+<a class="viewcode-back" href="../../../api/api_ref.html#fairwddi.api.router.list_codelists">[docs]</a>
+<span class="nd">@api</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+    <span class="s2">&quot;/codelists&quot;</span><span class="p">,</span>
+    <span class="n">response</span><span class="o">=</span><span class="nb">list</span><span class="p">[</span><span class="n">CodeListSummary</span><span class="p">],</span>
+    <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;List CodeLists with response domains, variables, and cross-survey reuse&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_codelists</span><span class="p">(</span>
+    <span class="n">request</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">500</span><span class="p">),</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+    <span class="n">q</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Search by name, URN, or code label&quot;</span><span class="p">),</span>
+    <span class="n">reused_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span>
+        <span class="kc">False</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Filter for code lists used across multiple variables&quot;</span>
+    <span class="p">),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">CodeListSummary</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return all code lists with their response categories and variable usages.&quot;&quot;&quot;</span>
+    <span class="n">qs</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">CodeList</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">prefetch_related</span><span class="p">(</span>
+            <span class="s2">&quot;codes__category&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;represented_variables__instance_variables__datafile_variables__datafile__study_unit&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;represented_variables__question_associations__question_item&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;urn&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CodeListSummary</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">q_lower</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">is_reused_filter</span> <span class="o">=</span> <span class="n">reused_only</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reused_only</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="n">limit_val</span> <span class="o">=</span> <span class="n">limit</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">limit</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="mi">100</span>
+    <span class="n">offset_val</span> <span class="o">=</span> <span class="n">offset</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">cl</span> <span class="ow">in</span> <span class="n">qs</span><span class="p">:</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">_build_codelist_summary</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_reused_filter</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">summary</span><span class="o">.</span><span class="n">is_reused</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">q_lower</span><span class="p">:</span>
+            <span class="n">name_match</span> <span class="o">=</span> <span class="n">q_lower</span> <span class="ow">in</span> <span class="n">summary</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">q_lower</span> <span class="ow">in</span> <span class="n">summary</span><span class="o">.</span><span class="n">urn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">code_match</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="n">q_lower</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">category_label</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">q_lower</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">code_value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">summary</span><span class="o">.</span><span class="n">codes</span>
+            <span class="p">)</span>
+            <span class="n">var_match</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">q_lower</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">summary</span><span class="o">.</span><span class="n">variable_names</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">name_match</span> <span class="ow">or</span> <span class="n">code_match</span> <span class="ow">or</span> <span class="n">var_match</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">results</span><span class="p">[</span><span class="n">offset_val</span> <span class="p">:</span> <span class="n">offset_val</span> <span class="o">+</span> <span class="n">limit_val</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="list_categories">
+<a class="viewcode-back" href="../../../api/api_ref.html#fairwddi.api.router.list_categories">[docs]</a>
+<span class="nd">@api</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+    <span class="s2">&quot;/categories&quot;</span><span class="p">,</span>
+    <span class="n">response</span><span class="o">=</span><span class="nb">list</span><span class="p">[</span><span class="n">CategorySummary</span><span class="p">],</span>
+    <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;List standardized Categories and their reuse across CodeLists&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_categories</span><span class="p">(</span>
+    <span class="n">request</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">500</span><span class="p">),</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+    <span class="n">q</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Search by category label or name&quot;</span><span class="p">),</span>
+    <span class="n">reused_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span>
+        <span class="kc">False</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Filter for categories used across multiple code lists&quot;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">CategorySummary</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return all categories with their code list memberships and survey footprints.&quot;&quot;&quot;</span>
+    <span class="n">qs</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">prefetch_related</span><span class="p">(</span>
+            <span class="s2">&quot;code_memberships__code_list__represented_variables__instance_variables__datafile_variables__datafile__study_unit&quot;</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;urn&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CategorySummary</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">q_lower</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">qs</span><span class="p">:</span>
+        <span class="n">cat_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cat</span><span class="o">.</span><span class="n">urn</span>
+        <span class="n">cat_label</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">label</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cat_name</span>
+
+        <span class="n">cl_refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CategoryReference</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">surveys_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">cm</span> <span class="ow">in</span> <span class="n">cat</span><span class="o">.</span><span class="n">code_memberships</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">cm</span><span class="o">.</span><span class="n">code_list</span><span class="p">:</span>
+                <span class="n">cl_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">code_list</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cm</span><span class="o">.</span><span class="n">code_list</span><span class="o">.</span><span class="n">urn</span>
+                <span class="n">cl_surveys</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">cm</span><span class="o">.</span><span class="n">code_list</span><span class="o">.</span><span class="n">represented_variables</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">iv</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">instance_variables</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                        <span class="k">for</span> <span class="n">dfv</span> <span class="ow">in</span> <span class="n">iv</span><span class="o">.</span><span class="n">datafile_variables</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                            <span class="k">if</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span> <span class="ow">and</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">study_unit</span><span class="p">:</span>
+                                <span class="n">s_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">study_unit</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                                <span class="n">cl_surveys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s_name</span><span class="p">)</span>
+                                <span class="n">surveys_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s_name</span><span class="p">)</span>
+                <span class="n">cl_refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">CategoryReference</span><span class="p">(</span>
+                        <span class="n">code_list_urn</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">code_list</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                        <span class="n">code_list_name</span><span class="o">=</span><span class="n">cl_name</span><span class="p">,</span>
+                        <span class="n">code_value</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">code_value</span><span class="p">),</span>
+                        <span class="n">is_missing</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">is_missing</span><span class="p">),</span>
+                        <span class="n">surveys</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">cl_surveys</span><span class="p">)),</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="n">is_reused</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cl_refs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">surveys_set</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">reused_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_reused</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">q_lower</span><span class="p">:</span>
+            <span class="n">text_match</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">q_lower</span> <span class="ow">in</span> <span class="n">cat_label</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="ow">or</span> <span class="n">q_lower</span> <span class="ow">in</span> <span class="n">cat_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="ow">or</span> <span class="n">q_lower</span> <span class="ow">in</span> <span class="n">cat</span><span class="o">.</span><span class="n">urn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="n">cl_match</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">q_lower</span> <span class="ow">in</span> <span class="n">cr</span><span class="o">.</span><span class="n">code_list_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">cr</span> <span class="ow">in</span> <span class="n">cl_refs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">text_match</span> <span class="ow">or</span> <span class="n">cl_match</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">CategorySummary</span><span class="p">(</span>
+                <span class="n">urn</span><span class="o">=</span><span class="n">cat</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">cat_name</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">cat</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+                <span class="n">label_display</span><span class="o">=</span><span class="n">cat_label</span><span class="p">,</span>
+                <span class="n">is_missing</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">is_missing</span><span class="p">),</span>
+                <span class="n">codelist_count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cl_refs</span><span class="p">),</span>
+                <span class="n">codelists</span><span class="o">=</span><span class="n">cl_refs</span><span class="p">,</span>
+                <span class="n">surveys</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">surveys_set</span><span class="p">)),</span>
+                <span class="n">is_reused</span><span class="o">=</span><span class="n">is_reused</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">results</span><span class="p">[</span><span class="n">offset</span> <span class="p">:</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">limit</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="get_codelist">
+<a class="viewcode-back" href="../../../api/api_ref.html#fairwddi.api.router.get_codelist">[docs]</a>
+<span class="nd">@api</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+    <span class="s2">&quot;/codelists/{path:urn}&quot;</span><span class="p">,</span>
+    <span class="n">response</span><span class="o">=</span><span class="n">CodeListSummary</span><span class="p">,</span>
+    <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;Get single CodeList detail by URN&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_codelist</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">urn</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CodeListSummary</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return complete details for a single CodeList.&quot;&quot;&quot;</span>
+    <span class="n">urn</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">urn</span><span class="p">)</span>
+    <span class="n">cl</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">CodeList</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">urn</span><span class="o">=</span><span class="n">urn</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">prefetch_related</span><span class="p">(</span>
+            <span class="s2">&quot;codes__category&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;represented_variables__instance_variables__datafile_variables__datafile__study_unit&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;represented_variables__question_associations__question_item&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cl</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CodeList &#39;</span><span class="si">{</span><span class="n">urn</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_build_codelist_summary</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_category">
+<a class="viewcode-back" href="../../../api/api_ref.html#fairwddi.api.router.get_category">[docs]</a>
+<span class="nd">@api</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+    <span class="s2">&quot;/categories/{path:urn}&quot;</span><span class="p">,</span>
+    <span class="n">response</span><span class="o">=</span><span class="n">CategorySummary</span><span class="p">,</span>
+    <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;Get single Category detail by URN&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_category</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">urn</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CategorySummary</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return complete details for a single Category.&quot;&quot;&quot;</span>
+    <span class="n">urn</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">urn</span><span class="p">)</span>
+    <span class="n">cat</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">urn</span><span class="o">=</span><span class="n">urn</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">prefetch_related</span><span class="p">(</span>
+            <span class="s2">&quot;code_memberships__code_list__represented_variables__instance_variables__datafile_variables__datafile__study_unit&quot;</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cat</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Category &#39;</span><span class="si">{</span><span class="n">urn</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span><span class="p">)</span>
+
+    <span class="n">cat_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cat</span><span class="o">.</span><span class="n">urn</span>
+    <span class="n">cat_label</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">label</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cat_name</span>
+
+    <span class="n">cl_refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CategoryReference</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">surveys_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">cm</span> <span class="ow">in</span> <span class="n">cat</span><span class="o">.</span><span class="n">code_memberships</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">cm</span><span class="o">.</span><span class="n">code_list</span><span class="p">:</span>
+            <span class="n">cl_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">code_list</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cm</span><span class="o">.</span><span class="n">code_list</span><span class="o">.</span><span class="n">urn</span>
+            <span class="n">cl_surveys</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">cm</span><span class="o">.</span><span class="n">code_list</span><span class="o">.</span><span class="n">represented_variables</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">iv</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">instance_variables</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">dfv</span> <span class="ow">in</span> <span class="n">iv</span><span class="o">.</span><span class="n">datafile_variables</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span> <span class="ow">and</span> <span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">study_unit</span><span class="p">:</span>
+                            <span class="n">s_name</span> <span class="o">=</span> <span class="n">_extract_display_text</span><span class="p">(</span><span class="n">dfv</span><span class="o">.</span><span class="n">datafile</span><span class="o">.</span><span class="n">study_unit</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                            <span class="n">cl_surveys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s_name</span><span class="p">)</span>
+                            <span class="n">surveys_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s_name</span><span class="p">)</span>
+
+            <span class="n">cl_refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">CategoryReference</span><span class="p">(</span>
+                    <span class="n">code_list_urn</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">code_list</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+                    <span class="n">code_list_name</span><span class="o">=</span><span class="n">cl_name</span><span class="p">,</span>
+                    <span class="n">code_value</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">code_value</span><span class="p">),</span>
+                    <span class="n">is_missing</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">is_missing</span><span class="p">),</span>
+                    <span class="n">surveys</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">cl_surveys</span><span class="p">)),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="n">is_reused</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cl_refs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">surveys_set</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">CategorySummary</span><span class="p">(</span>
+        <span class="n">urn</span><span class="o">=</span><span class="n">cat</span><span class="o">.</span><span class="n">urn</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">cat_name</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">cat</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+        <span class="n">label_display</span><span class="o">=</span><span class="n">cat_label</span><span class="p">,</span>
+        <span class="n">is_missing</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">is_missing</span><span class="p">),</span>
+        <span class="n">codelist_count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cl_refs</span><span class="p">),</span>
+        <span class="n">codelists</span><span class="o">=</span><span class="n">cl_refs</span><span class="p">,</span>
+        <span class="n">surveys</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">surveys_set</span><span class="p">)),</span>
+        <span class="n">is_reused</span><span class="o">=</span><span class="n">is_reused</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

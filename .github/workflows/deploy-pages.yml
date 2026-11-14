@@ -32,6 +32,16 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Build Sphinx Documentation
+        run: |
+          uv sync --group docs
+          uv run sphinx-build -d docs/build/doctrees -b html docs/source docs
+
       - name: Build Portal Data & Search Manifest
         run: |
           python scripts/build_site_data.py

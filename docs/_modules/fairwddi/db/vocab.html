@@ -1,0 +1,748 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>fairwddi.db.vocab &mdash; FAIRwDDI Lifecycle 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FAIRwDDI Lifecycle
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/index.html">Administrator Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../admin/index.html#key-operational-responsibilities">Key Operational Responsibilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../admin/index.html#guide-outline">Guide Outline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/architecture.html">System Architecture &amp; Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#hardware-operating-system-recommendations">Hardware &amp; Operating System Recommendations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#software-dependencies">Software Dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#database-architecture">Database Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/installation.html">Installation &amp; Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#configuration-env">Configuration (.env)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#database-provisioning">Database Provisioning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#verifying-installation">Verifying Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/cli_operations.html">CLI Operational Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#global-options">Global Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#vocabulary-administration-fairwddi-vocab">Vocabulary Administration (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">vocab</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#ingestion-pipeline-fairwddi-ingest">Ingestion Pipeline (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">ingest</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/ingestion_ops.html">Ingestion &amp; Pipeline Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#the-2-stage-ingestion-lifecycle">The 2-Stage Ingestion Lifecycle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#the-4-phase-comparison-cascade">The 4-Phase Comparison Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#reviewing-ingestion-plans">Reviewing Ingestion Plans</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#executing-batch-transactions">Executing Batch Transactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#handling-quarantine-records">Handling Quarantine Records</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#rolling-back-a-batch">Rolling Back a Batch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/deployment.html">Production Deployment &amp; Maintenance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#service-architecture">Service Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#asgi-application-server-setup">ASGI Application Server Setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#nginx-reverse-proxy-configuration">Nginx Reverse Proxy Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#database-maintenance-index-optimization">Database Maintenance &amp; Index Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#backup-and-disaster-recovery">Backup and Disaster Recovery</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/index.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../developer/index.html#architectural-principles">Architectural Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../developer/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/variable_cascade.html">The DDI Variable Cascade</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#the-three-tiers-of-the-cascade">The Three Tiers of the Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#tier-definitions">Tier Definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#standards-crosswalk">Standards Crosswalk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#orm-traversal-examples">ORM Traversal Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/data_model.html">The 30-Model Database Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#abstract-base-classes">Abstract Base Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#layer-model-breakdown">Layer &amp; Model Breakdown</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#polymorphic-cross-resource-relations">Polymorphic Cross-Resource Relations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/urn_registry.html">Universal URN Master Registry (UrnRegistry)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#the-problem-it-solves">The Problem It Solves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#the-supertype-master-pattern">The Supertype Master Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#lifecycle-guarantees">Lifecycle Guarantees</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#canonical-urn-syntax">Canonical URN Syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/multilingual_jsonb.html">Multilingual JSONB Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#jsonb-data-model">JSONB Data Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#string-normalization-pipeline">String Normalization Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#querying-multilingual-fields">Querying Multilingual Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#postgresql-17-icu-collations">PostgreSQL 17 ICU Collations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/fingerprinting.html">Content Fingerprinting &amp; Deduplication</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#the-multi-algorithm-approach">The Multi-Algorithm Approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#canonical-json-serialization">Canonical JSON Serialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#simple-vs-compound-hashing">Simple vs Compound Hashing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#deterministic-16-character-urn-hashes">Deterministic 16-Character URN Hashes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/ingest_engine.html">The Ingestion Engine (fairwddi.ingest)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#package-architecture">Package Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#format-detection-detector-py">Format Detection (detector.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#streaming-xml-iteration-streaming-py">Streaming XML Iteration (streaming.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#comparator-and-execution-plan-comparator-py-plan-py">Comparator and Execution Plan (comparator.py &amp; plan.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#batch-transaction-loading-loader-py">Batch Transaction Loading (loader.py)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#api-architecture">API Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#endpoints-overview">Endpoints Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#example-endpoint-implementation">Example Endpoint Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#interactive-database-explorer">Interactive Database Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/dartfx_integration.html">Data Artifex DDI Toolkit Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#overview-of-dartfx-ddi">Overview of dartfx-ddi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#ddi-lifecycle-fragment-streaming">DDI-Lifecycle Fragment Streaming</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#multilingual-codebook-merging">Multilingual Codebook Merging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#ddi-cdi-assistant-framework">DDI-CDI Assistant Framework</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributor/index.html">Contributor Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributor/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/environment.html">Development Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#pre-commit-hooks">Pre-commit Hooks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#running-quick-sanity-checks">Running Quick Sanity Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/conventions.html">Coding Conventions &amp; Standards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#python-stack-tooling">Python Stack &amp; Tooling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#code-formatting-linting-ruff">Code Formatting &amp; Linting (Ruff)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#type-annotations-static-typing">Type Annotations &amp; Static Typing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#django-migrations-zero-data-loss">Django Migrations &amp; Zero-Data-Loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#ddi-naming-conventions">DDI Naming Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/testing.html">Testing Guide &amp; Practices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#testing-stack">Testing Stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#running-tests">Running Tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#isolated-sqlite-test-configuration">Isolated SQLite Test Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#testing-ingestion-streaming">Testing Ingestion &amp; Streaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/workflows.html">Development Workflows &amp; Pull Requests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#git-branching-strategy">Git Branching Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#pull-request-checklist">Pull Request Checklist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#building-documentation-locally">Building Documentation Locally</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Python API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/index.html#modules">Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/models.html">Models (fairwddi.models)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.base">Base Infrastructure &amp; Supertype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.concept">Concept Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.representation">Representation Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.instrument">Instrument &amp; Question Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.dataset">Dataset Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.organization">Organization &amp; Grouping Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.infrastructure">Batch &amp; Ingestion Infrastructure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.event">Audit &amp; Event Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/schemas.html">Pydantic Schemas (fairwddi.schemas)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/schemas.html#module-fairwddi.schemas.common">Common Value Objects &amp; Primitives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/schemas.html#module-fairwddi.schemas.entities">Entity Schemas</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/db.html">Database Layer (fairwddi.db)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.seed">Seed &amp; Fixture Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.wipe">Wipe Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/ingest.html">Ingestion &amp; Pipeline (fairwddi.ingest)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.detector">Format Detection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.streaming">Streaming XML Parsing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.profiles">Extraction Profiles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.preflight">Preflight Static Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.comparator">Database Comparison</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.plan">Ingestion Execution Plan</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.loader">Batch Loader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.pipeline">Pipeline Orchestration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.harmonizer">Harmonization &amp; Cross-Survey Clustering</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.router">Router &amp; Endpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.schemas">API Request &amp; Response Schemas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.views">Views &amp; Route Handlers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.server">ASGI Server Runner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.explorer_html">Interactive Model Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/utils.html">Utilities (fairwddi.utils)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/utils.html#module-fairwddi.utils.urn">URN Helpers (urn.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/utils.html#module-fairwddi.utils.normalize_string">String Normalization (normalize_string.py)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/index.html">Standards &amp; Project Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../reference/index.html#reference-documents">Reference Documents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/glossary.html">DDI Canonical Terminology Glossary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/deliverables.html">Project Deliverables &amp; Research Reports</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#core-deliverables">Core Deliverables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#specialized-technical-research-papers">Specialized Technical Research Papers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#interactive-exploration">Interactive Exploration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/changelog.html">Changelog &amp; Project Roadmap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/changelog.html#project-timeline-overview">Project Timeline Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/changelog.html#release-history">Release History</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FAIRwDDI Lifecycle</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fairwddi.db.vocab</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for fairwddi.db.vocab</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Generic SKOS / XKOS controlled vocabulary loader and inspector for FAIRwDDI.</span>
+
+<span class="sd">Supports standard-agnostic ingestion of any SKOS / SKOS-XL / XKOS RDF vocabulary</span>
+<span class="sd">in Turtle (.ttl), RDF/XML (.rdf, .xml), JSON-LD (.jsonld, .json), N-Triples (.nt),</span>
+<span class="sd">and Notation3 (.n3) formats (e.g., CESSDA ELSST, CESSDA Topics, DDI-CV, UNESCO,</span>
+<span class="sd">Eurostat RAMON, Agrovoc, STW, custom project taxonomies).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">transaction</span>
+
+
+<div class="viewcode-block" id="check_vocabulary_loaded">
+<a class="viewcode-back" href="../../../api/db.html#fairwddi.db.vocab.check_vocabulary_loaded">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_vocabulary_loaded</span><span class="p">(</span><span class="n">vocabulary</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if concepts for a given vocabulary (or any vocabularies) are loaded.</span>
+
+<span class="sd">    Returns status summary dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Count</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Concept</span>
+
+    <span class="k">if</span> <span class="n">vocabulary</span><span class="p">:</span>
+        <span class="c1"># Match exact or case-insensitive prefix / contains</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">Concept</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">vocabulary__icontains</span><span class="o">=</span><span class="n">vocabulary</span><span class="p">)</span>
+        <span class="n">total_count</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="n">top_count</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">parent__isnull</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+        <span class="n">matched_vocab_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">qs</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s2">&quot;vocabulary&quot;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span> <span class="k">if</span> <span class="n">total_count</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">vocabulary</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;loaded&quot;</span><span class="p">:</span> <span class="n">total_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;vocabulary&quot;</span><span class="p">:</span> <span class="n">matched_vocab_name</span><span class="p">,</span>
+            <span class="s2">&quot;total_concepts&quot;</span><span class="p">:</span> <span class="n">total_count</span><span class="p">,</span>
+            <span class="s2">&quot;top_concepts&quot;</span><span class="p">:</span> <span class="n">top_count</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="c1"># Summary of all loaded vocabularies</span>
+    <span class="n">vocab_groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="n">Concept</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s2">&quot;vocabulary&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s2">&quot;urn&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;vocabulary&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">total_all</span> <span class="o">=</span> <span class="n">Concept</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;loaded&quot;</span><span class="p">:</span> <span class="n">total_all</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;vocabulary&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;vocabularies&quot;</span><span class="p">:</span> <span class="n">vocab_groups</span><span class="p">,</span>
+        <span class="s2">&quot;total_concepts&quot;</span><span class="p">:</span> <span class="n">total_all</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="extract_urn">
+<a class="viewcode-back" href="../../../api/db.html#fairwddi.db.vocab.extract_urn">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_urn</span><span class="p">(</span>
+    <span class="n">subject</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">graph</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">fallback_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;concept&quot;</span><span class="p">,</span>
+    <span class="n">default_agency</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fr.cdsp&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract authoritative/original URN from RDF node, or synthesize fallback DDI URN.</span>
+
+<span class="sd">    Priority:</span>
+<span class="sd">    1. If the subject URI itself starts with &#39;urn:&#39;, use it directly.</span>
+<span class="sd">    2. Search dct:identifier, dc:identifier, and skos:notation for values starting with &#39;urn:&#39;.</span>
+<span class="sd">    3. Fallback: synthesize &#39;urn:ddi:{agency}:{fallback_prefix}-{id}:1.0.0&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">subj_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">subj_str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;urn:&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">subj_str</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rdflib.namespace</span><span class="w"> </span><span class="kn">import</span> <span class="n">DC</span><span class="p">,</span> <span class="n">DCTERMS</span><span class="p">,</span> <span class="n">SKOS</span>
+
+    <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="p">(</span><span class="n">DCTERMS</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">DC</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">SKOS</span><span class="o">.</span><span class="n">notation</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">pred</span><span class="p">):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;urn:&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">val</span>
+
+    <span class="c1"># Fallback synthesis</span>
+    <span class="n">notation_val</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="p">(</span><span class="n">SKOS</span><span class="o">.</span><span class="n">notation</span><span class="p">,</span> <span class="n">DCTERMS</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">DC</span><span class="o">.</span><span class="n">identifier</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">pred</span><span class="p">):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">val</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;http://&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">val</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;https://&quot;</span><span class="p">):</span>
+                <span class="n">notation_val</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">notation_val</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="n">raw_id</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">notation_val</span> <span class="ow">or</span> <span class="n">subj_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">default_agency</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">fallback_prefix</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">raw_id</span><span class="si">}</span><span class="s2">:1.0.0&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="load_skos_vocabulary">
+<a class="viewcode-back" href="../../../api/db.html#fairwddi.db.vocab.load_skos_vocabulary">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_skos_vocabulary</span><span class="p">(</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">max_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">vocabulary_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rdf_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load any SKOS / XKOS vocabulary into the Concept table from an RDF file.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - file_path: Path to the RDF file (.ttl, .rdf, .xml, .jsonld, .nt, etc.).</span>
+<span class="sd">    - max_levels: Optional depth limit (1 for top concepts, 2 for top + level 1, None for all).</span>
+<span class="sd">    - reload: If True, clears existing concepts for this vocabulary before loading.</span>
+<span class="sd">    - vocabulary_name: Name of vocabulary (if None, infers from scheme or file stem).</span>
+<span class="sd">    - rdf_format: RDF format (if None, auto-detected from file extension).</span>
+
+<span class="sd">    Returns summary dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">rdflib</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rdflib.namespace</span><span class="w"> </span><span class="kn">import</span> <span class="n">DC</span><span class="p">,</span> <span class="n">DCTERMS</span><span class="p">,</span> <span class="n">RDF</span><span class="p">,</span> <span class="n">RDFS</span><span class="p">,</span> <span class="n">SKOS</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rdflib.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">guess_format</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Concept</span><span class="p">,</span> <span class="n">ConceptScheme</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vocabulary file not found: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+    <span class="n">agency</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DDI_AGENCY&quot;</span><span class="p">,</span> <span class="s2">&quot;fr.cdsp&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 1. Detect format and parse RDF graph</span>
+    <span class="n">fmt</span> <span class="o">=</span> <span class="n">rdf_format</span> <span class="ow">or</span> <span class="n">guess_format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">&quot;turtle&quot;</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">rdflib</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">fmt</span><span class="p">)</span>
+
+    <span class="c1"># 2. Determine / infer vocabulary name if not supplied</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">vocabulary_name</span><span class="p">:</span>
+        <span class="c1"># Prefer concise name: file stem prefix, e.g. &quot;ELSST&quot; from &quot;ELSST_R6.ttl&quot;</span>
+        <span class="n">vocabulary_name</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="n">vocab_slug</span> <span class="o">=</span> <span class="n">vocabulary_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Helper to extract multilingual properties with fallback</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_multilingual</span><span class="p">(</span>
+        <span class="n">subject</span><span class="p">:</span> <span class="n">rdflib</span><span class="o">.</span><span class="n">URIRef</span><span class="p">,</span> <span class="n">predicates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">rdflib</span><span class="o">.</span><span class="n">URIRef</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+        <span class="n">result</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">seen_pairs</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="n">predicates</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">lit</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">pred</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lit</span><span class="p">,</span> <span class="n">rdflib</span><span class="o">.</span><span class="n">Literal</span><span class="p">):</span>
+                    <span class="n">lang</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">lit</span><span class="o">.</span><span class="n">language</span> <span class="ow">or</span> <span class="s2">&quot;und&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">lit</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="n">pair</span> <span class="o">=</span> <span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">val</span> <span class="ow">and</span> <span class="n">pair</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen_pairs</span><span class="p">:</span>
+                        <span class="n">seen_pairs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+                        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="n">lang</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">val</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_notation</span><span class="p">(</span><span class="n">subject</span><span class="p">:</span> <span class="n">rdflib</span><span class="o">.</span><span class="n">URIRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">lit</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">SKOS</span><span class="o">.</span><span class="n">notation</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lit</span><span class="p">,</span> <span class="n">rdflib</span><span class="o">.</span><span class="n">Literal</span><span class="p">):</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">lit</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">val</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;urn:&quot;</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">val</span>
+        <span class="k">for</span> <span class="n">lit</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">DCTERMS</span><span class="o">.</span><span class="n">identifier</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lit</span><span class="p">,</span> <span class="n">rdflib</span><span class="o">.</span><span class="n">Literal</span><span class="p">):</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">lit</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">val</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;urn:&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">val</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;http&quot;</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">val</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># 3. Identify / create parent ConceptScheme(s) for the vocabulary</span>
+    <span class="n">scheme_nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">subjects</span><span class="p">(</span><span class="n">RDF</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">SKOS</span><span class="o">.</span><span class="n">ConceptScheme</span><span class="p">))</span>
+    <span class="n">schemes_by_uri</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ConceptScheme</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">scheme_nodes</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">s_node</span> <span class="ow">in</span> <span class="n">scheme_nodes</span><span class="p">:</span>
+            <span class="n">s_uri_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">s_node</span><span class="p">)</span>
+            <span class="n">s_urn</span> <span class="o">=</span> <span class="n">extract_urn</span><span class="p">(</span>
+                <span class="n">s_node</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">fallback_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;cs-</span><span class="si">{</span><span class="n">vocab_slug</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">default_agency</span><span class="o">=</span><span class="n">agency</span>
+            <span class="p">)</span>
+            <span class="n">s_labels</span> <span class="o">=</span> <span class="n">extract_multilingual</span><span class="p">(</span>
+                <span class="n">s_node</span><span class="p">,</span> <span class="p">[</span><span class="n">SKOS</span><span class="o">.</span><span class="n">prefLabel</span><span class="p">,</span> <span class="n">RDFS</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">DCTERMS</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">DC</span><span class="o">.</span><span class="n">title</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">s_descriptions</span> <span class="o">=</span> <span class="n">extract_multilingual</span><span class="p">(</span>
+                <span class="n">s_node</span><span class="p">,</span> <span class="p">[</span><span class="n">DCTERMS</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="n">RDFS</span><span class="o">.</span><span class="n">comment</span><span class="p">,</span> <span class="n">SKOS</span><span class="o">.</span><span class="n">scopeNote</span><span class="p">,</span> <span class="n">DC</span><span class="o">.</span><span class="n">description</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">s_labels</span><span class="p">:</span>
+                <span class="n">s_labels</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;und&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">vocabulary_name</span><span class="p">}]</span>
+
+            <span class="n">s_obj</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ConceptScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">update_or_create</span><span class="p">(</span>
+                <span class="n">urn</span><span class="o">=</span><span class="n">s_urn</span><span class="p">,</span>
+                <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">s_labels</span><span class="p">,</span>
+                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">s_descriptions</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+            <span class="n">schemes_by_uri</span><span class="p">[</span><span class="n">s_uri_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_obj</span>
+        <span class="n">default_scheme_obj</span> <span class="o">=</span> <span class="n">schemes_by_uri</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">scheme_nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">scheme_urn</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;urn:ddi:</span><span class="si">{</span><span class="n">agency</span><span class="si">}</span><span class="s2">:cs-</span><span class="si">{</span><span class="n">vocab_slug</span><span class="si">}</span><span class="s2">:1.0.0&quot;</span>
+        <span class="n">scheme_labels</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;und&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">vocabulary_name</span><span class="p">}]</span>
+        <span class="n">scheme_descriptions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;und&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Controlled vocabulary imported from </span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+        <span class="p">]</span>
+        <span class="n">default_scheme_obj</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ConceptScheme</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">update_or_create</span><span class="p">(</span>
+            <span class="n">urn</span><span class="o">=</span><span class="n">scheme_urn</span><span class="p">,</span>
+            <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">scheme_labels</span><span class="p">,</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">scheme_descriptions</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="n">schemes_by_uri</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_scheme_obj</span>
+
+    <span class="c1"># 4. Identify all concepts in the RDF graph</span>
+    <span class="n">all_concepts_in_graph</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">subjects</span><span class="p">(</span><span class="n">RDF</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">SKOS</span><span class="o">.</span><span class="n">Concept</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">subjects</span><span class="p">(</span><span class="n">SKOS</span><span class="o">.</span><span class="n">prefLabel</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">rdflib</span><span class="o">.</span><span class="n">URIRef</span><span class="p">)</span> <span class="ow">and</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">scheme_nodes</span><span class="p">:</span>
+            <span class="n">all_concepts_in_graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="n">all_concept_uri_strs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">all_concepts_in_graph</span><span class="p">]</span>
+
+    <span class="c1"># 5. Check if already loaded by vocabulary name OR matching URIs</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">check_vocabulary_loaded</span><span class="p">(</span><span class="n">vocabulary</span><span class="o">=</span><span class="n">vocabulary_name</span><span class="p">)</span>
+    <span class="n">existing_by_uri_count</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Concept</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">uri__in</span><span class="o">=</span><span class="n">all_concept_uri_strs</span><span class="p">[:</span><span class="mi">50</span><span class="p">])</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">all_concept_uri_strs</span>
+        <span class="k">else</span> <span class="mi">0</span>
+    <span class="p">)</span>
+    <span class="n">is_already_present</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="s2">&quot;loaded&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="p">(</span><span class="n">existing_by_uri_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_already_present</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">reload</span><span class="p">:</span>
+        <span class="n">found_count</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">status</span><span class="p">[</span><span class="s2">&quot;total_concepts&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">Concept</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">uri__in</span><span class="o">=</span><span class="n">all_concept_uri_strs</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;already_loaded&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Vocabulary &#39;</span><span class="si">{</span><span class="n">vocabulary_name</span><span class="si">}</span><span class="s2">&#39; (or concepts from </span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">) is already &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;loaded in the database (</span><span class="si">{</span><span class="n">found_count</span><span class="si">}</span><span class="s2"> concepts found). &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Use --reload / -r to overwrite.&quot;</span>
+            <span class="p">),</span>
+            <span class="o">**</span><span class="n">status</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="c1"># 6. If reload or existing concepts with these URIs exist, clean them up</span>
+    <span class="k">if</span> <span class="n">reload</span> <span class="ow">or</span> <span class="n">is_already_present</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Q</span>
+
+        <span class="n">Concept</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">Q</span><span class="p">(</span><span class="n">vocabulary</span><span class="o">=</span><span class="n">vocabulary_name</span><span class="p">)</span>
+            <span class="o">|</span> <span class="n">Q</span><span class="p">(</span><span class="n">uri__in</span><span class="o">=</span><span class="n">all_concept_uri_strs</span><span class="p">)</span>
+            <span class="o">|</span> <span class="n">Q</span><span class="p">(</span><span class="n">scheme__in</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">schemes_by_uri</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+
+    <span class="c1"># 7. Identify Top Concepts (Level 1)</span>
+    <span class="n">top_concept_uris</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">subjects</span><span class="p">(</span><span class="n">SKOS</span><span class="o">.</span><span class="n">topConceptOf</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">SKOS</span><span class="o">.</span><span class="n">hasTopConcept</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Fallback: concepts that have no broader relation are root/top concepts</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">top_concept_uris</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">all_concepts_in_graph</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">SKOS</span><span class="o">.</span><span class="n">broader</span><span class="p">)):</span>
+                <span class="n">top_concept_uris</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="c1"># Filter to only URIRefs in the graph</span>
+    <span class="n">top_concept_uris</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">top_concept_uris</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">all_concepts_in_graph</span><span class="p">}</span>
+
+    <span class="c1"># If flat vocabulary with no hierarchy, all concepts are level 1</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">top_concept_uris</span> <span class="ow">and</span> <span class="n">all_concepts_in_graph</span><span class="p">:</span>
+        <span class="n">top_concept_uris</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_concepts_in_graph</span><span class="p">)</span>
+
+    <span class="c1"># 8. Build Level Tree supporting bidirectional broader/narrower navigation</span>
+    <span class="n">level_nodes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">rdflib</span><span class="o">.</span><span class="n">URIRef</span><span class="p">,</span> <span class="n">rdflib</span><span class="o">.</span><span class="n">URIRef</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">visited_uris</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">rdflib</span><span class="o">.</span><span class="n">URIRef</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="c1"># Level 1</span>
+    <span class="n">level_1</span> <span class="o">=</span> <span class="p">[(</span><span class="n">c</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">top_concept_uris</span><span class="p">]</span>
+    <span class="n">level_nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">level_1</span>
+    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">level_1</span><span class="p">:</span>
+        <span class="n">visited_uris</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="n">current_level</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">max_levels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">current_level</span> <span class="o">&gt;=</span> <span class="n">max_levels</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="n">next_level</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">rdflib</span><span class="o">.</span><span class="n">URIRef</span><span class="p">,</span> <span class="n">rdflib</span><span class="o">.</span><span class="n">URIRef</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">parent_uri</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">level_nodes</span><span class="p">[</span><span class="n">current_level</span><span class="p">]:</span>
+            <span class="c1"># Forward navigation via skos:narrower</span>
+            <span class="k">for</span> <span class="n">child_uri</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">parent_uri</span><span class="p">,</span> <span class="n">SKOS</span><span class="o">.</span><span class="n">narrower</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child_uri</span><span class="p">,</span> <span class="n">rdflib</span><span class="o">.</span><span class="n">URIRef</span><span class="p">)</span> <span class="ow">and</span> <span class="n">child_uri</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visited_uris</span><span class="p">:</span>
+                    <span class="n">next_level</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">child_uri</span><span class="p">,</span> <span class="n">parent_uri</span><span class="p">))</span>
+                    <span class="n">visited_uris</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">child_uri</span><span class="p">)</span>
+
+            <span class="c1"># Reverse navigation via skos:broader (if narrower was not explicitly asserted)</span>
+            <span class="k">for</span> <span class="n">child_uri</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">subjects</span><span class="p">(</span><span class="n">SKOS</span><span class="o">.</span><span class="n">broader</span><span class="p">,</span> <span class="n">parent_uri</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child_uri</span><span class="p">,</span> <span class="n">rdflib</span><span class="o">.</span><span class="n">URIRef</span><span class="p">)</span> <span class="ow">and</span> <span class="n">child_uri</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visited_uris</span><span class="p">:</span>
+                    <span class="n">next_level</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">child_uri</span><span class="p">,</span> <span class="n">parent_uri</span><span class="p">))</span>
+                    <span class="n">visited_uris</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">child_uri</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">next_level</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="n">current_level</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">level_nodes</span><span class="p">[</span><span class="n">current_level</span><span class="p">]</span> <span class="o">=</span> <span class="n">next_level</span>
+
+    <span class="c1"># If all levels requested and some orphaned concepts exist, add them at bottom level</span>
+    <span class="k">if</span> <span class="n">max_levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">orphans</span> <span class="o">=</span> <span class="n">all_concepts_in_graph</span> <span class="o">-</span> <span class="n">visited_uris</span>
+        <span class="k">if</span> <span class="n">orphans</span><span class="p">:</span>
+            <span class="n">current_level</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">orphan_nodes</span> <span class="o">=</span> <span class="p">[(</span><span class="n">c</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">orphans</span><span class="p">]</span>
+            <span class="n">level_nodes</span><span class="p">[</span><span class="n">current_level</span><span class="p">]</span> <span class="o">=</span> <span class="n">orphan_nodes</span>
+            <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">orphan_nodes</span><span class="p">:</span>
+                <span class="n">visited_uris</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="c1"># 9. Insert concepts level by level inside a database transaction</span>
+    <span class="n">created_concepts_by_uri</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Concept</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">total_inserted</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">lvl</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">level_nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">c_uri</span><span class="p">,</span> <span class="n">parent_uri</span> <span class="ow">in</span> <span class="n">level_nodes</span><span class="p">[</span><span class="n">lvl</span><span class="p">]:</span>
+                <span class="n">uri_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">c_uri</span><span class="p">)</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="n">extract_multilingual</span><span class="p">(</span><span class="n">c_uri</span><span class="p">,</span> <span class="p">[</span><span class="n">SKOS</span><span class="o">.</span><span class="n">prefLabel</span><span class="p">,</span> <span class="n">RDFS</span><span class="o">.</span><span class="n">label</span><span class="p">])</span>
+                <span class="n">descriptions</span> <span class="o">=</span> <span class="n">extract_multilingual</span><span class="p">(</span>
+                    <span class="n">c_uri</span><span class="p">,</span> <span class="p">[</span><span class="n">SKOS</span><span class="o">.</span><span class="n">scopeNote</span><span class="p">,</span> <span class="n">SKOS</span><span class="o">.</span><span class="n">altLabel</span><span class="p">,</span> <span class="n">DCTERMS</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="n">RDFS</span><span class="o">.</span><span class="n">comment</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">definitions</span> <span class="o">=</span> <span class="n">extract_multilingual</span><span class="p">(</span>
+                    <span class="n">c_uri</span><span class="p">,</span>
+                    <span class="p">[</span>
+                        <span class="n">SKOS</span><span class="o">.</span><span class="n">definition</span><span class="p">,</span>
+                        <span class="n">rdflib</span><span class="o">.</span><span class="n">URIRef</span><span class="p">(</span>
+                            <span class="s2">&quot;http://rdf-vocabulary.ddialliance.org/xkos#additionalContentNote&quot;</span>
+                        <span class="p">),</span>
+                    <span class="p">],</span>
+                <span class="p">)</span>
+                <span class="n">notation_val</span> <span class="o">=</span> <span class="n">extract_notation</span><span class="p">(</span><span class="n">c_uri</span><span class="p">)</span>
+
+                <span class="c1"># Fallback if no label found</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">labels</span><span class="p">:</span>
+                    <span class="n">labels</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;und&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">uri_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]}]</span>
+
+                <span class="n">parent_model</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">parent_uri</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">parent_model</span> <span class="o">=</span> <span class="n">created_concepts_by_uri</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parent_uri</span><span class="p">))</span>
+
+                <span class="n">c_urn</span> <span class="o">=</span> <span class="n">extract_urn</span><span class="p">(</span>
+                    <span class="n">c_uri</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">fallback_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;concept-</span><span class="si">{</span><span class="n">vocab_slug</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">default_agency</span><span class="o">=</span><span class="n">agency</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Determine associated ConceptScheme</span>
+                <span class="n">concept_scheme_obj</span> <span class="o">=</span> <span class="n">default_scheme_obj</span>
+                <span class="k">for</span> <span class="n">scheme_ref</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">c_uri</span><span class="p">,</span> <span class="n">SKOS</span><span class="o">.</span><span class="n">inScheme</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">scheme_ref</span><span class="p">)</span> <span class="ow">in</span> <span class="n">schemes_by_uri</span><span class="p">:</span>
+                        <span class="n">concept_scheme_obj</span> <span class="o">=</span> <span class="n">schemes_by_uri</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">scheme_ref</span><span class="p">)]</span>
+                        <span class="k">break</span>
+                <span class="k">if</span> <span class="n">concept_scheme_obj</span> <span class="o">==</span> <span class="n">default_scheme_obj</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">scheme_ref</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">c_uri</span><span class="p">,</span> <span class="n">SKOS</span><span class="o">.</span><span class="n">topConceptOf</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">scheme_ref</span><span class="p">)</span> <span class="ow">in</span> <span class="n">schemes_by_uri</span><span class="p">:</span>
+                            <span class="n">concept_scheme_obj</span> <span class="o">=</span> <span class="n">schemes_by_uri</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">scheme_ref</span><span class="p">)]</span>
+                            <span class="k">break</span>
+
+                <span class="n">c_bytes</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;urn&quot;</span><span class="p">:</span> <span class="n">c_urn</span><span class="p">,</span> <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="n">uri_str</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">labels</span><span class="p">,</span> <span class="s2">&quot;notation&quot;</span><span class="p">:</span> <span class="n">notation_val</span><span class="p">},</span>
+                    <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+                <span class="n">c_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">c_bytes</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+                <span class="n">concept_obj</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Concept</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">update_or_create</span><span class="p">(</span>
+                    <span class="n">urn</span><span class="o">=</span><span class="n">c_urn</span><span class="p">,</span>
+                    <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;scheme&quot;</span><span class="p">:</span> <span class="n">concept_scheme_obj</span><span class="p">,</span>
+                        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="n">uri_str</span><span class="p">,</span>
+                        <span class="s2">&quot;vocabulary&quot;</span><span class="p">:</span> <span class="n">vocabulary_name</span><span class="p">,</span>
+                        <span class="s2">&quot;notation&quot;</span><span class="p">:</span> <span class="n">notation_val</span><span class="p">,</span>
+                        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">labels</span><span class="p">,</span>
+                        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">descriptions</span><span class="p">,</span>
+                        <span class="s2">&quot;definition&quot;</span><span class="p">:</span> <span class="n">definitions</span><span class="p">,</span>
+                        <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="n">parent_model</span><span class="p">,</span>
+                        <span class="s2">&quot;concept_type&quot;</span><span class="p">:</span> <span class="s2">&quot;top_concept&quot;</span> <span class="k">if</span> <span class="n">lvl</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;concept&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sha256&quot;</span><span class="p">:</span> <span class="n">c_hash</span><span class="p">},</span>
+                    <span class="p">},</span>
+                <span class="p">)</span>
+                <span class="n">created_concepts_by_uri</span><span class="p">[</span><span class="n">uri_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">concept_obj</span>
+                <span class="n">total_inserted</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vocabulary&quot;</span><span class="p">:</span> <span class="n">vocabulary_name</span><span class="p">,</span>
+        <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="n">fmt</span><span class="p">,</span>
+        <span class="s2">&quot;source_file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span>
+        <span class="s2">&quot;total_concepts&quot;</span><span class="p">:</span> <span class="n">total_inserted</span><span class="p">,</span>
+        <span class="s2">&quot;top_concepts&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">level_nodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">[])),</span>
+        <span class="s2">&quot;levels_loaded&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">level_nodes</span><span class="p">),</span>
+        <span class="s2">&quot;max_levels_limit&quot;</span><span class="p">:</span> <span class="n">max_levels</span><span class="p">,</span>
+        <span class="s2">&quot;elapsed_seconds&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">elapsed</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+
+<span class="c1"># Backwards-compatible alias for ELSST</span>
+<span class="n">load_elsst_vocabulary</span> <span class="o">=</span> <span class="n">load_skos_vocabulary</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

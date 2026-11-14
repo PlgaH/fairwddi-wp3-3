@@ -73,6 +73,7 @@ INDEX_HTML = """<!DOCTYPE html>
         <a href="#tools" class="nav-link">Tools</a>
         <a href="#slides" class="nav-link">Slides</a>
         <a href="#docs/request_overview" class="nav-link">Docs</a>
+        <a href="./docs/" class="nav-link" target="_blank" title="Technical Sphinx Documentation for Admins, Developers, and Contributors">Technical Docs ↗</a>
       </nav>
 
       <!-- Right Header Actions -->
@@ -229,6 +230,12 @@ INDEX_HTML = """<!DOCTYPE html>
       <!-- Section: Project Documentation -->
       <div class="nav-group">
         <div class="nav-group-header">Documentation & Background</div>
+        <a href="./docs/" class="sidebar-link" target="_blank" style="color: var(--accent, #38bdf8); font-weight: 600;">
+          <span class="sidebar-link-content">
+            <svg class="sidebar-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Technical Docs (Sphinx) ↗
+          </span>
+        </a>
         <a href="#docs/request_overview" class="sidebar-link">
           <span class="sidebar-link-content">
             <svg class="sidebar-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/></svg>
