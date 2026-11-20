@@ -13,6 +13,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS request_ddi_urnregistry (
     urn VARCHAR(512) PRIMARY KEY,
     resource_type VARCHAR(64) NOT NULL,
+    origin VARCHAR(32) NOT NULL DEFAULT 'instantiated',
     status VARCHAR(32) NOT NULL DEFAULT 'active',
     extended_attributes JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -20,6 +21,7 @@ CREATE TABLE IF NOT EXISTS request_ddi_urnregistry (
 );
 
 CREATE INDEX IF NOT EXISTS req_ddi_urn_reg_type_idx ON request_ddi_urnregistry (resource_type);
+CREATE INDEX IF NOT EXISTS req_ddi_urn_reg_origin_idx ON request_ddi_urnregistry (origin);
 CREATE INDEX IF NOT EXISTS req_ddi_urn_reg_status_idx ON request_ddi_urnregistry (status);
 
 -- ----------------------------------------------------------------------------
@@ -67,14 +69,14 @@ CREATE TABLE IF NOT EXISTS request_ddi_conceptscheme (
 
 CREATE TABLE IF NOT EXISTS request_ddi_concept (
     urn VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE,
-    scheme_urn VARCHAR(512) REFERENCES request_ddi_conceptscheme(urn) ON DELETE CASCADE,
+    scheme_urn VARCHAR(512) REFERENCES request_ddi_conceptscheme(urn) ON DELETE RESTRICT,
     uri VARCHAR(512) UNIQUE,
     vocabulary VARCHAR(128),
     notation VARCHAR(128),
     label JSONB DEFAULT '[]'::jsonb,
     description JSONB DEFAULT '[]'::jsonb,
     definition JSONB DEFAULT '[]'::jsonb,
-    parent_urn VARCHAR(512) REFERENCES request_ddi_concept(urn) ON DELETE SET NULL,
+    parent_urn VARCHAR(512) REFERENCES request_ddi_concept(urn) ON DELETE RESTRICT,
     concept_type VARCHAR(64),
     hashes JSONB DEFAULT '{}'::jsonb,
     extended_attributes JSONB DEFAULT '[]'::jsonb,
@@ -98,8 +100,8 @@ CREATE TABLE IF NOT EXISTS request_ddi_conceptualvariablescheme (
 
 CREATE TABLE IF NOT EXISTS request_ddi_conceptualvariable (
     urn VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE,
-    scheme_urn VARCHAR(512) REFERENCES request_ddi_conceptualvariablescheme(urn) ON DELETE CASCADE,
-    concept_urn VARCHAR(512) REFERENCES request_ddi_concept(urn) ON DELETE SET NULL,
+    scheme_urn VARCHAR(512) REFERENCES request_ddi_conceptualvariablescheme(urn) ON DELETE RESTRICT,
+    concept_urn VARCHAR(512) REFERENCES request_ddi_concept(urn) ON DELETE RESTRICT,
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
     label JSONB DEFAULT '[]'::jsonb,
     description JSONB DEFAULT '[]'::jsonb,
@@ -153,10 +155,10 @@ CREATE TABLE IF NOT EXISTS request_ddi_categoryscheme (
 CREATE TABLE IF NOT EXISTS request_ddi_category (
     urn VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE,
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
-    scheme_urn VARCHAR(512) REFERENCES request_ddi_categoryscheme(urn) ON DELETE CASCADE,
-    concept_urn VARCHAR(512) REFERENCES request_ddi_concept(urn) ON DELETE SET NULL,
+    scheme_urn VARCHAR(512) REFERENCES request_ddi_categoryscheme(urn) ON DELETE RESTRICT,
+    concept_urn VARCHAR(512) REFERENCES request_ddi_concept(urn) ON DELETE RESTRICT,
     label JSONB DEFAULT '[]'::jsonb,
-    parent_urn VARCHAR(512) REFERENCES request_ddi_category(urn) ON DELETE SET NULL,
+    parent_urn VARCHAR(512) REFERENCES request_ddi_category(urn) ON DELETE RESTRICT,
     "order" INTEGER DEFAULT 0,
     is_missing BOOLEAN DEFAULT FALSE,
     hashes JSONB DEFAULT '{}'::jsonb,
@@ -178,7 +180,7 @@ CREATE TABLE IF NOT EXISTS request_ddi_codelist (
     urn VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE,
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
     description JSONB DEFAULT '[]'::jsonb,
-    scheme_urn VARCHAR(512) REFERENCES request_ddi_codelistscheme(urn) ON DELETE SET NULL,
+    scheme_urn VARCHAR(512) REFERENCES request_ddi_codelistscheme(urn) ON DELETE RESTRICT,
     hashes JSONB DEFAULT '{}'::jsonb,
     extended_attributes JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -187,10 +189,10 @@ CREATE TABLE IF NOT EXISTS request_ddi_codelist (
 
 CREATE TABLE IF NOT EXISTS request_ddi_code (
     urn VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE,
-    code_list_urn VARCHAR(512) REFERENCES request_ddi_codelist(urn) ON DELETE CASCADE,
-    category_urn VARCHAR(512) REFERENCES request_ddi_category(urn) ON DELETE CASCADE,
+    code_list_urn VARCHAR(512) REFERENCES request_ddi_codelist(urn) ON DELETE RESTRICT,
+    category_urn VARCHAR(512) REFERENCES request_ddi_category(urn) ON DELETE RESTRICT,
     code_value VARCHAR(64),
-    parent_urn VARCHAR(512) REFERENCES request_ddi_code(urn) ON DELETE SET NULL,
+    parent_urn VARCHAR(512) REFERENCES request_ddi_code(urn) ON DELETE RESTRICT,
     "order" INTEGER DEFAULT 0,
     is_missing BOOLEAN DEFAULT FALSE,
     hashes JSONB DEFAULT '{}'::jsonb,
@@ -204,9 +206,9 @@ CREATE TABLE IF NOT EXISTS request_ddi_questionitem (
     urn VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE,
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
     question_text JSONB DEFAULT '[]'::jsonb,
-    scheme_urn VARCHAR(512) REFERENCES request_ddi_questionscheme(urn) ON DELETE CASCADE,
-    code_list_urn VARCHAR(512) REFERENCES request_ddi_codelist(urn) ON DELETE SET NULL,
-    concept_urn VARCHAR(512) REFERENCES request_ddi_concept(urn) ON DELETE SET NULL,
+    scheme_urn VARCHAR(512) REFERENCES request_ddi_questionscheme(urn) ON DELETE RESTRICT,
+    code_list_urn VARCHAR(512) REFERENCES request_ddi_codelist(urn) ON DELETE RESTRICT,
+    concept_urn VARCHAR(512) REFERENCES request_ddi_concept(urn) ON DELETE RESTRICT,
     response_domain JSONB DEFAULT '{}'::jsonb,
     hashes JSONB DEFAULT '{}'::jsonb,
     extended_attributes JSONB DEFAULT '[]'::jsonb,
@@ -229,10 +231,10 @@ CREATE TABLE IF NOT EXISTS request_ddi_representedvariable (
     label JSONB DEFAULT '[]'::jsonb,
     description JSONB DEFAULT '[]'::jsonb,
     value_representation JSONB DEFAULT '{}'::jsonb,
-    scheme_urn VARCHAR(512) REFERENCES request_ddi_representedvariablescheme(urn) ON DELETE CASCADE,
-    conceptual_variable_urn VARCHAR(512) REFERENCES request_ddi_conceptualvariable(urn) ON DELETE CASCADE,
-    question_item_urn VARCHAR(512) REFERENCES request_ddi_questionitem(urn) ON DELETE SET NULL,
-    code_list_urn VARCHAR(512) REFERENCES request_ddi_codelist(urn) ON DELETE SET NULL,
+    scheme_urn VARCHAR(512) REFERENCES request_ddi_representedvariablescheme(urn) ON DELETE RESTRICT,
+    conceptual_variable_urn VARCHAR(512) REFERENCES request_ddi_conceptualvariable(urn) ON DELETE RESTRICT,
+    question_item_urn VARCHAR(512) REFERENCES request_ddi_questionitem(urn) ON DELETE RESTRICT,
+    code_list_urn VARCHAR(512) REFERENCES request_ddi_codelist(urn) ON DELETE RESTRICT,
     hashes JSONB DEFAULT '{}'::jsonb,
     extended_attributes JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -241,8 +243,8 @@ CREATE TABLE IF NOT EXISTS request_ddi_representedvariable (
 
 CREATE TABLE IF NOT EXISTS request_ddi_questionvariable (
     id BIGSERIAL PRIMARY KEY,
-    question_item_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_questionitem(urn) ON DELETE CASCADE,
-    represented_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_representedvariable(urn) ON DELETE CASCADE,
+    question_item_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_questionitem(urn) ON DELETE RESTRICT,
+    represented_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_representedvariable(urn) ON DELETE RESTRICT,
     path VARCHAR(512) NOT NULL DEFAULT '',
     "order" INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -261,7 +263,7 @@ CREATE TABLE IF NOT EXISTS request_ddi_instrumentscheme (
 
 CREATE TABLE IF NOT EXISTS request_ddi_instrument (
     urn VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE,
-    scheme_urn VARCHAR(512) REFERENCES request_ddi_instrumentscheme(urn) ON DELETE SET NULL,
+    scheme_urn VARCHAR(512) REFERENCES request_ddi_instrumentscheme(urn) ON DELETE RESTRICT,
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
     label JSONB DEFAULT '[]'::jsonb,
     description JSONB DEFAULT '[]'::jsonb,
@@ -273,8 +275,8 @@ CREATE TABLE IF NOT EXISTS request_ddi_instrument (
 
 CREATE TABLE IF NOT EXISTS request_ddi_instrumentquestion (
     id BIGSERIAL PRIMARY KEY,
-    instrument_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instrument(urn) ON DELETE CASCADE,
-    question_item_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_questionitem(urn) ON DELETE CASCADE,
+    instrument_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instrument(urn) ON DELETE RESTRICT,
+    question_item_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_questionitem(urn) ON DELETE RESTRICT,
     path VARCHAR(512) NOT NULL DEFAULT '',
     "order" INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -301,8 +303,8 @@ CREATE TABLE IF NOT EXISTS request_ddi_studyunit (
 
 CREATE TABLE IF NOT EXISTS request_ddi_studyinstrument (
     id BIGSERIAL PRIMARY KEY,
-    study_unit_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_studyunit(urn) ON DELETE CASCADE,
-    instrument_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instrument(urn) ON DELETE CASCADE,
+    study_unit_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_studyunit(urn) ON DELETE RESTRICT,
+    instrument_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instrument(urn) ON DELETE RESTRICT,
     path VARCHAR(512) NOT NULL DEFAULT '',
     "order" INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -313,7 +315,7 @@ CREATE TABLE IF NOT EXISTS request_ddi_studyinstrument (
 CREATE TABLE IF NOT EXISTS request_ddi_datafile (
     urn VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE,
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
-    study_unit_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_studyunit(urn) ON DELETE CASCADE,
+    study_unit_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_studyunit(urn) ON DELETE RESTRICT,
     description JSONB DEFAULT '[]'::jsonb,
     hashes JSONB DEFAULT '{}'::jsonb,
     extended_attributes JSONB DEFAULT '[]'::jsonb,
@@ -335,8 +337,8 @@ CREATE TABLE IF NOT EXISTS request_ddi_instancevariable (
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
     label JSONB DEFAULT '[]'::jsonb,
     description JSONB DEFAULT '[]'::jsonb,
-    scheme_urn VARCHAR(512) REFERENCES request_ddi_instancevariablescheme(urn) ON DELETE CASCADE,
-    represented_variable_urn VARCHAR(512) REFERENCES request_ddi_representedvariable(urn) ON DELETE CASCADE,
+    scheme_urn VARCHAR(512) REFERENCES request_ddi_instancevariablescheme(urn) ON DELETE RESTRICT,
+    represented_variable_urn VARCHAR(512) REFERENCES request_ddi_representedvariable(urn) ON DELETE RESTRICT,
     hashes JSONB DEFAULT '{}'::jsonb,
     extended_attributes JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -345,8 +347,8 @@ CREATE TABLE IF NOT EXISTS request_ddi_instancevariable (
 
 CREATE TABLE IF NOT EXISTS request_ddi_datafilevariable (
     id BIGSERIAL PRIMARY KEY,
-    datafile_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_datafile(urn) ON DELETE CASCADE,
-    instance_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instancevariable(urn) ON DELETE CASCADE,
+    datafile_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_datafile(urn) ON DELETE RESTRICT,
+    instance_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instancevariable(urn) ON DELETE RESTRICT,
     "order" INTEGER DEFAULT 0,
     statistics JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -359,8 +361,8 @@ CREATE INDEX IF NOT EXISTS idx_req_ddi_df_iv_iv ON request_ddi_datafilevariable 
 
 CREATE TABLE IF NOT EXISTS request_ddi_datafilevariablefrequency (
     id BIGSERIAL PRIMARY KEY,
-    datafile_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_datafile(urn) ON DELETE CASCADE,
-    instance_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instancevariable(urn) ON DELETE CASCADE,
+    datafile_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_datafile(urn) ON DELETE RESTRICT,
+    instance_variable_urn VARCHAR(512) NOT NULL REFERENCES request_ddi_instancevariable(urn) ON DELETE RESTRICT,
     code_value VARCHAR(128) NOT NULL,
     frequency DOUBLE PRECISION NOT NULL,
     weight VARCHAR(256),
@@ -430,6 +432,8 @@ CREATE TABLE IF NOT EXISTS request_ddi_ingestbatch (
     status VARCHAR(32) NOT NULL DEFAULT 'completed',
     options JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_urns JSONB NOT NULL DEFAULT '[]'::jsonb,
+    generated_urns JSONB NOT NULL DEFAULT '[]'::jsonb,
+    linked_urns JSONB NOT NULL DEFAULT '[]'::jsonb,
     reused_urns JSONB NOT NULL DEFAULT '[]'::jsonb,
     created_aliases JSONB NOT NULL DEFAULT '[]'::jsonb,
     stats JSONB NOT NULL DEFAULT '{}'::jsonb,

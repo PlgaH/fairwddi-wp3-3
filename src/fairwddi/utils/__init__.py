@@ -1,5 +1,11 @@
 """FAIRwDDI utility functions."""
 
+from fairwddi.utils.integrity import (
+    ResourceReferencedError,
+    assert_can_delete,
+    get_resource_references,
+    integrity_deletion_context,
+)
 from fairwddi.utils.normalize_string import (
     normalize_string,
     normalize_string_for_comparison,
@@ -13,6 +19,10 @@ from fairwddi.utils.urn import (
 )
 
 __all__ = [
+    "ResourceReferencedError",
+    "assert_can_delete",
+    "get_resource_references",
+    "integrity_deletion_context",
     "normalize_string",
     "normalize_string_for_comparison",
     "normalize_string_for_database",

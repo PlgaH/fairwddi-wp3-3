@@ -78,7 +78,7 @@ class Datafile(DDIResource):
 
     study_unit = models.ForeignKey(
         StudyUnit,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="datafiles",
         db_column="study_unit_urn",
         help_text="Study unit containing this datafile.",
@@ -170,7 +170,7 @@ class InstanceVariable(DDIResource):
 
     scheme = models.ForeignKey(
         InstanceVariableScheme,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="instance_variables",
@@ -186,7 +186,7 @@ class InstanceVariable(DDIResource):
     )
     represented_variable = models.ForeignKey(
         RepresentedVariable,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="instance_variables",
@@ -245,14 +245,14 @@ class DatafileVariable(models.Model):
 
     datafile = models.ForeignKey(
         Datafile,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="datafile_variables",
         db_column="datafile_urn",
         help_text="Datafile containing this variable.",
     )
     instance_variable = models.ForeignKey(
         InstanceVariable,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="datafile_variables",
         db_column="instance_variable_urn",
         help_text="Instance variable column in this datafile.",
@@ -292,14 +292,14 @@ class DatafileVariableFrequency(models.Model):
 
     datafile = models.ForeignKey(
         Datafile,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="frequencies",
         db_column="datafile_urn",
         help_text="Datafile containing the variable and observations.",
     )
     instance_variable = models.ForeignKey(
         InstanceVariable,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="frequencies",
         db_column="instance_variable_urn",
         help_text="Instance variable measured.",
@@ -347,14 +347,14 @@ class StudyInstrument(models.Model):
 
     study_unit = models.ForeignKey(
         StudyUnit,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="study_instruments",
         db_column="study_unit_urn",
         help_text="Study unit that used this instrument.",
     )
     instrument = models.ForeignKey(
         "fairwddi.Instrument",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="study_associations",
         db_column="instrument_urn",
         help_text="Instrument used by the study unit.",

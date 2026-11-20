@@ -27,6 +27,7 @@ from fairwddi.models.event import (
 from fairwddi.models.infrastructure import (
     IngestBatch,
     MetadataQuarantine,
+    ResourceOrigin,
     URNAlias,
     UrnRegistry,
 )
@@ -91,6 +92,7 @@ __all__ = [
     "StudyInstrument",
     "StudyUnitInstrument",
     "EventLog",
+    "ResourceOrigin",
     "UrnRegistry",
     "URNAlias",
     "MetadataQuarantine",

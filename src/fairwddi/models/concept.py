@@ -29,7 +29,7 @@ class Concept(DDIIdentifiable):
 
     scheme = models.ForeignKey(
         ConceptScheme,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="concepts",
@@ -80,7 +80,7 @@ class Concept(DDIIdentifiable):
     )
     parent = models.ForeignKey(
         "self",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="narrower_concepts",
@@ -136,7 +136,7 @@ class ConceptualVariable(DDIResource):
 
     scheme = models.ForeignKey(
         ConceptualVariableScheme,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="conceptual_variables",
@@ -145,7 +145,7 @@ class ConceptualVariable(DDIResource):
     )
     concept = models.ForeignKey(
         Concept,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="conceptual_variables",

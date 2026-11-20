@@ -201,6 +201,7 @@ def load_skos_vocabulary(
                 defaults={
                     "name": s_labels,
                     "description": s_descriptions,
+                    "origin": "imported",
                 },
             )
             schemes_by_uri[s_uri_str] = s_obj
@@ -216,6 +217,7 @@ def load_skos_vocabulary(
             defaults={
                 "name": scheme_labels,
                 "description": scheme_descriptions,
+                "origin": "imported",
             },
         )
         schemes_by_uri["default"] = default_scheme_obj
@@ -255,11 +257,16 @@ def load_skos_vocabulary(
     if reload or is_already_present:
         from django.db.models import Q
 
-        Concept.objects.filter(
-            Q(vocabulary=vocabulary_name)
-            | Q(uri__in=all_concept_uri_strs)
-            | Q(scheme__in=list(schemes_by_uri.values()))
-        ).delete()
+        from fairwddi.utils.integrity import integrity_deletion_context
+
+        with integrity_deletion_context(bypass=True):
+            qs = Concept.objects.filter(
+                Q(vocabulary=vocabulary_name)
+                | Q(uri__in=all_concept_uri_strs)
+                | Q(scheme__in=list(schemes_by_uri.values()))
+            )
+            qs.update(parent=None)
+            qs.delete()
 
     # 7. Identify Top Concepts (Level 1)
     top_concept_uris = set(graph.subjects(SKOS.topConceptOf, None)) | set(
@@ -390,6 +397,7 @@ def load_skos_vocabulary(
                         "parent": parent_model,
                         "concept_type": "top_concept" if lvl == 1 else "concept",
                         "hashes": {"sha256": c_hash},
+                        "origin": "imported",
                     },
                 )
                 created_concepts_by_uri[uri_str] = concept_obj

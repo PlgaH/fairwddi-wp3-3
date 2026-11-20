@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, RootModel, model_validator
 
@@ -139,6 +139,10 @@ class DDIIdentifiableSchema(BaseModel):
     urn: str | None = Field(
         default=None,
         description="Persistent canonical URN: urn:ddi:{agency}:{ID}:{version}",
+    )
+    origin: Literal["imported", "generated", "instantiated"] | None = Field(
+        default=None,
+        description="Resource origin category: 'imported', 'generated', or 'instantiated'.",
     )
 
     @property

@@ -32,9 +32,10 @@ class SurveyItem(BaseModel):
 
 
 class QuestionItemSummary(BaseModel):
-    """Summary of a canonical QuestionItem with reuse indicators."""
+    """Summary of a QuestionItem with origin and reuse indicators."""
 
     urn: str
+    origin: str = "instantiated"
     name: str
     question_text: Any = None
     text_display: str
@@ -43,6 +44,7 @@ class QuestionItemSummary(BaseModel):
     variable_names: list[str] = Field(default_factory=list)
     instance_variables: list[str] = Field(default_factory=list)
     aliases: list[str] = Field(default_factory=list)
+    derived_from: list[str] = Field(default_factory=list)
     is_reused: bool = False
 
 
@@ -140,6 +142,7 @@ class CodeListSummary(BaseModel):
     """Summary of a CodeList and its response domain."""
 
     urn: str
+    origin: str = "instantiated"
     name: str
     description: str | None = None
     code_count: int = 0
@@ -166,6 +169,7 @@ class CategorySummary(BaseModel):
     """Summary of a standardized Category entity."""
 
     urn: str
+    origin: str = "instantiated"
     name: str
     label: Any = None
     label_display: str

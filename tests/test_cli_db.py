@@ -63,6 +63,7 @@ def test_cli_db_export_ddl_stdout() -> None:
     result = runner.invoke(app, ["db", "export-ddl"])
     assert result.exit_code == 0
     assert "CREATE TABLE IF NOT EXISTS request_ddi_urnregistry" in result.stdout
+    assert "CREATE INDEX IF NOT EXISTS req_ddi_urn_reg_origin_idx" in result.stdout
     assert "CREATE INDEX IF NOT EXISTS req_ddi_urn_reg_status_idx" in result.stdout
     assert "CREATE TABLE IF NOT EXISTS request_ddi_organization" in result.stdout
     assert "CREATE TABLE IF NOT EXISTS request_ddi_questionitem" in result.stdout
@@ -91,20 +92,6 @@ def test_cli_db_init() -> None:
 
 
 @pytest.mark.django_db
-def test_cli_db_seed() -> None:
-    """Test fairwddi db seed populates demonstration records."""
-    result = runner.invoke(app, ["db", "seed"])
-    assert result.exit_code == 0
-    assert "Database seeded successfully" in result.stdout
-    assert "Demonstration Data Seed Summary" in result.stdout
-
-    # Test seed with reset option
-    reset_result = runner.invoke(app, ["db", "seed", "--reset"])
-    assert reset_result.exit_code == 0
-    assert "Database seeded successfully" in reset_result.stdout
-
-
-@pytest.mark.django_db
 def test_cli_db_status() -> None:
     """Test fairwddi db status displays table inventory table."""
     result = runner.invoke(app, ["db", "status"])
@@ -119,9 +106,11 @@ def test_cli_db_wipe_prompt_confirm(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test fairwddi db wipe with interactive 4-digit confirmation code."""
     import secrets
 
+    from fairwddi.models import Category
+
     monkeypatch.setattr(secrets, "randbelow", lambda n: 4829 - 1000)
 
-    runner.invoke(app, ["db", "seed"])
+    Category.objects.create(urn="urn:ddi:fr.cdsp:cat_wipe_1:1.0.0", name="WipeTest")
     result = runner.invoke(app, ["db", "wipe"], input="4829\n")
     assert result.exit_code == 0
     assert "Database wiped successfully" in result.stdout
@@ -132,9 +121,11 @@ def test_cli_db_wipe_prompt_reject(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test fairwddi db wipe aborts when confirmation code is wrong."""
     import secrets
 
+    from fairwddi.models import Category
+
     monkeypatch.setattr(secrets, "randbelow", lambda n: 4829 - 1000)
 
-    runner.invoke(app, ["db", "seed"])
+    Category.objects.create(urn="urn:ddi:fr.cdsp:cat_wipe_2:1.0.0", name="WipeTest")
     result = runner.invoke(app, ["db", "wipe"], input="0000\n")
     assert result.exit_code != 0
     assert "Aborted" in result.stdout
@@ -143,7 +134,9 @@ def test_cli_db_wipe_prompt_reject(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.mark.django_db
 def test_cli_db_wipe_confirm_flag() -> None:
     """Test fairwddi db wipe with --confirm flag."""
-    runner.invoke(app, ["db", "seed"])
+    from fairwddi.models import Category
+
+    Category.objects.create(urn="urn:ddi:fr.cdsp:cat_wipe_3:1.0.0", name="WipeTest")
     result = runner.invoke(app, ["db", "wipe", "--confirm", "WIPE"])
     assert result.exit_code == 0
     assert "Database wiped successfully" in result.stdout
@@ -152,7 +145,9 @@ def test_cli_db_wipe_confirm_flag() -> None:
 @pytest.mark.django_db
 def test_cli_db_wipe_force() -> None:
     """Test fairwddi db wipe --force bypasses confirmation."""
-    runner.invoke(app, ["db", "seed"])
+    from fairwddi.models import Category
+
+    Category.objects.create(urn="urn:ddi:fr.cdsp:cat_wipe_4:1.0.0", name="WipeTest")
     result = runner.invoke(app, ["db", "wipe", "--force"])
     assert result.exit_code == 0
     assert "Database wiped successfully" in result.stdout
@@ -160,11 +155,14 @@ def test_cli_db_wipe_force() -> None:
 
 @pytest.mark.django_db(transaction=True)
 def test_cli_db_recreate_force() -> None:
-    """Test fairwddi db recreate --force drops, migrates, and recreates tables."""
-    result = runner.invoke(app, ["db", "recreate", "--force", "--seed"])
+    """Test fairwddi db recreate --force drops, migrates, and recreates empty tables."""
+    from fairwddi.models import QuestionItem
+
+    result = runner.invoke(app, ["db", "recreate", "--force"])
     assert result.exit_code == 0
     assert "Database schema recreated successfully" in result.stdout
-    assert "Database seeded successfully" in result.stdout
+    assert "Database seeded" not in result.stdout
+    assert QuestionItem.objects.count() == 0
 
 
 @pytest.mark.django_db

@@ -1,8 +1,7 @@
 """Review-gated Plan and Report models for the FAIRwDDI multi-stage ingestion pipeline.
 
-Modeled after the dartfx-ddi i18n MergePlan & ReviewGate pattern, every stage
-(preflight, ingest, compare, harmonize) can emit a deterministic YAML plan
-and a human-readable Markdown report.
+Every stage (preflight, ingest, compare, harmonize) emits a deterministic YAML plan
+and a human-readable Markdown report governed by a ReviewGate.
 """
 
 from __future__ import annotations
@@ -38,7 +37,7 @@ class ReviewGate(BaseModel):
 
 
 class PlanIssue(BaseModel):
-    """Diagnostic or QA finding recorded during preflight, staging, promotion, or comparison."""
+    """Diagnostic or QA finding recorded during preflight, ingestion, or comparison."""
 
     severity: Literal["error", "warning", "info"] = "warning"
     code: str
@@ -56,14 +55,11 @@ class PlanActionItem(BaseModel):
     stage: Literal["preflight", "ingest", "compare", "harmonize"]
     action: Literal[
         "create",
+        "link_existing",
+        "generate_harmonized",
         "reuse",
-        "alias",
         "quarantine",
-        "harmonize",
-        "merge_multilingual",
         "link_semantic",
-        "elevate",
-        "absorb",
         "group",
         "upgrade",
         "skip",
@@ -82,7 +78,7 @@ class PlanActionItem(BaseModel):
 class IngestPlan(BaseModel):
     """Serializable, review-gated execution plan and report for any ingestion stage."""
 
-    plan_version: str = "1.0"
+    plan_version: str = "2.0"
     stage: Literal["preflight", "ingest", "compare", "harmonize"]
     job_id: str
     created_at: str = Field(
@@ -214,47 +210,96 @@ class IngestPlan(BaseModel):
                     f"{r_urn} | {rev} | {issue.message} |"
                 )
 
-        alias_actions = [a for a in self.actions if a.action == "alias"]
-        if alias_actions:
-            from collections import Counter
-
-            by_type = Counter(a.resource_type for a in alias_actions)
-            summary_parts = [f"**{t}:** {cnt:,}" for t, cnt in by_type.most_common()]
+        link_actions = [a for a in self.actions if a.action == "link_existing"]
+        if link_actions:
             lines.extend(
                 [
                     "",
-                    "## Cross-Survey Deduplication (URN Aliases)",
+                    "## Linked to Existing Harmonized Resources (`generated` / `instantiated`)",
                     "",
                     "> [!TIP]",
                     (
-                        f"> **{len(alias_actions):,} incoming entities** match pre-existing "
-                        f"canonical resources in PostgreSQL ({', '.join(summary_parts)}). "
-                        "Instead of inserting duplicate database records, the engine will "
-                        "link these resources to existing canonical URNs via `URNAlias` "
-                        "records, ensuring multi-study harmonization and zero database bloat."
+                        f"> **{len(link_actions):,} incoming `imported` resource(s)** match "
+                        "pre-existing `generated` or `instantiated` bank resources. Each incoming "
+                        "resource will be persisted as `imported`, linked via "
+                        "`prov:wasDerivedFrom`, and used to enrich the target with alternate "
+                        "spellings or translations."
                     ),
                     "",
-                    "| Type | Source URN (Incoming) | Target Canonical URN | Match Basis |",
-                    "| :--- | :--- | :--- | :--- |",
+                    (
+                        "| Type | Incoming URN | Target URN | Target Origin | "
+                        "Match Type | Conf | Review? |"
+                    ),
+                    "| :--- | :--- | :--- | :--- | :--- | :---: | :---: |",
                 ]
             )
-            # Display up to 20 examples per type so all resource types are clearly visible
-            actions_by_type: dict[str, list[PlanActionItem]] = {}
-            for act in alias_actions:
-                actions_by_type.setdefault(act.resource_type, []).append(act)
+            for act in link_actions[:50]:
+                tgt_origin = act.details.get("target_origin", "generated")
+                rev = "Yes" if act.requires_review else "No"
+                lines.append(
+                    f"| `{act.resource_type}` | `{act.source_urn}` | `{act.target_urn}` | "
+                    f"`{tgt_origin}` | `{act.match_type or '-'}` | {act.confidence:.2f} | {rev} |"
+                )
+            if len(link_actions) > 50:
+                lines.append(
+                    f"| *...* | *({len(link_actions) - 50} additional links omitted)* | | | | | |"
+                )
 
-            for r_type, act_list in actions_by_type.items():
-                for act in act_list[:20]:
-                    note = act.notes.replace("will register URNAlias.", "").strip()
-                    lines.append(
-                        f"| `{act.resource_type}` | `{act.source_urn}` | "
-                        f"`{act.target_urn}` | {note} |"
-                    )
-                if len(act_list) > 20:
-                    extra_cnt = len(act_list) - 20
-                    lines.append(
-                        f"| *...* | *({extra_cnt} additional `{r_type}` aliases omitted)* | | |"
-                    )
+        gen_actions = [a for a in self.actions if a.action == "generate_harmonized"]
+        if gen_actions:
+            lines.extend(
+                [
+                    "",
+                    "## New `generated` Harmonized Resources (Matched Across `imported` Resources)",
+                    "",
+                    "> [!IMPORTANT]",
+                    (
+                        f"> **{len(gen_actions):,} incoming `imported` resource(s)** match "
+                        "existing unharmonized `imported` resources. Each incoming resource will "
+                        "be persisted as `imported`, and a new `generated` harmonized resource "
+                        "will be created with `prov:wasDerivedFrom` lineage links to both."
+                    ),
+                    "",
+                    (
+                        "| Type | Incoming URN | Matched Imported URN | "
+                        "Proposed Generated URN | Match Type | Conf | Review? |"
+                    ),
+                    "| :--- | :--- | :--- | :--- | :--- | :---: | :---: |",
+                ]
+            )
+            for act in gen_actions[:50]:
+                gen_urn = act.details.get("generated_urn") or "-"
+                rev = "Yes" if act.requires_review else "No"
+                lines.append(
+                    f"| `{act.resource_type}` | `{act.source_urn}` | `{act.target_urn}` | "
+                    f"`{gen_urn}` | `{act.match_type or '-'}` | {act.confidence:.2f} | {rev} |"
+                )
+            if len(gen_actions) > 50:
+                lines.append(
+                    f"| *...* | *({len(gen_actions) - 50} additional generated resources)* "
+                    "| | | | | |"
+                )
+
+        reuse_actions = [a for a in self.actions if a.action == "reuse"]
+        if reuse_actions:
+            lines.extend(
+                [
+                    "",
+                    "## Same-URN Reuse Candidates (Review Flagged)",
+                    "",
+                    "> [!WARNING]",
+                    (
+                        f"> **{len(reuse_actions):,} incoming entity/entities** carry URNs that "
+                        "already exist in `UrnRegistry` with matching content hashes. Review and "
+                        "confirm cross-file URN reuse before executing."
+                    ),
+                    "",
+                    "| Resource Type | URN | Details |",
+                    "| :--- | :--- | :--- |",
+                ]
+            )
+            for act in reuse_actions[:50]:
+                lines.append(f"| `{act.resource_type}` | `{act.source_urn}` | {act.notes} |")
 
         quarantine_actions = [a for a in self.actions if a.action == "quarantine"]
         if quarantine_actions:
@@ -276,46 +321,6 @@ class IngestPlan(BaseModel):
             )
             for act in quarantine_actions:
                 lines.append(f"| `{act.resource_type}` | `{act.source_urn}` | {act.notes} |")
-
-        near_or_variant_actions = [
-            a
-            for a in self.actions
-            if a.match_type
-            in (
-                MatchType.NEAR_EXACT.value,
-                MatchType.INCLUSIVE_WRITING_VARIANT.value,
-                MatchType.PHRASING_VARIANT.value,
-                MatchType.TYPOGRAPHICAL_VARIANT.value,
-                "NEAR_EXACT",
-                "INCLUSIVE_WRITING_VARIANT",
-                "PHRASING_VARIANT",
-                "TYPOGRAPHICAL_VARIANT",
-            )
-        ]
-        if near_or_variant_actions:
-            lines.extend(
-                [
-                    "",
-                    "## High-Similarity & Wording Variant Candidates (Review Flagged)",
-                    "",
-                    "> [!IMPORTANT]",
-                    (
-                        f"> **{len(near_or_variant_actions):,} candidate pairs** exhibit "
-                        "near-exact equivalence, punctuation variance, inclusive writing, or "
-                        "minor phrasing/typo shifts. Review and confirm `alias`, `absorb`, or "
-                        "`elevate` actions."
-                    ),
-                    "",
-                    "| ID | Match Type | Action | Type | Source URN | Target URN | Conf |",
-                    "| :--- | :--- | :--- | :--- | :--- | :--- | :---: |",
-                ]
-            )
-            for act in near_or_variant_actions[:50]:
-                tgt = f"`{act.target_urn}`" if act.target_urn else "-"
-                lines.append(
-                    f"| `{act.id}` | `{act.match_type}` | `{act.action}` | `{act.resource_type}` | "
-                    f"`{act.source_urn}` | {tgt} | {act.confidence:.2f} |"
-                )
 
         group_actions = [
             a

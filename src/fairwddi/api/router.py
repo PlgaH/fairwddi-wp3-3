@@ -34,8 +34,10 @@ from fairwddi.models import (
     IngestBatch,
     InstanceVariable,
     QuestionItem,
+    SemanticRelationship,
     StudyUnit,
     URNAlias,
+    UrnRegistry,
 )
 
 api = NinjaAPI(
@@ -88,12 +90,17 @@ def get_overview(request: Any) -> OverviewStats:
     total_aliases = URNAlias.objects.count()
     total_batches = IngestBatch.objects.count()
 
-    # Reused questions: questions linked to >= 2 distinct StudyUnits OR having URNAliases
-    # Fast computation via alias canonical targets
+    # Reused questions: harmonized QuestionItems with prov:wasDerivedFrom or URNAliases
     aliased_question_urns = set(
         URNAlias.objects.filter(entity_type="QuestionItem").values_list("canonical_urn", flat=True)
     )
-    reused_count = len(aliased_question_urns)
+    derived_question_urns = set(
+        SemanticRelationship.objects.filter(
+            predicate="prov:wasDerivedFrom",
+            subject_type="QuestionItem",
+        ).values_list("subject_urn", flat=True)
+    )
+    reused_count = len(aliased_question_urns | derived_question_urns)
 
     return OverviewStats(
         survey_count=total_surveys,
@@ -112,7 +119,7 @@ def list_surveys(request: Any) -> list[SurveyItem]:
     """Return all ingested surveys with variable and question counts."""
     surveys: list[SurveyItem] = []
     for su in StudyUnit.objects.all().order_by("urn"):
-        var_count = InstanceVariable.objects.filter(datafile__study_unit=su).count()
+        var_count = InstanceVariable.objects.filter(datafiles__study_unit=su).distinct().count()
         title_str = _extract_display_text(su.label or su.name)
         surveys.append(
             SurveyItem(
@@ -141,16 +148,25 @@ def list_questions(
         "variable_associations__represented_variable__instance_variables__datafile_variables__datafile__study_unit"
     )
 
-    # Pre-fetch all QuestionItem aliases into a lookup dict
+    origin_map = dict(UrnRegistry.objects.values_list("urn", "origin"))
+
+    # Pre-fetch all QuestionItem aliases and prov:wasDerivedFrom lineage links
     alias_map: dict[str, list[str]] = {}
     for a in URNAlias.objects.filter(entity_type="QuestionItem"):
         alias_map.setdefault(a.canonical_urn, []).append(a.alias_urn)
+
+    derived_map: dict[str, list[str]] = {}
+    for rel in SemanticRelationship.objects.filter(
+        predicate="prov:wasDerivedFrom", subject_type="QuestionItem"
+    ):
+        derived_map.setdefault(rel.subject_urn, []).append(rel.object_urn)
 
     results: list[QuestionItemSummary] = []
 
     for qi in qs.order_by("urn"):
         text_disp = _extract_display_text(qi.question_text) or _extract_display_text(qi.name)
         aliases = alias_map.get(qi.urn, [])
+        derived_from = derived_map.get(qi.urn, [])
 
         # Collect unique surveys and variable names
         surveys_set: set[str] = set()
@@ -172,7 +188,7 @@ def list_questions(
                         s_name = _extract_display_text(dfv.datafile.study_unit.name)
                         surveys_set.add(s_name)
 
-        is_reused = len(surveys_set) > 1 or len(aliases) > 0
+        is_reused = len(surveys_set) > 1 or len(aliases) > 0 or len(derived_from) > 0
 
         if reused_only and not is_reused:
             continue
@@ -187,6 +203,7 @@ def list_questions(
         results.append(
             QuestionItemSummary(
                 urn=qi.urn,
+                origin=origin_map.get(qi.urn, "instantiated"),
                 name=_extract_display_text(qi.name) or qi.urn,
                 question_text=qi.question_text,
                 text_display=text_disp,
@@ -195,6 +212,7 @@ def list_questions(
                 variable_names=var_names,
                 instance_variables=iv_urns,
                 aliases=aliases,
+                derived_from=derived_from,
                 is_reused=is_reused,
             )
         )
@@ -225,6 +243,8 @@ def get_question_cascade(request: Any, urn: str) -> QuestionCascadeGraph:
 
     q_text = _extract_display_text(qi.question_text) or _extract_display_text(qi.name)
 
+    origin_map = dict(UrnRegistry.objects.values_list("urn", "origin"))
+
     # 1. Central Question Node
     nodes[qi.urn] = GraphNode(
         id=qi.urn,
@@ -233,13 +253,69 @@ def get_question_cascade(request: Any, urn: str) -> QuestionCascadeGraph:
         sublabel=q_text[:80] + ("..." if len(q_text) > 80 else ""),
         data={
             "urn": qi.urn,
+            "origin": origin_map.get(qi.urn, "instantiated"),
             "question_text": qi.question_text,
             "instructions": qi.interviewer_instructions,
             "hashes": qi.hashes or {},
         },
     )
 
-    # 2. Inbound URN Aliases
+    # 2. Lineage via prov:wasDerivedFrom (both constituent imported sources & harmonized parents)
+    for rel in SemanticRelationship.objects.filter(
+        subject_urn=qi.urn, predicate="prov:wasDerivedFrom"
+    ):
+        src_qi = QuestionItem.objects.filter(urn=rel.object_urn).first()
+        src_label = _extract_display_text(src_qi.name) if src_qi else rel.object_urn.split(":")[-2]
+        src_text = (_extract_display_text(src_qi.question_text) or "") if src_qi else ""
+        nodes[rel.object_urn] = GraphNode(
+            id=rel.object_urn,
+            label=src_label or rel.object_urn,
+            type="QuestionItem",
+            sublabel=f"[{origin_map.get(rel.object_urn, 'imported')}] {src_text[:60]}",
+            data={
+                "urn": rel.object_urn,
+                "origin": origin_map.get(rel.object_urn, "imported"),
+                "question_text": src_qi.question_text if src_qi else None,
+            },
+        )
+        links.append(
+            GraphLink(
+                source=qi.urn,
+                target=rel.object_urn,
+                type="lineage",
+                label="prov:wasDerivedFrom",
+            )
+        )
+
+    for rel in SemanticRelationship.objects.filter(
+        object_urn=qi.urn, predicate="prov:wasDerivedFrom"
+    ):
+        parent_qi = QuestionItem.objects.filter(urn=rel.subject_urn).first()
+        parent_label = (
+            _extract_display_text(parent_qi.name) if parent_qi else rel.subject_urn.split(":")[-2]
+        )
+        parent_text = (_extract_display_text(parent_qi.question_text) or "") if parent_qi else ""
+        nodes[rel.subject_urn] = GraphNode(
+            id=rel.subject_urn,
+            label=parent_label or rel.subject_urn,
+            type="QuestionItem",
+            sublabel=f"[{origin_map.get(rel.subject_urn, 'generated')}] {parent_text[:60]}",
+            data={
+                "urn": rel.subject_urn,
+                "origin": origin_map.get(rel.subject_urn, "generated"),
+                "question_text": parent_qi.question_text if parent_qi else None,
+            },
+        )
+        links.append(
+            GraphLink(
+                source=rel.subject_urn,
+                target=qi.urn,
+                type="lineage",
+                label="prov:wasDerivedFrom",
+            )
+        )
+
+    # 3. Inbound URN Aliases
     aliases = URNAlias.objects.filter(canonical_urn=qi.urn)
     for a in aliases:
         nodes[a.alias_urn] = GraphNode(
@@ -560,9 +636,14 @@ def _build_codelist_summary(cl: CodeList) -> CodeListSummary:
         )
 
     is_reused = len(var_names) > 1 or len(surveys_set) > 1
+    cl_origin = (
+        UrnRegistry.objects.filter(urn=cl.urn).values_list("origin", flat=True).first()
+        or "instantiated"
+    )
 
     return CodeListSummary(
         urn=cl.urn,
+        origin=cl_origin,
         name=cl_name,
         description=cl_desc,
         code_count=len(codes_info),
@@ -662,6 +743,8 @@ def list_categories(
     results: list[CategorySummary] = []
     q_lower = q.lower().strip()
 
+    origin_map = dict(UrnRegistry.objects.values_list("urn", "origin"))
+
     for cat in qs:
         cat_name = _extract_display_text(cat.name) or cat.urn
         cat_label = _extract_display_text(cat.label) or cat_name
@@ -708,6 +791,7 @@ def list_categories(
         results.append(
             CategorySummary(
                 urn=cat.urn,
+                origin=origin_map.get(cat.urn, "instantiated"),
                 name=cat_name,
                 label=cat.label,
                 label_display=cat_label,
@@ -792,9 +876,14 @@ def get_category(request: Any, urn: str) -> CategorySummary:
             )
 
     is_reused = len(cl_refs) > 1 or len(surveys_set) > 1
+    cat_origin = (
+        UrnRegistry.objects.filter(urn=cat.urn).values_list("origin", flat=True).first()
+        or "instantiated"
+    )
 
     return CategorySummary(
         urn=cat.urn,
+        origin=cat_origin,
         name=cat_name,
         label=cat.label,
         label_display=cat_label,

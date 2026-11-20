@@ -574,8 +574,9 @@ class TestFairwDDIModels(TestCase):
         )
         assert reg.urn == "urn:ddi:fr.cdsp:qi-fr-001:1.0.0"
         assert reg.resource_type == "QuestionItem"
+        assert reg.origin == "instantiated"
         assert reg.status == "active"
-        assert str(reg) == "urn:ddi:fr.cdsp:qi-fr-001:1.0.0 (QuestionItem)"
+        assert str(reg) == "urn:ddi:fr.cdsp:qi-fr-001:1.0.0 (QuestionItem, instantiated)"
 
         # Custom status
         reg_deprecated = UrnRegistry.objects.create(
@@ -876,7 +877,95 @@ class TestFairwDDIModels(TestCase):
         assert reg_concept.resource_type == "Concept"
         assert reg_concept.status == "active"
 
-        # Deleting an entity should clean up its UrnRegistry entry
+        # Deleting an unreferenced entity should clean up its UrnRegistry entry
         qi_urn = qi.urn
         qi.delete()
         assert UrnRegistry.objects.filter(urn=qi_urn).first() is None
+
+    def test_origin_categorization_and_deletion_protection(self) -> None:
+        """Test ResourceOrigin categorization and deletion protection on referenced resources."""
+        from django.db.models.deletion import ProtectedError
+
+        from fairwddi.utils.integrity import ResourceReferencedError
+
+        # 1. Origin categorization defaults and overrides
+        cat_inst = Category.objects.create(
+            urn="urn:ddi:fr.cdsp:cat_inst:1.0.0",
+            name="InstantiatedCat",
+            label={"fr": "Oui"},
+        )
+        cat_imp = Category.objects.create(
+            urn="urn:ddi:fr.cdsp:cat_imp:1.0.0",
+            name="ImportedCat",
+            label={"fr": "Oui"},
+            origin="imported",
+        )
+        cat_gen = Category.objects.create(
+            urn="urn:ddi:fr.cdsp:cat_gen:1.0.0",
+            name="GeneratedCat",
+            label={"fr": "Oui"},
+            origin="generated",
+        )
+        assert cat_inst.origin == "instantiated"
+        assert cat_imp.origin == "imported"
+        assert cat_gen.origin == "generated"
+        assert UrnRegistry.objects.get(urn=cat_inst.urn).origin == "instantiated"
+        assert UrnRegistry.objects.get(urn=cat_imp.urn).origin == "imported"
+        assert UrnRegistry.objects.get(urn=cat_gen.urn).origin == "generated"
+
+        # 2. Relational FK deletion protection (Category referenced by Code)
+        cl = CodeList.objects.create(urn="urn:ddi:fr.cdsp:cl_prot:1.0.0", name="CLProt")
+        code = Code.objects.create(
+            urn="urn:ddi:fr.cdsp:code_prot:1.0.0",
+            code_list=cl,
+            category=cat_imp,
+            code_value="1",
+        )
+        with pytest.raises((ProtectedError, ResourceReferencedError)):
+            cat_imp.delete()
+
+        # QuestionItem referenced by QuestionVariable cannot be deleted
+        qi = QuestionItem.objects.create(
+            urn="urn:ddi:fr.cdsp:qi_prot:1.0.0",
+            name="QIProt",
+            question_text={"fr": "Question protégée ?"},
+            origin="imported",
+        )
+        rv = RepresentedVariable.objects.create(
+            urn="urn:ddi:fr.cdsp:rv_prot:1.0.0",
+            name="RVProt",
+            code_list=cl,
+            origin="imported",
+        )
+        qv = QuestionVariable.objects.create(question_item=qi, represented_variable=rv)
+        with pytest.raises((ProtectedError, ResourceReferencedError)):
+            qi.delete()
+
+        # 3. Lineage deletion protection (imported resource referenced via prov:wasDerivedFrom)
+        qi_gen = QuestionItem.objects.create(
+            urn="urn:ddi:fr.cdsp:qi_gen_prot:1.0.0",
+            name="QIGenProt",
+            question_text={"fr": "Question harmonisée ?"},
+            origin="generated",
+        )
+        SemanticRelationship.objects.create(
+            subject_type="QuestionItem",
+            subject_urn=qi_gen.urn,
+            predicate="prov:wasDerivedFrom",
+            object_type="QuestionItem",
+            object_urn=qi.urn,
+        )
+        # Even after removing QuestionVariable, qi is still referenced by qi_gen lineage
+        qv.delete()
+        with pytest.raises(ResourceReferencedError):
+            qi.delete()
+
+        # Once qi_gen is deleted (it has no incoming references), qi can be deleted cleanly
+        qi_gen.delete()
+        qi.delete()
+        assert QuestionItem.objects.filter(urn=qi.urn).exists() is False
+
+        # Clean up Code before deleting Category
+        code.delete()
+        cat_imp.delete()
+        assert Category.objects.filter(urn=cat_imp.urn).exists() is False

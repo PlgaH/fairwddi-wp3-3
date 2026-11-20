@@ -1,22 +1,16 @@
-"""Stage 3a (Comparison & Discovery): Cross-survey candidate discovery and similarity comparison.
+"""Stage 3a (Comparison & Discovery): Origin-aware cross-survey candidate discovery.
 
-Evaluates ReQuest resources (Category, CodeList, QuestionItem, RepresentedVariable) across tiers
-delegating string algorithms, stem detection, and variant classification to dartfx.ddi.harmonizer:
+Evaluates ReQuest resources (Category, CodeList, QuestionItem, RepresentedVariable,
+ConceptualVariable) with strict two-tier origin priority:
 
-1. EXACT (1.00): Identical content hash.
-2. FACET_EXACT (0.95): Identical normalized label or question_text hash across present languages.
-3. MULTILINGUAL_OVERLAP (0.92): Exact match in at least one shared language with complementary
-   translations, or complementary language labels on matching code structures.
-4. NEAR_EXACT (0.96 - 0.98): Identical after loose punctuation normalization or >= 0.98 similarity.
-5. INCLUSIVE_WRITING_VARIANT (0.98): Identical after stripping inclusive gender/plural markers.
-6. TYPOGRAPHICAL_VARIANT (0.95): Single-word typographical or grammatical error variant.
-7. PHRASING_VARIANT (0.92 - 0.94): Stylistic or pronominal phrasing variation.
-8. SHARED_STEM / SHARED_STEM_GRID (0.88): Shared prompt or stem with distinct sub-items.
-9. SAME_CONCEPT_DIVERGENT_DOMAIN / SAME_CONCEPT_DIFFERENT_SCALE (0.88): Equivalent concept/label
-   with divergent CodeLists. Action downgraded to link_semantic.
-10. SUBSTANTIVE_PERMUTATION (0.88): CodeLists sharing identical substantive categories.
-11. CATEGORIES_EXACT_CODES_DIFFERENT (0.85): CodeLists with identical categories, different codes.
-12. SYNTACTIC_SIMILAR (0.75 - 0.91): General normalized string similarity on label/question_text.
+1. Tier 1 (`origin in ('generated', 'instantiated')`):
+   Matches against already-harmonized or administrator-instantiated resources take top
+   priority -> `link_existing` (links incoming `imported` resource via `prov:wasDerivedFrom`
+   and enriches target metadata with alternate spellings / translations).
+2. Tier 2 (`origin == 'imported'` not yet linked to a harmonized parent):
+   Searched ONLY if Tier 1 finds no match -> `generate_harmonized` (creates a new
+   `generated` resource combining the two `imported` resources with `prov:wasDerivedFrom`
+   lineage links to both).
 """
 
 from __future__ import annotations
@@ -35,8 +29,17 @@ from dartfx.ddi.harmonizer import (
 )
 
 from fairwddi.ingest.plan import IngestPlan, PlanActionItem, ReviewGate
+from fairwddi.utils.urn import generate_generic_urn
 
 _normalizer = TextNormalizer()
+
+HARMONIZABLE_RESOURCE_TYPES = (
+    "Category",
+    "CodeList",
+    "QuestionItem",
+    "RepresentedVariable",
+    "ConceptualVariable",
+)
 
 
 def _raw_lang_dict(d: Any) -> dict[str, str]:
@@ -115,18 +118,6 @@ def _compare_multilingual_texts(
     return res.match_type.value, res.score, dict(res.metadata)
 
 
-def _is_record_elevated(urn: str, ext_attrs: Any, elevated_urns: set[str]) -> bool:
-    if urn in elevated_urns:
-        return True
-    if isinstance(ext_attrs, list):
-        for item in ext_attrs:
-            if isinstance(item, dict) and (
-                item.get("is_elevated") is True or item.get("type") == "elevation"
-            ):
-                return True
-    return False
-
-
 def _load_resource_records(
     resource_type: str,
     query: str | None = None,
@@ -136,23 +127,32 @@ def _load_resource_records(
         Category,
         CodeItem,
         CodeList,
+        ConceptualVariable,
         QuestionItem,
         QuestionVariable,
         RepresentedVariable,
+        SemanticRelationship,
         UrnRegistry,
     )
 
-    elevated_urns = set(UrnRegistry.objects.filter(status="elevated").values_list("urn", flat=True))
+    origin_map = dict(UrnRegistry.objects.values_list("urn", "origin"))
+    derived_from_map: dict[str, list[str]] = {}
+    for obj_urn, subj_urn in SemanticRelationship.objects.filter(
+        predicate="prov:wasDerivedFrom"
+    ).values_list("object_urn", "subject_urn"):
+        derived_from_map.setdefault(obj_urn, []).append(subj_urn)
+
     records: list[dict[str, Any]] = []
     q_low = query.lower() if query else None
 
     if resource_type == "Category":
         for cat in Category.objects.all().order_by("urn"):
             text_map = cat.label or {}
+            text_dict = _raw_lang_dict(text_map)
             if (
                 q_low
                 and q_low not in cat.urn.lower()
-                and not any(q_low in str(v).lower() for v in text_map.values())
+                and not any(q_low in str(v).lower() for v in text_dict.values())
             ):
                 continue
             records.append(
@@ -162,9 +162,8 @@ def _load_resource_records(
                     "name": cat.name,
                     "text": text_map,
                     "content_hash": (cat.hashes or {}).get("content"),
-                    "is_elevated": _is_record_elevated(
-                        cat.urn, cat.extended_attributes, elevated_urns
-                    ),
+                    "origin": origin_map.get(cat.urn, "instantiated"),
+                    "harmonized_targets": derived_from_map.get(cat.urn, []),
                 }
             )
 
@@ -185,9 +184,8 @@ def _load_resource_records(
                     "name": qi.name,
                     "text": text_map,
                     "content_hash": (qi.hashes or {}).get("content"),
-                    "is_elevated": _is_record_elevated(
-                        qi.urn, qi.extended_attributes, elevated_urns
-                    ),
+                    "origin": origin_map.get(qi.urn, "instantiated"),
+                    "harmonized_targets": derived_from_map.get(qi.urn, []),
                 }
             )
 
@@ -199,10 +197,12 @@ def _load_resource_records(
                 .order_by("order", "code_value")
             )
             code_pairs: list[tuple[str, str, bool]] = []
+            code_ml_pairs: list[tuple[str, dict[str, str], bool]] = []
             for ci in items:
                 cat_lbl_dict = _norm_lang_dict(ci.category.label) if ci.category else {}
                 cat_lbl = next(iter(cat_lbl_dict.values()), ci.category.urn if ci.category else "")
                 code_pairs.append((str(ci.value).strip(), cat_lbl, bool(ci.is_missing)))
+                code_ml_pairs.append((str(ci.value).strip(), cat_lbl_dict, bool(ci.is_missing)))
             if q_low and q_low not in cl.urn.lower() and q_low not in str(cl.name).lower():
                 if not any(q_low in lbl for _, lbl, _ in code_pairs):
                     continue
@@ -213,10 +213,10 @@ def _load_resource_records(
                     "name": cl.name,
                     "text": cl.label or {},
                     "codes": code_pairs,
+                    "codes_ml": code_ml_pairs,
                     "content_hash": (cl.hashes or {}).get("content"),
-                    "is_elevated": _is_record_elevated(
-                        cl.urn, cl.extended_attributes, elevated_urns
-                    ),
+                    "origin": origin_map.get(cl.urn, "instantiated"),
+                    "harmonized_targets": derived_from_map.get(cl.urn, []),
                 }
             )
 
@@ -251,13 +251,84 @@ def _load_resource_records(
                     "codelist_hash": cl_hash,
                     "question_urns": q_urns,
                     "content_hash": (rv.hashes or {}).get("content"),
-                    "is_elevated": _is_record_elevated(
-                        rv.urn, rv.extended_attributes, elevated_urns
-                    ),
+                    "origin": origin_map.get(rv.urn, "instantiated"),
+                    "harmonized_targets": derived_from_map.get(rv.urn, []),
+                }
+            )
+
+    elif resource_type == "ConceptualVariable":
+        for cv in ConceptualVariable.objects.all().order_by("urn"):
+            text_map = cv.label or {}
+            text_dict = _raw_lang_dict(text_map)
+            if (
+                q_low
+                and q_low not in cv.urn.lower()
+                and not any(q_low in str(v).lower() for v in text_dict.values())
+            ):
+                continue
+            records.append(
+                {
+                    "urn": cv.urn,
+                    "resource_type": "ConceptualVariable",
+                    "name": cv.name,
+                    "text": text_map,
+                    "content_hash": (cv.hashes or {}).get("content"),
+                    "origin": origin_map.get(cv.urn, "instantiated"),
+                    "harmonized_targets": derived_from_map.get(cv.urn, []),
                 }
             )
 
     return records
+
+
+def build_comparison_record(
+    resource_type: str,
+    urn: str,
+    norm: dict[str, Any],
+    origin: str = "imported",
+    cat_labels: dict[str, Any] | None = None,
+    codelist_hashes: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """Build an in-memory comparison record from normalized node data."""
+    if resource_type == "QuestionItem":
+        text_map = norm.get("question_text") or norm.get("label") or {}
+    else:
+        text_map = norm.get("label") or {}
+
+    rec: dict[str, Any] = {
+        "urn": urn,
+        "resource_type": resource_type,
+        "name": norm.get("name"),
+        "text": text_map,
+        "content_hash": (norm.get("hashes") or {}).get("content"),
+        "origin": origin,
+        "harmonized_targets": [],
+    }
+
+    if resource_type == "CodeList":
+        code_pairs: list[tuple[str, str, bool]] = []
+        code_ml_pairs: list[tuple[str, dict[str, str], bool]] = []
+        lbl_map = cat_labels or {}
+        for c in norm.get("codes", []):
+            cat_u = c.get("category_urn") or ""
+            raw_lbl = lbl_map.get(cat_u)
+            cat_lbl_dict = _norm_lang_dict(raw_lbl) if raw_lbl else {}
+            cat_lbl = next(iter(cat_lbl_dict.values()), cat_u)
+            val_str = str(c.get("value", "")).strip()
+            is_miss = bool(c.get("is_missing", False))
+            code_pairs.append((val_str, cat_lbl, is_miss))
+            code_ml_pairs.append((val_str, cat_lbl_dict, is_miss))
+        rec["text"] = norm.get("description") or norm.get("label") or {}
+        rec["codes"] = code_pairs
+        rec["codes_ml"] = code_ml_pairs
+
+    elif resource_type == "RepresentedVariable":
+        cl_u = norm.get("codelist_urn")
+        rec["codelist_urn"] = cl_u
+        rec["codelist_hash"] = (codelist_hashes or {}).get(cl_u) if cl_u else None
+        rec["question_urns"] = norm.get("question_urns") or []
+
+    return rec
 
 
 def _get_codelist_code_pairs(
@@ -277,7 +348,7 @@ def _get_codelist_code_pairs(
     for ci in items:
         lbl = ""
         if ci.category:
-            lbl_dict = _raw_lang_dict(ci.category.label)
+            lbl_dict = _norm_lang_dict(ci.category.label)
             lbl = next(iter(lbl_dict.values()), ci.category.urn if ci.category else "")
         pairs.append((str(ci.code_value).strip(), str(lbl).strip().lower()))
     cache[cl_urn] = pairs
@@ -291,8 +362,9 @@ def _check_codelist_compatibility(
     cl_hash_b: str | None = None,
     alias_map: dict[str, str] | None = None,
     codes_cache: dict[str, list[tuple[str, str]]] | None = None,
+    lineage_map: dict[str, set[str]] | None = None,
 ) -> tuple[bool, str]:
-    """Check if two CodeLists are identical, aliased, content-equivalent, or divergent."""
+    """Check if two CodeLists are identical, lineage-linked, content-equivalent, or divergent."""
     if not cl_a and not cl_b:
         return True, "both_uncoded"
     if bool(cl_a) != bool(cl_b):
@@ -300,10 +372,16 @@ def _check_codelist_compatibility(
     if cl_a == cl_b:
         return True, "identical_urn"
 
-    # Aliased through URNAlias
+    # Lineage / alias equivalence
+    if lineage_map and cl_a and cl_b:
+        parents_a = lineage_map.get(cl_a, set()) | {cl_a}
+        parents_b = lineage_map.get(cl_b, set()) | {cl_b}
+        if parents_a & parents_b:
+            return True, "shared_harmonized_codelist"
+
     def _res(u: str) -> str:
         curr = u
-        visited = set()
+        visited: set[str] = set()
         while curr not in visited:
             visited.add(curr)
             if alias_map is not None:
@@ -343,6 +421,7 @@ def _compare_pair(
     threshold: float = 0.75,
     alias_map: dict[str, str] | None = None,
     codes_cache: dict[str, list[tuple[str, str]]] | None = None,
+    lineage_map: dict[str, set[str]] | None = None,
 ) -> dict[str, Any] | None:
     """Compare two resource records of the same type and return a candidate dict if >= threshold."""
     r_type = rec_a["resource_type"]
@@ -351,7 +430,9 @@ def _compare_pair(
     if urn_a == urn_b:
         return None
 
-    is_tgt_elevated = bool(rec_b.get("is_elevated"))
+    tgt_origin = rec_b.get("origin", "instantiated")
+    tgt_is_harmonized = tgt_origin in ("generated", "instantiated")
+    harmonizable_action = "link_existing" if tgt_is_harmonized else "generate_harmonized"
 
     # For RepresentedVariable, assess CodeList compatibility upfront
     cl_compat = True
@@ -366,6 +447,7 @@ def _compare_pair(
             cl_hash_b=rec_b.get("codelist_hash"),
             alias_map=alias_map,
             codes_cache=codes_cache,
+            lineage_map=lineage_map,
         )
 
     # 1. Exact content hash match
@@ -382,7 +464,7 @@ def _compare_pair(
                 "details": {
                     "source_name": rec_a["name"],
                     "target_name": rec_b["name"],
-                    "target_is_elevated": is_tgt_elevated,
+                    "target_origin": tgt_origin,
                     "codelist_status": cl_status,
                     "source_codelist_urn": rec_a.get("codelist_urn"),
                     "target_codelist_urn": rec_b.get("codelist_urn"),
@@ -395,7 +477,9 @@ def _compare_pair(
         details: dict[str, Any] = {
             "source_name": rec_a["name"],
             "target_name": rec_b["name"],
-            "target_is_elevated": is_tgt_elevated,
+            "source_text": rec_a.get("text"),
+            "target_text": rec_b.get("text"),
+            "target_origin": tgt_origin,
         }
         if r_type == "RepresentedVariable":
             details["codelist_status"] = cl_status
@@ -404,10 +488,10 @@ def _compare_pair(
             "resource_type": r_type,
             "source_urn": urn_a,
             "target_urn": urn_b,
-            "match_type": MatchType.EXACT.value,
+            "match_type": MatchType.EXACT_IDENTICAL.value,
             "confidence": 1.0,
-            "recommended_action": "absorb" if is_tgt_elevated else "alias",
-            "requires_review": False,
+            "recommended_action": harmonizable_action,
+            "requires_review": not tgt_is_harmonized,
             "details": details,
         }
 
@@ -425,14 +509,14 @@ def _compare_pair(
                     "target_urn": urn_b,
                     "match_type": MatchType.FACET_EXACT.value,
                     "confidence": 0.95,
-                    "recommended_action": "absorb" if is_tgt_elevated else "alias",
-                    "requires_review": False,
+                    "recommended_action": harmonizable_action,
+                    "requires_review": not tgt_is_harmonized,
                     "details": {
                         "source_name": rec_a.get("name"),
                         "target_name": rec_b.get("name"),
                         "code_count": len(pairs_a),
                         "codes": [f"{v}: {lbl}" for v, lbl in pairs_a[:5]],
-                        "target_is_elevated": is_tgt_elevated,
+                        "target_origin": tgt_origin,
                     },
                 }
 
@@ -450,6 +534,7 @@ def _compare_pair(
                     "details": {
                         "source_name": rec_a.get("name"),
                         "target_name": rec_b.get("name"),
+                        "target_origin": tgt_origin,
                         "substantive_codes": len(subst_a),
                         "codes": [f"{v}: {lbl}" for v, lbl in sorted(subst_a)[:5]],
                     },
@@ -469,6 +554,7 @@ def _compare_pair(
                     "details": {
                         "source_name": rec_a.get("name"),
                         "target_name": rec_b.get("name"),
+                        "target_origin": tgt_origin,
                         "shared_categories": sorted(cats_a),
                     },
                 }
@@ -476,10 +562,14 @@ def _compare_pair(
             # Check if code values are identical with complementary languages in labels
             vals_a = [v for v, _, _ in codes_a]
             vals_b = [v for v, _, _ in codes_b]
-            text_a = rec_a.get("text")
-            text_b = rec_b.get("text")
-            langs_a = set(_raw_lang_dict(text_a).keys())
-            langs_b = set(_raw_lang_dict(text_b).keys())
+            langs_a = set(_raw_lang_dict(rec_a.get("text")).keys())
+            langs_b = set(_raw_lang_dict(rec_b.get("text")).keys())
+            codes_ml_a = rec_a.get("codes_ml") or []
+            codes_ml_b = rec_b.get("codes_ml") or []
+            if not langs_a and codes_ml_a:
+                langs_a = {k for _, d, _ in codes_ml_a for k in d}
+            if not langs_b and codes_ml_b:
+                langs_b = {k for _, d, _ in codes_ml_b for k in d}
             if vals_a == vals_b and langs_a and langs_b and langs_a != langs_b:
                 return {
                     "resource_type": "CodeList",
@@ -487,25 +577,24 @@ def _compare_pair(
                     "target_urn": urn_b,
                     "match_type": MatchType.MULTILINGUAL_OVERLAP.value,
                     "confidence": 0.90,
-                    "recommended_action": "absorb" if is_tgt_elevated else "merge_multilingual",
+                    "recommended_action": harmonizable_action,
                     "requires_review": True,
                     "details": {
                         "code_values": vals_a,
                         "source_languages": sorted(langs_a),
                         "target_languages": sorted(langs_b),
-                        "target_is_elevated": is_tgt_elevated,
+                        "target_origin": tgt_origin,
                     },
                 }
 
         # CodeList identity is strictly structural; do not fall through to text/label comparison
         return None
 
-    # 3. Text/Label comparison (Category, QuestionItem, RepresentedVariable)
+    # 3. Text/Label comparison (Category, QuestionItem, RepresentedVariable, ConceptualVariable)
     m_type, conf, details = _compare_multilingual_texts(rec_a.get("text"), rec_b.get("text"))
     if m_type and conf >= threshold:
         if m_type in (MatchType.SHARED_STEM.value, "SHARED_STEM", "SHARED_STEM_GRID"):
             if r_type not in ("QuestionItem", "RepresentedVariable"):
-                # Categories do not form question grids; fall back to syntactic similarity
                 m_type = MatchType.SYNTACTIC_SIMILAR.value
                 rec_action = "link_semantic"
                 req_rev = True
@@ -529,25 +618,21 @@ def _compare_pair(
                 "(CodeLists). Action downgraded to link_semantic to preserve value domain "
                 "integrity."
             )
-        elif m_type == MatchType.MULTILINGUAL_OVERLAP.value:
-            rec_action = "absorb" if is_tgt_elevated else "merge_multilingual"
-            req_rev = False
         elif m_type in (
             MatchType.FACET_EXACT.value,
             MatchType.EXACT_IDENTICAL.value,
             MatchType.NORMALIZED_EXACT.value,
+            MatchType.MULTILINGUAL_OVERLAP.value,
         ):
-            rec_action = "absorb" if is_tgt_elevated else "alias"
-            req_rev = False
-        elif m_type == MatchType.NEAR_EXACT.value:
-            rec_action = "absorb" if is_tgt_elevated else "alias"
-            req_rev = True
+            rec_action = harmonizable_action
+            req_rev = not tgt_is_harmonized
         elif m_type in (
+            MatchType.NEAR_EXACT.value,
             MatchType.INCLUSIVE_WRITING_VARIANT.value,
             MatchType.PHRASING_VARIANT.value,
             MatchType.TYPOGRAPHICAL_VARIANT.value,
         ):
-            rec_action = "absorb" if is_tgt_elevated else "elevate"
+            rec_action = harmonizable_action
             req_rev = True
         else:
             rec_action = "link_semantic"
@@ -575,12 +660,118 @@ def _compare_pair(
             "recommended_action": rec_action,
             "requires_review": req_rev,
             "details": {
+                "source_name": rec_a.get("name"),
+                "target_name": rec_b.get("name"),
                 "source_text": rec_a.get("text"),
                 "target_text": rec_b.get("text"),
-                "target_is_elevated": is_tgt_elevated,
+                "target_origin": tgt_origin,
                 **details,
             },
         }
+
+    return None
+
+
+def _derive_slug_seed(rec_a: dict[str, Any], rec_b: dict[str, Any]) -> str | None:
+    """Derive a clean human-readable seed string for generating a generic URN."""
+    for rec in (rec_b, rec_a):
+        text_dict = _raw_lang_dict(rec.get("text"))
+        if text_dict:
+            return text_dict.get("fr") or text_dict.get("en") or next(iter(text_dict.values()))
+        name_val = rec.get("name")
+        if isinstance(name_val, str) and name_val:
+            return name_val
+        if isinstance(name_val, list) and name_val and isinstance(name_val[0], dict):
+            val = name_val[0].get("value")
+            if val:
+                return str(val)
+    return None
+
+
+def find_best_match_for_incoming(
+    incoming_rec: dict[str, Any],
+    bank_records: list[dict[str, Any]],
+    threshold: float = 0.75,
+    alias_map: dict[str, str] | None = None,
+    codes_cache: dict[str, list[tuple[str, str]]] | None = None,
+    lineage_map: dict[str, set[str]] | None = None,
+    agency: str | None = None,
+) -> dict[str, Any] | None:
+    """Find the highest-priority harmonization match for an incoming resource record.
+
+    Priority rules:
+    1. Tier 1 (`origin in ('generated', 'instantiated')`):
+       Always evaluated first. If any match qualifies for `link_existing`, return the
+       highest-confidence match immediately without evaluating Tier 2.
+    2. Tier 2 (`origin == 'imported'` with empty `harmonized_targets`):
+       Evaluated ONLY if Tier 1 yields no match. If matched, returns a `generate_harmonized`
+       candidate proposing a new `generated` URN that unites both `imported` resources.
+    """
+    r_type = incoming_rec["resource_type"]
+    inc_urn = incoming_rec["urn"]
+
+    # Tier 1: Search generated / instantiated resources first
+    tier1_candidates: list[dict[str, Any]] = []
+    for rec in bank_records:
+        if rec["urn"] == inc_urn:
+            continue
+        if rec.get("origin") not in ("generated", "instantiated"):
+            continue
+        cand = _compare_pair(
+            incoming_rec,
+            rec,
+            threshold=threshold,
+            alias_map=alias_map,
+            codes_cache=codes_cache,
+            lineage_map=lineage_map,
+        )
+        if cand and cand["recommended_action"] == "link_existing":
+            tier1_candidates.append(cand)
+
+    if tier1_candidates:
+        tier1_candidates.sort(
+            key=lambda c: (
+                -c["confidence"],
+                0 if c["details"].get("target_origin") == "instantiated" else 1,
+                c["target_urn"],
+            )
+        )
+        return tier1_candidates[0]
+
+    # Tier 2: Search unharmonized imported resources ONLY if Tier 1 found nothing
+    tier2_candidates: list[tuple[dict[str, Any], dict[str, Any]]] = []
+    for rec in bank_records:
+        if rec["urn"] == inc_urn:
+            continue
+        if rec.get("origin") != "imported":
+            continue
+        if rec.get("harmonized_targets"):
+            continue
+        cand = _compare_pair(
+            incoming_rec,
+            rec,
+            threshold=threshold,
+            alias_map=alias_map,
+            codes_cache=codes_cache,
+            lineage_map=lineage_map,
+        )
+        if cand and cand["recommended_action"] == "generate_harmonized":
+            tier2_candidates.append((cand, rec))
+
+    if tier2_candidates:
+        tier2_candidates.sort(
+            key=lambda pair: (-pair[0]["confidence"], pair[0]["target_urn"]),
+        )
+        best_cand, matched_rec = tier2_candidates[0]
+        slug_seed = _derive_slug_seed(incoming_rec, matched_rec)
+        gen_urn = generate_generic_urn(
+            resource_type=r_type,
+            name_or_text=slug_seed,
+            agency=agency,
+        )
+        best_cand["details"]["generated_urn"] = gen_urn
+        best_cand["details"]["matched_imported_urn"] = matched_rec["urn"]
+        return best_cand
 
     return None
 
@@ -593,26 +784,18 @@ def discover_candidates(
     threshold: float = 0.75,
     limit: int = 100,
 ) -> list[dict[str, Any]]:
-    """Discover harmonization candidate pairs across the ReQuest database.
+    """Discover harmonization candidate pairs across the ReQuest database."""
+    from fairwddi.models import IngestBatch, InstanceVariable, SemanticRelationship, URNAlias
 
-    Args:
-        resource_type: Optional filter ('Category', 'CodeList', 'QuestionItem',
-                       'RepresentedVariable'). If None, searches across all 4 core types.
-        study_urn: Optional StudyUnit URN to scope source candidates to.
-        batch_id: Optional IngestBatch ID to scope source candidates to.
-        query: Optional substring filter on URN or text/label.
-        threshold: Minimum similarity confidence score (0.0 to 1.0, default 0.75).
-        limit: Maximum number of ranked candidate pairs to return.
-    """
-    from fairwddi.models import IngestBatch, InstanceVariable, URNAlias
-
-    target_types = (
-        [resource_type]
-        if resource_type
-        else ["Category", "CodeList", "QuestionItem", "RepresentedVariable"]
-    )
+    target_types = [resource_type] if resource_type else list(HARMONIZABLE_RESOURCE_TYPES[:4])
 
     alias_map = dict(URNAlias.objects.values_list("alias_urn", "canonical_urn"))
+    lineage_map: dict[str, set[str]] = {}
+    for subj_u, obj_u in SemanticRelationship.objects.filter(
+        predicate="prov:wasDerivedFrom"
+    ).values_list("subject_urn", "object_urn"):
+        lineage_map.setdefault(obj_u, set()).add(subj_u)
+
     codes_cache: dict[str, list[tuple[str, str]]] = {}
 
     scoped_urns: set[str] | None = None
@@ -642,7 +825,6 @@ def discover_candidates(
                 if scoped_urns is not None:
                     if item_a["urn"] not in scoped_urns and item_b["urn"] not in scoped_urns:
                         continue
-                    # Ensure source_urn is the one from the scoped batch/study
                     if item_b["urn"] in scoped_urns and item_a["urn"] not in scoped_urns:
                         src_item, tgt_item = item_b, item_a
                     else:
@@ -650,10 +832,23 @@ def discover_candidates(
                 else:
                     src_item, tgt_item = item_a, item_b
 
-                # If src_item is already elevated and tgt_item is study-specific,
-                # orient so study-specific is absorbed into elevated target
-                if src_item.get("is_elevated") and not tgt_item.get("is_elevated"):
+                src_is_harm = src_item.get("origin") in ("generated", "instantiated")
+                tgt_is_harm = tgt_item.get("origin") in ("generated", "instantiated")
+
+                # Orient so imported source links into generated/instantiated target
+                if src_is_harm and not tgt_is_harm:
                     src_item, tgt_item = tgt_item, src_item
+                    src_is_harm, tgt_is_harm = tgt_is_harm, src_is_harm
+
+                # Skip already-linked provenance pair
+                if tgt_item["urn"] in (src_item.get("harmonized_targets") or []):
+                    continue
+
+                # If source is already harmonized into a target, skip imported-to-imported pairing
+                if not tgt_is_harm and (
+                    src_item.get("harmonized_targets") or tgt_item.get("harmonized_targets")
+                ):
+                    continue
 
                 pair_key = (src_item["urn"], tgt_item["urn"])
                 if pair_key in seen_pairs:
@@ -666,11 +861,20 @@ def discover_candidates(
                     threshold=threshold,
                     alias_map=alias_map,
                     codes_cache=codes_cache,
+                    lineage_map=lineage_map,
                 )
                 if cand is not None:
                     candidates.append(cand)
 
-    candidates.sort(key=lambda c: (-c["confidence"], c["resource_type"], c["source_urn"]))
+    # Sort Tier 1 (`link_existing`) ahead of Tier 2 (`generate_harmonized`), then by confidence
+    candidates.sort(
+        key=lambda c: (
+            0 if c["recommended_action"] == "link_existing" else 1,
+            -c["confidence"],
+            c["resource_type"],
+            c["source_urn"],
+        )
+    )
     return candidates[:limit]
 
 

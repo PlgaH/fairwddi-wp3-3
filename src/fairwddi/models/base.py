@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import uuid
+from typing import Any
 
 from django.db import models
 
@@ -27,6 +28,40 @@ class DDIIdentifiable(models.Model):
 
     class Meta:
         abstract = True
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        origin_val = kwargs.pop("origin", None)
+        super().__init__(*args, **kwargs)
+        self._origin: str | None = origin_val
+
+    def refresh_from_db(self, *args: Any, **kwargs: Any) -> None:
+        self._origin = None
+        super().refresh_from_db(*args, **kwargs)
+
+    @property
+    def origin(self) -> str:
+        """Return resource origin ('imported', 'generated', or 'instantiated')."""
+        if self._origin:
+            return self._origin
+        if self.urn:
+            from fairwddi.models.infrastructure import ResourceOrigin, UrnRegistry
+
+            val = UrnRegistry.objects.filter(urn=self.urn).values_list("origin", flat=True).first()
+            if val:
+                self._origin = str(val)
+                return self._origin
+            return ResourceOrigin.INSTANTIATED.value
+        return "instantiated"
+
+    @origin.setter
+    def origin(self, value: str) -> None:
+        from fairwddi.models.infrastructure import ResourceOrigin
+
+        if value not in ResourceOrigin.values:
+            raise ValueError(
+                f"Invalid origin '{value}'. Must be one of {list(ResourceOrigin.values)}."
+            )
+        self._origin = value
 
     @property
     def is_canonical_ddi(self) -> bool:
@@ -128,7 +163,7 @@ class DDIIdentifiable(models.Model):
         """Allow setting or overriding version component."""
         pass
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         """Ensure a canonical URN is present and registered before saving."""
         if not self.urn:
             agency = os.getenv("DDI_AGENCY", "fr.cdsp")
@@ -144,20 +179,48 @@ class DDIIdentifiable(models.Model):
             self.urn = f"urn:ddi:{agency}:{object_id}:1.0.0"
 
         # Pre-register URN in UrnRegistry supertype table before inserting child row
-        from fairwddi.models.infrastructure import UrnRegistry
+        from fairwddi.models.infrastructure import ResourceOrigin, UrnRegistry
 
-        UrnRegistry.objects.update_or_create(
+        target_origin = self._origin
+        if target_origin is not None and target_origin not in ResourceOrigin.values:
+            raise ValueError(
+                f"Invalid origin '{target_origin}'. Must be one of {list(ResourceOrigin.values)}."
+            )
+
+        reg, created = UrnRegistry.objects.get_or_create(
             urn=self.urn,
-            defaults={"resource_type": self.__class__.__name__},
+            defaults={
+                "resource_type": self.__class__.__name__,
+                "origin": target_origin or ResourceOrigin.INSTANTIATED,
+            },
         )
+        if not created:
+            update_fields: list[str] = []
+            if reg.resource_type != self.__class__.__name__:
+                reg.resource_type = self.__class__.__name__
+                update_fields.append("resource_type")
+            if target_origin and reg.origin != target_origin:
+                reg.origin = target_origin
+                update_fields.append("origin")
+            if update_fields:
+                reg.save(update_fields=[*update_fields, "updated_at"])
+        self._origin = str(reg.origin)
         super().save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
-        """Delete instance and clean up central UrnRegistry record."""
+    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
+        """Delete instance after verifying zero active references, then clean up UrnRegistry."""
+        from fairwddi.models.concept import SemanticRelationship
         from fairwddi.models.infrastructure import UrnRegistry
+        from fairwddi.utils.integrity import assert_can_delete, integrity_deletion_context
 
+        ignore_urns = kwargs.pop("ignore_urns", None)
+        force = kwargs.pop("force", False)
         urn = self.urn
-        res = super().delete(*args, **kwargs)
+        if not force:
+            assert_can_delete(urn, ignore_urns=ignore_urns)
+        with integrity_deletion_context(ignore_urns=ignore_urns, bypass=force):
+            res = super().delete(*args, **kwargs)
+        SemanticRelationship.objects.filter(subject_urn=urn).delete()
         UrnRegistry.objects.filter(urn=urn).delete()
         return res
 

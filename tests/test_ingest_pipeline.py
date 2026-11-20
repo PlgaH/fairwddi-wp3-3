@@ -290,53 +290,41 @@ def test_compare_discover_and_harmonize_with_undo(tmp_path: Path) -> None:
     # Seed two complementary categories & question items across two survey waves
     StudyUnit.objects.create(
         urn="urn:ddi:fr.cdsp:study_w1:1.0.0",
-        agency="fr.cdsp",
-        identifier="study_w1",
-        version="1.0.0",
         name="Wave 1",
+        origin="imported",
     )
     StudyUnit.objects.create(
         urn="urn:ddi:fr.cdsp:study_w2:1.0.0",
-        agency="fr.cdsp",
-        identifier="study_w2",
-        version="1.0.0",
         name="Wave 2",
+        origin="imported",
     )
 
-    # Wave 1 has FR + EN; Wave 2 has FR only (MULTILINGUAL_OVERLAP)
+    # Wave 1 is instantiated (or generated); Wave 2 is imported -> Tier 1 link_existing
     Category.objects.create(
         urn="urn:ddi:fr.cdsp:cat_w1_yes:1.0.0",
-        agency="fr.cdsp",
-        identifier="cat_w1_yes",
-        version="1.0.0",
         name="Yes_W1",
         label={"fr": "Tout à fait d'accord", "en": "Strongly agree"},
+        origin="imported",
     )
     Category.objects.create(
         urn="urn:ddi:fr.cdsp:cat_w2_yes:1.0.0",
-        agency="fr.cdsp",
-        identifier="cat_w2_yes",
-        version="1.0.0",
         name="Yes_W2",
         label={"fr": "Tout à fait d'accord"},
+        origin="imported",
     )
 
-    # Near-similar QuestionItems (SYNTACTIC_SIMILAR -> requires_review=True)
+    # Near-similar QuestionItems (SYNTACTIC_SIMILAR -> requires_review=True, link_semantic)
     QuestionItem.objects.create(
         urn="urn:ddi:fr.cdsp:qi_w1_trust:1.0.0",
-        agency="fr.cdsp",
-        identifier="qi_w1_trust",
-        version="1.0.0",
         name="Q_Trust_W1",
         question_text={"en": "Do you have confidence in the national parliament?"},
+        origin="imported",
     )
     QuestionItem.objects.create(
         urn="urn:ddi:fr.cdsp:qi_w2_trust:1.0.0",
-        agency="fr.cdsp",
-        identifier="qi_w2_trust",
-        version="1.0.0",
         name="Q_Trust_W2",
         question_text={"en": "Do you have confidence in the European parliament?"},
+        origin="imported",
     )
 
     # 1. Discover candidates
@@ -346,7 +334,7 @@ def test_compare_discover_and_harmonize_with_undo(tmp_path: Path) -> None:
     assert "MULTILINGUAL_OVERLAP" in match_types
     assert "SYNTACTIC_SIMILAR" in match_types
 
-    # 2. Plan harmonization (without auto_approve -> requires review because of SYNTACTIC_SIMILAR)
+    # 2. Plan harmonization (without auto_approve -> requires review)
     harm_plan = plan_harmonization(threshold=0.75, output_dir=tmp_path)
     assert harm_plan.pending_review_count >= 1
     assert harm_plan.is_ready_to_execute(auto_approve=False) is False
@@ -363,19 +351,27 @@ def test_compare_discover_and_harmonize_with_undo(tmp_path: Path) -> None:
     loaded_plan.to_yaml(plan_yaml_path)
 
     apply_res = apply_harmonization(plan_yaml_path)
-    assert apply_res["merged_multilingual_count"] >= 1
+    assert apply_res["generated_count"] >= 1
     assert apply_res["semantic_links_created"] >= 2
 
-    # Check that cat_w2_yes received the English translation from cat_w1_yes
-    cat_w2 = Category.objects.get(urn="urn:ddi:fr.cdsp:cat_w2_yes:1.0.0")
-    assert cat_w2.label == {"en": "Strongly agree", "fr": "Tout à fait d'accord"}
-    assert SemanticRelationship.objects.count() >= 2
+    # Check that a generated Category was created preserving both FR and EN via prov:wasDerivedFrom
+    gen_rel = SemanticRelationship.objects.filter(
+        predicate="prov:wasDerivedFrom",
+        object_urn="urn:ddi:fr.cdsp:cat_w1_yes:1.0.0",
+    ).first()
+    assert gen_rel is not None
+    gen_cat = Category.objects.get(urn=gen_rel.subject_urn)
+    assert gen_cat.origin == "generated"
+    assert gen_cat.label == {"en": "Strongly agree", "fr": "Tout à fait d'accord"}
+    # Original imported categories remain intact!
+    assert Category.objects.filter(urn="urn:ddi:fr.cdsp:cat_w1_yes:1.0.0").exists()
+    assert Category.objects.filter(urn="urn:ddi:fr.cdsp:cat_w2_yes:1.0.0").exists()
 
     # 4. Undo harmonization and verify restoration
     undo_res = undo_harmonization(harm_plan.job_id)
     assert undo_res["status"] == "reverted"
-    cat_w2.refresh_from_db()
-    assert cat_w2.label == {"fr": "Tout à fait d'accord"}
+    assert Category.objects.filter(urn=gen_cat.urn).exists() is False
+    assert Category.objects.filter(urn="urn:ddi:fr.cdsp:cat_w2_yes:1.0.0").exists()
 
 
 # -----------------------------------------------------------------------------

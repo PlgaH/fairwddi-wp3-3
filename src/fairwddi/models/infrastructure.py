@@ -6,11 +6,20 @@ Includes UrnRegistry, URNAlias, MetadataQuarantine, and IngestBatch.
 from django.db import models
 
 
+class ResourceOrigin(models.TextChoices):
+    """Categorization of how a DDI resource entered the ReQuest repository."""
+
+    IMPORTED = "imported", "Imported"
+    GENERATED = "generated", "Generated"
+    INSTANTIATED = "instantiated", "Instantiated"
+
+
 class UrnRegistry(models.Model):
     """Central registry mapping URNs and external URIs to their resource types.
 
-    Provides referential integrity and O(1) URN-to-type crosswalk resolution
-    for both DDI and non-DDI identifiers.
+    Provides referential integrity, resource origin categorization
+    (``imported``, ``generated``, ``instantiated``), and O(1) URN-to-type crosswalk
+    resolution for both DDI and non-DDI identifiers.
     """
 
     urn = models.CharField(
@@ -22,6 +31,13 @@ class UrnRegistry(models.Model):
         max_length=64,
         db_index=True,
         help_text="Resource/entity type (e.g. 'QuestionItem', 'Category', 'ExternalConcept').",
+    )
+    origin = models.CharField(
+        max_length=32,
+        choices=ResourceOrigin.choices,
+        default=ResourceOrigin.INSTANTIATED,
+        db_index=True,
+        help_text="Resource origin category: 'imported', 'generated', or 'instantiated'.",
     )
     status = models.CharField(
         max_length=32,
@@ -44,7 +60,7 @@ class UrnRegistry(models.Model):
         verbose_name_plural = "URN Registries"
 
     def __str__(self) -> str:
-        return f"{self.urn} ({self.resource_type})"
+        return f"{self.urn} ({self.resource_type}, {self.origin})"
 
 
 class URNAlias(models.Model):
@@ -206,7 +222,19 @@ class IngestBatch(models.Model):
     created_urns = models.JSONField(
         default=list,
         blank=True,
-        help_text="Ordered list of canonical URNs created exclusively by this batch.",
+        help_text="Ordered list of canonical imported URNs created exclusively by this batch.",
+    )
+    generated_urns = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Ordered list of 'generated' harmonized URNs created during this batch.",
+    )
+    linked_urns = models.JSONField(
+        default=list,
+        blank=True,
+        help_text=(
+            "List of pre-existing 'generated'/'instantiated' URNs linked/enriched by this batch."
+        ),
     )
     reused_urns = models.JSONField(
         default=list,

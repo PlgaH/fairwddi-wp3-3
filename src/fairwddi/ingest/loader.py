@@ -1,9 +1,14 @@
-"""Stage 2 (Direct Ingestion & Undo): Stream DDI files directly into ReQuest core tables.
+"""Stage 2 (Direct Ingestion & Undo): Non-destructive streaming ingestion with two-tier matching.
 
-Replaces intermediate database staging (`StagedResourceNode`) with direct file-to-core-tables
-streaming, review-gated YAML plans (`plan_ingestion`), bulk SQL frequency insertion
-(`DatafileVariableFrequency`), and lightweight `IngestBatch` receipts for duplicate-file
-prevention and 1-click rollback (`undo_ingestion`).
+Streams DDI metadata files directly into ReQuest core tables:
+- Incoming resources are always persisted with ``origin='imported'`` (never silently absorbed).
+- Same-URN collisions always trigger review (`reuse` on matching hash, `quarantine` on drift).
+- New incoming resources are matched against the bank with strict two-tier priority:
+  1. Tier 1 (`generated` / `instantiated`): emit `link_existing` to link via `prov:wasDerivedFrom`
+     and enrich target metadata (alternate spellings / translations).
+  2. Tier 2 (unharmonized `imported`): emit `generate_harmonized` to synthesize a new `generated`
+     resource uniting both `imported` resources via `prov:wasDerivedFrom`.
+- Referential integrity & deletion protection are enforced across `undo_ingestion` and deletes.
 """
 
 from __future__ import annotations
@@ -18,10 +23,21 @@ from typing import Any
 
 from django.db import transaction
 
+from fairwddi.ingest.comparator import (
+    HARMONIZABLE_RESOURCE_TYPES,
+    _load_resource_records,
+    build_comparison_record,
+    find_best_match_for_incoming,
+)
 from fairwddi.ingest.detector import compute_file_sha256, detect_metadata_format
 from fairwddi.ingest.plan import IngestPlan, PlanActionItem, PlanIssue, ReviewGate
 from fairwddi.ingest.profiles import ImportProfile, load_profile
 from fairwddi.ingest.streaming import RawResourceNode, stream_resources
+from fairwddi.utils.integrity import (
+    assert_can_delete,
+    get_resource_references,
+    integrity_deletion_context,
+)
 from fairwddi.utils.normalize_string import normalize_string
 
 
@@ -235,7 +251,6 @@ def _extract_variable_stats_and_frequencies(
     summary_stats: dict[str, Any] = {}
     frequencies: list[dict[str, Any]] = []
 
-    # 1. DDI-L 4 user attributes (from upgraded DDI-C or DDI 4)
     if "ddi:summary_statistics" in uaps:
         try:
             parsed_stats = json.loads(uaps["ddi:summary_statistics"])
@@ -272,7 +287,6 @@ def _extract_variable_stats_and_frequencies(
         except Exception:
             pass
 
-    # 2. Direct DDI-Codebook inline `sumStat` and `catgry.catStat`
     if not summary_stats and "sumStat" in raw_value:
         raw_sums = raw_value["sumStat"]
         if isinstance(raw_sums, dict):
@@ -517,6 +531,7 @@ def _normalize_node(
     codelist_urn = None
     question_urns: list[str] = []
     concept_urn = None
+    represented_var_urn = None
     value_rep: dict[str, Any] | None = None
     summary_stats: dict[str, Any] = {}
     frequencies: list[dict[str, Any]] = []
@@ -548,6 +563,13 @@ def _normalize_node(
         )
         if c_ref:
             concept_urn = parse_ddi_urn(c_ref)[0]
+
+        rv_ref = _extract_ref_urn(
+            raw_value.get("RepresentedVariableReference")
+            or raw_value.get("represented_variable_reference")
+        )
+        if rv_ref:
+            represented_var_urn = parse_ddi_urn(rv_ref)[0]
 
         summary_stats, frequencies = _extract_variable_stats_and_frequencies(raw_value, uaps)
 
@@ -599,6 +621,7 @@ def _normalize_node(
         "codelist_urn": codelist_urn,
         "question_urns": question_urns,
         "concept_urn": concept_urn,
+        "represented_variable_urn": represented_var_urn,
         "value_representation": value_rep,
         "summary_stats": summary_stats,
         "frequencies": frequencies,
@@ -631,49 +654,6 @@ CORE_RESOURCE_TYPES = {
     "StudyUnit",
     "PhysicalInstance",
 }
-
-
-def _find_existing_by_content_hash(
-    resource_type: str,
-    content_hash: str,
-    facet_hash: str | None = None,
-) -> str | None:
-    """Check if an entity of `resource_type` already exists in DB by content or facet hash."""
-    from fairwddi.models import (
-        Category,
-        CodeList,
-        Concept,
-        ConceptualVariable,
-        QuestionItem,
-        RepresentedVariable,
-    )
-
-    model_map = {
-        "Category": Category,
-        "CodeList": CodeList,
-        "QuestionItem": QuestionItem,
-        "Concept": Concept,
-        "ConceptualVariable": ConceptualVariable,
-        "RepresentedVariable": RepresentedVariable,
-    }
-    model_cls = model_map.get(resource_type)
-    if model_cls is None:
-        return None
-
-    facet_key = (
-        "question_text"
-        if resource_type == "QuestionItem"
-        else ("label" if resource_type == "Category" else None)
-    )
-
-    for obj in model_cls.objects.exclude(hashes__isnull=True).only("urn", "hashes"):
-        if not isinstance(obj.hashes, dict):
-            continue
-        if obj.hashes.get("content") == content_hash:
-            return obj.urn
-        if facet_hash and facet_key and obj.hashes.get(facet_key) == facet_hash:
-            return obj.urn
-    return None
 
 
 def _get_existing_content_hash(urn: str) -> str | None:
@@ -722,15 +702,208 @@ def _find_active_batch_by_sha256(file_sha256: str) -> Any | None:
     )
 
 
+def _plan_harmonizable_resource(
+    *,
+    action_id: str,
+    r_type: str,
+    source_urn: str,
+    c_urn: str,
+    norm: dict[str, Any],
+    existing_urns: set[str],
+    pool_by_type: dict[str, list[dict[str, Any]]],
+    cat_labels: dict[str, Any],
+    codelist_hashes: dict[str, str],
+    codelist_pairs_cache: dict[str, list[tuple[str, str]]],
+    lineage_map: dict[str, set[str]],
+    match_threshold: float,
+    action_counts: dict[str, int],
+    issues: list[PlanIssue],
+    extra_details: dict[str, Any] | None = None,
+    notes_suffix: str = "",
+) -> PlanActionItem:
+    """Plan creation + two-tier origin matching or same-URN collision check for one resource."""
+    c_hash = norm["hashes"]["content"]
+    details: dict[str, Any] = {
+        "raw_urn": source_urn,
+        "canonical_urn": c_urn,
+        "content_hash": c_hash,
+        "name": norm["name"],
+        "origin": "imported",
+        **(extra_details or {}),
+    }
+
+    if c_urn in existing_urns:
+        existing_hash = _get_existing_content_hash(c_urn)
+        if existing_hash is None or existing_hash == c_hash:
+            act_type = "reuse"
+            target_urn = c_urn
+            req_review = True
+            notes = (
+                f"Same-URN collision: {r_type} '{c_urn}' already exists with identical content. "
+                "Review to confirm cross-file reuse."
+            )
+            issues.append(
+                PlanIssue(
+                    severity="warning",
+                    code="ING-URN-REUSE-001",
+                    resource_type=r_type,
+                    resource_urn=c_urn,
+                    message=notes,
+                    requires_review=False,
+                )
+            )
+        else:
+            act_type = "quarantine"
+            target_urn = c_urn
+            req_review = True
+            notes = (
+                f"Content drift detected on existing URN "
+                f"(existing={existing_hash[:19]}, incoming={c_hash[:19]})."
+            )
+            issues.append(
+                PlanIssue(
+                    severity="warning",
+                    code="ING-DRIFT-001",
+                    resource_type=r_type,
+                    resource_urn=c_urn,
+                    message=notes,
+                    requires_review=False,
+                )
+            )
+        action_counts[act_type] = action_counts.get(act_type, 0) + 1
+        return PlanActionItem(
+            id=action_id,
+            stage="ingest",
+            action=act_type,  # type: ignore[arg-type]
+            resource_type=r_type,
+            source_urn=source_urn,
+            target_urn=target_urn,
+            confidence=1.0,
+            requires_review=req_review,
+            details=details,
+            notes=notes,
+        )
+
+    # New URN: always create as imported, and evaluate two-tier matching if harmonizable
+    existing_urns.add(c_urn)
+    if r_type not in HARMONIZABLE_RESOURCE_TYPES:
+        action_counts["create"] = action_counts.get("create", 0) + 1
+        return PlanActionItem(
+            id=action_id,
+            stage="ingest",
+            action="create",
+            resource_type=r_type,
+            source_urn=source_urn,
+            target_urn=c_urn,
+            confidence=1.0,
+            requires_review=False,
+            details=details,
+            notes=f"Create {r_type} (origin='imported'){notes_suffix}.",
+        )
+
+    inc_rec = build_comparison_record(
+        r_type,
+        c_urn,
+        norm,
+        origin="imported",
+        cat_labels=cat_labels,
+        codelist_hashes=codelist_hashes,
+    )
+    if r_type == "CodeList" and inc_rec.get("codes"):
+        codelist_pairs_cache[c_urn] = [(v, lbl) for v, lbl, _ in inc_rec["codes"]]
+
+    pool = pool_by_type.setdefault(r_type, [])
+    match = find_best_match_for_incoming(
+        inc_rec,
+        pool,
+        threshold=match_threshold,
+        codes_cache=codelist_pairs_cache,
+        lineage_map=lineage_map,
+        agency=norm.get("agency"),
+    )
+
+    if match and match["recommended_action"] == "link_existing":
+        act_type = "link_existing"
+        target_urn = match["target_urn"]
+        conf = match["confidence"]
+        m_type = match["match_type"]
+        req_rev = bool(match["requires_review"])
+        inc_rec["harmonized_targets"] = [target_urn]
+        lineage_map.setdefault(c_urn, set()).add(target_urn)
+        pool.append(inc_rec)
+        details.update(match["details"])
+        notes = (
+            f"Create {r_type} (imported) and link to existing "
+            f"{match['details'].get('target_origin', 'harmonized')} '{target_urn}' ({m_type})."
+        )
+    elif match and match["recommended_action"] == "generate_harmonized":
+        act_type = "generate_harmonized"
+        target_urn = match["target_urn"]
+        gen_urn = match["details"]["generated_urn"]
+        conf = match["confidence"]
+        m_type = match["match_type"]
+        req_rev = bool(match["requires_review"])
+
+        # Mark matched imported record as now having a harmonized target so subsequent
+        # items in the same batch match the generated resource in Tier 1!
+        for rec in pool:
+            if rec["urn"] == target_urn:
+                rec.setdefault("harmonized_targets", []).append(gen_urn)
+                break
+        inc_rec["harmonized_targets"] = [gen_urn]
+        lineage_map.setdefault(target_urn, set()).add(gen_urn)
+        lineage_map.setdefault(c_urn, set()).add(gen_urn)
+        pool.append(inc_rec)
+
+        # Register synthetic generated record in Tier 1 pool for intra-batch chaining
+        gen_rec = dict(inc_rec)
+        gen_rec["urn"] = gen_urn
+        gen_rec["origin"] = "generated"
+        gen_rec["harmonized_targets"] = []
+        if match["details"].get("canonical_text"):
+            gen_rec["text"] = match["details"]["canonical_text"]
+        pool.append(gen_rec)
+
+        details.update(match["details"])
+        notes = (
+            f"Create {r_type} (imported) + new generated '{gen_urn}' "
+            f"harmonizing '{target_urn}' & '{c_urn}' ({m_type})."
+        )
+    else:
+        act_type = "create"
+        target_urn = c_urn
+        conf = 1.0
+        m_type = None
+        req_rev = False
+        pool.append(inc_rec)
+        notes = f"Create {r_type} (origin='imported'){notes_suffix}."
+
+    action_counts[act_type] = action_counts.get(act_type, 0) + 1
+    return PlanActionItem(
+        id=action_id,
+        stage="ingest",
+        action=act_type,  # type: ignore[arg-type]
+        resource_type=r_type,
+        source_urn=source_urn,
+        target_urn=target_urn,
+        confidence=conf,
+        match_type=m_type,
+        requires_review=req_rev,
+        details=details,
+        notes=notes,
+    )
+
+
 def plan_ingestion(
     file_path: str | Path,
     profile: str | Path | ImportProfile = "request",
     output_dir: str | Path | None = None,
     force_reload: bool = False,
     auto_approve: bool = False,
+    match_threshold: float = 0.75,
 ) -> IngestPlan:
     """Stream a metadata file in memory and build a review-gated Ingestion Plan (zero DB writes)."""
-    from fairwddi.models import UrnRegistry
+    from fairwddi.models import Category, CodeList, SemanticRelationship, UrnRegistry
 
     path = Path(file_path).resolve()
     if not path.exists():
@@ -739,18 +912,56 @@ def plan_ingestion(
     resolved_profile = profile if isinstance(profile, ImportProfile) else load_profile(profile)
     fmt = detect_metadata_format(path)
     file_sha256 = compute_file_sha256(path)
-    existing_batch = None if force_reload else _find_active_batch_by_sha256(file_sha256)
+    active_batch = _find_active_batch_by_sha256(file_sha256)
+    existing_batch = None if force_reload else active_batch
+    replaced_urns: set[str] = (
+        set(active_batch.created_urns or []) | set(active_batch.generated_urns or [])
+        if force_reload and active_batch is not None
+        else set()
+    )
 
     nodes = list(stream_resources(path, resolved_profile, format_info=fmt))
-    existing_urns = set(UrnRegistry.objects.values_list("urn", flat=True))
+    existing_urns = set(UrnRegistry.objects.values_list("urn", flat=True)) - replaced_urns
+
+    pool_by_type: dict[str, list[dict[str, Any]]] = {
+        rt: [
+            {
+                **rec,
+                "harmonized_targets": [
+                    u for u in rec.get("harmonized_targets", []) if u not in replaced_urns
+                ],
+            }
+            for rec in _load_resource_records(rt)
+            if rec["urn"] not in replaced_urns
+        ]
+        for rt in HARMONIZABLE_RESOURCE_TYPES
+    }
+    cat_labels: dict[str, Any] = {
+        cat.urn: cat.label
+        for cat in Category.objects.only("urn", "label")
+        if cat.label and cat.urn not in replaced_urns
+    }
+    codelist_hashes: dict[str, str] = {
+        cl.urn: (cl.hashes.get("codes") or cl.hashes.get("content") or "")
+        for cl in CodeList.objects.only("urn", "hashes")
+        if isinstance(cl.hashes, dict) and cl.urn not in replaced_urns
+    }
+    codelist_pairs_cache: dict[str, list[tuple[str, str]]] = {}
+    lineage_map: dict[str, set[str]] = {}
+    for subj_u, obj_u in SemanticRelationship.objects.filter(
+        predicate="prov:wasDerivedFrom"
+    ).values_list("subject_urn", "object_urn"):
+        if subj_u not in replaced_urns and obj_u not in replaced_urns:
+            lineage_map.setdefault(obj_u, set()).add(subj_u)
 
     actions: list[PlanActionItem] = []
     issues: list[PlanIssue] = []
     skipped_types: set[str] = set()
     action_counts: dict[str, int] = {
         "create": 0,
+        "link_existing": 0,
+        "generate_harmonized": 0,
         "reuse": 0,
-        "alias": 0,
         "quarantine": 0,
         "skip": 0,
     }
@@ -770,7 +981,8 @@ def plan_ingestion(
             )
         )
 
-    for idx, node in enumerate(nodes, start=1):
+    act_seq = 0
+    for node in nodes:
         r_type = node.resource_type
         if r_type == "VariableStatistics":
             _, s_dict, f_list = _extract_ddil33_variable_statistics(node.raw_value)
@@ -780,13 +992,14 @@ def plan_ingestion(
             continue
 
         if r_type not in CORE_RESOURCE_TYPES:
+            act_seq += 1
             action_counts["skip"] += 1
             skipped_types.add(r_type)
             actions.append(
                 PlanActionItem(
-                    id=f"ing-{idx:04d}",
+                    id=f"ing-{act_seq:04d}",
                     stage="ingest",
-                    action="skip",  # type: ignore[arg-type]
+                    action="skip",
                     resource_type=r_type,
                     source_urn=node.raw_urn,
                     target_urn=None,
@@ -803,126 +1016,150 @@ def plan_ingestion(
 
         norm = _normalize_node(r_type, node.raw_urn, node.raw_value)
         c_urn = norm["canonical_urn"]
-        c_hash = norm["hashes"]["content"]
-        rv_urn: str | None = None
         if norm["summary_stats"]:
             planned_summary_stat_vars += 1
         planned_frequency_rows += len(norm["frequencies"])
 
-        if c_urn in existing_urns:
-            existing_hash = _get_existing_content_hash(c_urn)
-            if existing_hash is None or existing_hash == c_hash:
-                act_type = "reuse"
-                target_urn = c_urn
-                req_review = False
-                notes = "Identical URN and content already in UrnRegistry."
-            else:
-                act_type = "quarantine"
-                target_urn = c_urn
-                req_review = True
-                notes = (
-                    f"Content drift detected on existing URN "
-                    f"(existing={existing_hash[:19]}, incoming={c_hash[:19]})."
-                )
-                issues.append(
-                    PlanIssue(
-                        severity="warning",
-                        code="ING-DRIFT-001",
-                        resource_type=r_type,
-                        resource_urn=c_urn,
-                        message=notes,
-                        requires_review=False,
-                    )
-                )
-        else:
-            facet_h = (
-                norm["hashes"].get("question_text")
-                if r_type == "QuestionItem"
-                else (norm["hashes"].get("label") if r_type == "Category" else None)
-            )
-            matched_urn = _find_existing_by_content_hash(r_type, c_hash, facet_hash=facet_h)
-            if matched_urn and matched_urn != c_urn:
-                act_type = "alias"
-                target_urn = matched_urn
-                req_review = False
-                match_desc = (
-                    "question text"
-                    if r_type == "QuestionItem" and facet_h
-                    else ("label" if r_type == "Category" and facet_h else "content hash")
-                )
-                notes = (
-                    f"Exact {match_desc} match with existing {r_type} "
-                    f"'{matched_urn}'; will register URNAlias."
-                )
-            else:
-                act_type = "create"
-                target_urn = c_urn
-                req_review = False
-                if r_type == "Variable":
-                    rv_payload = {
-                        "label": norm["label"],
-                        "codelist_urn": norm["codelist_urn"],
-                        "question_urns": norm["question_urns"],
-                        "value_representation": norm["value_representation"],
-                    }
-                    rv_hashes = compute_resource_hashes("RepresentedVariable", rv_payload)
-                    matched_rv = _find_existing_by_content_hash(
-                        "RepresentedVariable", rv_hashes["content"]
-                    )
-                    if matched_rv:
-                        rv_urn = matched_rv
-                    else:
-                        rv_id = f"rv_{norm['identifier']}_{rv_hashes['content'].split(':')[-1][:8]}"
-                        rv_urn = f"urn:ddi:{norm['agency']}:{rv_id}:{norm['version']}"
+        if r_type == "Category" and norm["label"]:
+            cat_labels[c_urn] = norm["label"]
+        elif r_type == "CodeList":
+            codelist_hashes[c_urn] = norm["hashes"].get("codes") or norm["hashes"]["content"]
 
-                    freq_parts: list[str] = []
-                    if norm["frequencies"]:
-                        freq_parts.append(f"{len(norm['frequencies'])} frequency rows")
-                    if norm["summary_stats"]:
-                        freq_parts.append("summary stats")
-                    extra_note = f" [{', '.join(freq_parts)}]" if freq_parts else ""
-
-                    notes = (
-                        f"Split: InstanceVariable ({c_urn}) + "
-                        f"RepresentedVariable ({rv_urn}){extra_note}"
-                    )
-                else:
-                    notes = f"Create {r_type} in ReQuest core schema."
-
-        action_counts[act_type] += 1
-        var_stats_details: dict[str, Any] = {}
         if r_type == "Variable":
-            if norm["frequencies"]:
-                var_stats_details["frequency_count"] = len(norm["frequencies"])
-            if norm["summary_stats"]:
-                var_stats_details["summary_stats"] = norm["summary_stats"]
+            # Synthesize study-specific imported RepresentedVariable (+ optional QuestionItem)
+            rv_urn = norm["represented_variable_urn"] or (
+                f"urn:ddi:{norm['agency']}:rv_{norm['identifier']}:{norm['version']}"
+            )
+            inline_q_urn: str | None = None
+            if not norm["question_urns"] and norm["question_text"]:
+                inline_q_urn = f"urn:ddi:{norm['agency']}:qi_{norm['identifier']}:{norm['version']}"
+                q_payload = {
+                    "name": f"q_{norm['name']}",
+                    "label": norm["question_text"],
+                    "question_text": norm["question_text"],
+                }
+                q_hashes = compute_resource_hashes("QuestionItem", q_payload)
+                q_norm = {**q_payload, "agency": norm["agency"], "hashes": q_hashes}
+                act_seq += 1
+                actions.append(
+                    _plan_harmonizable_resource(
+                        action_id=f"ing-{act_seq:04d}",
+                        r_type="QuestionItem",
+                        source_urn=inline_q_urn,
+                        c_urn=inline_q_urn,
+                        norm=q_norm,
+                        existing_urns=existing_urns,
+                        pool_by_type=pool_by_type,
+                        cat_labels=cat_labels,
+                        codelist_hashes=codelist_hashes,
+                        codelist_pairs_cache=codelist_pairs_cache,
+                        lineage_map=lineage_map,
+                        match_threshold=match_threshold,
+                        action_counts=action_counts,
+                        issues=issues,
+                        extra_details={"synthesized_from_variable": c_urn},
+                    )
+                )
 
-        actions.append(
-            PlanActionItem(
-                id=f"ing-{idx:04d}",
-                stage="ingest",
-                action=act_type,  # type: ignore[arg-type]
-                resource_type=r_type,
-                source_urn=node.raw_urn,
-                target_urn=target_urn,
-                confidence=1.0,
-                requires_review=req_review,
-                details={
-                    "raw_urn": node.raw_urn,
-                    "canonical_urn": c_urn,
-                    "content_hash": c_hash,
-                    "name": norm["name"],
-                    **(
-                        {
-                            "instance_variable_urn": c_urn,
-                            "represented_variable_urn": rv_urn,
-                        }
-                        if rv_urn
-                        else {}
+            rv_q_urns = [inline_q_urn] if inline_q_urn else norm["question_urns"]
+            rv_codelist_urn = norm["codelist_urn"]
+            if rv_codelist_urn is None and node.referenced_urns:
+                for ref_u in node.referenced_urns:
+                    parsed_ref = parse_ddi_urn(ref_u)[0]
+                    if parsed_ref in codelist_hashes:
+                        rv_codelist_urn = parsed_ref
+                        break
+            rv_payload = {
+                "name": norm["name"],
+                "label": norm["label"],
+                "description": norm["description"],
+                "codelist_urn": rv_codelist_urn,
+                "question_urns": rv_q_urns,
+                "value_representation": norm["value_representation"],
+            }
+            rv_hashes = compute_resource_hashes("RepresentedVariable", rv_payload)
+            rv_norm = {**rv_payload, "agency": norm["agency"], "hashes": rv_hashes}
+            act_seq += 1
+            actions.append(
+                _plan_harmonizable_resource(
+                    action_id=f"ing-{act_seq:04d}",
+                    r_type="RepresentedVariable",
+                    source_urn=rv_urn,
+                    c_urn=rv_urn,
+                    norm=rv_norm,
+                    existing_urns=existing_urns,
+                    pool_by_type=pool_by_type,
+                    cat_labels=cat_labels,
+                    codelist_hashes=codelist_hashes,
+                    codelist_pairs_cache=codelist_pairs_cache,
+                    lineage_map=lineage_map,
+                    match_threshold=match_threshold,
+                    action_counts=action_counts,
+                    issues=issues,
+                    extra_details={"synthesized_from_variable": c_urn},
+                )
+            )
+
+            var_extra: dict[str, Any] = {
+                "instance_variable_urn": c_urn,
+                "represented_variable_urn": rv_urn,
+            }
+            if inline_q_urn:
+                var_extra["inline_question_urn"] = inline_q_urn
+            if norm["frequencies"]:
+                var_extra["frequency_count"] = len(norm["frequencies"])
+            if norm["summary_stats"]:
+                var_extra["summary_stats"] = norm["summary_stats"]
+
+            freq_parts: list[str] = []
+            if norm["frequencies"]:
+                freq_parts.append(f"{len(norm['frequencies'])} frequency rows")
+            if norm["summary_stats"]:
+                freq_parts.append("summary stats")
+            extra_note = f" [{', '.join(freq_parts)}]" if freq_parts else ""
+
+            act_seq += 1
+            actions.append(
+                _plan_harmonizable_resource(
+                    action_id=f"ing-{act_seq:04d}",
+                    r_type="Variable",
+                    source_urn=node.raw_urn,
+                    c_urn=c_urn,
+                    norm=norm,
+                    existing_urns=existing_urns,
+                    pool_by_type=pool_by_type,
+                    cat_labels=cat_labels,
+                    codelist_hashes=codelist_hashes,
+                    codelist_pairs_cache=codelist_pairs_cache,
+                    lineage_map=lineage_map,
+                    match_threshold=match_threshold,
+                    action_counts=action_counts,
+                    issues=issues,
+                    extra_details=var_extra,
+                    notes_suffix=(
+                        f" -> InstanceVariable + RepresentedVariable ({rv_urn}){extra_note}"
                     ),
-                    **var_stats_details,
-                },
-                notes=notes,
+                )
+            )
+            continue
+
+        act_seq += 1
+        actions.append(
+            _plan_harmonizable_resource(
+                action_id=f"ing-{act_seq:04d}",
+                r_type=r_type,
+                source_urn=node.raw_urn,
+                c_urn=c_urn,
+                norm=norm,
+                existing_urns=existing_urns,
+                pool_by_type=pool_by_type,
+                cat_labels=cat_labels,
+                codelist_hashes=codelist_hashes,
+                codelist_pairs_cache=codelist_pairs_cache,
+                lineage_map=lineage_map,
+                match_threshold=match_threshold,
+                action_counts=action_counts,
+                issues=issues,
             )
         )
 
@@ -998,7 +1235,11 @@ def apply_ingestion(
     force_reload: bool = False,
     auto_approve: bool = False,
 ) -> dict[str, Any]:
-    """Stream a metadata file into ReQuest core tables and record an IngestBatch receipt."""
+    """Stream a metadata file into ReQuest core tables and execute planned lineage harmonization."""
+    from fairwddi.ingest.harmonizer import (
+        create_harmonized_resource,
+        link_to_harmonized_resource,
+    )
     from fairwddi.models import (
         Category,
         CategoryScheme,
@@ -1021,9 +1262,9 @@ def apply_ingestion(
         QuestionVariable,
         RepresentedVariable,
         RepresentedVariableScheme,
+        SemanticRelationship,
         StudyInstrument,
         StudyUnit,
-        URNAlias,
         UrnRegistry,
         VariableGroup,
         VariableScheme,
@@ -1063,8 +1304,9 @@ def apply_ingestion(
             "batch_id": existing_batch.id,
             "status": "already_ingested",
             "created_count": 0,
+            "generated_count": 0,
+            "linked_count": 0,
             "reused_count": len(existing_batch.reused_urns or []),
-            "alias_count": 0,
             "quarantine_count": 0,
             "frequency_rows_count": 0,
         }
@@ -1089,61 +1331,58 @@ def apply_ingestion(
     for n in nodes:
         nodes_by_type.setdefault(n.resource_type, []).append(n)
 
+    action_by_key: dict[tuple[str, str], PlanActionItem] = {
+        (act.resource_type, act.source_urn): act for act in plan.actions
+    }
     action_by_source_urn: dict[str, PlanActionItem] = {act.source_urn: act for act in plan.actions}
 
     created_urns: list[str] = []
+    generated_urns: list[str] = []
+    linked_urns: list[str] = []
     reused_urns: list[str] = []
-    created_aliases: list[str] = []
     quarantine_ids: list[int] = []
-    urn_remap: dict[str, str] = {}
+    harmonize_sub_job_ids: list[str] = []
+    created_rel_ids: list[int] = []
     entity_counts: dict[str, int] = {}
 
     def _inc(entity_name: str, amount: int = 1) -> None:
         if amount > 0:
             entity_counts[entity_name] = entity_counts.get(entity_name, 0) + amount
 
+    def _lookup_action(resource_type: str, raw_urn: str) -> PlanActionItem | None:
+        return action_by_key.get((resource_type, raw_urn)) or action_by_source_urn.get(raw_urn)
+
     def _register_or_check(
-        node: RawResourceNode,
-        norm: dict[str, Any],
+        resource_type: str,
+        raw_urn: str,
+        canonical_urn: str,
+        hashes: dict[str, str],
+        raw_value: dict[str, Any],
     ) -> tuple[str, str]:
-        c_urn = norm["canonical_urn"]
-        act = action_by_source_urn.get(node.raw_urn)
+        act = _lookup_action(resource_type, raw_urn)
         act_type = act.action if act else "create"
 
         if act_type == "quarantine":
-            existing_hash = _get_existing_content_hash(c_urn) or "unknown"
+            existing_hash = _get_existing_content_hash(canonical_urn) or "unknown"
             mq = MetadataQuarantine.objects.create(
-                incoming_urn=c_urn,
-                existing_urn=c_urn,
-                entity_type=node.resource_type,
+                incoming_urn=canonical_urn,
+                existing_urn=canonical_urn,
+                entity_type=resource_type,
                 existing_content_hash=existing_hash[:64],
-                incoming_content_hash=norm["hashes"]["content"][:64],
-                incoming_content=node.raw_value,
+                incoming_content_hash=hashes["content"][:64],
+                incoming_content=raw_value,
                 conflict_type="hash_mismatch",
                 source_file=src_path.name,
             )
             quarantine_ids.append(mq.id)
-            return "quarantine", c_urn
+            return "quarantine", canonical_urn
 
-        if act_type == "alias" and act and act.target_urn:
-            target = act.target_urn
-            urn_remap[c_urn] = target
-            urn_remap[node.raw_urn] = target
-            if not URNAlias.objects.filter(alias_urn=node.raw_urn).exists():
-                URNAlias.objects.create(
-                    alias_urn=node.raw_urn,
-                    canonical_urn=target,
-                    entity_type=node.resource_type,
-                    source_file=src_path.name,
-                )
-                created_aliases.append(node.raw_urn)
-            return "alias", target
+        if act_type == "reuse" or UrnRegistry.objects.filter(urn=canonical_urn).exists():
+            if canonical_urn not in reused_urns:
+                reused_urns.append(canonical_urn)
+            return "reuse", canonical_urn
 
-        if UrnRegistry.objects.filter(urn=c_urn).exists():
-            reused_urns.append(c_urn)
-            return "reuse", c_urn
-
-        return "create", c_urn
+        return "create", canonical_urn
 
     with transaction.atomic():
         # 1. StudyUnit & Datafile (PhysicalInstance)
@@ -1152,7 +1391,9 @@ def apply_ingestion(
 
         for node in nodes_by_type.get("StudyUnit", []):
             norm = _normalize_node("StudyUnit", node.raw_urn, node.raw_value)
-            status, c_urn = _register_or_check(node, norm)
+            status, c_urn = _register_or_check(
+                "StudyUnit", node.raw_urn, norm["canonical_urn"], norm["hashes"], node.raw_value
+            )
             if status == "create":
                 primary_study = StudyUnit.objects.create(
                     urn=c_urn,
@@ -1160,13 +1401,13 @@ def apply_ingestion(
                     title=norm["label"] or norm["citation"],
                     description=norm["description"] or norm["abstract"],
                     hashes=norm["hashes"],
+                    origin="imported",
                 )
                 created_urns.append(c_urn)
                 _inc("StudyUnit")
             else:
                 primary_study = StudyUnit.objects.filter(urn=c_urn).first() or primary_study
 
-            # Embedded PhysicalInstanceReference on StudyUnit (DDI 4 JSON)
             pi_refs = node.raw_value.get("PhysicalInstanceReference") or []
             if isinstance(pi_refs, dict):
                 pi_refs = [pi_refs]
@@ -1187,6 +1428,7 @@ def apply_ingestion(
                             study_unit=primary_study,
                             extended_attributes=ext_attrs,
                             hashes=pi_norm["hashes"],
+                            origin="imported",
                         )
                         created_urns.append(pi_c_urn)
                         _inc("Datafile")
@@ -1201,14 +1443,20 @@ def apply_ingestion(
                     urn=fallback_urn,
                     name=src_path.stem[:255],
                     title={"en": src_path.stem},
+                    origin="imported",
                 )
                 created_urns.append(fallback_urn)
                 _inc("StudyUnit")
 
-        # Standalone PhysicalInstance nodes (JSONL, DDI-L 3.3 XML, or DDI-C fileDscr)
         for node in nodes_by_type.get("PhysicalInstance", []):
             pi_norm = _normalize_node("PhysicalInstance", node.raw_urn, node.raw_value)
-            status, pi_c_urn = _register_or_check(node, pi_norm)
+            status, pi_c_urn = _register_or_check(
+                "PhysicalInstance",
+                node.raw_urn,
+                pi_norm["canonical_urn"],
+                pi_norm["hashes"],
+                node.raw_value,
+            )
             if status == "create" and primary_study:
                 f_name, ext_attrs = _extract_datafile_attributes(node.raw_value, pi_norm)
                 df_obj = Datafile.objects.create(
@@ -1218,6 +1466,7 @@ def apply_ingestion(
                     study_unit=primary_study,
                     extended_attributes=ext_attrs,
                     hashes=pi_norm["hashes"],
+                    origin="imported",
                 )
                 primary_datafile = primary_datafile or df_obj
                 created_urns.append(pi_c_urn)
@@ -1238,12 +1487,15 @@ def apply_ingestion(
         for s_type, s_cls in scheme_models.items():
             for node in nodes_by_type.get(s_type, []):
                 norm = _normalize_node(s_type, node.raw_urn, node.raw_value)
-                status, c_urn = _register_or_check(node, norm)
+                status, c_urn = _register_or_check(
+                    s_type, node.raw_urn, norm["canonical_urn"], norm["hashes"], node.raw_value
+                )
                 if status == "create":
                     s_cls.objects.create(
                         urn=c_urn,
                         name=norm["name_ml"],
                         description=norm["description"],
+                        origin="imported",
                     )
                     created_urns.append(c_urn)
                     _inc(s_type)
@@ -1251,20 +1503,29 @@ def apply_ingestion(
         # 3. Concept & ConceptualVariable
         for node in nodes_by_type.get("Concept", []):
             norm = _normalize_node("Concept", node.raw_urn, node.raw_value)
-            status, c_urn = _register_or_check(node, norm)
+            status, c_urn = _register_or_check(
+                "Concept", node.raw_urn, norm["canonical_urn"], norm["hashes"], node.raw_value
+            )
             if status == "create":
                 Concept.objects.create(
                     urn=c_urn,
                     label=norm["label"] or {"en": norm["name"]},
                     description=norm["description"],
                     hashes=norm["hashes"],
+                    origin="imported",
                 )
                 created_urns.append(c_urn)
                 _inc("Concept")
 
         for node in nodes_by_type.get("ConceptualVariable", []):
             norm = _normalize_node("ConceptualVariable", node.raw_urn, node.raw_value)
-            status, c_urn = _register_or_check(node, norm)
+            status, c_urn = _register_or_check(
+                "ConceptualVariable",
+                node.raw_urn,
+                norm["canonical_urn"],
+                norm["hashes"],
+                node.raw_value,
+            )
             if status == "create":
                 concept_obj = (
                     Concept.objects.filter(urn=norm["concept_urn"]).first()
@@ -1278,6 +1539,7 @@ def apply_ingestion(
                     description=norm["description"],
                     concept=concept_obj,
                     hashes=norm["hashes"],
+                    origin="imported",
                 )
                 created_urns.append(c_urn)
                 _inc("ConceptualVariable")
@@ -1285,7 +1547,9 @@ def apply_ingestion(
         # 4. Categories
         for node in nodes_by_type.get("Category", []):
             norm = _normalize_node("Category", node.raw_urn, node.raw_value)
-            status, c_urn = _register_or_check(node, norm)
+            status, c_urn = _register_or_check(
+                "Category", node.raw_urn, norm["canonical_urn"], norm["hashes"], node.raw_value
+            )
             if status == "create":
                 cat_ext: list[dict[str, Any]] = []
                 if norm["description"]:
@@ -1296,6 +1560,7 @@ def apply_ingestion(
                     label=norm["label"],
                     extended_attributes=cat_ext,
                     hashes=norm["hashes"],
+                    origin="imported",
                 )
                 created_urns.append(c_urn)
                 _inc("Category")
@@ -1303,21 +1568,23 @@ def apply_ingestion(
         # 5. CodeLists & CodeItems
         for node in nodes_by_type.get("CodeList", []):
             norm = _normalize_node("CodeList", node.raw_urn, node.raw_value)
-            status, c_urn = _register_or_check(node, norm)
+            status, c_urn = _register_or_check(
+                "CodeList", node.raw_urn, norm["canonical_urn"], norm["hashes"], node.raw_value
+            )
             if status == "create":
                 cl_obj = CodeList.objects.create(
                     urn=c_urn,
                     name=norm["name"],
                     description=norm["description"] or norm["label"],
                     hashes=norm["hashes"],
+                    origin="imported",
                 )
                 created_urns.append(c_urn)
                 _inc("CodeList")
                 for c_entry in norm["codes"]:
                     cat_u = c_entry.get("category_urn")
                     if cat_u:
-                        resolved_cat_u = urn_remap.get(cat_u, cat_u)
-                        cat_obj = Category.objects.filter(urn=resolved_cat_u).first()
+                        cat_obj = Category.objects.filter(urn=cat_u).first()
                         if cat_obj:
                             ci_obj, ci_created = CodeItem.objects.get_or_create(
                                 code_list=cl_obj,
@@ -1326,6 +1593,7 @@ def apply_ingestion(
                                     "category": cat_obj,
                                     "order": c_entry.get("order", 1),
                                     "is_missing": bool(c_entry.get("is_missing", False)),
+                                    "origin": "imported",
                                 },
                             )
                             if ci_created:
@@ -1335,7 +1603,13 @@ def apply_ingestion(
         # 6. QuestionItems
         for node in nodes_by_type.get("QuestionItem", []):
             norm = _normalize_node("QuestionItem", node.raw_urn, node.raw_value)
-            status, c_urn = _register_or_check(node, norm)
+            status, c_urn = _register_or_check(
+                "QuestionItem",
+                node.raw_urn,
+                norm["canonical_urn"],
+                norm["hashes"],
+                node.raw_value,
+            )
             if status == "create":
                 qi_ext: list[dict[str, Any]] = []
                 if norm["interviewer_instructions"]:
@@ -1355,6 +1629,7 @@ def apply_ingestion(
                     question_text=norm["question_text"] or norm["label"],
                     extended_attributes=qi_ext,
                     hashes=norm["hashes"],
+                    origin="imported",
                 )
                 created_urns.append(c_urn)
                 _inc("QuestionItem")
@@ -1362,14 +1637,19 @@ def apply_ingestion(
         # 7. Explicit RepresentedVariables
         for node in nodes_by_type.get("RepresentedVariable", []):
             norm = _normalize_node("RepresentedVariable", node.raw_urn, node.raw_value)
-            status, c_urn = _register_or_check(node, norm)
+            status, c_urn = _register_or_check(
+                "RepresentedVariable",
+                node.raw_urn,
+                norm["canonical_urn"],
+                norm["hashes"],
+                node.raw_value,
+            )
             if status == "create":
-                cl_u = (
-                    urn_remap.get(norm["codelist_urn"], norm["codelist_urn"])
+                cl_obj = (
+                    CodeList.objects.filter(urn=norm["codelist_urn"]).first()
                     if norm["codelist_urn"]
                     else None
                 )
-                cl_obj = CodeList.objects.filter(urn=cl_u).first() if cl_u else None
                 cv_obj = (
                     ConceptualVariable.objects.filter(urn=norm["concept_urn"]).first()
                     if norm["concept_urn"]
@@ -1384,12 +1664,12 @@ def apply_ingestion(
                     code_list=cl_obj,
                     value_representation=norm["value_representation"],
                     hashes=norm["hashes"],
+                    origin="imported",
                 )
                 created_urns.append(c_urn)
                 _inc("RepresentedVariable")
                 for idx, q_u in enumerate(norm["question_urns"], start=1):
-                    resolved_q_u = urn_remap.get(q_u, q_u)
-                    q_obj = QuestionItem.objects.filter(urn=resolved_q_u).first()
+                    q_obj = QuestionItem.objects.filter(urn=q_u).first()
                     if q_obj:
                         QuestionVariable.objects.get_or_create(
                             question_item=q_obj,
@@ -1400,7 +1680,13 @@ def apply_ingestion(
         # 8. VariableGroups
         for node in nodes_by_type.get("VariableGroup", []):
             norm = _normalize_node("VariableGroup", node.raw_urn, node.raw_value)
-            status, c_urn = _register_or_check(node, norm)
+            status, c_urn = _register_or_check(
+                "VariableGroup",
+                node.raw_urn,
+                norm["canonical_urn"],
+                norm["hashes"],
+                node.raw_value,
+            )
             if status == "create":
                 vg_refs = (
                     [{"resource_type": "StudyUnit", "urn": primary_study.urn}]
@@ -1414,11 +1700,12 @@ def apply_ingestion(
                     group_type="variable_group",
                     references=vg_refs,
                     hashes=norm["hashes"],
+                    origin="imported",
                 )
                 created_urns.append(c_urn)
                 _inc("VariableGroup")
 
-        # 9. Variables & InstanceVariables + Direct Bulk SQL Frequency Insertion
+        # 9. Variables & InstanceVariables + Synthesized RepresentedVariables + Bulk Frequencies
         freq_rows_to_insert: list[DatafileVariableFrequency] = []
         iv_by_urn: dict[str, InstanceVariable] = {}
 
@@ -1443,6 +1730,7 @@ def apply_ingestion(
                         {"type": "file_id", "value": file_id},
                         {"type": "file_name", "value": file_id},
                     ],
+                    origin="imported",
                 )
                 created_urns.append(df_urn)
                 _inc("Datafile")
@@ -1452,89 +1740,108 @@ def apply_ingestion(
         for var_type in ("Variable", "InstanceVariable"):
             for var_order, node in enumerate(nodes_by_type.get(var_type, []), start=1):
                 norm = _normalize_node(var_type, node.raw_urn, node.raw_value)
-                status, c_urn = _register_or_check(node, norm)
-                if status in ("quarantine", "alias"):
+                status, c_urn = _register_or_check(
+                    var_type, node.raw_urn, norm["canonical_urn"], norm["hashes"], node.raw_value
+                )
+                if status == "quarantine":
                     continue
 
-                cl_u = (
-                    urn_remap.get(norm["codelist_urn"], norm["codelist_urn"])
+                var_act = _lookup_action(var_type, node.raw_urn)
+                cl_obj = (
+                    CodeList.objects.filter(urn=norm["codelist_urn"]).first()
                     if norm["codelist_urn"]
                     else None
                 )
-                cl_obj = CodeList.objects.filter(urn=cl_u).first() if cl_u else None
                 if cl_obj is None and node.referenced_urns:
                     for ref_u in node.referenced_urns:
                         parsed_ref = parse_ddi_urn(ref_u)[0]
-                        resolved_ref = urn_remap.get(parsed_ref, parsed_ref)
-                        cl_obj = CodeList.objects.filter(urn=resolved_ref).first()
+                        cl_obj = CodeList.objects.filter(urn=parsed_ref).first()
                         if cl_obj:
                             break
 
+                # Resolve or create inline QuestionItem (for direct DDI-C XML)
+                inline_q_obj: QuestionItem | None = None
+                inline_q_urn = (
+                    var_act.details.get("inline_question_urn")
+                    if var_act and isinstance(var_act.details, dict)
+                    else None
+                )
+                if not norm["question_urns"] and norm["question_text"]:
+                    q_urn = (
+                        inline_q_urn
+                        or f"urn:ddi:{norm['agency']}:qi_{norm['identifier']}:{norm['version']}"
+                    )
+                    q_payload = {
+                        "name": f"q_{norm['name']}",
+                        "label": norm["question_text"],
+                        "question_text": norm["question_text"],
+                    }
+                    q_hashes = compute_resource_hashes("QuestionItem", q_payload)
+                    q_status, q_c_urn = _register_or_check(
+                        "QuestionItem", q_urn, q_urn, q_hashes, q_payload
+                    )
+                    if q_status == "create":
+                        inline_q_obj = QuestionItem.objects.create(
+                            urn=q_c_urn,
+                            name=f"q_{norm['name']}"[:255],
+                            question_text=norm["question_text"],
+                            hashes=q_hashes,
+                            origin="imported",
+                        )
+                        created_urns.append(q_c_urn)
+                        _inc("QuestionItem")
+                    elif q_status == "reuse":
+                        inline_q_obj = QuestionItem.objects.filter(urn=q_c_urn).first()
+
+                # Resolve or create study-specific imported RepresentedVariable
+                rv_urn_planned = (
+                    var_act.details.get("represented_variable_urn")
+                    if var_act and isinstance(var_act.details, dict)
+                    else None
+                )
+                rv_urn = (
+                    norm["represented_variable_urn"]
+                    or rv_urn_planned
+                    or f"urn:ddi:{norm['agency']}:rv_{norm['identifier']}:{norm['version']}"
+                )
+                rv_q_urns = [inline_q_obj.urn] if inline_q_obj else norm["question_urns"]
                 rv_payload = {
+                    "name": norm["name"],
                     "label": norm["label"],
+                    "description": norm["description"],
                     "codelist_urn": cl_obj.urn if cl_obj else None,
-                    "question_urns": [urn_remap.get(u, u) for u in norm["question_urns"]],
+                    "question_urns": rv_q_urns,
                     "value_representation": norm["value_representation"],
                 }
                 rv_hashes = compute_resource_hashes("RepresentedVariable", rv_payload)
-                existing_rv_urn = _find_existing_by_content_hash(
-                    "RepresentedVariable", rv_hashes["content"]
+                rv_status, rv_c_urn = _register_or_check(
+                    "RepresentedVariable", rv_urn, rv_urn, rv_hashes, rv_payload
                 )
-                if existing_rv_urn:
-                    rv_obj = RepresentedVariable.objects.filter(urn=existing_rv_urn).first()
+                if rv_status == "create":
+                    rv_obj = RepresentedVariable.objects.create(
+                        urn=rv_c_urn,
+                        name=norm["name"],
+                        label=norm["label"],
+                        description=norm["description"],
+                        code_list=cl_obj,
+                        value_representation=norm["value_representation"],
+                        hashes=rv_hashes,
+                        origin="imported",
+                    )
+                    created_urns.append(rv_c_urn)
+                    _inc("RepresentedVariable")
                 else:
-                    rv_id = f"rv_{norm['identifier']}_{rv_hashes['content'].split(':')[-1][:8]}"
-                    rv_urn = f"urn:ddi:{norm['agency']}:{rv_id}:{norm['version']}"
-                    rv_obj = RepresentedVariable.objects.filter(urn=rv_urn).first()
-                    if not rv_obj:
-                        rv_obj = RepresentedVariable.objects.create(
-                            urn=rv_urn,
-                            name=norm["name"],
-                            label=norm["label"],
-                            description=norm["description"],
-                            code_list=cl_obj,
-                            value_representation=norm["value_representation"],
-                            hashes=rv_hashes,
-                        )
-                        created_urns.append(rv_urn)
-                        _inc("RepresentedVariable")
+                    rv_obj = RepresentedVariable.objects.filter(urn=rv_c_urn).first()
 
-                if not norm["question_urns"] and norm["question_text"] and rv_obj:
-                    q_hashes = compute_resource_hashes(
-                        "QuestionItem",
-                        {"name": f"q_{norm['name']}", "question_text": norm["question_text"]},
+                if rv_obj and inline_q_obj:
+                    QuestionVariable.objects.get_or_create(
+                        question_item=inline_q_obj,
+                        represented_variable=rv_obj,
+                        defaults={"order": 1},
                     )
-                    existing_q_urn = _find_existing_by_content_hash(
-                        "QuestionItem",
-                        q_hashes["content"],
-                        facet_hash=q_hashes.get("question_text"),
-                    )
-                    if existing_q_urn:
-                        q_obj = QuestionItem.objects.filter(urn=existing_q_urn).first()
-                    else:
-                        q_id = f"qi_{norm['identifier']}_{q_hashes['content'].split(':')[-1][:8]}"
-                        q_urn = f"urn:ddi:{norm['agency']}:{q_id}:{norm['version']}"
-                        q_obj = QuestionItem.objects.filter(urn=q_urn).first()
-                        if not q_obj:
-                            q_obj = QuestionItem.objects.create(
-                                urn=q_urn,
-                                name=f"q_{norm['name']}"[:255],
-                                question_text=norm["question_text"],
-                                hashes=q_hashes,
-                            )
-                            created_urns.append(q_urn)
-                            _inc("QuestionItem")
-                    if q_obj:
-                        QuestionVariable.objects.get_or_create(
-                            question_item=q_obj,
-                            represented_variable=rv_obj,
-                            defaults={"order": 1},
-                        )
-
                 if rv_obj:
                     for idx, q_u in enumerate(norm["question_urns"], start=1):
-                        resolved_q_u = urn_remap.get(q_u, q_u)
-                        q_obj = QuestionItem.objects.filter(urn=resolved_q_u).first()
+                        q_obj = QuestionItem.objects.filter(urn=q_u).first()
                         if q_obj:
                             QuestionVariable.objects.get_or_create(
                                 question_item=q_obj,
@@ -1552,6 +1859,7 @@ def apply_ingestion(
                         represented_variable=rv_obj,
                         extended_attributes=su_ext,
                         hashes=norm["hashes"],
+                        origin="imported",
                     )
                     created_urns.append(c_urn)
                     _inc("InstanceVariable")
@@ -1603,11 +1911,7 @@ def apply_ingestion(
             var_u, s_dict, f_list = _extract_ddil33_variable_statistics(vs_node.raw_value)
             if not var_u:
                 continue
-            resolved_var_u = urn_remap.get(var_u, var_u)
-            iv_obj = (
-                iv_by_urn.get(resolved_var_u)
-                or InstanceVariable.objects.filter(urn=resolved_var_u).first()
-            )
+            iv_obj = iv_by_urn.get(var_u) or InstanceVariable.objects.filter(urn=var_u).first()
             if iv_obj and primary_study:
                 df_obj = _ensure_datafile(iv_obj.agency, iv_obj.version)
                 if df_obj:
@@ -1636,7 +1940,9 @@ def apply_ingestion(
         primary_instrument: Instrument | None = None
         for node in nodes_by_type.get("Instrument", []):
             norm = _normalize_node("Instrument", node.raw_urn, node.raw_value)
-            status, c_urn = _register_or_check(node, norm)
+            status, c_urn = _register_or_check(
+                "Instrument", node.raw_urn, norm["canonical_urn"], norm["hashes"], node.raw_value
+            )
             if status == "create":
                 primary_instrument = Instrument.objects.create(
                     urn=c_urn,
@@ -1644,6 +1950,7 @@ def apply_ingestion(
                     label=norm["label"],
                     description=norm["description"],
                     hashes=norm["hashes"],
+                    origin="imported",
                 )
                 created_urns.append(c_urn)
                 _inc("Instrument")
@@ -1670,6 +1977,7 @@ def apply_ingestion(
                     urn=inst_urn,
                     name=f"Instrument for {primary_study.name}"[:255],
                     label=primary_study.label,
+                    origin="imported",
                 )
                 created_urns.append(inst_urn)
                 _inc("Instrument")
@@ -1686,7 +1994,6 @@ def apply_ingestion(
                 )
                 if q_ref:
                     q_c_urn = parse_ddi_urn(q_ref)[0]
-                    q_c_urn = urn_remap.get(q_c_urn, q_c_urn)
                     q_obj = QuestionItem.objects.filter(urn=q_c_urn).first()
                     if q_obj:
                         _, iq_created = InstrumentQuestion.objects.get_or_create(
@@ -1700,7 +2007,99 @@ def apply_ingestion(
                         if iq_created:
                             _inc("InstrumentQuestion")
 
-        # 11. Record lightweight IngestBatch receipt (1 row per file, zero per-node bloat)
+        # 11. Execute Approved Harmonization / Lineage Actions in Dependency Order
+        harmonization_order = {rt: idx for idx, rt in enumerate(HARMONIZABLE_RESOURCE_TYPES)}
+        harm_actions = sorted(
+            [
+                a
+                for a in plan.actions
+                if a.approved and a.action in ("link_existing", "generate_harmonized")
+            ],
+            key=lambda a: (harmonization_order.get(a.resource_type, 99), a.id),
+        )
+
+        for act in harm_actions:
+            src_urn = act.details.get("canonical_urn") or act.source_urn
+            if act.action == "link_existing" and act.target_urn:
+                if not UrnRegistry.objects.filter(urn=src_urn).exists():
+                    continue
+                if not UrnRegistry.objects.filter(urn=act.target_urn).exists():
+                    continue
+                if SemanticRelationship.objects.filter(
+                    subject_urn=act.target_urn,
+                    predicate="prov:wasDerivedFrom",
+                    object_urn=src_urn,
+                ).exists():
+                    continue
+                link_res = link_to_harmonized_resource(
+                    source_urns=[src_urn],
+                    target_urn=act.target_urn,
+                    resource_type=act.resource_type,
+                    provenance_note=f"fairwddi.ingest:{plan.job_id}",
+                    canonical_text=act.details.get("canonical_text"),
+                    preserved_variants=act.details.get("preserved_variants"),
+                    discarded_variants=act.details.get("discarded_variants"),
+                    variant_type=act.details.get("variant_type"),
+                    match_type=str(act.match_type) if act.match_type else None,
+                    confidence=act.confidence,
+                    job_id=f"{plan.job_id}:{act.id}",
+                )
+                if act.target_urn not in linked_urns:
+                    linked_urns.append(act.target_urn)
+                created_rel_ids.extend(link_res["created_rel_ids"])
+                harmonize_sub_job_ids.append(link_res["job_id"])
+
+            elif act.action == "generate_harmonized" and act.target_urn:
+                gen_urn = act.details.get("generated_urn")
+                if not UrnRegistry.objects.filter(urn=src_urn).exists():
+                    continue
+                if not UrnRegistry.objects.filter(urn=act.target_urn).exists():
+                    continue
+
+                if gen_urn and UrnRegistry.objects.filter(urn=gen_urn).exists():
+                    link_res = link_to_harmonized_resource(
+                        source_urns=[src_urn],
+                        target_urn=gen_urn,
+                        resource_type=act.resource_type,
+                        provenance_note=f"fairwddi.ingest:{plan.job_id}",
+                        canonical_text=act.details.get("canonical_text"),
+                        preserved_variants=act.details.get("preserved_variants"),
+                        discarded_variants=act.details.get("discarded_variants"),
+                        variant_type=act.details.get("variant_type"),
+                        match_type=str(act.match_type) if act.match_type else None,
+                        confidence=act.confidence,
+                        job_id=f"{plan.job_id}:{act.id}",
+                    )
+                    if gen_urn not in linked_urns:
+                        linked_urns.append(gen_urn)
+                    created_rel_ids.extend(link_res["created_rel_ids"])
+                    harmonize_sub_job_ids.append(link_res["job_id"])
+                else:
+                    gen_res = create_harmonized_resource(
+                        source_urns=[act.target_urn, src_urn],
+                        target_urn=gen_urn,
+                        resource_type=act.resource_type,
+                        origin="generated",
+                        provenance_note=f"fairwddi.ingest:{plan.job_id}",
+                        canonical_text=act.details.get("canonical_text"),
+                        preserved_variants=act.details.get("preserved_variants"),
+                        discarded_variants=act.details.get("discarded_variants"),
+                        variant_type=act.details.get("variant_type"),
+                        match_type=str(act.match_type) if act.match_type else None,
+                        confidence=act.confidence,
+                        job_id=f"{plan.job_id}:{act.id}",
+                    )
+                    created_gen = gen_res["target_urn"]
+                    if created_gen not in generated_urns:
+                        generated_urns.append(created_gen)
+                    for cu in gen_res.get("created_code_urns", []):
+                        if cu not in generated_urns:
+                            generated_urns.append(cu)
+                    created_rel_ids.extend(gen_res["created_rel_ids"])
+                    harmonize_sub_job_ids.append(gen_res["job_id"])
+                    _inc(f"Generated{act.resource_type}")
+
+        # 12. Record lightweight IngestBatch receipt
         batch_status = "quarantined" if quarantine_ids else "completed"
         batch = IngestBatch.objects.create(
             source_format=fmt.canonical_slug,
@@ -1712,10 +2111,14 @@ def apply_ingestion(
                 "job_id": plan.job_id,
                 "profile": resolved_profile.name,
                 "quarantine_ids": quarantine_ids,
+                "harmonize_sub_job_ids": harmonize_sub_job_ids,
+                "created_rel_ids": created_rel_ids,
             },
             created_urns=created_urns,
+            generated_urns=generated_urns,
+            linked_urns=linked_urns,
             reused_urns=reused_urns,
-            created_aliases=created_aliases,
+            created_aliases=[],
             stats=entity_counts,
         )
 
@@ -1724,8 +2127,10 @@ def apply_ingestion(
         "batch_id": batch.id,
         "status": batch.status,
         "created_count": len(created_urns),
+        "generated_count": len(generated_urns),
+        "linked_count": len(linked_urns),
         "reused_count": len(reused_urns),
-        "alias_count": len(created_aliases),
+        "alias_count": 0,
         "quarantine_count": len(quarantine_ids),
         "frequency_rows_count": len(freq_rows_to_insert),
         "stats": entity_counts,
@@ -1733,13 +2138,15 @@ def apply_ingestion(
 
 
 def undo_ingestion(batch_id: int) -> dict[str, Any]:
-    """Roll back an IngestBatch in a single atomic transaction.
+    """Roll back an IngestBatch in a single atomic transaction respecting referential integrity.
 
-    Deletes UrnRegistry records created exclusively by `batch_id` (cascading cleanly
-    to all child DDI tables, shortcut tables, and `DatafileVariableFrequency`),
-    removes `URNAlias` and `MetadataQuarantine` rows created by the batch, and marks
-    the `IngestBatch` receipt as `'undone'`.
+    - Reverts target enrichments and removes ``prov:wasDerivedFrom`` links created by this batch.
+    - Removes ``generated`` resources minted by this batch ONLY if no subsequent batch/resource
+      still links to or references them.
+    - Verifies that no external resource outside the batch references any ``imported`` resource
+      in ``created_urns`` before deleting them in leaf-to-root order.
     """
+    from fairwddi.ingest.harmonizer import undo_harmonization
     from fairwddi.models import (
         Category,
         CategoryScheme,
@@ -1750,16 +2157,21 @@ def undo_ingestion(batch_id: int) -> dict[str, Any]:
         ConceptualVariable,
         ConceptualVariableScheme,
         Datafile,
+        DatafileVariable,
+        DatafileVariableFrequency,
         IngestBatch,
         InstanceVariable,
         Instrument,
+        InstrumentQuestion,
         MetadataQuarantine,
         QuestionItem,
         QuestionScheme,
+        QuestionVariable,
         RepresentedVariable,
         RepresentedVariableScheme,
+        SemanticRelationship,
+        StudyInstrument,
         StudyUnit,
-        URNAlias,
         UrnRegistry,
         VariableGroup,
         VariableScheme,
@@ -1770,44 +2182,129 @@ def undo_ingestion(batch_id: int) -> dict[str, Any]:
         raise ValueError(f"IngestBatch #{batch_id} does not exist.")
 
     created_urns = list(batch.created_urns or [])
-    created_aliases = list(batch.created_aliases or [])
-    quarantine_ids = list((batch.options or {}).get("quarantine_ids", []))
+    generated_urns = list(batch.generated_urns or [])
+    opts = batch.options or {}
+    quarantine_ids = list(opts.get("quarantine_ids", []))
+    sub_job_ids = list(opts.get("harmonize_sub_job_ids", []))
+    created_urns_set = set(created_urns)
+    generated_urns_set = set(generated_urns)
+
+    pre_gen_count = (
+        UrnRegistry.objects.filter(urn__in=generated_urns_set).count() if generated_urns_set else 0
+    )
 
     with transaction.atomic():
-        if created_aliases:
-            URNAlias.objects.filter(alias_urn__in=created_aliases).delete()
+        # 1. Unwind harmonization sub-jobs in reverse order
+        for sub_id in reversed(sub_job_ids):
+            try:
+                undo_harmonization(sub_id)
+            except ValueError as err:
+                # If a generated resource created by this batch is now referenced externally
+                # (e.g. a later batch linked to it), keep the generated resource alive and
+                # delete only this batch's provenance link to it.
+                if "referenced by" in str(err):
+                    SemanticRelationship.objects.filter(
+                        predicate="prov:wasDerivedFrom",
+                        object_urn__in=created_urns_set,
+                        subject_urn__in=generated_urns_set,
+                    ).delete()
+                else:
+                    pass
+
+        # Clean up any leftover generated_urns created by this batch that are no longer referenced
+        if generated_urns_set:
+            remaining_gen = set(
+                UrnRegistry.objects.filter(urn__in=generated_urns_set).values_list("urn", flat=True)
+            )
+            for gen_u in list(remaining_gen):
+                other_links = SemanticRelationship.objects.filter(
+                    subject_urn=gen_u, predicate="prov:wasDerivedFrom"
+                ).exclude(object_urn__in=created_urns_set)
+                ext_refs = get_resource_references(
+                    gen_u, ignore_urns=created_urns_set | remaining_gen
+                )
+                if other_links.count() > 1 or ext_refs:
+                    remaining_gen.discard(gen_u)
+
+            if remaining_gen:
+                with integrity_deletion_context(ignore_urns=created_urns_set | remaining_gen):
+                    SemanticRelationship.objects.filter(subject_urn__in=remaining_gen).delete()
+                    Code.objects.filter(urn__in=remaining_gen).delete()
+                    for m_cls in (
+                        RepresentedVariable,
+                        QuestionItem,
+                        CodeList,
+                        Category,
+                        ConceptualVariable,
+                    ):
+                        m_cls.objects.filter(urn__in=remaining_gen).delete()
+                    UrnRegistry.objects.filter(urn__in=remaining_gen).delete()
+
+        deleted_generated_count = (
+            pre_gen_count - UrnRegistry.objects.filter(urn__in=generated_urns_set).count()
+            if generated_urns_set
+            else 0
+        )
 
         if quarantine_ids:
             MetadataQuarantine.objects.filter(id__in=quarantine_ids).delete()
 
-        deleted_urns_count = 0
-        if created_urns:
-            created_urns_set = set(created_urns)
-            for m_cls in (
-                Code,
-                Datafile,
-                InstanceVariable,
-                RepresentedVariable,
-                QuestionItem,
-                CodeList,
-                Category,
-                ConceptualVariable,
-                Concept,
-                Instrument,
-                VariableGroup,
-                StudyUnit,
-                CategoryScheme,
-                QuestionScheme,
-                ConceptScheme,
-                ConceptualVariableScheme,
-                RepresentedVariableScheme,
-                VariableScheme,
-            ):
-                m_cls.objects.filter(urn__in=created_urns_set).delete()
+        # 2. Verify zero external references exist to any imported resource in created_urns
+        if created_urns_set:
+            for c_u in created_urns:
+                assert_can_delete(c_u, ignore_urns=created_urns_set)
 
-            qs = UrnRegistry.objects.filter(urn__in=created_urns_set)
-            deleted_urns_count = qs.count()
-            qs.delete()
+            with integrity_deletion_context(ignore_urns=created_urns_set):
+                # Remove junction & frequency rows owned by this batch's resources
+                DatafileVariableFrequency.objects.filter(
+                    instance_variable_id__in=created_urns_set
+                ).delete()
+                DatafileVariableFrequency.objects.filter(datafile_id__in=created_urns_set).delete()
+                DatafileVariable.objects.filter(instance_variable_id__in=created_urns_set).delete()
+                DatafileVariable.objects.filter(datafile_id__in=created_urns_set).delete()
+                StudyInstrument.objects.filter(study_unit_id__in=created_urns_set).delete()
+                StudyInstrument.objects.filter(instrument_id__in=created_urns_set).delete()
+                InstrumentQuestion.objects.filter(instrument_id__in=created_urns_set).delete()
+                InstrumentQuestion.objects.filter(question_item_id__in=created_urns_set).delete()
+                QuestionVariable.objects.filter(question_item_id__in=created_urns_set).delete()
+                QuestionVariable.objects.filter(
+                    represented_variable_id__in=created_urns_set
+                ).delete()
+                SemanticRelationship.objects.filter(subject_urn__in=created_urns_set).delete()
+
+                # Clear self-referential parent links within the batch
+                Code.objects.filter(urn__in=created_urns_set).update(parent=None)
+                Category.objects.filter(urn__in=created_urns_set).update(parent=None)
+                Concept.objects.filter(urn__in=created_urns_set).update(parent=None)
+
+                # Delete core resources in strict leaf-to-root order
+                for m_cls in (
+                    InstanceVariable,
+                    Datafile,
+                    StudyUnit,
+                    Code,
+                    RepresentedVariable,
+                    QuestionItem,
+                    CodeList,
+                    Category,
+                    ConceptualVariable,
+                    Concept,
+                    Instrument,
+                    VariableGroup,
+                    CategoryScheme,
+                    QuestionScheme,
+                    ConceptScheme,
+                    ConceptualVariableScheme,
+                    RepresentedVariableScheme,
+                    VariableScheme,
+                ):
+                    m_cls.objects.filter(urn__in=created_urns_set).delete()
+
+                qs = UrnRegistry.objects.filter(urn__in=created_urns_set)
+                deleted_urns_count = qs.count()
+                qs.delete()
+        else:
+            deleted_urns_count = 0
 
         batch.status = "undone"
         batch.save(update_fields=["status", "updated_at"])
@@ -1816,7 +2313,8 @@ def undo_ingestion(batch_id: int) -> dict[str, Any]:
         "batch_id": batch.id,
         "status": batch.status,
         "deleted_core_resources_count": deleted_urns_count,
-        "deleted_aliases_count": len(created_aliases),
+        "deleted_generated_resources_count": deleted_generated_count,
+        "deleted_aliases_count": 0,
     }
 
 
@@ -1837,6 +2335,8 @@ def list_ingest_batches(status: str | None = None, limit: int = 50) -> list[dict
                 "source_format": b.source_format,
                 "status": b.status,
                 "created_count": len(b.created_urns or []),
+                "generated_count": len(b.generated_urns or []),
+                "linked_count": len(b.linked_urns or []),
                 "reused_count": len(b.reused_urns or []),
                 "alias_count": len(b.created_aliases or []),
                 "stats": b.stats or {},
@@ -1863,6 +2363,8 @@ def get_ingest_batch_status(batch_id: int) -> dict[str, Any]:
         "status": b.status,
         "options": b.options or {},
         "created_count": len(b.created_urns or []),
+        "generated_count": len(b.generated_urns or []),
+        "linked_count": len(b.linked_urns or []),
         "reused_count": len(b.reused_urns or []),
         "alias_count": len(b.created_aliases or []),
         "stats": b.stats or {},

@@ -49,13 +49,13 @@ class InstrumentQuestion(models.Model):
 
     instrument = models.ForeignKey(
         Instrument,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="question_associations",
         db_column="instrument_urn",
     )
     question_item = models.ForeignKey(
         QuestionItem,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="instrument_associations",
         db_column="question_item_urn",
     )

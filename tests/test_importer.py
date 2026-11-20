@@ -340,3 +340,316 @@ def test_cli_ingest_plan_execute_list_status_and_undo(
     assert undo_res.exit_code == 0
     assert f"Rolled back Batch #{batch.id}" in undo_res.stdout
     assert IngestBatch.objects.get(id=batch.id).status == "undone"
+
+
+@pytest.mark.django_db
+def test_same_urn_identical_content_triggers_review(tmp_path: Path) -> None:
+    """Same-URN collisions across files with identical content must trigger review ('reuse')."""
+    from fairwddi.ingest import compute_resource_hashes
+    from fairwddi.models import QuestionItem
+
+    shared_urn = "urn:ddi:fr.cdsp:qi_shared_01:1.0.0"
+    QuestionItem.objects.create(
+        urn=shared_urn,
+        name="QI_SHARED",
+        question_text={"en": "Do you vote regularly?"},
+        hashes=compute_resource_hashes(
+            "QuestionItem",
+            {
+                "name": "QI_SHARED",
+                "label": None,
+                "description": None,
+                "question_text": {"en": "Do you vote regularly?"},
+            },
+        ),
+        origin="imported",
+    )
+
+    incoming_json = tmp_path / "same_urn_reuse.json"
+    incoming_json.write_text(
+        """{
+          "items": [
+            {
+              "$type": "QuestionItem",
+              "URN": "urn:ddi:fr.cdsp:qi_shared_01:1.0.0",
+              "Agency": "fr.cdsp",
+              "ID": "qi_shared_01",
+              "Version": "1.0.0",
+              "QuestionItemName": [{"String": {"language": "en", "value": "QI_SHARED"}}],
+              "QuestionText": [
+                {"LiteralText": {"Text": {"language": "en", "value": "Do you vote regularly?"}}}
+              ]
+            }
+          ]
+        }""",
+        encoding="utf-8",
+    )
+
+    plan = plan_ingestion(incoming_json, profile="request")
+    assert plan.summary["reuse"] == 1
+    assert plan.pending_review_count == 1
+    assert plan.is_ready_to_execute(auto_approve=False) is False
+    assert any(i.code == "ING-URN-REUSE-001" for i in plan.issues)
+    reuse_act = next(a for a in plan.actions if a.action == "reuse")
+    assert reuse_act.requires_review is True
+    assert reuse_act.target_urn == shared_urn
+
+    with pytest.raises(PermissionError):
+        apply_ingestion(plan, auto_approve=False)
+
+    res = apply_ingestion(plan, auto_approve=True)
+    assert res["reused_count"] == 1
+    assert res["created_count"] == 0
+
+
+@pytest.mark.django_db
+def test_three_wave_non_destructive_import_and_two_tier_matching(tmp_path: Path) -> None:
+    """Test the complete 3-wave import lifecycle:
+
+    - Wave 1: Creates `imported` resources only (no `generated` resources).
+    - Wave 2: Matches Wave 1 `imported` resource -> creates Wave 2 `imported` resource
+      AND spawns a `generated` resource linking both via `prov:wasDerivedFrom` with
+      alternate spelling preserved.
+    - Wave 3: Prioritizes the `generated` resource in Tier 1 -> creates Wave 3 `imported`
+      resource, links it to the existing `generated` resource via `prov:wasDerivedFrom`,
+      and enriches the `generated` resource without spawning a duplicate `generated` resource.
+    - Also verifies deletion protection during undo.
+    """
+    from fairwddi.models import QuestionItem, SemanticRelationship, UrnRegistry
+    from fairwddi.utils.integrity import ResourceReferencedError
+
+    w1_file = tmp_path / "wave1.json"
+    w1_file.write_text(
+        """{
+          "items": [
+            {
+              "$type": "QuestionItem",
+              "URN": "urn:ddi:fr.cdsp:w1.qi_org:1.0.0",
+              "QuestionItemName": [{"String": {"language": "fr", "value": "QI_ORG_W1"}}],
+              "QuestionText": [
+                {
+                  "LiteralText": {
+                    "Text": {
+                      "language": "fr",
+                      "value": "Êtes-vous satisfait des institutions ?"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }""",
+        encoding="utf-8",
+    )
+
+    w2_file = tmp_path / "wave2.json"
+    w2_file.write_text(
+        """{
+          "items": [
+            {
+              "$type": "QuestionItem",
+              "URN": "urn:ddi:fr.cdsp:w2.qi_org:1.0.0",
+              "QuestionItemName": [{"String": {"language": "fr", "value": "QI_ORG_W2"}}],
+              "QuestionText": [
+                {
+                  "LiteralText": {
+                    "Text": {
+                      "language": "fr",
+                      "value": "Êtes-vous satisfait(e) des institutions ?"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }""",
+        encoding="utf-8",
+    )
+
+    w3_file = tmp_path / "wave3.json"
+    w3_file.write_text(
+        """{
+          "items": [
+            {
+              "$type": "QuestionItem",
+              "URN": "urn:ddi:fr.cdsp:w3.qi_org:1.0.0",
+              "QuestionItemName": [{"String": {"language": "fr", "value": "QI_ORG_W3"}}],
+              "QuestionText": [
+                {
+                  "LiteralText": {
+                    "Text": {
+                      "language": "fr",
+                      "value": "Êtes-vous satisfait(e) des institutions ?"
+                    }
+                  }
+                },
+                {
+                  "LiteralText": {
+                    "Text": {
+                      "language": "en",
+                      "value": "Are you satisfied with the institutions?"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }""",
+        encoding="utf-8",
+    )
+
+    # Wave 1: First import -> creates imported resource only
+    p1 = plan_ingestion(w1_file, profile="request")
+    assert p1.summary["create"] == 1
+    assert p1.summary["generate_harmonized"] == 0
+    assert p1.summary["link_existing"] == 0
+    assert p1.is_ready_to_execute() is True
+
+    r1 = apply_ingestion(p1)
+    b1_id = r1["batch_id"]
+    assert r1["created_count"] == 1
+    assert r1["generated_count"] == 0
+    assert UrnRegistry.objects.get(urn="urn:ddi:fr.cdsp:w1.qi_org:1.0.0").origin == "imported"
+
+    # Wave 2: Second import with inclusive spelling -> Tier 2 match -> generate_harmonized
+    p2 = plan_ingestion(w2_file, profile="request")
+    assert p2.summary["generate_harmonized"] == 1
+    assert p2.summary["link_existing"] == 0
+    assert p2.pending_review_count == 1
+    assert p2.is_ready_to_execute(auto_approve=False) is False
+    gen_urn = p2.actions[0].details["generated_urn"]
+    assert p2.actions[0].target_urn == "urn:ddi:fr.cdsp:w1.qi_org:1.0.0"
+
+    r2 = apply_ingestion(p2, auto_approve=True)
+    b2_id = r2["batch_id"]
+    assert r2["created_count"] == 1
+    assert r2["generated_count"] == 1
+
+    # Both imported resources remain intact, AND new generated resource exists
+    assert QuestionItem.objects.filter(urn="urn:ddi:fr.cdsp:w1.qi_org:1.0.0").exists()
+    assert QuestionItem.objects.filter(urn="urn:ddi:fr.cdsp:w2.qi_org:1.0.0").exists()
+    gen_qi = QuestionItem.objects.get(urn=gen_urn)
+    assert gen_qi.origin == "generated"
+    assert UrnRegistry.objects.get(urn="urn:ddi:fr.cdsp:w2.qi_org:1.0.0").origin == "imported"
+
+    # Lineage links from generated -> both imported resources
+    derived_targets = set(
+        SemanticRelationship.objects.filter(
+            subject_urn=gen_urn, predicate="prov:wasDerivedFrom"
+        ).values_list("object_urn", flat=True)
+    )
+    assert derived_targets == {
+        "urn:ddi:fr.cdsp:w1.qi_org:1.0.0",
+        "urn:ddi:fr.cdsp:w2.qi_org:1.0.0",
+    }
+
+    # Alternate spelling recorded on generated resource
+    variants = [a for a in (gen_qi.extended_attributes or []) if a.get("type") == "wording_variant"]
+    assert any(v["value"] == "Êtes-vous satisfait des institutions ?" for v in variants)
+
+    # Wave 3: Third import -> MUST prioritize generated resource (Tier 1) -> link_existing
+    p3 = plan_ingestion(w3_file, profile="request")
+    assert p3.summary["link_existing"] == 1
+    assert p3.summary["generate_harmonized"] == 0
+    assert p3.actions[0].target_urn == gen_urn
+
+    r3 = apply_ingestion(p3, auto_approve=True)
+    b3_id = r3["batch_id"]
+    assert r3["created_count"] == 1
+    assert r3["generated_count"] == 0
+    assert r3["linked_count"] == 1
+    assert UrnRegistry.objects.get(urn="urn:ddi:fr.cdsp:w3.qi_org:1.0.0").origin == "imported"
+
+    gen_qi.refresh_from_db()
+    en_vals = [
+        e["value"]
+        for e in (gen_qi.question_text or [])
+        if isinstance(e, dict) and e.get("lang") == "en"
+    ]
+    assert en_vals == ["Are you satisfied with the institutions?"]
+
+    derived_targets_after = set(
+        SemanticRelationship.objects.filter(
+            subject_urn=gen_urn, predicate="prov:wasDerivedFrom"
+        ).values_list("object_urn", flat=True)
+    )
+    assert derived_targets_after == {
+        "urn:ddi:fr.cdsp:w1.qi_org:1.0.0",
+        "urn:ddi:fr.cdsp:w2.qi_org:1.0.0",
+        "urn:ddi:fr.cdsp:w3.qi_org:1.0.0",
+    }
+
+    # Deletion protection: cannot roll back Wave 1 while generated resource derives from w1
+    with pytest.raises(ResourceReferencedError):
+        undo_ingestion(b1_id)
+
+    # Rolling back Wave 2 while Wave 3 still links to gen_urn protects gen_urn & w1
+    undo_ingestion(b2_id)
+    assert QuestionItem.objects.filter(urn=gen_urn).exists() is True
+    assert QuestionItem.objects.filter(urn="urn:ddi:fr.cdsp:w2.qi_org:1.0.0").exists() is False
+
+    # Rolling back Wave 3 leaves only w1 and gen_urn; clean up
+    undo_ingestion(b3_id)
+    assert QuestionItem.objects.filter(urn="urn:ddi:fr.cdsp:w3.qi_org:1.0.0").exists() is False
+
+
+@pytest.mark.django_db
+def test_instantiated_resource_prioritized_on_first_import(tmp_path: Path) -> None:
+    """When an administrator pre-instantiates a resource, the very first import links to it."""
+    from fairwddi.models import QuestionItem, SemanticRelationship
+
+    inst_qi = QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:QI-admin-trust:1.0.0",
+        name="QI_ADMIN_TRUST",
+        question_text={"fr": "Avez-vous confiance dans la justice ?"},
+        origin="instantiated",
+    )
+
+    # Also seed an unharmonized imported QuestionItem with the exact same text to prove
+    # Tier 1 (`instantiated`) strictly beats Tier 2 (`imported`)!
+    QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:old_imp_justice:1.0.0",
+        name="OLD_IMP",
+        question_text={"fr": "Avez-vous confiance dans la justice ?"},
+        origin="imported",
+    )
+
+    inc_file = tmp_path / "inc_justice.json"
+    inc_file.write_text(
+        """{
+          "items": [
+            {
+              "$type": "QuestionItem",
+              "URN": "urn:ddi:fr.cdsp:w1.qi_justice:1.0.0",
+              "QuestionItemName": [{"String": {"language": "fr", "value": "QI_JUS_W1"}}],
+              "QuestionText": [
+                {
+                  "LiteralText": {
+                    "Text": {
+                      "language": "fr",
+                      "value": "Avez-vous confiance dans la justice ?",
+                      "lang": "fr"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }""",
+        encoding="utf-8",
+    )
+
+    plan = plan_ingestion(inc_file, profile="request")
+    assert plan.summary["link_existing"] == 1
+    assert plan.summary["generate_harmonized"] == 0
+    assert plan.actions[0].target_urn == inst_qi.urn
+    assert plan.actions[0].details["target_origin"] == "instantiated"
+
+    res = apply_ingestion(plan, auto_approve=True)
+    assert res["created_count"] == 1
+    assert res["linked_count"] == 1
+    assert SemanticRelationship.objects.filter(
+        subject_urn=inst_qi.urn,
+        predicate="prov:wasDerivedFrom",
+        object_urn="urn:ddi:fr.cdsp:w1.qi_justice:1.0.0",
+    ).exists()

@@ -127,6 +127,8 @@ def test_api_question_cascade(api_client: TestClient) -> None:
     assert "InstanceVariable" in node_types
     assert "URNAlias" in node_types
     assert "CodeList" in node_types
+    qi_node = next(n for n in data["nodes"] if n["id"] == q_urn)
+    assert qi_node["data"]["origin"] == "instantiated"
 
     # Verify CodeList node data contains codes & categories
     cl_node = next(n for n in data["nodes"] if n["type"] == "CodeList")

@@ -10,7 +10,6 @@ from rich.table import Table
 import fairwddi
 from fairwddi.db.config import configure_django_for_cli, get_database_config
 from fairwddi.db.ddl import export_postgres_ddl
-from fairwddi.db.seed import seed_sample_data
 
 app = typer.Typer(
     name="fairwddi",
@@ -19,7 +18,7 @@ app = typer.Typer(
 )
 db_app = typer.Typer(
     name="db",
-    help="Database management, migrations, seeding, and DDL export commands.",
+    help="Database management, migrations, vocabulary loading, and DDL export commands.",
     no_args_is_help=True,
 )
 app.add_typer(db_app, name="db")
@@ -134,35 +133,6 @@ def db_init() -> None:
     console.print("[dim]Applying database migrations...[/dim]")
     call_command("migrate", interactive=False, verbosity=1)
     console.print("[bold green]Database initialized successfully.[/bold green]")
-
-
-@db_app.command("seed")
-def db_seed(
-    reset: bool = typer.Option(
-        False,
-        "--reset",
-        "-r",
-        help="Clear existing data before seeding demonstration records.",
-    ),
-) -> None:
-    """Seed the database with standard DDI demonstration entities."""
-    from django.core.management import call_command
-
-    configure_django_for_cli()
-    call_command("migrate", interactive=False, verbosity=0)
-
-    console.print("[dim]Seeding DDI-Lifecycle demonstration data...[/dim]")
-    summary = seed_sample_data(reset=reset)
-
-    table = Table(title="Demonstration Data Seed Summary", border_style="green")
-    table.add_column("Entity / Layer", style="bold cyan")
-    table.add_column("Count", justify="right", style="yellow")
-
-    for key, count in summary.items():
-        table.add_row(key.replace("_", " ").title(), str(count))
-
-    console.print(table)
-    console.print("[bold green]Database seeded successfully.[/bold green]")
 
 
 @db_app.command("status")
@@ -282,12 +252,6 @@ def db_recreate(
         "-f",
         help="Bypass confirmation prompt (for automated scripts).",
     ),
-    seed: bool = typer.Option(
-        False,
-        "--seed",
-        "-s",
-        help="Seed demonstration data after recreating tables.",
-    ),
     load_vocab: bool = typer.Option(
         False,
         "--load-vocab",
@@ -302,7 +266,6 @@ def db_recreate(
     from django.core.management import call_command
     from django.db import connection
 
-    from fairwddi.db.seed import seed_sample_data
     from fairwddi.db.vocab import load_skos_vocabulary
 
     configure_django_for_cli()
@@ -347,23 +310,12 @@ def db_recreate(
     call_command("migrate", interactive=False, verbosity=1)
     console.print("[bold green]Database schema recreated successfully.[/bold green]")
 
-    if seed:
-        console.print("[dim]Seeding demonstration data...[/dim]")
-        summary = seed_sample_data(reset=False)
-        table = Table(title="Demonstration Data Seed Summary", border_style="green")
-        table.add_column("Entity / Layer", style="bold cyan")
-        table.add_column("Count", justify="right", style="yellow")
-        for key, count in summary.items():
-            table.add_row(key.replace("_", " ").title(), str(count))
-        console.print(table)
-        console.print("[bold green]Database seeded successfully.[/bold green]")
-
     if load_vocab:
         vocab_file = Path("vocab/ELSST_R6.ttl")
         if vocab_file.exists():
             console.print("[dim]Loading standard ELSST vocabulary...[/dim]")
             stats = load_skos_vocabulary(str(vocab_file), max_levels=1)
-            loaded_count = stats.get("concepts_loaded", 0)
+            loaded_count = stats.get("total_concepts", stats.get("concepts_loaded", 0))
             console.print(f"[bold green]Loaded {loaded_count} top ELSST concepts.[/bold green]")
 
 
@@ -807,9 +759,10 @@ def ingest_execute_cmd(
     table.add_column("Value", justify="right", style="yellow")
     table.add_row("Job ID", res["job_id"])
     table.add_row("Batch Status", res["status"])
-    table.add_row("Created Core Resources", f"{res['created_count']:,}")
-    table.add_row("Reused Existing Resources", f"{res['reused_count']:,}")
-    table.add_row("Registered URN Aliases", f"{res['alias_count']:,}")
+    table.add_row("Created Imported Resources", f"{res['created_count']:,}")
+    table.add_row("Generated Harmonized Resources", f"{res.get('generated_count', 0):,}")
+    table.add_row("Linked Existing Harmonized", f"{res.get('linked_count', 0):,}")
+    table.add_row("Reused Same-URN Resources", f"{res['reused_count']:,}")
     table.add_row("Quarantined Drift Items", f"{res['quarantine_count']:,}")
     table.add_row("Inserted Frequency Rows", f"{res['frequency_rows_count']:,}")
     console.print(table)
@@ -884,8 +837,9 @@ def ingest_undo_cmd(
 
     console.print(
         f"[bold green]Rolled back Batch #{res['batch_id']}:[/bold green] "
-        f"removed [yellow]{res['deleted_core_resources_count']:,}[/yellow] core resource(s) "
-        f"and [yellow]{res['deleted_aliases_count']:,}[/yellow] alias(es)."
+        f"removed [yellow]{res['deleted_core_resources_count']:,}[/yellow] imported resource(s) "
+        f"and [yellow]{res.get('deleted_generated_resources_count', 0):,}[/yellow] "
+        "generated resource(s)."
     )
 
 
@@ -908,9 +862,10 @@ def ingest_list_cmd(
     table.add_column("File Name", style="bold green")
     table.add_column("Format", style="white")
     table.add_column("Status", style="yellow")
-    table.add_column("Created", justify="right", style="magenta")
+    table.add_column("Imported", justify="right", style="magenta")
+    table.add_column("Generated", justify="right", style="green")
+    table.add_column("Linked", justify="right", style="blue")
     table.add_column("Reused", justify="right", style="cyan")
-    table.add_column("Aliases", justify="right", style="blue")
     table.add_column("Created At", style="dim")
 
     for b in batches:
@@ -920,8 +875,9 @@ def ingest_list_cmd(
             b["source_format"],
             b["status"],
             f"{b['created_count']:,}",
+            f"{b.get('generated_count', 0):,}",
+            f"{b.get('linked_count', 0):,}",
             f"{b['reused_count']:,}",
-            f"{b['alias_count']:,}",
             str(b["created_at"] or "")[:19],
         )
     console.print(table)
@@ -950,9 +906,10 @@ def ingest_status_cmd(
     table.add_row("Status", info_dict["status"])
     table.add_row("Source Format", info_dict["source_format"])
     table.add_row("File SHA-256", info_dict["file_sha256"][:24] + "...")
-    table.add_row("Created Core Resources", f"{info_dict['created_count']:,}")
-    table.add_row("Reused Existing Resources", f"{info_dict['reused_count']:,}")
-    table.add_row("Registered URN Aliases", f"{info_dict['alias_count']:,}")
+    table.add_row("Created Imported Resources", f"{info_dict['created_count']:,}")
+    table.add_row("Generated Harmonized Resources", f"{info_dict.get('generated_count', 0):,}")
+    table.add_row("Linked Existing Resources", f"{info_dict.get('linked_count', 0):,}")
+    table.add_row("Reused Same-URN Resources", f"{info_dict['reused_count']:,}")
     table.add_row("Created At", str(info_dict["created_at"] or ""))
     console.print(table)
 
@@ -1233,7 +1190,7 @@ def harmonize_apply_cmd(
         False, "--auto-approve", help="Execute even if review gate is not marked approved."
     ),
 ) -> None:
-    """Apply an approved Harmonization Plan (merges, aliases, elevations, absorptions, groups)."""
+    """Apply an approved Harmonization Plan (non-destructive lineage links & groups)."""
     from fairwddi.ingest.harmonizer import apply_harmonization
 
     configure_django_for_cli()
@@ -1245,9 +1202,10 @@ def harmonize_apply_cmd(
 
     console.print(
         f"[bold green]Applied Harmonization Job [cyan]{res['job_id']}[/cyan]:[/bold green] "
-        f"merged={res['merged_multilingual_count']}, aliased={res['aliased_count']}, "
-        f"elevated={res.get('elevated_count', 0)}, absorbed={res.get('absorbed_count', 0)}, "
-        f"grouped={res.get('grouped_count', 0)}, semantic_links={res['semantic_links_created']}."
+        f"linked_existing={res.get('linked_existing_count', 0)}, "
+        f"generated={res.get('generated_count', 0)}, "
+        f"grouped={res.get('grouped_count', 0)}, "
+        f"semantic_links={res['semantic_links_created']}."
     )
 
 
@@ -1287,19 +1245,19 @@ def harmonize_approve_high_cmd(
     )
 
 
-@harmonize_app.command("elevate")
-def harmonize_elevate_cmd(
+@harmonize_app.command("create")
+def harmonize_create_cmd(
     source_urns: list[str] = typer.Option(
         ...,
         "--source",
         "-s",
-        help="Source study-specific URN(s) to elevate (can specify multiple times).",
+        help="Source imported URN(s) to harmonize (can specify multiple times).",
     ),
     target_urn: str | None = typer.Option(
         None,
         "--target-urn",
         "-t",
-        help="Explicit canonical generic DDI URN (auto-generated with slug randomizer if omitted).",
+        help="Explicit canonical DDI URN (auto-generated if omitted).",
     ),
     resource_type: str | None = typer.Option(
         None,
@@ -1311,7 +1269,7 @@ def harmonize_elevate_cmd(
         None,
         "--name",
         "-n",
-        help="Human-readable label/name for the elevated generic resource.",
+        help="Human-readable label/name for the harmonized resource.",
     ),
     agency: str | None = typer.Option(
         None,
@@ -1319,15 +1277,10 @@ def harmonize_elevate_cmd(
         "-a",
         help="DDI maintenance agency (defaults to DDI_AGENCY or 'fr.cdsp').",
     ),
-    update_references: bool = typer.Option(
-        True,
-        "--update-references/--no-update-references",
-        help="Update relational and junction references across the DDI cascade.",
-    ),
-    retire_sources: bool = typer.Option(
-        True,
-        "--retire-sources/--keep-sources",
-        help="Retire source records from primary entity table while preserving URNAlias.",
+    origin: str = typer.Option(
+        "instantiated",
+        "--origin",
+        help="Resource origin ('instantiated' for admin CLI or 'generated' for automated).",
     ),
     note: str = typer.Option(
         "",
@@ -1335,61 +1288,56 @@ def harmonize_elevate_cmd(
         help="Audit/provenance note.",
     ),
 ) -> None:
-    """Elevate one or more study-specific resources into a generic harmonized resource."""
-    from fairwddi.ingest.harmonizer import elevate_resource
+    """Create a new instantiated or generated harmonized resource from imported resources."""
+    from fairwddi.ingest.harmonizer import create_harmonized_resource
 
     configure_django_for_cli()
     try:
-        res = elevate_resource(
+        res = create_harmonized_resource(
             source_urns=source_urns,
-            generic_urn=target_urn,
+            target_urn=target_urn,
             resource_type=resource_type,
-            generic_name=name,
+            name=name,
             agency=agency,
-            retire_sources=retire_sources,
-            update_references=update_references,
+            origin=origin,
             provenance_note=note,
         )
     except Exception as exc:
-        console.print(f"[bold red]Elevation Error:[/bold red] {exc}")
+        console.print(f"[bold red]Harmonize Create Error:[/bold red] {exc}")
         raise typer.Exit(code=1) from exc
 
-    table = Table(title=f"Elevated Resource Created ({res['resource_type']})", border_style="green")
+    table = Table(
+        title=f"Harmonized Resource Created ({res['resource_type']})",
+        border_style="green",
+    )
     table.add_column("Property", style="bold cyan")
     table.add_column("Value", style="green")
-    table.add_row("Generic URN", f"[bold green]{res['generic_urn']}[/bold green]")
+    table.add_row("Target URN", f"[bold green]{res['target_urn']}[/bold green]")
     table.add_row("Resource Type", res["resource_type"])
-    table.add_row("Registry Status", "[bold cyan]elevated[/bold cyan]")
-    table.add_row("Sources Elevated", str(len(res["source_urns"])))
+    table.add_row("Origin", f"[bold cyan]{res['origin']}[/bold cyan]")
+    table.add_row("Sources Linked", str(len(res["source_urns"])))
     for s_idx, s_urn in enumerate(res["source_urns"], 1):
         table.add_row(f"  • Source #{s_idx}", s_urn)
-    table.add_row("Aliases Created", str(res["aliases_created"]))
-    table.add_row("Semantic Links", str(res["semantic_links_created"]))
-    table.add_row("Retired Sources", str(res["retired_sources"]))
-
-    refs = res.get("updated_references", {})
-    if refs:
-        for ref_k, ref_v in refs.items():
-            table.add_row(f"  ↳ Ref: {ref_k}", f"{ref_v} updated")
+    table.add_row("Lineage Links (prov:wasDerivedFrom)", str(res["semantic_links_created"]))
 
     console.print(table)
     job_id = res["job_id"]
     console.print(f"\n[dim]To revert: [yellow]fairwddi harmonize undo {job_id}[/yellow][/dim]\n")
 
 
-@harmonize_app.command("absorb")
-def harmonize_absorb_cmd(
+@harmonize_app.command("link")
+def harmonize_link_cmd(
     source_urns: list[str] = typer.Option(
         ...,
         "--source",
         "-s",
-        help="Source study-specific URN(s) to absorb (can specify multiple times).",
+        help="Source imported URN(s) to link (can specify multiple times).",
     ),
     into_urn: str = typer.Option(
         ...,
         "--into",
         "-i",
-        help="Target canonical harmonized/elevated URN to absorb into.",
+        help="Target generated/instantiated harmonized URN to link into.",
     ),
     resource_type: str | None = typer.Option(
         None,
@@ -1397,111 +1345,48 @@ def harmonize_absorb_cmd(
         "-T",
         help="Optional DDI resource type. Auto-inferred from into_urn if omitted.",
     ),
-    update_references: bool = typer.Option(
-        True,
-        "--update-references/--no-update-references",
-        help="Update relational references across the DDI cascade to point to into_urn.",
-    ),
-    retire_sources: bool = typer.Option(
-        True,
-        "--retire-sources/--keep-sources",
-        help="Retire source records from primary entity table while preserving URNAlias.",
-    ),
     note: str = typer.Option(
         "",
         "--note",
         help="Audit/provenance note.",
     ),
 ) -> None:
-    """Absorb one or more study resources into an existing harmonized/elevated resource."""
-    from fairwddi.ingest.harmonizer import absorb_resource
+    """Link imported resources to an existing generated or instantiated harmonized resource."""
+    from fairwddi.ingest.harmonizer import link_to_harmonized_resource
 
     configure_django_for_cli()
     try:
-        res = absorb_resource(
+        res = link_to_harmonized_resource(
             source_urns=source_urns,
-            into_urn=into_urn,
+            target_urn=into_urn,
             resource_type=resource_type,
-            retire_sources=retire_sources,
-            update_references=update_references,
             provenance_note=note,
         )
     except Exception as exc:
-        console.print(f"[bold red]Absorption Error:[/bold red] {exc}")
+        console.print(f"[bold red]Harmonize Link Error:[/bold red] {exc}")
         raise typer.Exit(code=1) from exc
 
-    table = Table(title=f"Resource Absorbed into ({res['resource_type']})", border_style="green")
+    table = Table(title=f"Resources Linked ({res['resource_type']})", border_style="green")
     table.add_column("Property", style="bold cyan")
     table.add_column("Value", style="green")
     table.add_row("Target Harmonized URN", f"[bold green]{res['target_urn']}[/bold green]")
+    table.add_row("Target Origin", res["target_origin"])
     table.add_row("Resource Type", res["resource_type"])
-    table.add_row("Sources Absorbed", str(len(res["source_urns"])))
+    table.add_row("Sources Linked", str(len(res["source_urns"])))
     for s_idx, s_urn in enumerate(res["source_urns"], 1):
         table.add_row(f"  • Source #{s_idx}", s_urn)
-    table.add_row("Aliases Created", str(res["aliases_created"]))
-    table.add_row("Semantic Links", str(res["semantic_links_created"]))
-    table.add_row("Retired Sources", str(res["retired_sources"]))
-
-    refs = res.get("updated_references", {})
-    if refs:
-        for ref_k, ref_v in refs.items():
-            table.add_row(f"  ↳ Ref: {ref_k}", f"{ref_v} updated")
+    table.add_row("Lineage Links (prov:wasDerivedFrom)", str(res["semantic_links_created"]))
 
     console.print(table)
     job_id = res["job_id"]
     console.print(f"\n[dim]To revert: [yellow]fairwddi harmonize undo {job_id}[/yellow][/dim]\n")
 
 
-@harmonize_app.command("rename")
-def harmonize_rename_cmd(
-    old_urn: str = typer.Argument(..., help="Current URN to rename/promote."),
-    new_urn: str = typer.Argument(..., help="New canonical generic DDI URN."),
-    resource_type: str | None = typer.Option(
-        None,
-        "--type",
-        "-T",
-        help="DDI resource type (auto-detected from UrnRegistry if omitted).",
-    ),
-    update_references: bool = typer.Option(
-        True,
-        "--update-references/--no-update-references",
-        help="Update relational references across the DDI cascade.",
-    ),
-    note: str = typer.Option(
-        "",
-        "--note",
-        help="Audit/provenance note.",
-    ),
-) -> None:
-    """Atomically rename a resource URN, updating cascade references and creating an alias."""
-    from fairwddi.ingest.harmonizer import migrate_urn
-
-    configure_django_for_cli()
-    try:
-        res = migrate_urn(
-            old_urn=old_urn,
-            new_urn=new_urn,
-            resource_type=resource_type,
-            provenance_note=note,
-        )
-    except Exception as exc:
-        console.print(f"[bold red]Rename Error:[/bold red] {exc}")
-        raise typer.Exit(code=1) from exc
-
-    console.print(
-        f"[bold green]Successfully Renamed URN:[/bold green]\n"
-        f"  • Old: [cyan]{old_urn}[/cyan]\n"
-        f"  • New: [bold green]{res['generic_urn']}[/bold green]\n"
-        f"  • Aliased: [yellow]{res['aliases_created']}[/yellow] | "
-        f"References updated: [yellow]{sum(res.get('updated_references', {}).values())}[/yellow]"
-    )
-
-
 @harmonize_app.command("undo")
 def harmonize_undo_cmd(
     job_id: str = typer.Argument(..., help="Harmonization job_id to revert."),
 ) -> None:
-    """Revert an applied Harmonization Job or Elevation Job using EventLog snapshots."""
+    """Revert an applied Harmonization Job using EventLog snapshots."""
     from fairwddi.ingest.harmonizer import undo_harmonization
 
     configure_django_for_cli()
@@ -1511,14 +1396,9 @@ def harmonize_undo_cmd(
         console.print(f"[bold red]Harmonize Undo Error:[/bold red] {exc}")
         raise typer.Exit(code=1) from exc
 
-    restored = res.get("restored_sources", res.get("restored_targets", 0))
-    tgt_info = (
-        f", rolled back target [cyan]{res['target_urn']}[/cyan]" if res.get("is_absorption") else ""
-    )
     console.print(
         f"[bold green]Reverted Job [cyan]{res['job_id']}[/cyan]:[/bold green] "
-        f"restored {restored} resource(s){tgt_info}, "
-        f"removed {res.get('removed_aliases', 0)} alias(es)."
+        f"removed {res.get('removed_semantic_links', 0)} semantic link(s)."
     )
 
 

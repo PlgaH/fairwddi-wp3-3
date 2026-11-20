@@ -1,23 +1,30 @@
 """FAIRwDDI Phase 2 Ingestion Package (`fairwddi.ingest`).
 
-Provides a direct file-to-core-tables, review-gated ingestion and harmonization pipeline:
+Provides a non-destructive, origin-aware, review-gated ingestion and harmonization pipeline:
 1. `preflight`: Readiness check (`run_preflight_check`), profiles, and DDI-C -> DDI-L upgrade.
 2. `ingest` (`loader`): Direct streaming ingestion (`plan_ingestion`, `apply_ingestion`),
    `IngestBatch` receipts (`list_ingest_batches`, `get_ingest_batch_status`), and `undo_ingestion`.
-3. `compare`: Cross-survey similarity (`compare_batch`) and discovery (`discover_candidates`).
-4. `harmonize`: Review-gated harmonization (`plan_harmonization`, `apply_harmonization`, `undo`).
+3. `compare`: Two-tier origin-prioritized comparison (`compare_batch`, `discover_candidates`,
+   `find_best_match_for_incoming`).
+4. `harmonize`: Non-destructive harmonization (`plan_harmonization`, `apply_harmonization`,
+   `create_harmonized_resource`, `link_to_harmonized_resource`, `undo_harmonization`).
 5. `pipeline`: End-to-end convenience runner (`run_ingestion_pipeline`).
 """
 
 from __future__ import annotations
 
-from fairwddi.ingest.comparator import compare_batch, discover_candidates
+from fairwddi.ingest.comparator import (
+    HARMONIZABLE_RESOURCE_TYPES,
+    build_comparison_record,
+    compare_batch,
+    discover_candidates,
+    find_best_match_for_incoming,
+)
 from fairwddi.ingest.detector import MetadataFormatInfo, compute_file_sha256, detect_metadata_format
 from fairwddi.ingest.harmonizer import (
-    absorb_resource,
     apply_harmonization,
-    elevate_resource,
-    migrate_urn,
+    create_harmonized_resource,
+    link_to_harmonized_resource,
     plan_harmonization,
     undo_harmonization,
 )
@@ -77,13 +84,15 @@ __all__ = [
     "undo_ingestion",
     "list_ingest_batches",
     "get_ingest_batch_status",
+    "HARMONIZABLE_RESOURCE_TYPES",
+    "build_comparison_record",
+    "find_best_match_for_incoming",
     "compare_batch",
     "discover_candidates",
     "plan_harmonization",
     "apply_harmonization",
-    "elevate_resource",
-    "absorb_resource",
-    "migrate_urn",
+    "create_harmonized_resource",
+    "link_to_harmonized_resource",
     "undo_harmonization",
     "run_ingestion_pipeline",
 ]

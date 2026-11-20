@@ -28,7 +28,7 @@ class QuestionItem(DDIResource):
 
     scheme = models.ForeignKey(
         QuestionScheme,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="questions",
@@ -37,7 +37,7 @@ class QuestionItem(DDIResource):
     )
     code_list = models.ForeignKey(
         "fairwddi.CodeList",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="question_items",
@@ -169,7 +169,7 @@ class Category(DDIResource):
 
     scheme = models.ForeignKey(
         CategoryScheme,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="categories",
@@ -178,7 +178,7 @@ class Category(DDIResource):
     )
     concept = models.ForeignKey(
         Concept,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="categories",
@@ -193,7 +193,7 @@ class Category(DDIResource):
     )
     parent = models.ForeignKey(
         "self",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="children",
@@ -265,7 +265,7 @@ class CodeList(DDIResource):
     )
     scheme = models.ForeignKey(
         CategoryScheme,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="code_lists",
@@ -299,7 +299,7 @@ class Code(DDIIdentifiable):
 
     code_list = models.ForeignKey(
         CodeList,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="codes",
@@ -307,7 +307,7 @@ class Code(DDIIdentifiable):
     )
     category = models.ForeignKey(
         Category,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="code_memberships",
@@ -322,7 +322,7 @@ class Code(DDIIdentifiable):
     )
     parent = models.ForeignKey(
         "self",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="children",
@@ -408,7 +408,7 @@ class RepresentedVariable(DDIResource):
 
     scheme = models.ForeignKey(
         RepresentedVariableScheme,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="represented_variables",
@@ -417,7 +417,7 @@ class RepresentedVariable(DDIResource):
     )
     conceptual_variable = models.ForeignKey(
         ConceptualVariable,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="represented_variables",
@@ -426,7 +426,7 @@ class RepresentedVariable(DDIResource):
     )
     code_list = models.ForeignKey(
         CodeList,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="represented_variables",
@@ -491,13 +491,13 @@ class QuestionVariable(models.Model):
 
     question_item = models.ForeignKey(
         QuestionItem,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="variable_associations",
         db_column="question_item_urn",
     )
     represented_variable = models.ForeignKey(
         RepresentedVariable,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="question_associations",
         db_column="represented_variable_urn",
     )

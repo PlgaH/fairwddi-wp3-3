@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -504,6 +504,10 @@ class UrnRegistrySchema(BaseModel):
         ...,
         description="Target resource type (e.g. 'QuestionItem', 'Category', 'ExternalConcept').",
     )
+    origin: Literal["imported", "generated", "instantiated"] = Field(
+        default="instantiated",
+        description="Resource origin category: 'imported', 'generated', or 'instantiated'.",
+    )
     status: str = Field(
         default="active",
         description="Publication or lifecycle status (e.g. 'active', 'deprecated').",
@@ -563,6 +567,8 @@ class IngestBatchSchema(BaseModel):
     status: str = "completed"
     options: dict[str, Any] = Field(default_factory=dict)
     created_urns: list[str] = Field(default_factory=list)
+    generated_urns: list[str] = Field(default_factory=list)
+    linked_urns: list[str] = Field(default_factory=list)
     reused_urns: list[str] = Field(default_factory=list)
     created_aliases: list[str] = Field(default_factory=list)
     stats: dict[str, Any] = Field(default_factory=dict)
