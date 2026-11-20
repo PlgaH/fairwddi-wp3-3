@@ -700,12 +700,13 @@ def find_best_match_for_incoming(
     """Find the highest-priority harmonization match for an incoming resource record.
 
     Priority rules:
-    1. Tier 1 (`origin in ('generated', 'instantiated')`):
-       Always evaluated first. If any match qualifies for `link_existing`, return the
+
+    1. Tier 1 (``origin in ('generated', 'instantiated')``):
+       Always evaluated first. If any match qualifies for ``link_existing``, return the
        highest-confidence match immediately without evaluating Tier 2.
-    2. Tier 2 (`origin == 'imported'` with empty `harmonized_targets`):
-       Evaluated ONLY if Tier 1 yields no match. If matched, returns a `generate_harmonized`
-       candidate proposing a new `generated` URN that unites both `imported` resources.
+    2. Tier 2 (``origin == 'imported'`` with empty ``harmonized_targets``):
+       Evaluated ONLY if Tier 1 yields no match. If matched, returns a ``generate_harmonized``
+       candidate proposing a new ``generated`` URN that unites both ``imported`` resources.
     """
     r_type = incoming_rec["resource_type"]
     inc_urn = incoming_rec["urn"]

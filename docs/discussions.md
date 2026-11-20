@@ -265,112 +265,90 @@ The interactive explorer web application (`fairwddi explore` / `fairwddi serve`)
 
 ---
 
-## Topic 5: Resource Elevation & Absorption Helpers (`fairwddi harmonize elevate` & `fairwddi harmonize absorb`)
+## Topic 5: Non-Destructive Resource Harmonization & Lineage Helpers (`fairwddi harmonize create` & `fairwddi harmonize link`)
 
 ### Context & Need
-During metadata ingestion, incoming DDI files mint study-specific URNs anchored to their source dataset (e.g. `urn:ddi:fr.cdsp:elipss_2015_w1.q01:1.0.0`). When an archivist harmonizes questions, variables, or response domains across multiple survey waves or studies, elevating them into a generic, cross-study resource should not retain a study-specific URN, as that causes confusion (e.g., a generic question in a 2024 study appearing to depend on an ELIPSS 2015 wave identifier).
+During metadata ingestion, incoming DDI files mint study-specific URNs anchored to their source dataset (e.g. `urn:ddi:fr.cdsp:elipss_2015_w1.q01:1.0.0`). Under the non-destructive DDI architecture:
+- Every resource is categorized with a persistent `origin`: `imported` (raw ingestion from file), `generated` (synthesized by code or an agent), or `instantiated` (curated by an archivist via CLI/API).
+- Incoming metadata is **never absorbed or overwritten**; incoming resources always preserve their distinct identity and are never deleted.
+- Lineage between resources is explicitly tracked using standard W3C PROV-O predicates (`prov:wasDerivedFrom`).
+- Referential integrity is protected: a resource that is referenced by another resource cannot be deleted.
 
-Furthermore, in longitudinal studies, questions and variables are frequently recognized as harmonizable at different points in time:
-1. **Initial Harmonization (Elevation):** An archivist compares waves 1 and 2, recognizes two study-specific questions are identical/equivalent, and creates a **brand-new generic resource** (`generic_urn`).
-2. **Subsequent Harmonization (Absorption):** At a later time (e.g. upon ingesting wave 3, or discovering an unlinked wave), the archivist finds another study item that belongs to the *already existing* harmonized resource. The archivist needs to **absorb** the new study item into the existing generic resource, merging any new language translations or instructions, updating provenance, repointing references, and retiring the source.
+In longitudinal studies, questions and variables are harmonized through a two-tier matching hierarchy:
+1. **Tier 1 (Link to Curated Resource):** When an incoming imported resource matches an existing `generated` or `instantiated` resource, it is linked directly to that target via `prov:wasDerivedFrom`, enriching any missing language translations.
+2. **Tier 2 (Harmonize Two Imported Resources):** If no generated/instantiated candidate exists, but two or more `imported` resources match, a brand-new `generated` harmonized resource is created, with both source items linked to it via `prov:wasDerivedFrom`.
 
 ```mermaid
 flowchart TD
-    subgraph Elevation ["Initial Elevation Workflow (fairwddi harmonize elevate)"]
-        S1["Wave 1 Question\n(elipss.2015.q01)"] & S2["Wave 2 Question\n(elipss.2016.q01)"]
-        S1 & S2 -->|Multilingual Fusion| GenQI["Brand-New Harmonized Question\n(QI-trust-national-assembly-4f2a)\nstatus = elevated"]
-        S1 & S2 -->|URNAlias| GenQI
-        S1 & S2 -->|UrnRegistry| Ret1["status = superseded"]
+    subgraph Tier2 ["Tier 2: Harmonize Imported Resources (fairwddi harmonize create)"]
+        S1["Wave 1 Question\n(elipss.2015.q01)\norigin = imported"] & S2["Wave 2 Question\n(elipss.2016.q01)\norigin = imported"]
+        GenQI["Harmonized Question\n(QI-trust-national-assembly-4f2a)\norigin = generated"]
+        GenQI -->|prov:wasDerivedFrom| S1
+        GenQI -->|prov:wasDerivedFrom| S2
     end
 
-    subgraph Absorption ["Subsequent Absorption Workflow (fairwddi harmonize absorb)"]
-        S3["Wave 3 Question\n(elipss.2017.q01)\n(Brings Spanish text)"] -->|Absorb into Existing| GenQI
-        GenQI -->|Updated Content| GenQI2["Harmonized Question Updated\n• Merged Spanish translation\n• Recalculated SHA-256 hash\n• Provenance audit recorded"]
-        S3 -->|URNAlias| GenQI2
-        S3 -->|UrnRegistry| Ret2["status = superseded"]
+    subgraph Tier1 ["Tier 1: Link to Existing Target (fairwddi harmonize link)"]
+        S3["Wave 3 Question\n(elipss.2017.q01)\n(Brings Spanish text)\norigin = imported"]
+        GenQI -->|Updated Content| GenQI2["Harmonized Question Updated\n• Merged Spanish translation\n• Recalculated SHA-256 hash\n• Non-destructive lineage audit"]
+        GenQI2 -->|prov:wasDerivedFrom| S3
     end
 ```
 
 ### Application-Level Helper Strategy
 
-#### 1. Elevation Workflow (`fairwddi harmonize elevate`)
-- **Creation of a Brand-New Generic Resource:**
-  - Rather than mutating an existing study record in-place, creates a new canonical resource with an elevated generic URN (e.g. `urn:ddi:fr.cdsp:QI-trust-national-assembly-7f4c:1.0.0` or `CV-political-trust`).
+#### 1. Creation Workflow (`fairwddi harmonize create`)
+- **Creation of a Brand-New Generated Resource:**
+  - Creates a new canonical resource with origin `generated` (or `instantiated`) and an elevated generic URN (e.g. `urn:ddi:fr.cdsp:QI-trust-national-assembly-7f4c:1.0.0`).
   - Supports explicit valid canonical DDI URNs or an automated slug-based randomized URN generator (`generate_generic_urn`).
   - Fuses multilingual labels, question texts, and descriptions from all source items, recomputing canonical SHA-256 digests.
-  - Registers the new URN in `UrnRegistry` with `status = 'elevated'` and structured provenance in `extended_attributes`.
-- **Source URN Aliasing & Retirement:**
-  - Each source study-specific URN is registered in `URNAlias` (`alias_urn -> canonical_urn`).
-  - Source URNs in `UrnRegistry` are updated to `status = 'superseded'`.
-  - Source records in the primary entity table are retired (by default) to keep the active catalog clean.
-- **Reference Pointer Consolidation:**
-  - Relational pointers across the DDI cascade (`QuestionVariable`, `InstrumentQuestion`, `RepresentedVariable`, `InstanceVariable`, `Code`, `Category`, `Concept`) are updated to point to `generic_urn`.
-  - Historical JSONB references (`IngestBatch.created_urns`, `EventLog.event_data`, `MetadataQuarantine`, `extended_attributes`) resolve cleanly through `URNAlias` without destructive document rewriting.
+  - Registers the new URN in `UrnRegistry` with `origin = 'generated'` and structured provenance in `extended_attributes`.
+- **W3C Lineage Tracking (`prov:wasDerivedFrom`):**
+  - Records semantic derivation links in `SemanticRelationship` (`subject_urn = generated_urn`, `predicate = 'prov:wasDerivedFrom'`, `object_urn = source_urn`).
+  - Source `imported` resources remain fully preserved and active in their primary entity tables without mutation.
 
-#### 2. Absorption Workflow (`fairwddi harmonize absorb`)
-- **Target Integrity & In-Place Enrichment:**
-  - Absorbs one or more source items into an *already existing* canonical harmonized resource (`into_urn`).
-  - Performs dynamic multilingual fusion: any new translations (e.g. Spanish text on a previously French/English question), interviewer instructions, or extended attributes are merged into the existing target entity.
+#### 2. Link Workflow (`fairwddi harmonize link`)
+- **Target Integrity & In-Place Multilingual Enrichment:**
+  - Links an imported source item into an *already existing* canonical harmonized resource (`target_urn`).
+  - Performs dynamic multilingual fusion: any new translations (e.g. Spanish text on a previously French/English question) or interviewer instructions are merged into the target entity.
   - Recomputes SHA-256 content hashes for the target entity.
-  - Records structured absorption provenance (`job_id`, `absorbed_urns`, `note`) in both `target_obj.extended_attributes` and `UrnRegistry.extended_attributes`.
-- **Reference Repointing & Source Retirement:**
-  - Any references pointing to the absorbed sources are repointed to `into_urn` across the DDI cascade.
-  - Absorbed source URNs are aliased to `into_urn` in `URNAlias` and set to `status = 'superseded'` in `UrnRegistry`.
-- **Target-Preserving Undo (`fairwddi harmonize undo <job_id>`):**
-  - Standard elevation undo deletes the generic entity.
-  - Absorption undo **preserves the target entity**, rolling it back to its exact pre-absorption attribute state (stripping the absorbed translations/instructions and restoring original hashes), re-creating the retired source items, restoring their active status, and repointing references back.
+  - Records structured provenance in both `target_obj.extended_attributes` and `UrnRegistry.extended_attributes`.
+- **W3C Provenance Edge:**
+  - Records `prov:wasDerivedFrom` in `SemanticRelationship` targeting the source item.
+  - Source `imported` items remain intact and active.
 
-#### 3. Single-Resource Promotion & Migration (`fairwddi harmonize rename`)
-- Atomically renames a study-specific or legacy URN to a clean canonical URN, updating all cascade references and creating an alias in `URNAlias`.
-
-#### 4. Declarative Plan Actions, Wording Curation & Shared-Stem Question Grids
-- **Target-Aware `elevate` & `absorb` in `.harmonize.plan.yaml`:**
-  - `discover_candidates` and `build_harmonization_plan` inspect whether either resource in a candidate pair is already an elevated generic entity (`UrnRegistry.status == 'elevated'` or `is_elevated: True` in `extended_attributes`).
-  - If the target is already elevated, the plan recommends `action: "absorb"` (enriching the existing canonical resource in-place). If both are study-specific, it recommends `action: "elevate"` (or `action: "alias"` for exact/near-exact equivalence).
-- **Stratified Similarity & Wording Curation (`requires_review: true`):**
-  - `NEAR_EXACT`: Terminal punctuation variants (e.g., trailing `?` or spacing before `?`) and high sequence similarity ($\ge 0.98$).
-  - `INCLUSIVE_WRITING_VARIANT` & `PHRASING_VARIANT`: Inclusive markers (`"confronté(e)"` vs. `"confronté"`) and stylistic shifts (`"Je refuse de répondre"` vs. `"Refuse de répondre"`). Keeps the default wording on `question_text`/`label` and preserves alternate phrasings in `extended_attributes` (`type: "wording_variant"`).
-  - `TYPOGRAPHICAL_VARIANT`: Grammatical/typographical errors (`"Ma mère..."` vs. `"Mon mère..."`). Keeps the valid wording on the canonical field and drops `discarded_variants` while preserving the source URN in `URNAlias`.
-- **Shared-Stem Question Grids (`SHARED_STEM_GRID` & Generic `Group`):**
-  - Questions, categories, or variables sharing a common stem followed by distinct choices/sub-items (e.g., `"Êtes-vous confronté(e) à un ou plusieurs des problèmes suivants concernant votre quartier ? Manque d'espaces verts"` vs. `"... ? Manque de sécurité"`) are classified as `SHARED_STEM_GRID` (`action: "group"`, `requires_review: true`).
-  - Executing `group` creates or updates a generic `Group` entity (`request_ddi_group` with `group_type="question_grid"`, Shared stem in `description`, and sub-item metadata in `extended_attributes`) and records `ddi:inGroup` relationships in `SemanticRelationship`.
+#### 3. Target-Preserving Undo (`fairwddi harmonize undo <job_id>`)
+- If a generated target resource is subsequently referenced by external dependencies or subsequent waves, undo fails fast or preserves the target while safely unwinding the derivation links for the undone batch.
 
 ### CLI Interface Summary
 
 ```bash
-# 1. Elevate two study questions into a new harmonized QuestionItem (auto-slug generated)
-uv run fairwddi harmonize elevate \
+# 1. Create a harmonized QuestionItem from two imported study questions
+uv run fairwddi harmonize create \
   -s urn:ddi:fr.cdsp:elipss.2015.q01:1.0.0 \
   -s urn:ddi:fr.cdsp:elipss.2016.q01:1.0.0 \
   --name "Trust in National Assembly"
 
-# 2. Elevate with an explicit canonical target URN
-uv run fairwddi harmonize elevate \
+# 2. Create with an explicit canonical target URN
+uv run fairwddi harmonize create \
   -s urn:ddi:fr.cdsp:elipss.2015.q01:1.0.0 \
   -s urn:ddi:fr.cdsp:elipss.2016.q01:1.0.0 \
   -t urn:ddi:fr.cdsp:QI-trust-national-assembly:1.0.0
 
-# 3. Absorb a newly ingested 2017 wave question into the existing harmonized QuestionItem
-uv run fairwddi harmonize absorb \
+# 3. Link a newly ingested 2017 wave question into the existing harmonized QuestionItem
+uv run fairwddi harmonize link \
   -s urn:ddi:fr.cdsp:elipss.2017.q01:1.0.0 \
-  -i urn:ddi:fr.cdsp:QI-trust-national-assembly:1.0.0 \
-  --note "Wave 3 longitudinal absorption"
+  -t urn:ddi:fr.cdsp:QI-trust-national-assembly:1.0.0 \
+  --note "Wave 3 longitudinal linkage"
 
-# 4. Atomically rename/promote a legacy resource URN
-uv run fairwddi harmonize rename \
-  urn:ddi:fr.cdsp:legacy_q1:1.0.0 \
-  urn:ddi:fr.cdsp:QI-canonical-trust:1.0.0
-
-# 5. Rollback an elevation or absorption job
-uv run fairwddi harmonize undo elevate-questionitem-7f2a1b
-uv run fairwddi harmonize undo absorb-questionitem-9a0257
+# 4. Rollback a harmonization job
+uv run fairwddi harmonize undo harm-questionitem-7f2a1b
 ```
 
 ### Key Discussion Questions for the Team
-1. Should superseded study-specific records remain in the database marked as `status = 'superseded'` in `UrnRegistry`, or should they be cleaned from primary tables to minimize active catalog clutter?
+1. Should `generated` harmonized resources created automatically during batch ingestion be presented for mandatory review by archivists before being published to public discovery?
 2. What slug patterns should be standardized for generic resources across the agency (e.g., `QI-{slug}-{rand}` vs. `{agency}.generic.QI.{slug}`)?
-3. For archivist workflows, should elevation and absorption be suggested as recommended actions in `fairwddi harmonize plan` when similarity candidates are discovered?
-4. When absorption enriches a target resource with a new language translation, should the target resource increment its version (`1.0.0` $\rightarrow$ `1.1.0`), or remain unchanged with provenance stored in `extended_attributes`?
+3. For archivist workflows, what thresholds of similarity should recommend `link_existing` vs `generate_harmonized` actions in `fairwddi harmonize plan`?
+4. When linkage enriches a target resource with a new language translation, should the target resource increment its version (`1.0.0` $\rightarrow$ `1.1.0`), or remain unchanged with provenance stored in `extended_attributes`?
 
 ---
 
@@ -382,5 +360,5 @@ uv run fairwddi harmonize undo absorb-questionitem-9a0257
 - [ ] **Topic 3:** Validate DDI-C $\rightarrow$ DDI-L synthetic URN naming convention (`urn:ddi:fr.cdsp:{type}:{study_id}:{name}:1.0.0`) and how DDI-C files bridge to DDI-L canonical objects.
 - [ ] **Topic 3:** Standardize versioning policy (`:1.0.0` vs `:3.0.0`) for newly synthesized ReQuest canonical entities.
 - [ ] **Topic 4:** Schedule demonstration of the Question Bank Explorer for consortium partners.
-- [ ] **Topic 5:** Align on archivist elevation & absorption workflows (`fairwddi harmonize elevate`, `fairwddi harmonize absorb`), generic URN slug conventions, and target versioning policies.
+- [ ] **Topic 5:** Review two-tier harmonization matching (`generate_harmonized`, `link_existing`), W3C `prov:wasDerivedFrom` lineage, and archivist curation CLI (`fairwddi harmonize create`, `fairwddi harmonize link`).
 

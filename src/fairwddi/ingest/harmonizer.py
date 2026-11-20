@@ -1,6 +1,7 @@
 """Stage 3b (Harmonization & Lineage): Non-destructive, origin-aware harmonization & undo.
 
 Supports:
+
 - Linking ``imported`` resources into existing ``generated`` or ``instantiated`` resources
   (``link_to_harmonized_resource``) while enriching metadata (alternate spellings, languages).
 - Creating new ``generated`` or ``instantiated`` harmonized resources from ``imported``
@@ -446,8 +447,10 @@ def _copy_codelist_structure(
     from fairwddi.models import Category, CodeItem, SemanticRelationship
 
     created_code_urns: list[str] = []
-    for ci in CodeItem.objects.filter(code_list=source_cl).select_related("category").order_by(
-        "order", "code_value"
+    for ci in (
+        CodeItem.objects.filter(code_list=source_cl)
+        .select_related("category")
+        .order_by("order", "code_value")
     ):
         target_cat = ci.category
         if target_cat is not None:
@@ -800,9 +803,7 @@ def create_harmonized_resource(
                 merged_ext = _append_unique_ext_attrs(merged_ext, qt_vars)
     else:
         lbl_items = [
-            (s.urn, getattr(s, "label", None))
-            for s in ordered_sources
-            if getattr(s, "label", None)
+            (s.urn, getattr(s, "label", None)) for s in ordered_sources if getattr(s, "label", None)
         ]
         if lbl_items or canonical_text:
             prefer_list = any(isinstance(getattr(s, "label", None), list) for s in ordered_sources)
@@ -964,8 +965,10 @@ def plan_harmonization(
         act_type = cand["recommended_action"]
         details = dict(cand["details"])
         if act_type == "generate_harmonized" and "generated_urn" not in details:
-            slug_seed = details.get("canonical_text") or details.get("source_text") or details.get(
-                "source_name"
+            slug_seed = (
+                details.get("canonical_text")
+                or details.get("source_text")
+                or details.get("source_name")
             )
             if isinstance(slug_seed, dict):
                 slug_seed = (

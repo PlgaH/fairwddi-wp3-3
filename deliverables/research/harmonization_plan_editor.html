@@ -724,6 +724,8 @@
       text-transform: uppercase;
       font-family: var(--font-mono);
     }
+    .act-generate_harmonized { background: rgba(139, 92, 246, 0.2); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.4); }
+    .act-link_existing { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
     .act-elevate { background: rgba(139, 92, 246, 0.2); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.4); }
     .act-absorb { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
     .act-group { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); }
@@ -1119,11 +1121,11 @@
 
         <div class="kpi-card">
           <div class="kpi-header">
-            <span>Elevate / Absorb</span>
+            <span>Harmonized / Linked</span>
             <span style="color: var(--accent-purple);">⚡</span>
           </div>
           <div class="kpi-num" style="color: var(--accent-purple);" id="kpi-elevate-absorb">0</div>
-          <div style="font-size: 11px; color: var(--text-dim);">Canonical promotion</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Non-destructive synthesis</div>
         </div>
 
         <div class="kpi-card">
@@ -1160,8 +1162,8 @@
           <!-- Action Filters -->
           <div class="filter-chips" style="border-left: 1px solid var(--border); padding-left: 8px;">
             <span class="chip active" onclick="setFilterAction('all', this)">All Actions</span>
-            <span class="chip" onclick="setFilterAction('elevate', this)">Elevate</span>
-            <span class="chip" onclick="setFilterAction('absorb', this)">Absorb</span>
+            <span class="chip" onclick="setFilterAction('generate_harmonized', this)">Create Harmonized</span>
+            <span class="chip" onclick="setFilterAction('link_existing', this)">Link Target</span>
             <span class="chip" onclick="setFilterAction('group', this)">Group (Grid)</span>
             <span class="chip" onclick="setFilterAction('alias', this)">Alias</span>
             <span class="chip" onclick="setFilterAction('merge_multilingual', this)">Merge</span>
@@ -1306,8 +1308,8 @@
 
         <div style="font-size: 11px; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;">
           <strong>Quick CLI Reference:</strong>
-          <div>• <code>uv run fairwddi harmonize elevate -s &lt;src1&gt; -s &lt;src2&gt; -n "Generic Name"</code> — Elevate into canonical bank entity</div>
-          <div>• <code>uv run fairwddi harmonize absorb -s &lt;src&gt; -i &lt;into_urn&gt;</code> — Absorb wave into existing elevated resource</div>
+          <div>• <code>uv run fairwddi harmonize create -s &lt;src1&gt; -s &lt;src2&gt; -n "Generic Name"</code> — Create new generated harmonized bank entity</div>
+          <div>• <code>uv run fairwddi harmonize link -s &lt;src&gt; -t &lt;target_urn&gt;</code> — Link incoming wave into existing generated/instantiated resource</div>
           <div>• <code>uv run fairwddi harmonize approve-high &lt;plan.yaml&gt; -t 0.95</code> — Triage & auto-approve top-tier matches</div>
           <div>• <code>uv run fairwddi harmonize undo &lt;job_id&gt;</code> — Roll back entire transaction via EventLog snapshots</div>
         </div>
@@ -1642,8 +1644,10 @@
 
         // Action Filter
         if (filterAction !== "all") {
-          if (filterAction === "elevate" && a.action !== "elevate") return false;
-          if (filterAction === "absorb" && a.action !== "absorb") return false;
+          if (filterAction === "generate_harmonized" && a.action !== "generate_harmonized" && a.action !== "elevate") return false;
+          if (filterAction === "link_existing" && a.action !== "link_existing" && a.action !== "absorb") return false;
+          if (filterAction === "elevate" && a.action !== "elevate" && a.action !== "generate_harmonized") return false;
+          if (filterAction === "absorb" && a.action !== "absorb" && a.action !== "link_existing") return false;
           if (filterAction === "group" && a.action !== "group") return false;
           if (filterAction === "alias" && a.action !== "alias") return false;
           if (filterAction === "merge_multilingual" && a.action !== "merge_multilingual") return false;
@@ -1756,7 +1760,7 @@
       const facetExactCount = actions.filter(a => a.match_type === "FACET_EXACT" || a.match_type === "EXACT" || a.confidence >= 0.95).length;
       const gridCount = actions.filter(a => a.match_type === "SHARED_STEM_GRID" || a.action === "group").length;
       const variantCount = actions.filter(a => isVariantMatchType(a.match_type)).length;
-      const elevAbsorbCount = actions.filter(a => a.action === "elevate" || a.action === "absorb").length;
+      const elevAbsorbCount = actions.filter(a => a.action === "generate_harmonized" || a.action === "link_existing" || a.action === "elevate" || a.action === "absorb").length;
 
       document.getElementById("kpi-total").textContent = total.toLocaleString();
       const thresh = currentPlan.summary?.threshold || minConfidence;
@@ -1880,8 +1884,8 @@
           <td style="font-family: var(--font-mono); font-weight: 600; color: var(--text-muted);">${escapeHtml(item.id)}</td>
           <td>
             <select class="field-select" style="padding: 2px 6px; font-size: 11px; font-weight: 600;" onchange="changeItemAction('${item.id}', this.value)">
-              <option value="elevate" ${item.action === 'elevate' ? 'selected' : ''}>elevate (Canonical)</option>
-              <option value="absorb" ${item.action === 'absorb' ? 'selected' : ''}>absorb (Into elevated)</option>
+              <option value="generate_harmonized" ${item.action === 'generate_harmonized' || item.action === 'elevate' ? 'selected' : ''}>generate_harmonized (Create)</option>
+              <option value="link_existing" ${item.action === 'link_existing' || item.action === 'absorb' ? 'selected' : ''}>link_existing (Link)</option>
               <option value="group" ${item.action === 'group' ? 'selected' : ''}>group (Question Grid)</option>
               <option value="alias" ${item.action === 'alias' ? 'selected' : ''}>alias (URNAlias)</option>
               <option value="harmonize" ${item.action === 'harmonize' ? 'selected' : ''}>harmonize (General)</option>
@@ -2152,8 +2156,8 @@
           <div class="field-group">
             <label class="field-label">Harmonization Action</label>
             <select class="field-select" id="ins-action">
-              <option value="elevate" ${item.action === 'elevate' ? 'selected' : ''}>elevate (Elevate into generic canonical entity)</option>
-              <option value="absorb" ${item.action === 'absorb' ? 'selected' : ''}>absorb (Absorb into existing elevated canonical entity)</option>
+              <option value="generate_harmonized" ${item.action === 'generate_harmonized' || item.action === 'elevate' ? 'selected' : ''}>generate_harmonized (Create new harmonized entity)</option>
+              <option value="link_existing" ${item.action === 'link_existing' || item.action === 'absorb' ? 'selected' : ''}>link_existing (Link to existing harmonized target)</option>
               <option value="group" ${item.action === 'group' ? 'selected' : ''}>group (Group into Question Grid / shared stem)</option>
               <option value="alias" ${item.action === 'alias' ? 'selected' : ''}>alias (Register URNAlias & re-point references)</option>
               <option value="harmonize" ${item.action === 'harmonize' ? 'selected' : ''}>harmonize (General canonical harmonization)</option>

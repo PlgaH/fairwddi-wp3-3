@@ -575,48 +575,47 @@ sequenceDiagram
 
 ---
 
-### 6.2 Canonical Elevation, Absorption & Long-Term Provenance
+### 6.2 Non-Destructive Two-Tier Harmonization & W3C Provenance DAG
 
-In longitudinal survey programmes and question banks, question wordings and variables migrate across two distinct lifecycle phases:
+In longitudinal survey programmes and question banks, question wordings and variables migrate across two distinct lifecycle phases without ever mutating or retiring historical study records:
 
 ```mermaid
 flowchart LR
-    subgraph Wave12 ["Wave 1 & Wave 2 Ingested"]
-        W1["elipss.2013.q01"]
-        W2["elipss.2014.q01"]
+    subgraph Wave12 ["Wave 1 & Wave 2 Ingested (origin: imported)"]
+        W1["elipss.2013.q01\n(origin: imported)"]
+        W2["elipss.2014.q01\n(origin: imported)"]
     end
 
-    subgraph Elevation ["Elevation Phase (fairwddi harmonize elevate)"]
-        W1 & W2 -->|Multilingual Merge| BankQI["Canonical Bank Resource\nQI-trust-institutions:1.0.0\n(UrnRegistry: elevated)"]
-        W1 & W2 -->|Aliases| BankQI
-        W1 & W2 -.->|Retire| Sup1["UrnRegistry: superseded"]
+    subgraph Generation ["Harmonization Phase (fairwddi harmonize create / Tier 2 match)"]
+        BankQI["Harmonized Bank Resource\nQI-trust-institutions:1.0.0\n(origin: generated)"]
+        BankQI -->|prov:wasDerivedFrom| W1
+        BankQI -->|prov:wasDerivedFrom| W2
     end
 
-    subgraph Absorption ["Later Absorption Phase (fairwddi harmonize absorb)"]
-        W3["Wave 3 Ingested Later\nelipss.2015.q01\n(brings new translations)"] -->|Absorb into Existing| BankQI
-        BankQI -->|Enriched Target| BankQI2["Canonical Bank Resource\n• Multilingual text fused\n• Hashes updated\n• Provenance recorded"]
-        W3 -->|Alias| BankQI2
-        W3 -.->|Retire| Sup2["UrnRegistry: superseded"]
+    subgraph Linkage ["Later Survey Waves (Tier 1 match / fairwddi harmonize link)"]
+        W3["Wave 3 Ingested Later\nelipss.2015.q01\n(origin: imported)"]
+        BankQI2["Enriched Bank Resource\n• Multilingual text fused\n• Alternate spellings preserved\n(wording_variant)"]
+        BankQI2 -->|prov:wasDerivedFrom| W3
+        BankQI2 -.->|Derives from all waves| W1 & W2
     end
 ```
 
-#### 1. Elevation (`fairwddi harmonize elevate`)
+#### 1. Harmonized Resource Creation (`generate_harmonized` / `fairwddi harmonize create`)
 
-- When two or more study-specific questions/variables are identified as equivalent across waves, an archivist elevates them into a **brand-new generic resource** with a canonical bank URN (e.g. `urn:ddi:fr.cdsp:QI-trust-institutions:1.0.0`).
-- The generic entity fuses multilingual labels, question texts, and instructions across sources, recalculates SHA-256 content hashes, and registers in `UrnRegistry` with `status = 'elevated'`.
-- All active relational pointers across the DDI cascade (`QuestionVariable`, `InstrumentQuestion`, `RepresentedVariable`, `InstanceVariable`, etc.) are repointed to the new generic URN.
-- The original study URNs are recorded in `URNAlias` (`alias_urn -> canonical_urn`) and marked as `superseded` in `UrnRegistry`.
+- When two or more study-specific questions/variables are identified as equivalent across waves, the harmonizer unites them into a **new harmonized resource** with a canonical bank URN (e.g. `urn:ddi:fr.cdsp:QI-trust-institutions:1.0.0`).
+- The harmonized entity fuses multilingual labels, question texts, and instructions across sources, recalculates SHA-256 content hashes, and registers in `UrnRegistry` with `origin = 'generated'` (or `'instantiated'` when created directly by an administrator).
+- Crucially, **all source study records remain completely intact** as `origin = 'imported'`, and study-level foreign keys (`InstanceVariable`, `QuestionVariable`) stay attached to their wave's imported resources.
+- Lineage is recorded through directed W3C `prov:wasDerivedFrom` edges in `SemanticRelationship` (`subject = harmonized_target`, `object = imported_source`).
 
-#### 2. Absorption (`fairwddi harmonize absorb`)
+#### 2. Link to Existing Harmonized Resource (`link_existing` / `fairwddi harmonize link`)
 
-- When a subsequent survey wave is ingested (e.g. Wave 3) or an archivist discovers an existing study resource corresponding to a previously elevated question, the archivist **absorbs** the new study item into the _already existing_ harmonized resource.
-- **In-Place Multilingual Fusion:** Any new translations or instructions provided by the absorbed item are dynamically merged into the target entity, and its SHA-256 fingerprint is updated.
-- **Audit Provenance:** `target_obj.extended_attributes` and `UrnRegistry.extended_attributes` record structured absorption provenance (`job_id`, `absorbed_urns`, `note`).
-- **Cascade Repointing & Aliasing:** Foreign keys linking to the absorbed item are updated to point to the canonical target, and an alias is registered in `URNAlias`.
-- **Target-Preserving Undo:** Reverting an absorption job (`fairwddi harmonize undo <job_id>`) restores the target object to its exact pre-absorption state (without deleting it) while restoring the absorbed sources.
+- When a subsequent survey wave is ingested (e.g. Wave 3) or an archivist links an imported study resource to a previously harmonized question, the pipeline **links** the new study item to the _already existing_ harmonized resource (Tier 1 match).
+- **In-Place Multilingual Enrichment:** Any newly provided translations are dynamically added to the target entity, while alternate phrasings are preserved in `extended_attributes` (`type: "wording_variant"`).
+- **Audit Provenance:** `target_obj.extended_attributes` and `SemanticRelationship` record structured derivation provenance (`prov:wasDerivedFrom`, `match_type`, `confidence`).
+- **Target-Preserving Undo:** Reverting an ingestion or linkage job (`fairwddi ingest undo <batch_id>` or `fairwddi harmonize undo <job_id>`) safely preserves the harmonized target if other survey waves still depend on it.
 
 > [!NOTE]
-> **Provenance Guarantee:** Original source URNs found in historical DDI files, external citations, or historical JSONB records are never orphaned. Any lookup for a historical URN automatically resolves through `URNAlias` to the canonical bank URN without requiring destructive rewriting of historical JSONB documents.
+> **Provenance Guarantee:** Historical study records are never mutated or retired. Lineage DAGs (`prov:wasDerivedFrom`) explicitly link harmonized bank concepts to raw study variables, providing full traceability for comparative and secondary data analysis.
 
 ---
 
@@ -625,15 +624,18 @@ flowchart LR
 Archivists can review candidate matches discovered by `fairwddi compare discover` or planned via `fairwddi harmonize plan` in the standalone **Harmonization Plan Editor** ([`deliverables/research/harmonization_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/harmonization_plan_editor.html)) or via the generated YAML/Markdown harmonization plans:
 
 - **Stratified Match Classification & Review Flagging (`requires_review: true`):**
-  - `NEAR_EXACT`: Terminal punctuation variants (e.g., trailing `?` or French spacing before `?`) and sequence similarity $\ge 0.98$. Recommends `alias` (or `absorb` if the target is already elevated).
-  - `INCLUSIVE_WRITING_VARIANT`: Inclusive/gendered marker variations (e.g., `"confronté(e)"` vs. `"confronté"`). Recommends `elevate` (or `absorb`), preserving alternate phrasings in `extended_attributes` (`type: "wording_variant"`).
-  - `PHRASING_VARIANT`: Stylistic or pronominal shifts (e.g., `"Je refuse de répondre"` vs. `"Refuse de répondre"`). Recommends `elevate` (or `absorb`), keeping canonical wording on the primary field and storing alternates in `extended_attributes`.
-  - `TYPOGRAPHICAL_VARIANT`: Single-word grammatical or typographical mistakes (e.g., `"Ma mère..."` vs. `"Mon mère..."`). Recommends `elevate` (or `absorb`), retaining the valid wording and dropping `discarded_variants` while preserving the source URN in `URNAlias`.
-  - `SHARED_STEM_GRID`: Questions or variables sharing a common stem followed by distinct choices/sub-items (e.g., `"Êtes-vous confronté(e) à un ou plusieurs des problèmes suivants concernant votre quartier ? Manque d'espaces verts"` vs. `"... ? Manque de sécurité"`). Recommends `group`, creating or updating a generic `Group` (`group_type="question_grid"`) and recording `ddi:inGroup` in `SemanticRelationship`.
+  - `NEAR_EXACT`: Terminal punctuation variants (e.g., trailing `?` or French spacing before `?`) and sequence similarity $\ge 0.98$. Recommends `link_existing` (if harmonized target exists) or `generate_harmonized`.
+  - `INCLUSIVE_WRITING_VARIANT`: Inclusive/gendered marker variations (e.g., `"confronté(e)"` vs. `"confronté"`). Recommends `generate_harmonized` (or `link_existing`), preserving alternate phrasings in `extended_attributes` (`type: "wording_variant"`).
+  - `PHRASING_VARIANT`: Stylistic or pronominal shifts (e.g., `"Je refuse de répondre"` vs. `"Refuse de répondre"`). Recommends `generate_harmonized` (or `link_existing`), keeping canonical wording on the primary field and storing alternates in `extended_attributes`.
+  - `TYPOGRAPHICAL_VARIANT`: Single-word grammatical or typographical mistakes (e.g., `"Ma mère..."` vs. `"Mon mère..."`). Recommends `generate_harmonized` (or `link_existing`), retaining valid wording on the target while preserving the source in the database intact.
+  - `SHARED_STEM_GRID`: Questions or variables sharing a common stem followed by distinct choices/sub-items. Recommends `group`, creating or updating a generic `Group` (`group_type="question_grid"`) and recording W3C `dcterms:isPartOf` in `SemanticRelationship`.
   - `SAME_CONCEPT_DIFFERENT_SCALE`: `RepresentedVariable` pairs sharing identical or near-exact labels but backed by divergent response scales (`CodeList`). Action is strictly downgraded to `link_semantic` (`skos:closeMatch`) to protect value domain integrity and prevent accidental aliasing across incompatible response scales.
   - `SYNTACTIC_SIMILAR`: Moderate similarity ($0.85 \le \text{sim} < 0.98$). Recommends `link_semantic` (`skos:closeMatch`).
-- **Declarative Plan Actions (`elevate`, `absorb`, `group`, `alias`, `merge_multilingual`, `link_semantic`, `skip`):**
-  - Target-aware planning automatically recommends `absorb` when one resource is already an elevated canonical item (`status = 'elevated'`) and `elevate` when both are study-specific.
+- **Declarative Plan Actions (`generate_harmonized`, `link_existing`, `group`, `link_semantic`, `skip`):**
+  - Two-tier matching automatically recommends `link_existing` when one resource is already a bank harmonized item (`origin in ('generated', 'instantiated')`) and `generate_harmonized` when matching across unharmonized `imported` resources.
+  - Use `fairwddi harmonize approve-high <plan.yaml> --min-confidence 0.96` to bulk-approve high-confidence and near-exact items while disabling lower-confidence candidates.
+- **CodeList & Question Text Side-by-Side Diff:** Compares incoming survey wave response codes and question wordings against canonical candidates.
+- **Execution Ready:** Emits validated `.harmonize.plan.yaml` with an approved review gate ready for `fairwddi harmonize apply` (and full rollback via `fairwddi harmonize undo <job_id>`).
   - Use `fairwddi harmonize approve-high <plan.yaml> --min-confidence 0.96` to bulk-approve high-confidence and near-exact items while disabling lower-confidence candidates.
 - **CodeList & Question Text Side-by-Side Diff:** Compares incoming survey wave response codes and question wordings against canonical candidates.
 - **Execution Ready:** Emits validated `.harmonize.plan.yaml` with an approved review gate ready for `fairwddi harmonize apply` (and full rollback via `fairwddi harmonize undo <job_id>`).

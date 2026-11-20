@@ -48,11 +48,10 @@
   - Built pre-flight "already loaded" detection and global vocabulary inventory reporting (`fairwddi db check-vocab`).
 
 - **CLI Tools & Database Utilities:**
-  - Integrated full database lifecycle, vocabulary loaders, staging, seeding, and export utilities into the unified Typer & Rich CLI (`fairwddi info`, `db init`, `db seed`, `db wipe`, `db recreate`, `db status`, `db export-ddl`, `db load-vocab`, `db check-vocab`).
+  - Integrated full database lifecycle, vocabulary loaders, staging, schema management, and export utilities into the unified Typer & Rich CLI (`fairwddi info`, `db init`, `db wipe`, `db recreate`, `db status`, `db export-ddl`, `db load-vocab`, `db check-vocab`).
   - Implemented multi-standard metadata import command group (`fairwddi import file`, `import list-profiles`, `import list`, `import stats`, `import query`, `import status`, `import log`, `import delete`).
-  - Implemented complete database seeder (`fairwddi.db.seed`, `fairwddi db seed`) populating demonstration entities across all architectural layers.
   - Built safe database wipe engine (`fairwddi.db.wipe`, `fairwddi db wipe`) with reverse topological deletion ordering and 4-digit verification confirmation code.
-  - Implemented schema recreation engine (`fairwddi db recreate`) for zero-state resets with optional seeding and vocabulary loading.
+  - Implemented schema recreation engine (`fairwddi db recreate`) for clean zero-state resets with optional vocabulary loading (clean database initialization with zero mock records).
   - Implemented environment & connection config resolver (`fairwddi.db.config`) supporting `.env` files, `DATABASE_URL`, discrete PostgreSQL variables, and automatic SQLite fallback.
 
 - **Corpus Analysis & Sample DDI Collection:**

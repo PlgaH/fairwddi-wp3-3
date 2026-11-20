@@ -104,62 +104,9 @@ Database initialized successfully.
 
 ---
 
-### 3.2 Seed Demonstration Data (`fairwddi db seed`)
+### 3.2 Check Database Inventory (`fairwddi db status`)
 
-Populates the database with realistic, multilingual DDI demonstration records (aligned with DDI 4 / DDI-CDI / DDI-L) across all architectural layers (Concepts, Representation, Datasets, Groups, and Staging).
-
-```bash
-# Seed records (idempotent get_or_create)
-uv run fairwddi db seed
-```
-
-#### Resetting Data Before Seeding
-
-To wipe existing records and re-seed clean demonstration data:
-
-```bash
-uv run fairwddi db seed --reset
-# or short flag
-uv run fairwddi db seed -r
-```
-
-**Example Output:**
-```
-Seeding DDI-Lifecycle demonstration data...
- Demonstration Data Seed Summary 
-┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
-┃ Entity / Layer         ┃ Count ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━┩
-│ Organizations          │     1 │
-│ Groups                 │     1 │
-│ Concepts               │     2 │
-│ Conceptual Variables   │     1 │
-│ Question Schemes       │     1 │
-│ Question Items         │     1 │
-│ Question Variables     │     1 │
-│ Instruments            │     1 │
-│ Instrument Questions   │     1 │
-│ Categories             │     6 │
-│ Category Schemes       │     1 │
-│ Code Lists             │     1 │
-│ Codes                  │     6 │
-│ Represented Variables  │     1 │
-│ Study Units            │     2 │
-│ Instance Variables     │     2 │
-│ Study Unit Variables   │     2 │
-│ Urn Aliases            │     1 │
-│ Staged Nodes           │     1 │
-│ Event Logs             │     1 │
-│ Semantic Relationships │     3 │
-└────────────────────────┴───────┘
-Database seeded successfully.
-```
-
----
-
-### 3.3 Check Database Inventory (`fairwddi db status`)
-
-Displays the current status of all 28 models/tables along with their active record counts.
+Displays the current status of all 30 models/tables along with their active record counts.
 
 ```bash
 uv run fairwddi db status
@@ -167,17 +114,18 @@ uv run fairwddi db status
 
 **Example Output:**
 ```
-                             FAIRwDDI Model Inventory [sqlite3: fairwddi_dev.sqlite3]
+                             FAIRwDDI Model Inventory [postgresql: fairwddi]
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
 ┃ Model Name                ┃ Database Table                    ┃ Record Count ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
-│ ConceptScheme             │ request_ddi_conceptscheme         │            1 │
-│ Concept                   │ request_ddi_concept               │            2 │
-│ ConceptualVariableScheme  │ request_ddi_conceptualvariablesc… │            1 │
-│ ConceptualVariable        │ request_ddi_conceptualvariable    │            1 │
-│ SemanticRelationship      │ request_ddi_semanticrelationship  │            3 │
-│ QuestionScheme            │ request_ddi_questionscheme        │            1 │
-│ QuestionItem              │ request_ddi_questionitem          │            1 │
+│ ConceptScheme             │ request_ddi_conceptscheme         │            0 │
+│ Concept                   │ request_ddi_concept               │            0 │
+│ ConceptualVariableScheme  │ request_ddi_conceptualvariablesc… │            0 │
+│ ConceptualVariable        │ request_ddi_conceptualvariable    │            0 │
+│ SemanticRelationship      │ request_ddi_semanticrelationship  │            0 │
+│ QuestionScheme            │ request_ddi_questionscheme        │            0 │
+│ QuestionItem              │ request_ddi_questionitem          │            0 │
+```
 │ CategoryScheme            │ request_ddi_categoryscheme        │            1 │
 │ Category                  │ request_ddi_category              │            6 │
 │ CodeList                  │ request_ddi_codelist              │            1 │
@@ -296,10 +244,10 @@ Drops the entire schema (all tables, constraints, and sequences) and runs all mi
 # Interactive schema drop and recreation
 uv run fairwddi db recreate
 
-# Force recreation, followed by demonstration data seeding and top ELSST concept loading
-uv run fairwddi db recreate --force --seed --load-vocab
+# Force recreation, followed by top ELSST concept loading
+uv run fairwddi db recreate --force --load-vocab
 # or using short flags
-uv run fairwddi db recreate -f -s -v
+uv run fairwddi db recreate -f -v
 ```
 
 ---
@@ -732,10 +680,10 @@ Archivists can inspect candidate matches in the standalone browser-based **Harmo
 
 - **Question Grid Inspector:** Inspect detected common question stems (`SHARED_STEM_GRID`), view sub-item prompts, and configure `group_type: question_grid` groups.
 - **Wording Variant Curator:** Classify inclusive writing markers (`(e)`, `·es`), stylistic phrasing, and punctuation shifts; configure `canonical_text` overrides, manage `preserved_variants` (stored in `extended_attributes` for search discovery), and discard errata.
-- **Elevation & Absorption:** Switch operations to `elevate` (create new canonical bank-level generic entity) or `absorb` (absorb wave into an existing elevated entity).
+- **Create Harmonized & Link Existing:** Switch operations between `generate_harmonized` (create new canonical bank-level generated entity from imported items) and `link_existing` (link wave into an existing generated or instantiated entity via `prov:wasDerivedFrom`).
 - **Side-by-Side Diff Inspector:** Compare source and target response codes, category labels, and question texts with visual discrepancy highlighting.
 - **1-Click Bulk Approval:** Instantly authorize all `FACET_EXACT` matches ($\ge 0.95$ confidence) while keeping fuzzy items for closer human inspection.
-- **Action Switching:** Reconfigure operations between `elevate`, `absorb`, `group`, `alias`, `harmonize`, `merge_multilingual`, `link_semantic`, or `skip`.
+- **Action Switching:** Reconfigure operations between `generate_harmonized`, `link_existing`, `group`, `alias`, `harmonize`, `merge_multilingual`, `link_semantic`, or `skip`.
 - **Review Gate Sign-Off:** Authorize the plan so `fairwddi harmonize apply` can run without manual bypass flags.
 
 ```bash
@@ -748,78 +696,67 @@ uv run fairwddi harmonize undo <job_id>
 
 ---
 
-#### 2. Resource Elevation (`fairwddi harmonize elevate`)
+#### 2. Create Harmonized Resource (`fairwddi harmonize create`)
 
-Converts one or more study-specific resources (e.g. `QuestionItem`, `RepresentedVariable`, `ConceptualVariable`) into a brand-new generic harmonized resource, fusing multilingual texts, repointing cascade references, recording canonical aliases in `URNAlias`, and retiring sources:
+Creates a new `generated` (default) or `instantiated` harmonized resource uniting one or more `imported` source resources. Fuses multilingual labels and question texts, preserves all source records intact as `origin='imported'`, records W3C `prov:wasDerivedFrom` lineage edges, and records alternate spellings in `extended_attributes` (`wording_variant`):
 
 ```bash
-# Elevate study questions into a generic QuestionItem with auto-generated slug URN
-uv run fairwddi harmonize elevate \
+# Create a generated harmonized QuestionItem with auto-generated generic URN
+uv run fairwddi harmonize create \
   --source urn:ddi:fr.cdsp:elipss.2015.q01:1.0.0 \
   --source urn:ddi:fr.cdsp:elipss.2016.q01:1.0.0 \
   --name "Trust in National Assembly (Harmonized)"
 
-# Elevate with an explicit canonical target DDI URN
-uv run fairwddi harmonize elevate \
+# Create an administrator-instantiated resource with an explicit canonical target DDI URN
+uv run fairwddi harmonize create \
   -s urn:ddi:fr.cdsp:elipss.2015.q01:1.0.0 \
   -s urn:ddi:fr.cdsp:elipss.2016.q01:1.0.0 \
-  -t urn:ddi:fr.cdsp:QI-trust-national-assembly:1.0.0
+  -t urn:ddi:fr.cdsp:QI-trust-national-assembly:1.0.0 \
+  --origin instantiated
 ```
 
 **Key Options:**
-- `--source / -s`: Source study-specific URN(s) to elevate (can specify multiple times).
+- `--source / -s`: Source `imported` URN(s) to harmonize (can specify multiple times).
 - `--target-urn / -t`: Explicit canonical generic DDI URN (auto-generated if omitted).
-- `--type / -T`: Optional resource type (e.g., `QuestionItem`, `ConceptualVariable`). Auto-inferred if omitted.
-- `--name / -n`: Human-readable label/name for the elevated generic resource.
-- `--update-references / --no-update-references`: Automatically repoint foreign keys across the DDI cascade (default: enabled).
-- `--retire-sources / --keep-sources`: Retire source records from primary entity table while preserving aliases (default: retire).
-- `--note`: Audit note stored in `URNAlias` and `EventLog`.
+- `--type / -T`: Optional resource type (e.g., `QuestionItem`, `RepresentedVariable`, `Category`). Auto-inferred if omitted.
+- `--name / -n`: Human-readable label/name for the harmonized generic resource.
+- `--origin`: Resource origin classification: `generated` (default) or `instantiated`.
+- `--canonical-text`: Preferred text or translation dictionary for primary display.
+- `--note`: Provenance note stored in `SemanticRelationship` and `EventLog`.
 
 ---
 
-#### 3. Subsequent Resource Absorption (`fairwddi harmonize absorb`)
+#### 3. Link to Existing Harmonized Resource (`fairwddi harmonize link`)
 
-Absorbs a newly discovered or subsequent wave's resource into an *already existing* harmonized/elevated resource. Merges any newly provided translations or interviewer instructions, updates SHA-256 hashes, repoints foreign keys across the cascade, records an alias, and retires the source:
+Links newly imported survey resources to an *already existing* harmonized target (`origin='generated'` or `'instantiated'`). Preserves source records intact, enriches the target with newly provided translations or alternate spellings (`wording_variant`), and records `prov:wasDerivedFrom` lineage:
 
 ```bash
-# Absorb a wave 3 question into the existing harmonized QuestionItem
-uv run fairwddi harmonize absorb \
+# Link a wave 3 question to the existing harmonized QuestionItem
+uv run fairwddi harmonize link \
   --source urn:ddi:fr.cdsp:elipss.2017.q01:1.0.0 \
-  --into urn:ddi:fr.cdsp:QI-trust-national-assembly:1.0.0 \
-  --note "Wave 3 longitudinal absorption"
+  --target-urn urn:ddi:fr.cdsp:QI-trust-national-assembly:1.0.0 \
+  --note "Wave 3 longitudinal linkage"
 ```
 
 **Key Options:**
-- `--source / -s`: Source study-specific URN(s) to absorb (can specify multiple times).
-- `--into / -i`: Target canonical harmonized/elevated URN (must already exist in the database).
+- `--source / -s`: Source `imported` URN(s) to link (can specify multiple times).
+- `--target-urn / -t`: Target canonical harmonized URN (must already exist in `UrnRegistry`).
 - `--type / -T`: Optional DDI resource type. Auto-inferred from target URN if omitted.
-- `--update-references`: Repoint foreign keys and junction entries to target URN.
-- `--retire-sources`: Retire source records from primary entity table.
+- `--canonical-text`: Preferred text to set on the target entity.
+- `--note`: Audit note stored in `SemanticRelationship` and `EventLog`.
 
 ---
 
-#### 4. Canonical URN Renaming & Promotion (`fairwddi harmonize rename`)
+#### 4. Reverting Harmonization (`fairwddi harmonize undo`)
 
-Atomically promotes or renames a single resource URN, creating an alias for the old URN and updating all relational pointers across the cascade:
-
-```bash
-uv run fairwddi harmonize rename \
-  urn:ddi:fr.cdsp:legacy_q1:1.0.0 \
-  urn:ddi:fr.cdsp:QI-canonical-trust:1.0.0
-```
-
----
-
-#### 5. Reverting Harmonization, Elevation, or Absorption (`fairwddi harmonize undo`)
-
-Reverts an applied harmonization, elevation, or absorption job using its complete `EventLog` snapshot:
+Reverts an applied harmonization or linkage job using its complete `EventLog` snapshot:
 
 ```bash
-# Revert an elevation job (removes generic entity, restores original source entities and pointers)
-uv run fairwddi harmonize undo elevate-questionitem-7f2a1b
+# Revert a creation job (removes generated entity and lineage links, provided no later batches depend on it)
+uv run fairwddi harmonize undo harm-generated-questionitem-7f2a1b
 
-# Revert an absorption job (restores target to pre-absorption state, restores source entities)
-uv run fairwddi harmonize undo absorb-questionitem-9a0257
+# Revert a linkage job (restores target to pre-linkage state and removes prov:wasDerivedFrom link)
+uv run fairwddi harmonize undo link-questionitem-9a0257
 ```
 
 ---

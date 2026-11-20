@@ -16,7 +16,7 @@ Global Options
 
    Commands:
      info            Display runtime environment, database connection, and package details.
-     db              Database initialization, status inspection, DDL export, and seeding.
+     db              Database initialization, status inspection, DDL export, and lifecycle tools.
      vocab           Controlled vocabulary and SKOS taxonomy administration.
      preflight       Static analysis and profile validation of incoming DDI XML files.
      compare         Batch comparison between XML files and database records.
@@ -27,7 +27,7 @@ Global Options
 Database Management (``fairwddi db``)
 -------------------------------------
 
-Inspect, migrate, seed, and manage PostgreSQL schema state:
+Inspect, migrate, wipe, and manage PostgreSQL schema state:
 
 .. code-block:: bash
 
@@ -37,16 +37,13 @@ Inspect, migrate, seed, and manage PostgreSQL schema state:
    # Apply all migrations and initialize the UrnRegistry
    fairwddi db init
 
-   # Seed development / demonstration fixtures
-   fairwddi db seed
-
    # Export raw PostgreSQL 17 DDL to a file
    fairwddi db export-ddl --output postgres_17_schema.sql
 
    # Wipe database (requires confirmation flag)
    fairwddi db wipe --confirm-irreversible-loss
 
-   # Recreate database from scratch (wipe + init + seed)
+   # Recreate database from scratch (drop all tables + run migrations)
    fairwddi db recreate --confirm-irreversible-loss
 
 Vocabulary Administration (``fairwddi vocab``)
@@ -110,7 +107,7 @@ Cluster, compare, and harmonize variables across studies:
 
 .. code-block:: bash
 
-   # Generate a harmonization plan proposing concept linkages
+   # Generate a review-gated harmonization plan proposing concept linkages
    fairwddi harmonize plan --threshold 0.85 --output harmonization_plan.yaml
 
    # Approve all high-confidence (>= 0.95) proposals automatically
@@ -119,8 +116,14 @@ Cluster, compare, and harmonize variables across studies:
    # Apply the approved harmonization linkages to the database
    fairwddi harmonize apply harmonization_plan.yaml
 
-   # Elevate a RepresentedVariable to a new ConceptualVariable
-   fairwddi harmonize elevate <rep_var_urn> --name "POL_ATTITUDE"
+   # Create a new instantiated or generated harmonized resource from imported sources
+   fairwddi harmonize create -s <src1_urn> -s <src2_urn> --name "Trust in Institutions"
+
+   # Link imported resources to an existing generated or instantiated harmonized target
+   fairwddi harmonize link -s <wave3_urn> -t <harmonized_target_urn>
+
+   # Revert an applied harmonization job
+   fairwddi harmonize undo <job_id>
 
 API Server (``fairwddi serve``)
 -------------------------------

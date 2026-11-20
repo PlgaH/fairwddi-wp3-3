@@ -1,13 +1,16 @@
 """Stage 2 (Direct Ingestion & Undo): Non-destructive streaming ingestion with two-tier matching.
 
 Streams DDI metadata files directly into ReQuest core tables:
+
 - Incoming resources are always persisted with ``origin='imported'`` (never silently absorbed).
 - Same-URN collisions always trigger review (`reuse` on matching hash, `quarantine` on drift).
 - New incoming resources are matched against the bank with strict two-tier priority:
+
   1. Tier 1 (`generated` / `instantiated`): emit `link_existing` to link via `prov:wasDerivedFrom`
      and enrich target metadata (alternate spellings / translations).
   2. Tier 2 (unharmonized `imported`): emit `generate_harmonized` to synthesize a new `generated`
      resource uniting both `imported` resources via `prov:wasDerivedFrom`.
+
 - Referential integrity & deletion protection are enforced across `undo_ingestion` and deletes.
 """
 

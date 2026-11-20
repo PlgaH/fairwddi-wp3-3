@@ -19,46 +19,48 @@ The 2-Stage Ingestion Lifecycle
                                    ▼
    ┌───────────────────────────────────────────────────────────────┐
    │ STAGE 2: DATABASE COMPARISON & EXECUTION PLAN                 │
-   │  Phase 1: Deterministic URN Matching                          │
-   │  Phase 2: Multi-Algorithm Content Fingerprint Matching        │
-   │  Phase 3: ICU Collation-Based Heuristic Match (Fallback)      │
-   │  Phase 4: Action Determination:                               │
-   │           - CREATE: Brand new entity                          │
-   │           - LINK: Reusing existing representation             │
-   │           - RE-VERSION: Semantic update under new version URN │
-   │           - QUARANTINE: Identical URN, drifted content        │
+   │  1. Same-URN Collision Check:                                 │
+   │     - REUSE: Identical URN & Hash (Archivist review)          │
+   │     - QUARANTINE: Identical URN, drifted content hash         │
+   │  2. Strict Two-Tier Resource Matching:                        │
+   │     - TIER 1 (generated/instantiated): LINK_EXISTING (W3C     │
+   │       prov:wasDerivedFrom + wording_variant enrichment)       │
+   │     - TIER 2 (unharmonized imported): GENERATE_HARMONIZED     │
+   │       (mints new generated resource uniting both)             │
+   │     - CREATE: Standalone new imported resource                │
    └───────────────────────────────┬───────────────────────────────┘
                                    │
                                    ▼
    ┌───────────────────────────────────────────────────────────────┐
    │ TRANSACTIONAL BATCH LOADER                                    │
-   │  - Master UrnRegistry upsert                                  │
-   │  - Child entity persistence                                   │
-   │  - IngestBatch receipt & audit log generation                 │
+   │  - Master UrnRegistry upsert with origin='imported'           │
+   │  - Child entity persistence (never absorbed / overwritten)    │
+   │  - W3C prov:wasDerivedFrom lineage & wording_variant logging   │
+   │  - IngestBatch receipt (created, generated, linked, reused)   │
+   │  - Deletion protection & cascade-safe rollback                │
    └───────────────────────────────────────────────────────────────┘
 
-The 4-Phase Comparison Cascade
-------------------------------
+The Non-Destructive Ingestion & Two-Tier Matching Architecture
+--------------------------------------------------------------
 
-When an incoming XML entity is compared against the database:
+FAIRwDDI enforces non-destructive ingestion where incoming metadata is always preserved:
 
-1. **Phase 1 — Deterministic URN Match**:
-   If an entity with the exact URN (e.g., ``urn:ddi:fr.cdsp:Q_AGE:1.0``) already exists:
-   * If its content fingerprint matches the incoming payload, the entity is verified as **identical** and linked.
-   * If its content fingerprint differs, a **metadata collision** is detected! Rather than silently overwriting, the entity is routed to **Quarantine** for archivist review.
+1. **Origin Classification**:
+   Every resource in ``UrnRegistry`` carries an ``origin`` tag:
+   * ``imported``: Ingested from external survey files or vocabularies.
+   * ``generated``: Synthesized automatically by harmonizer algorithms or agent workflows.
+   * ``instantiated``: Created directly by an archivist via CLI, API, or administrative ORM.
 
-2. **Phase 2 — Multi-Algorithm Fingerprint Match**:
-   If the URN does not match, the pipeline checks whether an entity with an identical canonical content hash exists under another URN (e.g., when a survey generates random identifiers for a standard question):
-   * If an identical hash is found, the incoming URN is recorded as an **alias** (``URNAlias``) pointing to the existing canonical entity, preventing duplicate records.
+2. **Same-URN Collision Gate**:
+   * If an incoming URN already exists in ``UrnRegistry`` with an identical content hash, it triggers ``action="reuse"`` (``ING-URN-REUSE-001``). Cross-file reuse requires explicit archivist confirmation.
+   * If the existing URN has a different content hash, a content drift collision is flagged and routed to ``action="quarantine"`` (``ING-DRIFT-001``).
 
-3. **Phase 3 — ICU Collation Heuristic Match**:
-   For legacy DDI-Codebook files lacking persistent URNs, the engine applies normalized string comparisons using PostgreSQL's ICU collation (``und-x-icu``). Candidate matches exceeding the configured similarity threshold (e.g., 90%) are proposed for linking in the execution plan.
+3. **Strict Two-Tier Matching for Harmonizable Resources**:
+   * **Tier 1 (Harmonized / Bank Targets)**: Evaluated first against all ``generated`` and ``instantiated`` resources. If a match meets the threshold, ``action="link_existing"`` is planned. The incoming resource is saved as ``origin='imported'``, linked to the target via ``prov:wasDerivedFrom``, and any alternate spellings are preserved on the target as ``wording_variant`` entries in ``extended_attributes``.
+   * **Tier 2 (Unharmonized Imported Candidates)**: Evaluated only if Tier 1 yields no match. When two ``imported`` resources match across surveys, ``action="generate_harmonized"`` is planned. Both source records remain intact as ``origin='imported'``, and a brand-new ``origin='generated'`` resource is minted, linking both sources via ``prov:wasDerivedFrom``.
 
-4. **Phase 4 — Execution Action Determination**:
-   * **CREATE**: Persist as a new canonical entity in ``UrnRegistry`` and its respective table.
-   * **LINK**: Connect the incoming ``InstanceVariable`` to an existing ``RepresentedVariable``.
-   * **RE-VERSION**: Increment version number (e.g., ``1.0`` → ``2.0``) and record the historical link in ``URNAlias``.
-   * **QUARANTINE**: Hold the record in isolation until an archivist inspects the discrepancy.
+4. **Referential Deletion Protection**:
+   Resources referenced by other entities (foreign keys, junction tables, groups, or semantic relationships) cannot be deleted. Batch rollbacks (``undo_ingestion``) safely preserve generated resources if subsequent survey waves derive from them.
 
 Reviewing Ingestion Plans
 -------------------------

@@ -647,6 +647,8 @@
       text-transform: uppercase;
     }
     .act-create { background: rgba(16, 185, 129, 0.18); color: #34d399; }
+    .act-link_existing { background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
+    .act-generate_harmonized { background: rgba(139, 92, 246, 0.18); color: #c084fc; }
     .act-reuse { background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
     .act-alias { background: rgba(6, 182, 212, 0.18); color: #22d3ee; }
     .act-quarantine { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
@@ -1012,9 +1014,10 @@
           <div class="filter-chips" style="border-left: 1px solid var(--border); padding-left: 8px;">
             <span class="chip active" onclick="setFilterAction('all', this)">All Actions</span>
             <span class="chip" onclick="setFilterAction('create', this)">Create</span>
+            <span class="chip" onclick="setFilterAction('link_existing', this)">Link Existing</span>
+            <span class="chip" onclick="setFilterAction('generate_harmonized', this)">Create Harmonized</span>
+            <span class="chip" onclick="setFilterAction('reuse', this)">Reuse</span>
             <span class="chip" onclick="setFilterAction('alias', this)">Alias</span>
-            <span class="chip" onclick="setFilterAction('elevate', this)">Elevate</span>
-            <span class="chip" onclick="setFilterAction('absorb', this)">Absorb</span>
             <span class="chip" onclick="setFilterAction('group', this)">Group</span>
             <span class="chip" onclick="setFilterAction('skip', this)">Skip</span>
             <span class="chip" onclick="setFilterAction('quarantine', this)">Quarantine</span>
@@ -1579,10 +1582,10 @@
           <td>
             <select class="field-select" style="padding: 2px 6px; font-size: 11px; font-weight: 600;" onchange="changeItemAction('${item.id}', this.value)">
               <option value="create" ${item.action === 'create' ? 'selected' : ''}>CREATE</option>
-              <option value="alias" ${item.action === 'alias' ? 'selected' : ''}>ALIAS</option>
+              <option value="link_existing" ${item.action === 'link_existing' || item.action === 'absorb' ? 'selected' : ''}>LINK_EXISTING</option>
+              <option value="generate_harmonized" ${item.action === 'generate_harmonized' || item.action === 'elevate' ? 'selected' : ''}>GENERATE_HARMONIZED</option>
               <option value="reuse" ${item.action === 'reuse' ? 'selected' : ''}>REUSE</option>
-              <option value="elevate" ${item.action === 'elevate' ? 'selected' : ''}>ELEVATE</option>
-              <option value="absorb" ${item.action === 'absorb' ? 'selected' : ''}>ABSORB</option>
+              <option value="alias" ${item.action === 'alias' ? 'selected' : ''}>ALIAS</option>
               <option value="group" ${item.action === 'group' ? 'selected' : ''}>GROUP</option>
               <option value="skip" ${item.action === 'skip' ? 'selected' : ''}>SKIP</option>
               <option value="quarantine" ${item.action === 'quarantine' ? 'selected' : ''}>QUARANTINE</option>
@@ -1631,10 +1634,10 @@
             <label class="field-label">Action Operation</label>
             <select class="field-select" id="ins-action">
               <option value="create" ${item.action === 'create' ? 'selected' : ''}>create (Insert new row)</option>
-              <option value="alias" ${item.action === 'alias' ? 'selected' : ''}>alias (Link to canonical URN via URNAlias)</option>
+              <option value="link_existing" ${item.action === 'link_existing' || item.action === 'absorb' ? 'selected' : ''}>link_existing (Link to existing generated/instantiated entity)</option>
+              <option value="generate_harmonized" ${item.action === 'generate_harmonized' || item.action === 'elevate' ? 'selected' : ''}>generate_harmonized (Create synthesized harmonized entity)</option>
               <option value="reuse" ${item.action === 'reuse' ? 'selected' : ''}>reuse (Exact match)</option>
-              <option value="elevate" ${item.action === 'elevate' ? 'selected' : ''}>elevate (Elevate into generic canonical entity)</option>
-              <option value="absorb" ${item.action === 'absorb' ? 'selected' : ''}>absorb (Absorb into existing elevated canonical entity)</option>
+              <option value="alias" ${item.action === 'alias' ? 'selected' : ''}>alias (Link to canonical URN via URNAlias)</option>
               <option value="group" ${item.action === 'group' ? 'selected' : ''}>group (Group into Question Grid / shared stem)</option>
               <option value="skip" ${item.action === 'skip' ? 'selected' : ''}>skip (Do not insert)</option>
               <option value="quarantine" ${item.action === 'quarantine' ? 'selected' : ''}>quarantine (Flagged metadata drift)</option>
