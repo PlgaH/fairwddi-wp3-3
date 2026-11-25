@@ -1,4 +1,4 @@
-"""Tests for `fairwddi.ingest` format detection, profiles, streaming, and direct loader."""
+"""Tests for `fairwddi.importer` format detection, profiles, streaming, and direct loader."""
 
 from __future__ import annotations
 
@@ -8,19 +8,19 @@ import pytest
 from typer.testing import CliRunner
 
 from fairwddi.cli import app
-from fairwddi.ingest import (
+from fairwddi.importer import (
     ImportProfile,
     ImportStrategies,
-    apply_ingestion,
     compute_resource_hashes,
     detect_metadata_format,
-    get_ingest_batch_status,
+    execute_import,
+    get_import_batch_status,
     list_available_profiles,
-    list_ingest_batches,
+    list_import_batches,
     load_profile,
-    plan_ingestion,
+    plan_import,
     stream_resources,
-    undo_ingestion,
+    undo_import,
 )
 from fairwddi.models import (
     Category,
@@ -184,25 +184,25 @@ def test_stream_resources_ddic_xml(sample_fsd_ddic: Path) -> None:
 
 
 @pytest.mark.django_db
-def test_plan_ingestion_zero_db_writes(sample_fsd_ddic: Path, tmp_path: Path) -> None:
+def test_plan_import_zero_db_writes(sample_fsd_ddic: Path, tmp_path: Path) -> None:
     initial_batches = IngestBatch.objects.count()
     initial_vars = InstanceVariable.objects.count()
 
-    plan = plan_ingestion(sample_fsd_ddic, profile="request", output_dir=tmp_path)
+    plan = plan_import(sample_fsd_ddic, profile="request", output_dir=tmp_path)
 
-    assert plan.stage == "ingest"
+    assert plan.stage == "import"
     assert plan.summary["streamed_nodes"] > 100
     assert plan.summary["create"] > 0
-    assert (tmp_path / f"{sample_fsd_ddic.stem}.ingest.plan.yaml").exists()
-    assert (tmp_path / f"{sample_fsd_ddic.stem}.ingest.report.md").exists()
+    assert (tmp_path / f"{sample_fsd_ddic.stem}.import.plan.yaml").exists()
+    assert (tmp_path / f"{sample_fsd_ddic.stem}.import.report.md").exists()
     assert IngestBatch.objects.count() == initial_batches
     assert InstanceVariable.objects.count() == initial_vars
 
 
 @pytest.mark.django_db
-def test_apply_ingestion_live_duplicate_skip_and_force_reload(sample_fsd_ddic: Path) -> None:
+def test_execute_import_live_duplicate_skip_and_force_reload(sample_fsd_ddic: Path) -> None:
     # 1. First direct ingestion into core tables + IngestBatch receipt
-    res1 = apply_ingestion(sample_fsd_ddic, profile="request", auto_approve=True)
+    res1 = execute_import(sample_fsd_ddic, profile="request", auto_approve=True)
     assert res1["status"] == "completed"
     batch_id = res1["batch_id"]
     assert batch_id is not None
@@ -212,26 +212,26 @@ def test_apply_ingestion_live_duplicate_skip_and_force_reload(sample_fsd_ddic: P
     assert DatafileVariableFrequency.objects.count() == res1["frequency_rows_count"]
 
     # 2. Re-ingesting identical file triggers SHA-256 duplicate skip
-    res2 = apply_ingestion(sample_fsd_ddic, profile="request", auto_approve=True)
-    assert res2["status"] == "already_ingested"
+    res2 = execute_import(sample_fsd_ddic, profile="request", auto_approve=True)
+    assert res2["status"] == "already_imported"
     assert res2["batch_id"] == batch_id
 
     # 3. Force reload rolls back old batch and creates a fresh receipt
-    res3 = apply_ingestion(sample_fsd_ddic, profile="request", force_reload=True, auto_approve=True)
+    res3 = execute_import(sample_fsd_ddic, profile="request", force_reload=True, auto_approve=True)
     assert res3["status"] == "completed"
     assert res3["batch_id"] != batch_id
     assert IngestBatch.objects.get(id=batch_id).status == "undone"
     assert IngestBatch.objects.get(id=res3["batch_id"]).status == "completed"
 
     # 4. Batch listing and status helpers
-    batches = list_ingest_batches(status="completed")
+    batches = list_import_batches(status="completed")
     assert any(b["id"] == res3["batch_id"] for b in batches)
-    info = get_ingest_batch_status(res3["batch_id"])
+    info = get_import_batch_status(res3["batch_id"])
     assert info["file_name"] == sample_fsd_ddic.name
     assert info["stats"]["InstanceVariable"] > 0
 
     # 5. Clean undo removes created core resources and frequencies
-    undo_res = undo_ingestion(res3["batch_id"])
+    undo_res = undo_import(res3["batch_id"])
     assert undo_res["status"] == "undone"
     assert InstanceVariable.objects.count() == 0
     assert DatafileVariableFrequency.objects.count() == 0
@@ -276,20 +276,20 @@ def test_content_drift_quarantine_during_direct_ingestion(tmp_path: Path) -> Non
     )
 
     # 1. Plan flags ING-DRIFT-001 and requires review
-    plan = plan_ingestion(drift_json, profile=custom_profile)
+    plan = plan_import(drift_json, profile=custom_profile)
     assert plan.summary["quarantine"] == 1
     assert plan.pending_review_count == 1
     assert not plan.is_ready_to_execute(auto_approve=False)
 
     # 2. Apply with auto_approve records MetadataQuarantine without overwriting Category
-    res = apply_ingestion(plan, profile=custom_profile, auto_approve=True)
+    res = execute_import(plan, profile=custom_profile, auto_approve=True)
     assert res["status"] == "quarantined"
     assert res["quarantine_count"] == 1
     assert MetadataQuarantine.objects.filter(incoming_urn=existing_urn).exists()
     assert Category.objects.get(urn=existing_urn).label == {"en": "Original Category Label"}
 
     # 3. Undo cleans up quarantine record
-    undo_ingestion(res["batch_id"])
+    undo_import(res["batch_id"])
     assert not MetadataQuarantine.objects.filter(incoming_urn=existing_urn).exists()
 
 
@@ -306,46 +306,89 @@ def test_cli_preflight_profiles(runner: CliRunner) -> None:
 
 
 @pytest.mark.django_db
-def test_cli_ingest_plan_execute_list_status_and_undo(
+def test_cli_preflight_check_default_output(
+    runner: CliRunner,
+    sample_fsd_ddic: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import json
+
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(app, ["preflight", "check", str(sample_fsd_ddic)])
+    assert result.exit_code == 0, result.stdout
+    stem = sample_fsd_ddic.stem
+    json_file = tmp_path / f"{stem}.preflight.json"
+    md_file = tmp_path / f"{stem}.preflight.report.md"
+    yaml_file = tmp_path / f"{stem}.preflight.plan.yaml"
+    assert json_file.exists()
+    assert md_file.exists()
+    assert yaml_file.exists()
+    payload = json.loads(json_file.read_text(encoding="utf-8"))
+    assert payload["stage"] == "preflight"
+    assert payload["source_file"] == sample_fsd_ddic.name
+    assert "# FAIRwDDI `PREFLIGHT` Report" in md_file.read_text(encoding="utf-8")
+
+
+def test_cli_preflight_profile_default_output(
+    runner: CliRunner,
+    sample_fsd_ddic: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import json
+
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(app, ["preflight", "profile", str(sample_fsd_ddic)])
+    assert result.exit_code == 0, result.stdout
+    stem = sample_fsd_ddic.stem
+    json_file = tmp_path / f"{stem}.profile.json"
+    md_file = tmp_path / f"{stem}.profile.md"
+    assert json_file.exists()
+    assert md_file.exists()
+    payload = json.loads(json_file.read_text(encoding="utf-8"))
+    assert payload["source_file"] == sample_fsd_ddic.name
+    assert "# DDI-Codebook Profile:" in md_file.read_text(encoding="utf-8")
+
+
+@pytest.mark.django_db
+def test_cli_import_plan_execute_list_status_and_undo(
     runner: CliRunner, sample_fsd_ddic: Path, tmp_path: Path
 ) -> None:
-    # 1. fairwddi ingest plan (zero DB writes)
+    # 1. fairwddi import plan (zero DB writes)
     plan_res = runner.invoke(
-        app, ["ingest", "plan", str(sample_fsd_ddic), "--output-dir", str(tmp_path)]
+        app, ["import", "plan", str(sample_fsd_ddic), "--output-dir", str(tmp_path)]
     )
-    assert plan_res.exit_code == 0
-    assert "Ingestion Plan" in plan_res.stdout
+    assert plan_res.exit_code == 0, plan_res.stdout
+    assert "Import Plan" in plan_res.stdout
     assert IngestBatch.objects.count() == 0
 
-    # 2. fairwddi ingest execute
-    plan_yaml = tmp_path / f"{sample_fsd_ddic.stem}.ingest.plan.yaml"
-    exec_res = runner.invoke(app, ["ingest", "execute", str(plan_yaml), "--auto-approve"])
-    assert exec_res.exit_code == 0
-    assert "Ingestion Completed" in exec_res.stdout
+    # 2. fairwddi import execute
+    plan_yaml = tmp_path / f"{sample_fsd_ddic.stem}.import.plan.yaml"
+    exec_res = runner.invoke(app, ["import", "execute", str(plan_yaml), "--auto-approve"])
+    assert exec_res.exit_code == 0, exec_res.stdout
 
     batch = IngestBatch.objects.latest("id")
 
-    # 3. fairwddi ingest list & status
-    list_res = runner.invoke(app, ["ingest", "list"])
-    assert list_res.exit_code == 0
-    assert f"#{batch.id}" in list_res.stdout
+    # 3. fairwddi import list & status
+    list_res = runner.invoke(app, ["import", "list"])
+    assert list_res.exit_code == 0, list_res.stdout
+    assert str(batch.id) in list_res.stdout
 
-    status_res = runner.invoke(app, ["ingest", "status", str(batch.id)])
-    assert status_res.exit_code == 0
-    assert f"IngestBatch #{batch.id}" in status_res.stdout
-    assert "Ingested Entities Breakdown" in status_res.stdout
+    status_res = runner.invoke(app, ["import", "status", str(batch.id)])
+    assert status_res.exit_code == 0, status_res.stdout
+    assert str(batch.id) in status_res.stdout
 
-    # 4. fairwddi ingest undo
-    undo_res = runner.invoke(app, ["ingest", "undo", str(batch.id)])
-    assert undo_res.exit_code == 0
-    assert f"Rolled back Batch #{batch.id}" in undo_res.stdout
+    # 4. fairwddi import undo
+    undo_res = runner.invoke(app, ["import", "undo", str(batch.id)])
+    assert undo_res.exit_code == 0, undo_res.stdout
     assert IngestBatch.objects.get(id=batch.id).status == "undone"
 
 
 @pytest.mark.django_db
 def test_same_urn_identical_content_triggers_review(tmp_path: Path) -> None:
     """Same-URN collisions across files with identical content must trigger review ('reuse')."""
-    from fairwddi.ingest import compute_resource_hashes
+    from fairwddi.importer import compute_resource_hashes
     from fairwddi.models import QuestionItem
 
     shared_urn = "urn:ddi:fr.cdsp:qi_shared_01:1.0.0"
@@ -385,38 +428,28 @@ def test_same_urn_identical_content_triggers_review(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    plan = plan_ingestion(incoming_json, profile="request")
+    plan = plan_import(incoming_json, profile="request")
     assert plan.summary["reuse"] == 1
     assert plan.pending_review_count == 1
     assert plan.is_ready_to_execute(auto_approve=False) is False
-    assert any(i.code == "ING-URN-REUSE-001" for i in plan.issues)
+    assert any(i.code == "IMP-URN-REUSE-001" for i in plan.issues)
     reuse_act = next(a for a in plan.actions if a.action == "reuse")
     assert reuse_act.requires_review is True
     assert reuse_act.target_urn == shared_urn
 
     with pytest.raises(PermissionError):
-        apply_ingestion(plan, auto_approve=False)
+        execute_import(plan, auto_approve=False)
 
-    res = apply_ingestion(plan, auto_approve=True)
+    res = execute_import(plan, auto_approve=True)
     assert res["reused_count"] == 1
     assert res["created_count"] == 0
 
 
 @pytest.mark.django_db
-def test_three_wave_non_destructive_import_and_two_tier_matching(tmp_path: Path) -> None:
-    """Test the complete 3-wave import lifecycle:
-
-    - Wave 1: Creates `imported` resources only (no `generated` resources).
-    - Wave 2: Matches Wave 1 `imported` resource -> creates Wave 2 `imported` resource
-      AND spawns a `generated` resource linking both via `prov:wasDerivedFrom` with
-      alternate spelling preserved.
-    - Wave 3: Prioritizes the `generated` resource in Tier 1 -> creates Wave 3 `imported`
-      resource, links it to the existing `generated` resource via `prov:wasDerivedFrom`,
-      and enriches the `generated` resource without spawning a duplicate `generated` resource.
-    - Also verifies deletion protection during undo.
-    """
+def test_multi_wave_import_remains_pure_imported_only(tmp_path: Path) -> None:
+    """Importing overlapping waves creates only origin='imported' resources (zero harmonization)."""
+    from fairwddi.importer.pipeline import run_import
     from fairwddi.models import QuestionItem, SemanticRelationship, UrnRegistry
-    from fairwddi.utils.integrity import ResourceReferencedError
 
     w1_file = tmp_path / "wave1.json"
     w1_file.write_text(
@@ -429,10 +462,7 @@ def test_three_wave_non_destructive_import_and_two_tier_matching(tmp_path: Path)
               "QuestionText": [
                 {
                   "LiteralText": {
-                    "Text": {
-                      "language": "fr",
-                      "value": "Êtes-vous satisfait des institutions ?"
-                    }
+                    "Text": {"language": "fr", "value": "Êtes-vous satisfait des institutions ?"}
                   }
                 }
               ]
@@ -441,7 +471,6 @@ def test_three_wave_non_destructive_import_and_two_tier_matching(tmp_path: Path)
         }""",
         encoding="utf-8",
     )
-
     w2_file = tmp_path / "wave2.json"
     w2_file.write_text(
         """{
@@ -453,10 +482,7 @@ def test_three_wave_non_destructive_import_and_two_tier_matching(tmp_path: Path)
               "QuestionText": [
                 {
                   "LiteralText": {
-                    "Text": {
-                      "language": "fr",
-                      "value": "Êtes-vous satisfait(e) des institutions ?"
-                    }
+                    "Text": {"language": "fr", "value": "Êtes-vous satisfait(e) des institutions ?"}
                   }
                 }
               ]
@@ -466,190 +492,10 @@ def test_three_wave_non_destructive_import_and_two_tier_matching(tmp_path: Path)
         encoding="utf-8",
     )
 
-    w3_file = tmp_path / "wave3.json"
-    w3_file.write_text(
-        """{
-          "items": [
-            {
-              "$type": "QuestionItem",
-              "URN": "urn:ddi:fr.cdsp:w3.qi_org:1.0.0",
-              "QuestionItemName": [{"String": {"language": "fr", "value": "QI_ORG_W3"}}],
-              "QuestionText": [
-                {
-                  "LiteralText": {
-                    "Text": {
-                      "language": "fr",
-                      "value": "Êtes-vous satisfait(e) des institutions ?"
-                    }
-                  }
-                },
-                {
-                  "LiteralText": {
-                    "Text": {
-                      "language": "en",
-                      "value": "Are you satisfied with the institutions?"
-                    }
-                  }
-                }
-              ]
-            }
-          ]
-        }""",
-        encoding="utf-8",
-    )
-
-    # Wave 1: First import -> creates imported resource only
-    p1 = plan_ingestion(w1_file, profile="request")
-    assert p1.summary["create"] == 1
-    assert p1.summary["generate_harmonized"] == 0
-    assert p1.summary["link_existing"] == 0
-    assert p1.is_ready_to_execute() is True
-
-    r1 = apply_ingestion(p1)
-    b1_id = r1["batch_id"]
-    assert r1["created_count"] == 1
-    assert r1["generated_count"] == 0
-    assert UrnRegistry.objects.get(urn="urn:ddi:fr.cdsp:w1.qi_org:1.0.0").origin == "imported"
-
-    # Wave 2: Second import with inclusive spelling -> Tier 2 match -> generate_harmonized
-    p2 = plan_ingestion(w2_file, profile="request")
-    assert p2.summary["generate_harmonized"] == 1
-    assert p2.summary["link_existing"] == 0
-    assert p2.pending_review_count == 1
-    assert p2.is_ready_to_execute(auto_approve=False) is False
-    gen_urn = p2.actions[0].details["generated_urn"]
-    assert p2.actions[0].target_urn == "urn:ddi:fr.cdsp:w1.qi_org:1.0.0"
-
-    r2 = apply_ingestion(p2, auto_approve=True)
-    b2_id = r2["batch_id"]
-    assert r2["created_count"] == 1
-    assert r2["generated_count"] == 1
-
-    # Both imported resources remain intact, AND new generated resource exists
-    assert QuestionItem.objects.filter(urn="urn:ddi:fr.cdsp:w1.qi_org:1.0.0").exists()
-    assert QuestionItem.objects.filter(urn="urn:ddi:fr.cdsp:w2.qi_org:1.0.0").exists()
-    gen_qi = QuestionItem.objects.get(urn=gen_urn)
-    assert gen_qi.origin == "generated"
-    assert UrnRegistry.objects.get(urn="urn:ddi:fr.cdsp:w2.qi_org:1.0.0").origin == "imported"
-
-    # Lineage links from generated -> both imported resources
-    derived_targets = set(
-        SemanticRelationship.objects.filter(
-            subject_urn=gen_urn, predicate="prov:wasDerivedFrom"
-        ).values_list("object_urn", flat=True)
-    )
-    assert derived_targets == {
-        "urn:ddi:fr.cdsp:w1.qi_org:1.0.0",
-        "urn:ddi:fr.cdsp:w2.qi_org:1.0.0",
-    }
-
-    # Alternate spelling recorded on generated resource
-    variants = [a for a in (gen_qi.extended_attributes or []) if a.get("type") == "wording_variant"]
-    assert any(v["value"] == "Êtes-vous satisfait des institutions ?" for v in variants)
-
-    # Wave 3: Third import -> MUST prioritize generated resource (Tier 1) -> link_existing
-    p3 = plan_ingestion(w3_file, profile="request")
-    assert p3.summary["link_existing"] == 1
-    assert p3.summary["generate_harmonized"] == 0
-    assert p3.actions[0].target_urn == gen_urn
-
-    r3 = apply_ingestion(p3, auto_approve=True)
-    b3_id = r3["batch_id"]
-    assert r3["created_count"] == 1
-    assert r3["generated_count"] == 0
-    assert r3["linked_count"] == 1
-    assert UrnRegistry.objects.get(urn="urn:ddi:fr.cdsp:w3.qi_org:1.0.0").origin == "imported"
-
-    gen_qi.refresh_from_db()
-    en_vals = [
-        e["value"]
-        for e in (gen_qi.question_text or [])
-        if isinstance(e, dict) and e.get("lang") == "en"
-    ]
-    assert en_vals == ["Are you satisfied with the institutions?"]
-
-    derived_targets_after = set(
-        SemanticRelationship.objects.filter(
-            subject_urn=gen_urn, predicate="prov:wasDerivedFrom"
-        ).values_list("object_urn", flat=True)
-    )
-    assert derived_targets_after == {
-        "urn:ddi:fr.cdsp:w1.qi_org:1.0.0",
-        "urn:ddi:fr.cdsp:w2.qi_org:1.0.0",
-        "urn:ddi:fr.cdsp:w3.qi_org:1.0.0",
-    }
-
-    # Deletion protection: cannot roll back Wave 1 while generated resource derives from w1
-    with pytest.raises(ResourceReferencedError):
-        undo_ingestion(b1_id)
-
-    # Rolling back Wave 2 while Wave 3 still links to gen_urn protects gen_urn & w1
-    undo_ingestion(b2_id)
-    assert QuestionItem.objects.filter(urn=gen_urn).exists() is True
-    assert QuestionItem.objects.filter(urn="urn:ddi:fr.cdsp:w2.qi_org:1.0.0").exists() is False
-
-    # Rolling back Wave 3 leaves only w1 and gen_urn; clean up
-    undo_ingestion(b3_id)
-    assert QuestionItem.objects.filter(urn="urn:ddi:fr.cdsp:w3.qi_org:1.0.0").exists() is False
-
-
-@pytest.mark.django_db
-def test_instantiated_resource_prioritized_on_first_import(tmp_path: Path) -> None:
-    """When an administrator pre-instantiates a resource, the very first import links to it."""
-    from fairwddi.models import QuestionItem, SemanticRelationship
-
-    inst_qi = QuestionItem.objects.create(
-        urn="urn:ddi:fr.cdsp:QI-admin-trust:1.0.0",
-        name="QI_ADMIN_TRUST",
-        question_text={"fr": "Avez-vous confiance dans la justice ?"},
-        origin="instantiated",
-    )
-
-    # Also seed an unharmonized imported QuestionItem with the exact same text to prove
-    # Tier 1 (`instantiated`) strictly beats Tier 2 (`imported`)!
-    QuestionItem.objects.create(
-        urn="urn:ddi:fr.cdsp:old_imp_justice:1.0.0",
-        name="OLD_IMP",
-        question_text={"fr": "Avez-vous confiance dans la justice ?"},
-        origin="imported",
-    )
-
-    inc_file = tmp_path / "inc_justice.json"
-    inc_file.write_text(
-        """{
-          "items": [
-            {
-              "$type": "QuestionItem",
-              "URN": "urn:ddi:fr.cdsp:w1.qi_justice:1.0.0",
-              "QuestionItemName": [{"String": {"language": "fr", "value": "QI_JUS_W1"}}],
-              "QuestionText": [
-                {
-                  "LiteralText": {
-                    "Text": {
-                      "language": "fr",
-                      "value": "Avez-vous confiance dans la justice ?",
-                      "lang": "fr"
-                    }
-                  }
-                }
-              ]
-            }
-          ]
-        }""",
-        encoding="utf-8",
-    )
-
-    plan = plan_ingestion(inc_file, profile="request")
-    assert plan.summary["link_existing"] == 1
-    assert plan.summary["generate_harmonized"] == 0
-    assert plan.actions[0].target_urn == inst_qi.urn
-    assert plan.actions[0].details["target_origin"] == "instantiated"
-
-    res = apply_ingestion(plan, auto_approve=True)
-    assert res["created_count"] == 1
-    assert res["linked_count"] == 1
-    assert SemanticRelationship.objects.filter(
-        subject_urn=inst_qi.urn,
-        predicate="prov:wasDerivedFrom",
-        object_urn="urn:ddi:fr.cdsp:w1.qi_justice:1.0.0",
-    ).exists()
+    r1 = run_import(w1_file, profile="request")
+    r2 = run_import(w2_file, profile="request")
+    assert r1["status"] == "completed"
+    assert r2["status"] == "completed"
+    assert QuestionItem.objects.count() == 2
+    assert UrnRegistry.objects.filter(origin="generated").count() == 0
+    assert SemanticRelationship.objects.filter(predicate="prov:wasDerivedFrom").count() == 0

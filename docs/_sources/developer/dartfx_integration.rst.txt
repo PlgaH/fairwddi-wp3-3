@@ -15,7 +15,7 @@ The Data Artifex DDI Toolkit is a specialized Python framework providing:
 DDI-Lifecycle Fragment Streaming
 --------------------------------
 
-In ``fairwddi.ingest``, DDI-Lifecycle 3.3 files are parsed via ``ddilifecycle.stream_ddil``:
+In ``fairwddi.importer``, DDI-Lifecycle 3.3 files are parsed via ``ddilifecycle.stream_ddil``:
 
 .. code-block:: python
 

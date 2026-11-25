@@ -43,6 +43,16 @@ class Group(DDIResource):
     typed URN references.
     """
 
+    slug = models.SlugField(
+        max_length=128,
+        unique=True,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text=(
+            "Short human-friendly slug/nickname for CLI & API lookup (e.g. 'elipss-panel')."
+        ),
+    )
     description = models.JSONField(
         default=list,
         blank=True,

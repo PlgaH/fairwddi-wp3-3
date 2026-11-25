@@ -23,8 +23,8 @@ Execute the test suite via ``uv``::
    uv run pytest -v -x
 
    # Run a specific test module or test function
-   uv run pytest tests/test_ingest_pipeline.py
-   uv run pytest tests/test_cascade.py -k "test_variable_cascade"
+   uv run pytest tests/test_import_isolation.py
+   uv run pytest tests/test_compare.py tests/test_harmonize.py
 
    # Run with coverage report
    uv run pytest --cov=fairwddi --cov-report=term-missing

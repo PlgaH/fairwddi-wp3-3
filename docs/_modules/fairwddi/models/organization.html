@@ -24,11 +24,21 @@
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+<div class="portal-return-bar">
+  <a href="../index.html">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to FAIRwDDI Architecture Portal & Explorer
+  </a>
+  <span class="badge">CDSP • Sciences Po / CNRS</span>
+</div>
+ 
+
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+  
 
           
           
@@ -42,6 +52,13 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
+  <div style="margin-top: 10px; margin-bottom: 6px; padding: 0 4px;">
+    <a href="../index.html" style="font-size: 0.82rem; color: #38bdf8 !important; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Main Portal
+    </a>
+  </div>
+
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul>
@@ -65,20 +82,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../admin/cli_operations.html">CLI Operational Reference</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#global-options">Global Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#vocabulary-administration-fairwddi-vocab">Vocabulary Administration (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">vocab</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#ingestion-pipeline-fairwddi-ingest">Ingestion Pipeline (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">ingest</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#deterministic-import-fairwddi-import">Deterministic Import (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#context-groups-fairwddi-group">Context Groups (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">group</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#three-layer-comparison-fairwddi-compare">Three-Layer Comparison (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">compare</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../../admin/ingestion_ops.html">Ingestion &amp; Pipeline Operations</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#the-2-stage-ingestion-lifecycle">The 2-Stage Ingestion Lifecycle</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#the-4-phase-comparison-cascade">The 4-Phase Comparison Cascade</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#reviewing-ingestion-plans">Reviewing Ingestion Plans</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#executing-batch-transactions">Executing Batch Transactions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#handling-quarantine-records">Handling Quarantine Records</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#rolling-back-a-batch">Rolling Back a Batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/ingestion_ops.html">Import &amp; Harmonization Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#pure-import-lifecycle-fairwddi-import">Pure Import Lifecycle (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#post-import-comparison-harmonization">Post-Import Comparison &amp; Harmonization</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../admin/deployment.html">Production Deployment &amp; Maintenance</a><ul>
@@ -131,14 +145,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../../developer/ingest_engine.html">The Ingestion Engine (fairwddi.ingest)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#package-architecture">Package Architecture</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#format-detection-detector-py">Format Detection (detector.py)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#streaming-xml-iteration-streaming-py">Streaming XML Iteration (streaming.py)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#comparator-and-execution-plan-comparator-py-plan-py">Comparator and Execution Plan (comparator.py &amp; plan.py)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../developer/ingest_engine.html#batch-transaction-loading-loader-py">Batch Transaction Loading (loader.py)</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/importer_engine.html">The Import, Comparison &amp; Harmonization Engines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#api-architecture">API Architecture</a></li>
@@ -215,20 +222,100 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.seed">Seed &amp; Fixture Management</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.wipe">Wipe Utilities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.wipe">Wipe &amp; Lifecycle Utilities</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../../api/ingest.html">Ingestion &amp; Pipeline (fairwddi.ingest)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.detector">Format Detection</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.streaming">Streaming XML Parsing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.profiles">Extraction Profiles</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.preflight">Preflight Static Analysis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.comparator">Database Comparison</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.plan">Ingestion Execution Plan</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.loader">Batch Loader</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.pipeline">Pipeline Orchestration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../api/ingest.html#module-fairwddi.ingest.harmonizer">Harmonization &amp; Cross-Survey Clustering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/importer.html">Pure Deterministic Import (fairwddi.importer)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.detector.MetadataFormatInfo"><code class="docutils literal notranslate"><span class="pre">MetadataFormatInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.detector.compute_file_sha256"><code class="docutils literal notranslate"><span class="pre">compute_file_sha256()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.detector.detect_metadata_format"><code class="docutils literal notranslate"><span class="pre">detect_metadata_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.RawResourceNode"><code class="docutils literal notranslate"><span class="pre">RawResourceNode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_json"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_xml"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.resource_to_json"><code class="docutils literal notranslate"><span class="pre">resource_to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.stream_ddi_c_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_c_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.stream_ddi_l_json"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.stream_ddi_l_jsonl"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_jsonl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.stream_ddi_l_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.stream_resources"><code class="docutils literal notranslate"><span class="pre">stream_resources()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.xml_elem_to_dict"><code class="docutils literal notranslate"><span class="pre">xml_elem_to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.xml_to_json_dict"><code class="docutils literal notranslate"><span class="pre">xml_to_json_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.profiles.ImportProfile"><code class="docutils literal notranslate"><span class="pre">ImportProfile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.profiles.ImportStrategies"><code class="docutils literal notranslate"><span class="pre">ImportStrategies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.profiles.list_available_profiles"><code class="docutils literal notranslate"><span class="pre">list_available_profiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.profiles.load_profile"><code class="docutils literal notranslate"><span class="pre">load_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.preflight.run_preflight_check"><code class="docutils literal notranslate"><span class="pre">run_preflight_check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.preflight.upgrade_ddic_to_ddil"><code class="docutils literal notranslate"><span class="pre">upgrade_ddic_to_ddil()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.plan.ImportActionItem"><code class="docutils literal notranslate"><span class="pre">ImportActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.plan.ImportPlan"><code class="docutils literal notranslate"><span class="pre">ImportPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.plan.PlanActionItem"><code class="docutils literal notranslate"><span class="pre">PlanActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.plan.PlanIssue"><code class="docutils literal notranslate"><span class="pre">PlanIssue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.plan.ReviewGate"><code class="docutils literal notranslate"><span class="pre">ReviewGate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.compute_resource_hashes"><code class="docutils literal notranslate"><span class="pre">compute_resource_hashes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.execute_import"><code class="docutils literal notranslate"><span class="pre">execute_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.get_import_batch_status"><code class="docutils literal notranslate"><span class="pre">get_import_batch_status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.list_import_batches"><code class="docutils literal notranslate"><span class="pre">list_import_batches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.parse_ddi_urn"><code class="docutils literal notranslate"><span class="pre">parse_ddi_urn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.plan_import"><code class="docutils literal notranslate"><span class="pre">plan_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.undo_import"><code class="docutils literal notranslate"><span class="pre">undo_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.pipeline.run_import"><code class="docutils literal notranslate"><span class="pre">run_import()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/groups.html">Group Curation &amp; Set Resolution (fairwddi.groups)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.add_group_members"><code class="docutils literal notranslate"><span class="pre">add_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.create_group"><code class="docutils literal notranslate"><span class="pre">create_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.delete_group"><code class="docutils literal notranslate"><span class="pre">delete_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.get_group_details"><code class="docutils literal notranslate"><span class="pre">get_group_details()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.list_groups"><code class="docutils literal notranslate"><span class="pre">list_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.remove_group_members"><code class="docutils literal notranslate"><span class="pre">remove_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.rename_group"><code class="docutils literal notranslate"><span class="pre">rename_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.resolve_group"><code class="docutils literal notranslate"><span class="pre">resolve_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet"><code class="docutils literal notranslate"><span class="pre">ResolvedResourceSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.resolver.ResourceSetSpec"><code class="docutils literal notranslate"><span class="pre">ResourceSetSpec</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.resolver.parse_resource_set_spec"><code class="docutils literal notranslate"><span class="pre">parse_resource_set_spec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.resolver.resolve_resource_set"><code class="docutils literal notranslate"><span class="pre">resolve_resource_set()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/compare.html">Three-Layer Comparison Engine (fairwddi.compare)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.models.CandidateCorrespondence"><code class="docutils literal notranslate"><span class="pre">CandidateCorrespondence</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.models.CodeListQualification"><code class="docutils literal notranslate"><span class="pre">CodeListQualification</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.models.ComparisonResultSet"><code class="docutils literal notranslate"><span class="pre">ComparisonResultSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.models.CorrespondenceLevel"><code class="docutils literal notranslate"><span class="pre">CorrespondenceLevel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.models.QualificationReport"><code class="docutils literal notranslate"><span class="pre">QualificationReport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.ComparisonConfig"><code class="docutils literal notranslate"><span class="pre">ComparisonConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.ConceptualRuleConfig"><code class="docutils literal notranslate"><span class="pre">ConceptualRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.QualificationRuleConfig"><code class="docutils literal notranslate"><span class="pre">QualificationRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.ResourceTypeComparisonRule"><code class="docutils literal notranslate"><span class="pre">ResourceTypeComparisonRule</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.SemanticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SemanticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.SyntacticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SyntacticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.list_comparison_configs"><code class="docutils literal notranslate"><span class="pre">list_comparison_configs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.load_comparison_config"><code class="docutils literal notranslate"><span class="pre">load_comparison_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.qualifier.evaluate_qualification"><code class="docutils literal notranslate"><span class="pre">evaluate_qualification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.syntactic.compare_syntactic_sets"><code class="docutils literal notranslate"><span class="pre">compare_syntactic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider"><code class="docutils literal notranslate"><span class="pre">SentenceTransformerEmbeddingProvider</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.semantic.compare_semantic_sets"><code class="docutils literal notranslate"><span class="pre">compare_semantic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.semantic.get_embedding_provider"><code class="docutils literal notranslate"><span class="pre">get_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.semantic.register_embedding_provider"><code class="docutils literal notranslate"><span class="pre">register_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.conceptual.ConceptAssigner"><code class="docutils literal notranslate"><span class="pre">ConceptAssigner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.conceptual.compare_conceptual_sets"><code class="docutils literal notranslate"><span class="pre">compare_conceptual_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.conceptual.register_concept_assigner"><code class="docutils literal notranslate"><span class="pre">register_concept_assigner()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.engine.run_comparison"><code class="docutils literal notranslate"><span class="pre">run_comparison()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/harmonize.html">Policy-Driven Harmonization (fairwddi.harmonize)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy"><code class="docutils literal notranslate"><span class="pre">AutoApproveHighPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.GuardrailPolicy"><code class="docutils literal notranslate"><span class="pre">GuardrailPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem"><code class="docutils literal notranslate"><span class="pre">HarmonizationActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.HarmonizationGuardrails"><code class="docutils literal notranslate"><span class="pre">HarmonizationGuardrails</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan"><code class="docutils literal notranslate"><span class="pre">HarmonizationPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy"><code class="docutils literal notranslate"><span class="pre">HarmonizationPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.load_harmonization_policy"><code class="docutils literal notranslate"><span class="pre">load_harmonization_policy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.planner.approve_high_actions"><code class="docutils literal notranslate"><span class="pre">approve_high_actions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.planner.plan_harmonization"><code class="docutils literal notranslate"><span class="pre">plan_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.manager.create_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">create_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.manager.execute_harmonization"><code class="docutils literal notranslate"><span class="pre">execute_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.manager.link_to_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">link_to_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.manager.undo_harmonization"><code class="docutils literal notranslate"><span class="pre">undo_harmonization()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
@@ -343,6 +430,16 @@
 <span class="sd">    typed URN references.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">slug</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">SlugField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+        <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">db_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Short human-friendly slug/nickname for CLI &amp; API lookup (e.g. &#39;elipss-panel&#39;).&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
     <span class="n">description</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>

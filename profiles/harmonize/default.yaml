@@ -1,0 +1,29 @@
+name: "default"
+description: "Default FAIRwDDI harmonization policy defining explicit high-confidence criteria and CodeList divergence guardrails."
+
+auto_approve_high:
+  min_confidence: 0.90
+  allowed_levels:
+    - syntactic
+  allowed_match_types:
+    - EXACT_IDENTICAL
+    - NORMALIZED_EXACT
+    - SUBSTANTIVE_EXACT
+    - NEAR_EXACT
+    - INCLUSIVE_WRITING_VARIANT
+    - TYPOGRAPHICAL_VARIANT
+    - PHRASING_VARIANT
+  allowed_codelist_qualifications:
+    - IDENTICAL
+    - MISSING_VALUES_ONLY
+    - NOT_APPLICABLE
+  allowed_actions:
+    - link_existing
+    - generate_harmonized
+  non_high_behavior: "pending_review"
+
+guardrails:
+  downgrade_scale_cardinality_diff_to_semantic_link: true
+  downgrade_dimension_mismatch_to_semantic_link: true
+  downgrade_uncoded_to_semantic_link: true
+  group_shared_stem_grids: true

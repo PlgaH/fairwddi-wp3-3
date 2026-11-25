@@ -1,7 +1,7 @@
 CLI Operational Reference
 =========================
 
-The ``fairwddi`` command-line interface (built with `Typer <https://typer.tiangolo.com/>`_ and `Rich <https://rich.readthedocs.io/>`_) is the primary management utility for database tasks, XML validation, ingestion planning, harmonizing variables, and serving the REST API.
+The ``fairwddi`` command-line interface (built with `Typer <https://typer.tiangolo.com/>`_ and `Rich <https://rich.readthedocs.io/>`_) provides database administration, preflight inspection, pure deterministic import, context group curation, three-layer read-only comparison, policy-driven harmonization, and the ASGI REST API server.
 
 Global Options
 --------------
@@ -11,127 +11,105 @@ Global Options
    fairwddi [OPTIONS] COMMAND [ARGS]...
 
    Options:
-     --version       Show package version and exit.
+     --version, -v   Show package version and exit.
      --help          Show help message and exit.
 
    Commands:
-     info            Display runtime environment, database connection, and package details.
-     db              Database initialization, status inspection, DDL export, and lifecycle tools.
-     vocab           Controlled vocabulary and SKOS taxonomy administration.
-     preflight       Static analysis and profile validation of incoming DDI XML files.
-     compare         Batch comparison between XML files and database records.
-     ingest          Execute, monitor, and rollback ingestion execution plans.
-     harmonize       Interactive cross-survey variable clustering and harmonization.
-     serve           Launch the ASGI REST API server with live Swagger documentation.
+     db              Database initialization, vocabulary loading, wipe, and DDL export.
+     preflight       Preflight readiness checks, profile QA, and DDI-C -> DDI-L upgrades.
+     import          Deterministic metadata import (``fairwddi import <file>`` + subcommands).
+     group           Curate and inspect reusable DDI resource Groups (canonical URN + slug).
+     compare         Read-only two-set, three-layer comparison (syntactic, semantic, conceptual).
+     harmonize       Plan, approve, execute, and undo comparison-driven harmonization.
+     serve / ui      Launch the ASGI REST API server and Question Bank Explorer.
 
 Database Management (``fairwddi db``)
 -------------------------------------
 
-Inspect, migrate, wipe, and manage PostgreSQL schema state:
-
 .. code-block:: bash
 
-   # Check connection status, table counts, and pending migrations
    fairwddi db status
-
-   # Apply all migrations and initialize the UrnRegistry
    fairwddi db init
-
-   # Export raw PostgreSQL 17 DDL to a file
    fairwddi db export-ddl --output postgres_17_schema.sql
-
-   # Wipe database (requires confirmation flag)
-   fairwddi db wipe --confirm-irreversible-loss
-
-   # Recreate database from scratch (drop all tables + run migrations)
-   fairwddi db recreate --confirm-irreversible-loss
-
-Vocabulary Administration (``fairwddi vocab``)
-----------------------------------------------
-
-Manage SKOS controlled vocabularies (e.g., CESSDA ELSST):
-
-.. code-block:: bash
-
-   # Check loaded vocabularies and concept counts
-   fairwddi vocab check
-
-   # Load SKOS RDF/XML file into the Concept and ConceptScheme tables
-   fairwddi vocab load-skos /path/to/elsst_fr_en.rdf --vocabulary-name "ELSST" --agency "eu.cessda"
+   fairwddi db load-vocab /path/to/elsst.ttl --vocabulary ELSST --levels 2
+   fairwddi db check-vocab
 
 Preflight Analysis (``fairwddi preflight``)
 -------------------------------------------
 
-Validate DDI XML files before ingestion:
+.. code-block:: bash
+
+   fairwddi preflight check survey_wave_1.xml --profile request
+   fairwddi preflight upgrade legacy_codebook.xml --format ddi4-json --category-scheme-mode per_codelist
+   fairwddi preflight profiles
+
+Deterministic Import (``fairwddi import``)
+------------------------------------------
+
+Import DDI-Codebook or DDI-Lifecycle files into ReQuest core tables with **zero cross-study harmonization**:
 
 .. code-block:: bash
 
-   # Inspect XML file encoding, namespaces, format version, and root elements
-   fairwddi preflight check survey_wave_1.xml
+   # Direct one-command import (DDI-C upgraded to DDI 4.0 automatically)
+   fairwddi import survey_wave_1.xml --category-scheme-mode per_codelist
 
-   # Extract resource counts and profile characteristics
-   fairwddi preflight profiles survey_wave_1.xml --output profile_report.json
+   # Plan-first dry-run workflow
+   fairwddi import plan survey_ddi33.xml --output-dir ./import_out
+   fairwddi import execute ./import_out/survey_ddi33.import.plan.yaml
 
-   # Test upgrade crosswalks (e.g., DDI-Codebook 2.5 to 2.6 or DDI 3.3 to 4.0)
-   fairwddi preflight upgrade legacy_codebook.xml --target-version 2.6
+   # Inspect and roll back batches
+   fairwddi import list --limit 10
+   fairwddi import status 42
+   fairwddi import undo 42
 
-Ingestion Pipeline (``fairwddi ingest``)
-----------------------------------------
-
-Orchestrate safe, plan-based batch ingestion:
+Context Groups (``fairwddi group``)
+-----------------------------------
 
 .. code-block:: bash
 
-   # Step 1: Generate a non-destructive comparison plan against existing database
-   fairwddi ingest plan survey_ddi33.xml --report-out survey_plan.yaml
+   fairwddi group create "ESS France Series" --slug ess-fr --type longitudinal_series \
+     --member urn:ddi:fr.cdsp:su_ess_w1:1.0.0 --member urn:ddi:fr.cdsp:su_ess_w2:1.0.0
+   fairwddi group list
+   fairwddi group show ess-fr
+   fairwddi group add ess-fr --member urn:ddi:fr.cdsp:su_ess_w3:1.0.0
 
-   # Step 2: Review plan summary and proposed actions (Create, Link, Re-version, Quarantine)
-   fairwddi ingest plan survey_ddi33.xml --dry-run
+Three-Layer Comparison (``fairwddi compare``)
+---------------------------------------------
 
-   # Step 3: Execute the plan transactionally
-   fairwddi ingest execute survey_plan.yaml
+.. code-block:: bash
 
-   # List recent ingestion batches and receipts
-   fairwddi ingest list --limit 10
+   fairwddi compare configs
+   fairwddi compare init-config my_compare.yaml --preset default
 
-   # Check detailed status of a specific batch receipt
-   fairwddi ingest status <batch_id>
-
-   # Rollback an ingestion batch cleanly
-   fairwddi ingest undo <batch_id> --confirm
+   fairwddi compare run \
+     --source batch:42 \
+     --target group:ess-fr \
+     --level syntactic --level semantic \
+     --type QuestionItem --type RepresentedVariable \
+     --output-dir ./compare_out
 
 Harmonization (``fairwddi harmonize``)
 --------------------------------------
 
-Cluster, compare, and harmonize variables across studies:
-
 .. code-block:: bash
 
-   # Generate a review-gated harmonization plan proposing concept linkages
-   fairwddi harmonize plan --threshold 0.85 --output harmonization_plan.yaml
+   # Plan harmonization (all items pending manual review by default)
+   fairwddi harmonize plan ./compare_out/compare-abc12345.comparison.yaml --output-dir ./harm_out
 
-   # Approve all high-confidence (>= 0.95) proposals automatically
-   fairwddi harmonize approve-high harmonization_plan.yaml
+   # Plan and auto-approve qualifying high-tier matches in one step
+   fairwddi harmonize plan ./compare_out/compare-abc12345.comparison.yaml --approve-high --output-dir ./harm_out
 
-   # Apply the approved harmonization linkages to the database
-   fairwddi harmonize apply harmonization_plan.yaml
+   # Execute approved actions atomically
+   fairwddi harmonize execute ./harm_out/harmonize-abc12345.harmonize.plan.yaml
 
-   # Create a new instantiated or generated harmonized resource from imported sources
+   # Manual creation, linking, and EventLog rollback
    fairwddi harmonize create -s <src1_urn> -s <src2_urn> --name "Trust in Institutions"
-
-   # Link imported resources to an existing generated or instantiated harmonized target
-   fairwddi harmonize link -s <wave3_urn> -t <harmonized_target_urn>
-
-   # Revert an applied harmonization job
+   fairwddi harmonize link -s <wave3_urn> --into <harmonized_target_urn>
    fairwddi harmonize undo <job_id>
 
 API Server (``fairwddi serve``)
 -------------------------------
 
-Start the ASGI web service running `django-ninja`::
+.. code-block:: bash
 
-   # Start server on default port (8000)
-   fairwddi serve
-
-   # Start with custom host, port, and auto-reload for development
-   fairwddi serve --host 0.0.0.0 --port 8080 --reload
+   fairwddi serve --host 127.0.0.1 --port 8000 --open

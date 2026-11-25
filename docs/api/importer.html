@@ -1,0 +1,1154 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pure Deterministic Import (fairwddi.importer) &mdash; FAIRwDDI Lifecycle 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Group Curation &amp; Set Resolution (fairwddi.groups)" href="groups.html" />
+    <link rel="prev" title="Database Layer (fairwddi.db)" href="db.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+<div class="portal-return-bar">
+  <a href="../index.html">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to FAIRwDDI Architecture Portal & Explorer
+  </a>
+  <span class="badge">CDSP • Sciences Po / CNRS</span>
+</div>
+ 
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+  
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FAIRwDDI Lifecycle
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+  <div style="margin-top: 10px; margin-bottom: 6px; padding: 0 4px;">
+    <a href="../index.html" style="font-size: 0.82rem; color: #38bdf8 !important; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Main Portal
+    </a>
+  </div>
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../admin/index.html">Administrator Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../admin/index.html#key-operational-responsibilities">Key Operational Responsibilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/index.html#guide-outline">Guide Outline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../admin/architecture.html">System Architecture &amp; Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/architecture.html#hardware-operating-system-recommendations">Hardware &amp; Operating System Recommendations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/architecture.html#software-dependencies">Software Dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/architecture.html#database-architecture">Database Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/installation.html">Installation &amp; Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#configuration-env">Configuration (.env)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#database-provisioning">Database Provisioning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#verifying-installation">Verifying Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/cli_operations.html">CLI Operational Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#global-options">Global Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#deterministic-import-fairwddi-import">Deterministic Import (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#context-groups-fairwddi-group">Context Groups (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">group</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#three-layer-comparison-fairwddi-compare">Three-Layer Comparison (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">compare</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/ingestion_ops.html">Import &amp; Harmonization Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#pure-import-lifecycle-fairwddi-import">Pure Import Lifecycle (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#post-import-comparison-harmonization">Post-Import Comparison &amp; Harmonization</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/deployment.html">Production Deployment &amp; Maintenance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#service-architecture">Service Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#asgi-application-server-setup">ASGI Application Server Setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#nginx-reverse-proxy-configuration">Nginx Reverse Proxy Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#database-maintenance-index-optimization">Database Maintenance &amp; Index Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#backup-and-disaster-recovery">Backup and Disaster Recovery</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../developer/index.html#architectural-principles">Architectural Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../developer/variable_cascade.html">The DDI Variable Cascade</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#the-three-tiers-of-the-cascade">The Three Tiers of the Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#tier-definitions">Tier Definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#standards-crosswalk">Standards Crosswalk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#orm-traversal-examples">ORM Traversal Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/data_model.html">The 30-Model Database Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/data_model.html#abstract-base-classes">Abstract Base Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/data_model.html#layer-model-breakdown">Layer &amp; Model Breakdown</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/data_model.html#polymorphic-cross-resource-relations">Polymorphic Cross-Resource Relations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/urn_registry.html">Universal URN Master Registry (UrnRegistry)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#the-problem-it-solves">The Problem It Solves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#the-supertype-master-pattern">The Supertype Master Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#lifecycle-guarantees">Lifecycle Guarantees</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#canonical-urn-syntax">Canonical URN Syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/multilingual_jsonb.html">Multilingual JSONB Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#jsonb-data-model">JSONB Data Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#string-normalization-pipeline">String Normalization Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#querying-multilingual-fields">Querying Multilingual Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#postgresql-17-icu-collations">PostgreSQL 17 ICU Collations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/fingerprinting.html">Content Fingerprinting &amp; Deduplication</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#the-multi-algorithm-approach">The Multi-Algorithm Approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#canonical-json-serialization">Canonical JSON Serialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#simple-vs-compound-hashing">Simple vs Compound Hashing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#deterministic-16-character-urn-hashes">Deterministic 16-Character URN Hashes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/importer_engine.html">The Import, Comparison &amp; Harmonization Engines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#api-architecture">API Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#endpoints-overview">Endpoints Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#example-endpoint-implementation">Example Endpoint Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#interactive-database-explorer">Interactive Database Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/dartfx_integration.html">Data Artifex DDI Toolkit Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#overview-of-dartfx-ddi">Overview of dartfx-ddi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#ddi-lifecycle-fragment-streaming">DDI-Lifecycle Fragment Streaming</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#multilingual-codebook-merging">Multilingual Codebook Merging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#ddi-cdi-assistant-framework">DDI-CDI Assistant Framework</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributor/index.html">Contributor Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../contributor/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/environment.html">Development Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#pre-commit-hooks">Pre-commit Hooks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#running-quick-sanity-checks">Running Quick Sanity Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/conventions.html">Coding Conventions &amp; Standards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#python-stack-tooling">Python Stack &amp; Tooling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#code-formatting-linting-ruff">Code Formatting &amp; Linting (Ruff)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#type-annotations-static-typing">Type Annotations &amp; Static Typing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#django-migrations-zero-data-loss">Django Migrations &amp; Zero-Data-Loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#ddi-naming-conventions">DDI Naming Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/testing.html">Testing Guide &amp; Practices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#testing-stack">Testing Stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#running-tests">Running Tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#isolated-sqlite-test-configuration">Isolated SQLite Test Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#testing-ingestion-streaming">Testing Ingestion &amp; Streaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/workflows.html">Development Workflows &amp; Pull Requests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#git-branching-strategy">Git Branching Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#pull-request-checklist">Pull Request Checklist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#building-documentation-locally">Building Documentation Locally</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Python API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="models.html">Models (fairwddi.models)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.base">Base Infrastructure &amp; Supertype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.concept">Concept Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.representation">Representation Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.instrument">Instrument &amp; Question Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.dataset">Dataset Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.organization">Organization &amp; Grouping Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.infrastructure">Batch &amp; Ingestion Infrastructure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.event">Audit &amp; Event Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="schemas.html">Pydantic Schemas (fairwddi.schemas)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="schemas.html#module-fairwddi.schemas.common">Common Value Objects &amp; Primitives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="schemas.html#module-fairwddi.schemas.entities">Entity Schemas</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="db.html">Database Layer (fairwddi.db)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.wipe">Wipe &amp; Lifecycle Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Pure Deterministic Import (fairwddi.importer)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.detector.MetadataFormatInfo"><code class="docutils literal notranslate"><span class="pre">MetadataFormatInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.detector.compute_file_sha256"><code class="docutils literal notranslate"><span class="pre">compute_file_sha256()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.detector.detect_metadata_format"><code class="docutils literal notranslate"><span class="pre">detect_metadata_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.streaming.RawResourceNode"><code class="docutils literal notranslate"><span class="pre">RawResourceNode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.streaming.extract_referenced_urns_from_json"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.streaming.extract_referenced_urns_from_xml"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.streaming.resource_to_json"><code class="docutils literal notranslate"><span class="pre">resource_to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.streaming.stream_ddi_c_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_c_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.streaming.stream_ddi_l_json"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.streaming.stream_ddi_l_jsonl"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_jsonl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.streaming.stream_ddi_l_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.streaming.stream_resources"><code class="docutils literal notranslate"><span class="pre">stream_resources()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.streaming.xml_elem_to_dict"><code class="docutils literal notranslate"><span class="pre">xml_elem_to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.streaming.xml_to_json_dict"><code class="docutils literal notranslate"><span class="pre">xml_to_json_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.profiles.ImportProfile"><code class="docutils literal notranslate"><span class="pre">ImportProfile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.profiles.ImportStrategies"><code class="docutils literal notranslate"><span class="pre">ImportStrategies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.profiles.list_available_profiles"><code class="docutils literal notranslate"><span class="pre">list_available_profiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.profiles.load_profile"><code class="docutils literal notranslate"><span class="pre">load_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.preflight.run_preflight_check"><code class="docutils literal notranslate"><span class="pre">run_preflight_check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.preflight.upgrade_ddic_to_ddil"><code class="docutils literal notranslate"><span class="pre">upgrade_ddic_to_ddil()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.plan.ImportActionItem"><code class="docutils literal notranslate"><span class="pre">ImportActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.plan.ImportPlan"><code class="docutils literal notranslate"><span class="pre">ImportPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.plan.PlanActionItem"><code class="docutils literal notranslate"><span class="pre">PlanActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.plan.PlanIssue"><code class="docutils literal notranslate"><span class="pre">PlanIssue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.plan.ReviewGate"><code class="docutils literal notranslate"><span class="pre">ReviewGate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.loader.compute_resource_hashes"><code class="docutils literal notranslate"><span class="pre">compute_resource_hashes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.loader.execute_import"><code class="docutils literal notranslate"><span class="pre">execute_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.loader.get_import_batch_status"><code class="docutils literal notranslate"><span class="pre">get_import_batch_status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.loader.list_import_batches"><code class="docutils literal notranslate"><span class="pre">list_import_batches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.loader.parse_ddi_urn"><code class="docutils literal notranslate"><span class="pre">parse_ddi_urn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.loader.plan_import"><code class="docutils literal notranslate"><span class="pre">plan_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.loader.undo_import"><code class="docutils literal notranslate"><span class="pre">undo_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.importer.pipeline.run_import"><code class="docutils literal notranslate"><span class="pre">run_import()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="groups.html">Group Curation &amp; Set Resolution (fairwddi.groups)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.add_group_members"><code class="docutils literal notranslate"><span class="pre">add_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.create_group"><code class="docutils literal notranslate"><span class="pre">create_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.delete_group"><code class="docutils literal notranslate"><span class="pre">delete_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.get_group_details"><code class="docutils literal notranslate"><span class="pre">get_group_details()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.list_groups"><code class="docutils literal notranslate"><span class="pre">list_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.remove_group_members"><code class="docutils literal notranslate"><span class="pre">remove_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.rename_group"><code class="docutils literal notranslate"><span class="pre">rename_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.resolve_group"><code class="docutils literal notranslate"><span class="pre">resolve_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.ResolvedResourceSet"><code class="docutils literal notranslate"><span class="pre">ResolvedResourceSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.ResourceSetSpec"><code class="docutils literal notranslate"><span class="pre">ResourceSetSpec</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.parse_resource_set_spec"><code class="docutils literal notranslate"><span class="pre">parse_resource_set_spec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.resolve_resource_set"><code class="docutils literal notranslate"><span class="pre">resolve_resource_set()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="compare.html">Three-Layer Comparison Engine (fairwddi.compare)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.CandidateCorrespondence"><code class="docutils literal notranslate"><span class="pre">CandidateCorrespondence</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.CodeListQualification"><code class="docutils literal notranslate"><span class="pre">CodeListQualification</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.ComparisonResultSet"><code class="docutils literal notranslate"><span class="pre">ComparisonResultSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.CorrespondenceLevel"><code class="docutils literal notranslate"><span class="pre">CorrespondenceLevel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.QualificationReport"><code class="docutils literal notranslate"><span class="pre">QualificationReport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.ComparisonConfig"><code class="docutils literal notranslate"><span class="pre">ComparisonConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.ConceptualRuleConfig"><code class="docutils literal notranslate"><span class="pre">ConceptualRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.QualificationRuleConfig"><code class="docutils literal notranslate"><span class="pre">QualificationRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.ResourceTypeComparisonRule"><code class="docutils literal notranslate"><span class="pre">ResourceTypeComparisonRule</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.SemanticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SemanticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.SyntacticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SyntacticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.list_comparison_configs"><code class="docutils literal notranslate"><span class="pre">list_comparison_configs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.load_comparison_config"><code class="docutils literal notranslate"><span class="pre">load_comparison_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.qualifier.evaluate_qualification"><code class="docutils literal notranslate"><span class="pre">evaluate_qualification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.syntactic.compare_syntactic_sets"><code class="docutils literal notranslate"><span class="pre">compare_syntactic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider"><code class="docutils literal notranslate"><span class="pre">SentenceTransformerEmbeddingProvider</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.semantic.compare_semantic_sets"><code class="docutils literal notranslate"><span class="pre">compare_semantic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.semantic.get_embedding_provider"><code class="docutils literal notranslate"><span class="pre">get_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.semantic.register_embedding_provider"><code class="docutils literal notranslate"><span class="pre">register_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.conceptual.ConceptAssigner"><code class="docutils literal notranslate"><span class="pre">ConceptAssigner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.conceptual.compare_conceptual_sets"><code class="docutils literal notranslate"><span class="pre">compare_conceptual_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.conceptual.register_concept_assigner"><code class="docutils literal notranslate"><span class="pre">register_concept_assigner()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.engine.run_comparison"><code class="docutils literal notranslate"><span class="pre">run_comparison()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="harmonize.html">Policy-Driven Harmonization (fairwddi.harmonize)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy"><code class="docutils literal notranslate"><span class="pre">AutoApproveHighPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.GuardrailPolicy"><code class="docutils literal notranslate"><span class="pre">GuardrailPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem"><code class="docutils literal notranslate"><span class="pre">HarmonizationActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.HarmonizationGuardrails"><code class="docutils literal notranslate"><span class="pre">HarmonizationGuardrails</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan"><code class="docutils literal notranslate"><span class="pre">HarmonizationPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy"><code class="docutils literal notranslate"><span class="pre">HarmonizationPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.load_harmonization_policy"><code class="docutils literal notranslate"><span class="pre">load_harmonization_policy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.planner.approve_high_actions"><code class="docutils literal notranslate"><span class="pre">approve_high_actions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.planner.plan_harmonization"><code class="docutils literal notranslate"><span class="pre">plan_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.manager.create_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">create_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.manager.execute_harmonization"><code class="docutils literal notranslate"><span class="pre">execute_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.manager.link_to_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">link_to_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.manager.undo_harmonization"><code class="docutils literal notranslate"><span class="pre">undo_harmonization()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.router">Router &amp; Endpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.schemas">API Request &amp; Response Schemas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.views">Views &amp; Route Handlers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.server">ASGI Server Runner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.explorer_html">Interactive Model Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">Utilities (fairwddi.utils)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#module-fairwddi.utils.urn">URN Helpers (urn.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#module-fairwddi.utils.normalize_string">String Normalization (normalize_string.py)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Standards &amp; Project Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#reference-documents">Reference Documents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/glossary.html">DDI Canonical Terminology Glossary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/deliverables.html">Project Deliverables &amp; Research Reports</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/deliverables.html#core-deliverables">Core Deliverables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/deliverables.html#specialized-technical-research-papers">Specialized Technical Research Papers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/deliverables.html#interactive-exploration">Interactive Exploration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/changelog.html">Changelog &amp; Project Roadmap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/changelog.html#project-timeline-overview">Project Timeline Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/changelog.html#release-history">Release History</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FAIRwDDI Lifecycle</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Python API Reference</a></li>
+      <li class="breadcrumb-item active">Pure Deterministic Import (fairwddi.importer)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/importer.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pure-deterministic-import-fairwddi-importer">
+<h1>Pure Deterministic Import (fairwddi.importer)<a class="headerlink" href="#pure-deterministic-import-fairwddi-importer" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">fairwddi.importer</span></code> package manages format detection, streaming XML/JSON parsing, preflight checks, DDI-C upgrades, deterministic import plans, and atomic batch loading with zero harmonization coupling.</p>
+<p id="module-fairwddi.importer.detector">Metadata format detection and file SHA-256 fingerprinting for FAIRwDDI.</p>
+<p>Detects specifications (DDI-Lifecycle, DDI-Codebook, DDI-CDI), versions,
+serializations, and archive flavors (Colectica, Nesstar, etc.).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.importer.detector.MetadataFormatInfo">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.importer.detector.</span></span><span class="sig-name descname"><span class="pre">MetadataFormatInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">specification</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialization</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flavor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_tag_or_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonical_slug</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/detector.html#MetadataFormatInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.detector.MetadataFormatInfo" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Structured information about a detected metadata document format.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.detector.MetadataFormatInfo.canonical_slug">
+<span class="sig-name descname"><span class="pre">canonical_slug</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.detector.MetadataFormatInfo.canonical_slug" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.detector.MetadataFormatInfo.flavor">
+<span class="sig-name descname"><span class="pre">flavor</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.importer.detector.MetadataFormatInfo.flavor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.detector.MetadataFormatInfo.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'frozen':</span> <span class="pre">True}</span></span><a class="headerlink" href="#fairwddi.importer.detector.MetadataFormatInfo.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.detector.MetadataFormatInfo.root_tag_or_type">
+<span class="sig-name descname"><span class="pre">root_tag_or_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.importer.detector.MetadataFormatInfo.root_tag_or_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.detector.MetadataFormatInfo.serialization">
+<span class="sig-name descname"><span class="pre">serialization</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'xml'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'json'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'jsonl'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'json-ld'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'turtle'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'csv'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'unknown'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.detector.MetadataFormatInfo.serialization" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.detector.MetadataFormatInfo.specification">
+<span class="sig-name descname"><span class="pre">specification</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'DDI-L'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'DDI-C'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'DDI-CDI'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Unknown'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.detector.MetadataFormatInfo.specification" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.detector.MetadataFormatInfo.version">
+<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.detector.MetadataFormatInfo.version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.detector.compute_file_sha256">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.detector.</span></span><span class="sig-name descname"><span class="pre">compute_file_sha256</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/detector.html#compute_file_sha256"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.detector.compute_file_sha256" title="Link to this definition"></a></dt>
+<dd><p>Compute SHA-256 digest of a file in streaming chunks.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.detector.detect_metadata_format">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.detector.</span></span><span class="sig-name descname"><span class="pre">detect_metadata_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/detector.html#detect_metadata_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.detector.detect_metadata_format" title="Link to this definition"></a></dt>
+<dd><p>Detect metadata specification, version, serialization, and flavor from a file.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<p id="module-fairwddi.importer.streaming">Streaming parsers and resource extractors for DDI metadata formats.</p>
+<p>Streams DDI-Lifecycle 3.x XML, DDI-Lifecycle 4.0 JSON/JSONL, and DDI-Codebook 2.5 XML
+in constant O(1) memory, yielding structured in-memory <code class="docutils literal notranslate"><span class="pre">RawResourceNode</span></code> payloads
+directly to preflight and pure import without intermediate database staging.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.RawResourceNode">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.importer.streaming.</span></span><span class="sig-name descname"><span class="pre">RawResourceNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_urn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">referenced_urns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_fingerprint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#RawResourceNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.RawResourceNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Individual extracted metadata element yielded during streaming.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.RawResourceNode.compute_content_fingerprint">
+<span class="sig-name descname"><span class="pre">compute_content_fingerprint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#RawResourceNode.compute_content_fingerprint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.RawResourceNode.compute_content_fingerprint" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.RawResourceNode.content_fingerprint">
+<span class="sig-name descname"><span class="pre">content_fingerprint</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.streaming.RawResourceNode.content_fingerprint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.RawResourceNode.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'arbitrary_types_allowed':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></span><a class="headerlink" href="#fairwddi.importer.streaming.RawResourceNode.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.RawResourceNode.raw_urn">
+<span class="sig-name descname"><span class="pre">raw_urn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.streaming.RawResourceNode.raw_urn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.RawResourceNode.raw_value">
+<span class="sig-name descname"><span class="pre">raw_value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.streaming.RawResourceNode.raw_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.RawResourceNode.referenced_urns">
+<span class="sig-name descname"><span class="pre">referenced_urns</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#set" title="(in Python v3.15)"><span class="pre">set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.streaming.RawResourceNode.referenced_urns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.RawResourceNode.resource_type">
+<span class="sig-name descname"><span class="pre">resource_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.streaming.RawResourceNode.resource_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.RawResourceNode.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#RawResourceNode.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.RawResourceNode.to_json" title="Link to this definition"></a></dt>
+<dd><p>Return canonical JSON representation of the resource payload.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.extract_referenced_urns_from_json">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.streaming.</span></span><span class="sig-name descname"><span class="pre">extract_referenced_urns_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#extract_referenced_urns_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.extract_referenced_urns_from_json" title="Link to this definition"></a></dt>
+<dd><p>Recursively extract referenced URNs from a JSON dictionary.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.extract_referenced_urns_from_xml">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.streaming.</span></span><span class="sig-name descname"><span class="pre">extract_referenced_urns_from_xml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#extract_referenced_urns_from_xml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.extract_referenced_urns_from_xml" title="Link to this definition"></a></dt>
+<dd><p>Extract referenced URNs from Reference elements within an XML tree.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.resource_to_json">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.streaming.</span></span><span class="sig-name descname"><span class="pre">resource_to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resource</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#resource_to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.resource_to_json" title="Link to this definition"></a></dt>
+<dd><p>Serialize any metadata resource (model instance, XML element, or dict) to a JSON dict.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.stream_ddi_c_xml">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.streaming.</span></span><span class="sig-name descname"><span class="pre">stream_ddi_c_xml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#stream_ddi_c_xml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.stream_ddi_c_xml" title="Link to this definition"></a></dt>
+<dd><p>Parse DDI-Codebook 2.5 XML files using dartfx-ddi and stream resources.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.stream_ddi_l_json">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.streaming.</span></span><span class="sig-name descname"><span class="pre">stream_ddi_l_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#stream_ddi_l_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.stream_ddi_l_json" title="Link to this definition"></a></dt>
+<dd><p>Stream DDI-Lifecycle 4.0 / Colectica JSON files item by item.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.stream_ddi_l_jsonl">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.streaming.</span></span><span class="sig-name descname"><span class="pre">stream_ddi_l_jsonl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#stream_ddi_l_jsonl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.stream_ddi_l_jsonl" title="Link to this definition"></a></dt>
+<dd><p>Stream DDI-Lifecycle 4.0 JSON Lines (.jsonl) files in O(1) memory.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.stream_ddi_l_xml">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.streaming.</span></span><span class="sig-name descname"><span class="pre">stream_ddi_l_xml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#stream_ddi_l_xml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.stream_ddi_l_xml" title="Link to this definition"></a></dt>
+<dd><p>Stream DDI-Lifecycle 3.x XML files element-by-element using iterparse.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.stream_resources">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.streaming.</span></span><span class="sig-name descname"><span class="pre">stream_resources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#stream_resources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.stream_resources" title="Link to this definition"></a></dt>
+<dd><p>Unified dispatcher streaming RawResourceNode instances based on detected format.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.xml_elem_to_dict">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.streaming.</span></span><span class="sig-name descname"><span class="pre">xml_elem_to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#xml_elem_to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.xml_elem_to_dict" title="Link to this definition"></a></dt>
+<dd><p>Alias for backwards compatibility: converts XML element to JSON dictionary.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.streaming.xml_to_json_dict">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.streaming.</span></span><span class="sig-name descname"><span class="pre">xml_to_json_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/streaming.html#xml_to_json_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.streaming.xml_to_json_dict" title="Link to this definition"></a></dt>
+<dd><p>Recursively convert an lxml XML element to a clean structured JSON dict or scalar.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<p id="module-fairwddi.importer.profiles">Import profile definitions and YAML/JSON loader for FAIRwDDI.</p>
+<p>Governs resource filtering, referential integrity traversal, and duplicate/drift strategies.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportProfile">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.importer.profiles.</span></span><span class="sig-name descname"><span class="pre">ImportProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_referenced_resources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/profiles.html#ImportProfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.profiles.ImportProfile" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Configuration profile defining resource filtering and collision rules for ingestion.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportProfile.description">
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.profiles.ImportProfile.description" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportProfile.exclude_types">
+<span class="sig-name descname"><span class="pre">exclude_types</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.profiles.ImportProfile.exclude_types" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportProfile.include_referenced_resources">
+<span class="sig-name descname"><span class="pre">include_referenced_resources</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.importer.profiles.ImportProfile.include_referenced_resources" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportProfile.include_types">
+<span class="sig-name descname"><span class="pre">include_types</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.profiles.ImportProfile.include_types" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportProfile.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.importer.profiles.ImportProfile.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportProfile.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.profiles.ImportProfile.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportProfile.should_include">
+<span class="sig-name descname"><span class="pre">should_include</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_referenced</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/profiles.html#ImportProfile.should_include"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.profiles.ImportProfile.should_include" title="Link to this definition"></a></dt>
+<dd><p>Evaluate if a resource type should be included for ingestion.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportProfile.strategies">
+<span class="sig-name descname"><span class="pre">strategies</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#fairwddi.importer.profiles.ImportStrategies" title="fairwddi.importer.profiles.ImportStrategies"><span class="pre">ImportStrategies</span></a></span><a class="headerlink" href="#fairwddi.importer.profiles.ImportProfile.strategies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportStrategies">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.importer.profiles.</span></span><span class="sig-name descname"><span class="pre">ImportStrategies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_duplicate_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'skip'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_existing_resource</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'insert_new_only'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_content_drift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'quarantine'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/profiles.html#ImportStrategies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.profiles.ImportStrategies" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Collision and duplicate resolution strategies for an ingestion session.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportStrategies.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.importer.profiles.ImportStrategies.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportStrategies.on_content_drift">
+<span class="sig-name descname"><span class="pre">on_content_drift</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'quarantine'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'reject'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'overwrite'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.profiles.ImportStrategies.on_content_drift" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportStrategies.on_duplicate_file">
+<span class="sig-name descname"><span class="pre">on_duplicate_file</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'skip'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'force_reload'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'fail'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.profiles.ImportStrategies.on_duplicate_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.ImportStrategies.on_existing_resource">
+<span class="sig-name descname"><span class="pre">on_existing_resource</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'insert_new_only'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'fail'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'replace'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.profiles.ImportStrategies.on_existing_resource" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.list_available_profiles">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.profiles.</span></span><span class="sig-name descname"><span class="pre">list_available_profiles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/profiles.html#list_available_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.profiles.list_available_profiles" title="Link to this definition"></a></dt>
+<dd><p>Scan and list available profiles in the profiles/ directory.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.profiles.load_profile">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.profiles.</span></span><span class="sig-name descname"><span class="pre">load_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_or_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/profiles.html#load_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.profiles.load_profile" title="Link to this definition"></a></dt>
+<dd><p>Load an ImportProfile from a YAML/JSON file or preset name (default: ‘request’).</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<p id="module-fairwddi.importer.preflight">Stage 1 (Preflight): Readiness inspection, profile QA, URN audit, and DDI-C to DDI-L upgrade.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.preflight.run_preflight_check">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.preflight.</span></span><span class="sig-name descname"><span class="pre">run_preflight_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'request'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_approve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/preflight.html#run_preflight_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.preflight.run_preflight_check" title="Link to this definition"></a></dt>
+<dd><p>Run Stage 1 preflight readiness checks on an incoming DDI-C or DDI-L file.</p>
+<p>Performs:
+1. Format &amp; version detection + SHA-256 duplicate batch check.
+2. Specification &amp; ReQuest profile QA (using dartfx-ddi profilers).
+3. URN readiness audit (explicit vs. synthesized vs. anonymous).
+4. Internal &amp; external reference resolution audit against UrnRegistry.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.preflight.upgrade_ddic_to_ddil">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.preflight.</span></span><span class="sig-name descname"><span class="pre">upgrade_ddic_to_ddil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ddi4-json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hierarchical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">harmonize_codes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">harmonize_questions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category_scheme_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'single'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">report_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/preflight.html#upgrade_ddic_to_ddil"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.preflight.upgrade_ddic_to_ddil" title="Link to this definition"></a></dt>
+<dd><p>Explicitly upgrade a DDI-Codebook (classic or multilingual) file to DDI-Lifecycle on disk.</p>
+<p>Uses dartfx-ddi CodebookToLifecycleConverter with intra-file code list and question
+deduplication, selectable CategoryScheme granularity, and deterministic URN generation.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<p id="module-fairwddi.importer.plan">Review-gated Plan and Report models for the FAIRwDDI deterministic import pipeline.</p>
+<p>Every import stage (<code class="docutils literal notranslate"><span class="pre">preflight</span></code> and <code class="docutils literal notranslate"><span class="pre">import</span></code>) emits a deterministic YAML plan
+and a human-readable Markdown report governed by a <a class="reference internal" href="#fairwddi.importer.plan.ReviewGate" title="fairwddi.importer.plan.ReviewGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReviewGate</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.importer.plan.</span></span><span class="sig-name descname"><span class="pre">ImportActionItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'import'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_urn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_urn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">requires_review</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">approved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/plan.html#ImportActionItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Planned or executed deterministic import operation on a metadata resource.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem.action">
+<span class="sig-name descname"><span class="pre">action</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'create'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'reuse'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'quarantine'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'upgrade'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'skip'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem.action" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem.approved">
+<span class="sig-name descname"><span class="pre">approved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem.approved" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem.confidence">
+<span class="sig-name descname"><span class="pre">confidence</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem.confidence" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem.details">
+<span class="sig-name descname"><span class="pre">details</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem.details" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem.notes">
+<span class="sig-name descname"><span class="pre">notes</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem.notes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem.requires_review">
+<span class="sig-name descname"><span class="pre">requires_review</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem.requires_review" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem.resource_type">
+<span class="sig-name descname"><span class="pre">resource_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem.resource_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem.source_urn">
+<span class="sig-name descname"><span class="pre">source_urn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem.source_urn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem.stage">
+<span class="sig-name descname"><span class="pre">stage</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'preflight'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'import'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem.stage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportActionItem.target_urn">
+<span class="sig-name descname"><span class="pre">target_urn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportActionItem.target_urn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.importer.plan.</span></span><span class="sig-name descname"><span class="pre">ImportPlan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plan_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'2.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'import'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">job_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_sha256</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'request'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">review_gate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/plan.html#ImportPlan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Serializable, review-gated execution plan and report for metadata import stages.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.actions">
+<span class="sig-name descname"><span class="pre">actions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#fairwddi.importer.plan.ImportActionItem" title="fairwddi.importer.plan.ImportActionItem"><span class="pre">ImportActionItem</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.actions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.batch_id">
+<span class="sig-name descname"><span class="pre">batch_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.batch_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.created_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.error_count">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">error_count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.error_count" title="Link to this definition"></a></dt>
+<dd><p>Count of error-severity issues.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.file_sha256">
+<span class="sig-name descname"><span class="pre">file_sha256</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.file_sha256" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.from_yaml">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/plan.html#ImportPlan.from_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.from_yaml" title="Link to this definition"></a></dt>
+<dd><p>Load an ImportPlan from a YAML file path or YAML string.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.is_ready_to_execute">
+<span class="sig-name descname"><span class="pre">is_ready_to_execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auto_approve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/plan.html#ImportPlan.is_ready_to_execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.is_ready_to_execute" title="Link to this definition"></a></dt>
+<dd><p>Check whether this plan is clear to execute.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.issues">
+<span class="sig-name descname"><span class="pre">issues</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#fairwddi.importer.plan.PlanIssue" title="fairwddi.importer.plan.PlanIssue"><span class="pre">PlanIssue</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.issues" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.job_id">
+<span class="sig-name descname"><span class="pre">job_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.job_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.pending_review_count">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">pending_review_count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.pending_review_count" title="Link to this definition"></a></dt>
+<dd><p>Count of issues or actions flagged as requiring human review.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.plan_version">
+<span class="sig-name descname"><span class="pre">plan_version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.plan_version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.profile">
+<span class="sig-name descname"><span class="pre">profile</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.profile" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.review_gate">
+<span class="sig-name descname"><span class="pre">review_gate</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#fairwddi.importer.plan.ReviewGate" title="fairwddi.importer.plan.ReviewGate"><span class="pre">ReviewGate</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.review_gate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.source_file">
+<span class="sig-name descname"><span class="pre">source_file</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.source_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.source_format">
+<span class="sig-name descname"><span class="pre">source_format</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.source_format" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.source_path">
+<span class="sig-name descname"><span class="pre">source_path</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.source_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.stage">
+<span class="sig-name descname"><span class="pre">stage</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'preflight'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'import'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.stage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.summary">
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.summary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/plan.html#ImportPlan.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Convert plan to a plain dictionary suitable for YAML/JSON serialization.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.to_markdown">
+<span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/plan.html#ImportPlan.to_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Render a human-readable Markdown report for this plan.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.to_yaml">
+<span class="sig-name descname"><span class="pre">to_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/plan.html#ImportPlan.to_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.to_yaml" title="Link to this definition"></a></dt>
+<dd><p>Serialize the plan to YAML and optionally write to disk.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ImportPlan.warning_count">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">warning_count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ImportPlan.warning_count" title="Link to this definition"></a></dt>
+<dd><p>Count of warning-severity issues.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.PlanActionItem">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.plan.</span></span><span class="sig-name descname"><span class="pre">PlanActionItem</span></span><a class="headerlink" href="#fairwddi.importer.plan.PlanActionItem" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#fairwddi.importer.plan.ImportActionItem" title="fairwddi.importer.plan.ImportActionItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImportActionItem</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.PlanIssue">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.importer.plan.</span></span><span class="sig-name descname"><span class="pre">PlanIssue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">severity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'warning'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_urn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">requires_review</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/plan.html#PlanIssue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.plan.PlanIssue" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Diagnostic or QA finding recorded during preflight or import.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.PlanIssue.code">
+<span class="sig-name descname"><span class="pre">code</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.PlanIssue.code" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.PlanIssue.message">
+<span class="sig-name descname"><span class="pre">message</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.PlanIssue.message" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.PlanIssue.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.importer.plan.PlanIssue.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.PlanIssue.requires_review">
+<span class="sig-name descname"><span class="pre">requires_review</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.PlanIssue.requires_review" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.PlanIssue.resource_type">
+<span class="sig-name descname"><span class="pre">resource_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.PlanIssue.resource_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.PlanIssue.resource_urn">
+<span class="sig-name descname"><span class="pre">resource_urn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.PlanIssue.resource_urn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.PlanIssue.samples">
+<span class="sig-name descname"><span class="pre">samples</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.plan.PlanIssue.samples" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.PlanIssue.severity">
+<span class="sig-name descname"><span class="pre">severity</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'error'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'warning'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'info'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.importer.plan.PlanIssue.severity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ReviewGate">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.importer.plan.</span></span><span class="sig-name descname"><span class="pre">ReviewGate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">approved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reviewer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reviewed_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/plan.html#ReviewGate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.plan.ReviewGate" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Approval gate governing whether a plan with pending review items may execute.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ReviewGate.approved">
+<span class="sig-name descname"><span class="pre">approved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ReviewGate.approved" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ReviewGate.comments">
+<span class="sig-name descname"><span class="pre">comments</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ReviewGate.comments" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ReviewGate.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.importer.plan.ReviewGate.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ReviewGate.reviewed_at">
+<span class="sig-name descname"><span class="pre">reviewed_at</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ReviewGate.reviewed_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.importer.plan.ReviewGate.reviewer">
+<span class="sig-name descname"><span class="pre">reviewer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.importer.plan.ReviewGate.reviewer" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<p id="module-fairwddi.importer.loader">Stage 2 (Pure Deterministic Import &amp; Undo): Streaming metadata load with zero harmonization.</p>
+<p>Streams DDI metadata files directly into ReQuest core tables:</p>
+<ul class="simple">
+<li><p>Strictly pure, deterministic import with ZERO cross-study harmonization, synthetic URNs,
+or <code class="docutils literal notranslate"><span class="pre">prov:wasDerivedFrom</span></code> lineage links.</p></li>
+<li><p>Incoming resources are always persisted faithfully with <code class="docutils literal notranslate"><span class="pre">origin='imported'</span></code>.</p></li>
+<li><p>Same-URN collisions trigger review (<code class="docutils literal notranslate"><span class="pre">reuse</span></code> on matching hash, <code class="docutils literal notranslate"><span class="pre">quarantine</span></code> on drift).</p></li>
+<li><p>Faithfully preserves <code class="docutils literal notranslate"><span class="pre">Category.is_missing</span></code>, <code class="docutils literal notranslate"><span class="pre">CodeItem.is_missing</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">CategoryScheme</span></code> ownership (both <code class="docutils literal notranslate"><span class="pre">single</span></code> and <code class="docutils literal notranslate"><span class="pre">per_codelist</span></code> modes).</p></li>
+<li><p>Referential integrity &amp; deletion protection are enforced across <code class="docutils literal notranslate"><span class="pre">undo_import</span></code> and deletes.</p></li>
+</ul>
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.loader.compute_resource_hashes">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.loader.</span></span><span class="sig-name descname"><span class="pre">compute_resource_hashes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalized_fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/loader.html#compute_resource_hashes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.loader.compute_resource_hashes" title="Link to this definition"></a></dt>
+<dd><p>Compute deterministic SHA-256 content and facet hashes for a normalized resource.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.loader.execute_import">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.loader.</span></span><span class="sig-name descname"><span class="pre">execute_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_or_plan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'request'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_reload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_approve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/loader.html#execute_import"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.loader.execute_import" title="Link to this definition"></a></dt>
+<dd><p>Stream a metadata file deterministically into ReQuest core tables (zero harmonization).</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.loader.get_import_batch_status">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.loader.</span></span><span class="sig-name descname"><span class="pre">get_import_batch_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/loader.html#get_import_batch_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.loader.get_import_batch_status" title="Link to this definition"></a></dt>
+<dd><p>Return full status and statistics for a single IngestBatch receipt.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.loader.list_import_batches">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.loader.</span></span><span class="sig-name descname"><span class="pre">list_import_batches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/loader.html#list_import_batches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.loader.list_import_batches" title="Link to this definition"></a></dt>
+<dd><p>Return a summary list of IngestBatch receipts ordered newest first.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.loader.parse_ddi_urn">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.loader.</span></span><span class="sig-name descname"><span class="pre">parse_ddi_urn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">urn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_agency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/loader.html#parse_ddi_urn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.loader.parse_ddi_urn" title="Link to this definition"></a></dt>
+<dd><p>Parse a DDI URN into (canonical_urn, agency, identifier, version).</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.loader.plan_import">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.loader.</span></span><span class="sig-name descname"><span class="pre">plan_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'request'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_reload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_approve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/loader.html#plan_import"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.loader.plan_import" title="Link to this definition"></a></dt>
+<dd><p>Stream a metadata file in memory and build a zero-write deterministic ImportPlan.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.loader.undo_import">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.loader.</span></span><span class="sig-name descname"><span class="pre">undo_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/loader.html#undo_import"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.loader.undo_import" title="Link to this definition"></a></dt>
+<dd><p>Roll back an imported IngestBatch atomically, respecting referential integrity.</p>
+<p>Verifies that no external resource (or harmonization artifact) outside this batch
+references any resource in <code class="docutils literal notranslate"><span class="pre">created_urns</span></code> before deleting them in leaf-to-root order.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<p id="module-fairwddi.importer.pipeline">Pure deterministic metadata import orchestrator (<cite>fairwddi import &lt;file&gt;</cite>).</p>
+<p>Executes:
+1. Preflight format detection and validation.
+2. Optional DDI-Codebook -&gt; DDI-Lifecycle 4.0 upgrade on disk (preserving intra-file</p>
+<blockquote>
+<div><p>deduplication and selectable CategoryScheme granularity).</p>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>Deterministic zero-write import plan (<cite>plan_import</cite>).</p></li>
+<li><p>Direct database load (<cite>execute_import</cite>) unless <cite>dry_run=True</cite>.</p></li>
+</ol>
+<p>Contains ZERO harmonization or cross-file comparison logic.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.importer.pipeline.run_import">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.importer.pipeline.</span></span><span class="sig-name descname"><span class="pre">run_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'request'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hierarchical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">harmonize_codes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">harmonize_questions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category_scheme_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'single'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_reload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_approve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/importer/pipeline.html#run_import"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.importer.pipeline.run_import" title="Link to this definition"></a></dt>
+<dd><p>Execute the pure deterministic FAIRwDDI import pipeline on a metadata file.</p>
+<p>Stages:</p>
+<ol class="arabic simple">
+<li><p>Preflight readiness inspection (and explicit DDI-C -&gt; DDI-L 4.0 upgrade on disk
+when the input file is DDI-Codebook).</p></li>
+<li><p>Deterministic Import Plan (<cite>plan_import</cite>) with zero DB writes.</p></li>
+<li><p>Direct Import Execution (<cite>execute_import</cite>) into ReQuest core tables + <cite>IngestBatch</cite>
+receipt (unless <cite>dry_run=True</cite>).</p></li>
+</ol>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="db.html" class="btn btn-neutral float-left" title="Database Layer (fairwddi.db)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="groups.html" class="btn btn-neutral float-right" title="Group Curation &amp; Set Resolution (fairwddi.groups)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

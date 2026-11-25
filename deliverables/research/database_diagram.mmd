@@ -17,6 +17,7 @@ erDiagram
 
     Group {
         string urn PK "Canonical URN (e.g. urn:ddi:fr.cdsp:grp-ess:1.0.0)"
+        string slug UK "Unique human-friendly short slug/nickname"
         jsonb name "Multilingual name [{'lang': 'fr', 'value': '...'}]"
         jsonb description "Multilingual description"
         string group_type "Type: study_series, panel, thematic, collection"
@@ -359,7 +360,6 @@ erDiagram
         jsonb options "Batch configuration and options"
         jsonb created_urns "Canonical URNs created by batch"
         jsonb reused_urns "Pre-existing canonical URNs reused"
-        jsonb created_aliases "Aliases registered by batch"
         jsonb stats "Summary counts of created entities"
         timestamp created_at "Batch execution timestamp"
         timestamp updated_at "Update timestamp"

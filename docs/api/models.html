@@ -85,20 +85,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../admin/cli_operations.html">CLI Operational Reference</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#global-options">Global Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#vocabulary-administration-fairwddi-vocab">Vocabulary Administration (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">vocab</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#ingestion-pipeline-fairwddi-ingest">Ingestion Pipeline (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">ingest</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#deterministic-import-fairwddi-import">Deterministic Import (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#context-groups-fairwddi-group">Context Groups (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">group</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#three-layer-comparison-fairwddi-compare">Three-Layer Comparison (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">compare</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../admin/ingestion_ops.html">Ingestion &amp; Pipeline Operations</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#the-2-stage-ingestion-lifecycle">The 2-Stage Ingestion Lifecycle</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#the-4-phase-comparison-cascade">The 4-Phase Comparison Cascade</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#reviewing-ingestion-plans">Reviewing Ingestion Plans</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#executing-batch-transactions">Executing Batch Transactions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#handling-quarantine-records">Handling Quarantine Records</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#rolling-back-a-batch">Rolling Back a Batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/ingestion_ops.html">Import &amp; Harmonization Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#pure-import-lifecycle-fairwddi-import">Pure Import Lifecycle (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#post-import-comparison-harmonization">Post-Import Comparison &amp; Harmonization</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../admin/deployment.html">Production Deployment &amp; Maintenance</a><ul>
@@ -151,14 +148,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../developer/ingest_engine.html">The Ingestion Engine (fairwddi.ingest)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../developer/ingest_engine.html#package-architecture">Package Architecture</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../developer/ingest_engine.html#format-detection-detector-py">Format Detection (detector.py)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../developer/ingest_engine.html#streaming-xml-iteration-streaming-py">Streaming XML Iteration (streaming.py)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../developer/ingest_engine.html#comparator-and-execution-plan-comparator-py-plan-py">Comparator and Execution Plan (comparator.py &amp; plan.py)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../developer/ingest_engine.html#batch-transaction-loading-loader-py">Batch Transaction Loading (loader.py)</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/importer_engine.html">The Import, Comparison &amp; Harmonization Engines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#api-architecture">API Architecture</a></li>
@@ -235,20 +225,100 @@
 <li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
 <li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.seed">Seed &amp; Fixture Management</a></li>
-<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.wipe">Wipe Utilities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.wipe">Wipe &amp; Lifecycle Utilities</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="ingest.html">Ingestion &amp; Pipeline (fairwddi.ingest)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="ingest.html#module-fairwddi.ingest.detector">Format Detection</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ingest.html#module-fairwddi.ingest.streaming">Streaming XML Parsing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ingest.html#module-fairwddi.ingest.profiles">Extraction Profiles</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ingest.html#module-fairwddi.ingest.preflight">Preflight Static Analysis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ingest.html#module-fairwddi.ingest.comparator">Database Comparison</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ingest.html#module-fairwddi.ingest.plan">Ingestion Execution Plan</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ingest.html#module-fairwddi.ingest.loader">Batch Loader</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ingest.html#module-fairwddi.ingest.pipeline">Pipeline Orchestration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ingest.html#module-fairwddi.ingest.harmonizer">Harmonization &amp; Cross-Survey Clustering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="importer.html">Pure Deterministic Import (fairwddi.importer)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.detector.MetadataFormatInfo"><code class="docutils literal notranslate"><span class="pre">MetadataFormatInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.detector.compute_file_sha256"><code class="docutils literal notranslate"><span class="pre">compute_file_sha256()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.detector.detect_metadata_format"><code class="docutils literal notranslate"><span class="pre">detect_metadata_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.RawResourceNode"><code class="docutils literal notranslate"><span class="pre">RawResourceNode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_json"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_xml"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.resource_to_json"><code class="docutils literal notranslate"><span class="pre">resource_to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_ddi_c_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_c_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_ddi_l_json"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_ddi_l_jsonl"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_jsonl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_ddi_l_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_resources"><code class="docutils literal notranslate"><span class="pre">stream_resources()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.xml_elem_to_dict"><code class="docutils literal notranslate"><span class="pre">xml_elem_to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.xml_to_json_dict"><code class="docutils literal notranslate"><span class="pre">xml_to_json_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.profiles.ImportProfile"><code class="docutils literal notranslate"><span class="pre">ImportProfile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.profiles.ImportStrategies"><code class="docutils literal notranslate"><span class="pre">ImportStrategies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.profiles.list_available_profiles"><code class="docutils literal notranslate"><span class="pre">list_available_profiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.profiles.load_profile"><code class="docutils literal notranslate"><span class="pre">load_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.preflight.run_preflight_check"><code class="docutils literal notranslate"><span class="pre">run_preflight_check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.preflight.upgrade_ddic_to_ddil"><code class="docutils literal notranslate"><span class="pre">upgrade_ddic_to_ddil()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.ImportActionItem"><code class="docutils literal notranslate"><span class="pre">ImportActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.ImportPlan"><code class="docutils literal notranslate"><span class="pre">ImportPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.PlanActionItem"><code class="docutils literal notranslate"><span class="pre">PlanActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.PlanIssue"><code class="docutils literal notranslate"><span class="pre">PlanIssue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.ReviewGate"><code class="docutils literal notranslate"><span class="pre">ReviewGate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.compute_resource_hashes"><code class="docutils literal notranslate"><span class="pre">compute_resource_hashes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.execute_import"><code class="docutils literal notranslate"><span class="pre">execute_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.get_import_batch_status"><code class="docutils literal notranslate"><span class="pre">get_import_batch_status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.list_import_batches"><code class="docutils literal notranslate"><span class="pre">list_import_batches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.parse_ddi_urn"><code class="docutils literal notranslate"><span class="pre">parse_ddi_urn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.plan_import"><code class="docutils literal notranslate"><span class="pre">plan_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.undo_import"><code class="docutils literal notranslate"><span class="pre">undo_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.pipeline.run_import"><code class="docutils literal notranslate"><span class="pre">run_import()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="groups.html">Group Curation &amp; Set Resolution (fairwddi.groups)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.add_group_members"><code class="docutils literal notranslate"><span class="pre">add_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.create_group"><code class="docutils literal notranslate"><span class="pre">create_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.delete_group"><code class="docutils literal notranslate"><span class="pre">delete_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.get_group_details"><code class="docutils literal notranslate"><span class="pre">get_group_details()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.list_groups"><code class="docutils literal notranslate"><span class="pre">list_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.remove_group_members"><code class="docutils literal notranslate"><span class="pre">remove_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.rename_group"><code class="docutils literal notranslate"><span class="pre">rename_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.resolve_group"><code class="docutils literal notranslate"><span class="pre">resolve_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.ResolvedResourceSet"><code class="docutils literal notranslate"><span class="pre">ResolvedResourceSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.ResourceSetSpec"><code class="docutils literal notranslate"><span class="pre">ResourceSetSpec</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.parse_resource_set_spec"><code class="docutils literal notranslate"><span class="pre">parse_resource_set_spec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.resolve_resource_set"><code class="docutils literal notranslate"><span class="pre">resolve_resource_set()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="compare.html">Three-Layer Comparison Engine (fairwddi.compare)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.CandidateCorrespondence"><code class="docutils literal notranslate"><span class="pre">CandidateCorrespondence</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.CodeListQualification"><code class="docutils literal notranslate"><span class="pre">CodeListQualification</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.ComparisonResultSet"><code class="docutils literal notranslate"><span class="pre">ComparisonResultSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.CorrespondenceLevel"><code class="docutils literal notranslate"><span class="pre">CorrespondenceLevel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.QualificationReport"><code class="docutils literal notranslate"><span class="pre">QualificationReport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.ComparisonConfig"><code class="docutils literal notranslate"><span class="pre">ComparisonConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.ConceptualRuleConfig"><code class="docutils literal notranslate"><span class="pre">ConceptualRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.QualificationRuleConfig"><code class="docutils literal notranslate"><span class="pre">QualificationRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.ResourceTypeComparisonRule"><code class="docutils literal notranslate"><span class="pre">ResourceTypeComparisonRule</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.SemanticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SemanticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.SyntacticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SyntacticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.list_comparison_configs"><code class="docutils literal notranslate"><span class="pre">list_comparison_configs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.load_comparison_config"><code class="docutils literal notranslate"><span class="pre">load_comparison_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.qualifier.evaluate_qualification"><code class="docutils literal notranslate"><span class="pre">evaluate_qualification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.syntactic.compare_syntactic_sets"><code class="docutils literal notranslate"><span class="pre">compare_syntactic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider"><code class="docutils literal notranslate"><span class="pre">SentenceTransformerEmbeddingProvider</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.semantic.compare_semantic_sets"><code class="docutils literal notranslate"><span class="pre">compare_semantic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.semantic.get_embedding_provider"><code class="docutils literal notranslate"><span class="pre">get_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.semantic.register_embedding_provider"><code class="docutils literal notranslate"><span class="pre">register_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.conceptual.ConceptAssigner"><code class="docutils literal notranslate"><span class="pre">ConceptAssigner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.conceptual.compare_conceptual_sets"><code class="docutils literal notranslate"><span class="pre">compare_conceptual_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.conceptual.register_concept_assigner"><code class="docutils literal notranslate"><span class="pre">register_concept_assigner()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.engine.run_comparison"><code class="docutils literal notranslate"><span class="pre">run_comparison()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="harmonize.html">Policy-Driven Harmonization (fairwddi.harmonize)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy"><code class="docutils literal notranslate"><span class="pre">AutoApproveHighPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.GuardrailPolicy"><code class="docutils literal notranslate"><span class="pre">GuardrailPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem"><code class="docutils literal notranslate"><span class="pre">HarmonizationActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.HarmonizationGuardrails"><code class="docutils literal notranslate"><span class="pre">HarmonizationGuardrails</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan"><code class="docutils literal notranslate"><span class="pre">HarmonizationPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy"><code class="docutils literal notranslate"><span class="pre">HarmonizationPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.load_harmonization_policy"><code class="docutils literal notranslate"><span class="pre">load_harmonization_policy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.planner.approve_high_actions"><code class="docutils literal notranslate"><span class="pre">approve_high_actions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.planner.plan_harmonization"><code class="docutils literal notranslate"><span class="pre">plan_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.manager.create_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">create_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.manager.execute_harmonization"><code class="docutils literal notranslate"><span class="pre">execute_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.manager.link_to_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">link_to_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.manager.undo_harmonization"><code class="docutils literal notranslate"><span class="pre">undo_harmonization()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
@@ -327,6 +397,8 @@
 <p>Canonical DDI 3.3 / 4.0 URN format:
 <a class="reference external" href="urn:ddi">urn:ddi</a>:{agency[.sub-agency]}:{ID}:{version}
 e.g. <a class="reference external" href="urn:ddi:fr.cdsp:Category.cat-fr-yes:1.0.0">urn:ddi:fr.cdsp:Category.cat-fr-yes:1.0.0</a></p>
+<dl class="field-list simple">
+</dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="fairwddi.models.base.DDIIdentifiable.Meta">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../_modules/fairwddi/models/base.html#DDIIdentifiable.Meta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.base.DDIIdentifiable.Meta" title="Link to this definition"></a></dt>
@@ -336,6 +408,13 @@ e.g. <a class="reference external" href="urn:ddi:fr.cdsp:Category.cat-fr-yes:1.0
 <span class="sig-name descname"><span class="pre">abstract</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#fairwddi.models.base.DDIIdentifiable.Meta.abstract" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.models.base.DDIIdentifiable.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/base.html#DDIIdentifiable.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.base.DDIIdentifiable.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -354,7 +433,9 @@ object the first time, the query is executed.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="fairwddi.models.base.DDIIdentifiable.delete">
 <span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/base.html#DDIIdentifiable.delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.base.DDIIdentifiable.delete" title="Link to this definition"></a></dt>
-<dd><p>Delete instance and clean up central UrnRegistry record.</p>
+<dd><p>Delete instance after verifying zero active references, then clean up UrnRegistry.</p>
+<dl class="field-list simple">
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -408,6 +489,28 @@ object the first time, the query is executed.</p>
 <dd><p>Extract the specific ObjectID portion if maintainable-scoped.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="fairwddi.models.base.DDIIdentifiable.origin">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">origin</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.models.base.DDIIdentifiable.origin" title="Link to this definition"></a></dt>
+<dd><p>Return resource origin (‘imported’, ‘generated’, or ‘instantiated’).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.models.base.DDIIdentifiable.refresh_from_db">
+<span class="sig-name descname"><span class="pre">refresh_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/base.html#DDIIdentifiable.refresh_from_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.base.DDIIdentifiable.refresh_from_db" title="Link to this definition"></a></dt>
+<dd><p>Reload field values from the database.</p>
+<p>By default, the reloading happens from the database this instance was
+loaded from, or by the read router if this instance wasn’t loaded from
+any database. The using parameter will override the default.</p>
+<p>Fields can be used to specify which fields to reload. The fields
+should be an iterable of field attnames. If fields is None, then
+all non-deferred fields are reloaded.</p>
+<p>When accessing deferred fields of an instance, the deferred loading
+of the field will call this method.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="fairwddi.models.base.DDIIdentifiable.save">
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/base.html#DDIIdentifiable.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.base.DDIIdentifiable.save" title="Link to this definition"></a></dt>
@@ -443,6 +546,8 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.base.</span></span><span class="sig-name descname"><span class="pre">DDIResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/base.html#DDIResource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.base.DDIResource" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIIdentifiable" title="fairwddi.models.base.DDIIdentifiable"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIIdentifiable</span></code></a></p>
 <p>Abstract base model for all top-level DDI resources requiring urn and name, with hashes.</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="fairwddi.models.base.DDIResource.Meta">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../_modules/fairwddi/models/base.html#DDIResource.Meta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.base.DDIResource.Meta" title="Link to this definition"></a></dt>
@@ -516,6 +621,8 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.base.</span></span><span class="sig-name descname"><span class="pre">DDIScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/base.html#DDIScheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.base.DDIScheme" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIIdentifiable" title="fairwddi.models.base.DDIIdentifiable"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIIdentifiable</span></code></a></p>
 <p>Abstract base model for all DDI Scheme containers (without hashes).</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="fairwddi.models.base.DDIScheme.Meta">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../_modules/fairwddi/models/base.html#DDIScheme.Meta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.base.DDIScheme.Meta" title="Link to this definition"></a></dt>
@@ -606,6 +713,8 @@ and concept-to-concept relationships for semantic harmonization across any vocab
 <p>Supports hierarchical trees (skos:broader / skos:narrower) via parent relationship,
 notation codes, vocabulary identifiers, and multilingual definitions.
 Inherits DDIIdentifiable with URN primary key and hashes.</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.concept.Concept.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.concept.Concept.NotUpdated" title="Link to this definition"></a></dt>
@@ -809,6 +918,8 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.concept.</span></span><span class="sig-name descname"><span class="pre">ConceptScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/concept.html#ConceptScheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.concept.ConceptScheme" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIScheme" title="fairwddi.models.base.DDIScheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIScheme</span></code></a></p>
 <p>Named collection of reusable concepts (maps to DDI-L ConceptScheme).</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.concept.ConceptScheme.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.concept.ConceptScheme.NotUpdated" title="Link to this definition"></a></dt>
@@ -906,6 +1017,8 @@ object the first time, the query is executed.</p>
 <p>Abstract measurement concept (e.g. ‘Left-Right Political Placement’).</p>
 <p>Represents the top tier of the DDI variable cascade:
 ConceptualVariable -&gt; RepresentedVariable -&gt; InstanceVariable.</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.concept.ConceptualVariable.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.concept.ConceptualVariable.NotUpdated" title="Link to this definition"></a></dt>
@@ -1051,6 +1164,8 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.concept.</span></span><span class="sig-name descname"><span class="pre">ConceptualVariableScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/concept.html#ConceptualVariableScheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.concept.ConceptualVariableScheme" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIScheme" title="fairwddi.models.base.DDIScheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIScheme</span></code></a></p>
 <p>Named collection of reusable conceptual variables (DDI-L ConceptualVariableScheme).</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.concept.ConceptualVariableScheme.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.concept.ConceptualVariableScheme.NotUpdated" title="Link to this definition"></a></dt>
@@ -1256,6 +1371,8 @@ CodeList, Code, RepresentedVariable, and QuestionVariable.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.representation.</span></span><span class="sig-name descname"><span class="pre">Category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/representation.html#Category"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.representation.Category" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIResource" title="fairwddi.models.base.DDIResource"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIResource</span></code></a></p>
 <p>Response category text label (decoupled from numerical code values).</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.representation.Category.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.representation.Category.NotUpdated" title="Link to this definition"></a></dt>
@@ -1447,6 +1564,8 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.representation.</span></span><span class="sig-name descname"><span class="pre">CategoryScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/representation.html#CategoryScheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.representation.CategoryScheme" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIScheme" title="fairwddi.models.base.DDIScheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIScheme</span></code></a></p>
 <p>Named collection of reusable categories (maps to DDI-L CategoryScheme).</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.representation.CategoryScheme.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.representation.CategoryScheme.NotUpdated" title="Link to this definition"></a></dt>
@@ -1557,6 +1676,8 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.representation.</span></span><span class="sig-name descname"><span class="pre">Code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/representation.html#Code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.representation.Code" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIIdentifiable" title="fairwddi.models.base.DDIIdentifiable"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIIdentifiable</span></code></a></p>
 <p>Junction connecting a CodeList to a Category with a code value (DDI Code).</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.representation.Code.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.representation.Code.NotUpdated" title="Link to this definition"></a></dt>
@@ -1740,6 +1861,8 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.representation.</span></span><span class="sig-name descname"><span class="pre">CodeList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/representation.html#CodeList"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.representation.CodeList" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIResource" title="fairwddi.models.base.DDIResource"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIResource</span></code></a></p>
 <p>Structural set of response codes linked to categories.</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.representation.CodeList.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.representation.CodeList.NotUpdated" title="Link to this definition"></a></dt>
@@ -1896,6 +2019,8 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.representation.</span></span><span class="sig-name descname"><span class="pre">QuestionItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/representation.html#QuestionItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.representation.QuestionItem" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIResource" title="fairwddi.models.base.DDIResource"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIResource</span></code></a></p>
 <p>Standalone reusable question text.</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.representation.QuestionItem.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.representation.QuestionItem.NotUpdated" title="Link to this definition"></a></dt>
@@ -2082,6 +2207,8 @@ class built by <code class="docutils literal notranslate"><span class="pre">crea
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.representation.</span></span><span class="sig-name descname"><span class="pre">QuestionScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/representation.html#QuestionScheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.representation.QuestionScheme" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIScheme" title="fairwddi.models.base.DDIScheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIScheme</span></code></a></p>
 <p>Named collection of reusable questions (maps to DDI-L QuestionScheme).</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.representation.QuestionScheme.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.representation.QuestionScheme.NotUpdated" title="Link to this definition"></a></dt>
@@ -2289,6 +2416,8 @@ object the first time, the query is executed.</p>
 <p>Represents the middle tier of the DDI variable cascade:
 ConceptualVariable -&gt; RepresentedVariable -&gt; InstanceVariable.
 Associated with QuestionItem entities via QuestionVariable.</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.representation.RepresentedVariable.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.representation.RepresentedVariable.NotUpdated" title="Link to this definition"></a></dt>
@@ -2482,6 +2611,8 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.representation.</span></span><span class="sig-name descname"><span class="pre">RepresentedVariableScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/representation.html#RepresentedVariableScheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.representation.RepresentedVariableScheme" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIScheme" title="fairwddi.models.base.DDIScheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIScheme</span></code></a></p>
 <p>Named collection of represented variables (DDI-L RepresentedVariableScheme).</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.representation.RepresentedVariableScheme.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.representation.RepresentedVariableScheme.NotUpdated" title="Link to this definition"></a></dt>
@@ -2582,6 +2713,8 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.instrument.</span></span><span class="sig-name descname"><span class="pre">Instrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/instrument.html#Instrument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.instrument.Instrument" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIResource" title="fairwddi.models.base.DDIResource"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIResource</span></code></a></p>
 <p>Data collection instrument / questionnaire in DDI-Lifecycle.</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.instrument.Instrument.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.instrument.Instrument.NotUpdated" title="Link to this definition"></a></dt>
@@ -2832,6 +2965,8 @@ and StudyInstrument (study unit to instrument junction).</p>
 <p>A minimal Datafile entity relating InstanceVariables to a StudyUnit.</p>
 <p>A Datafile points to a StudyUnit and groups concrete dataset column
 InstanceVariables, replacing the legacy StudyVariable junction table.</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.dataset.Datafile.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.dataset.Datafile.NotUpdated" title="Link to this definition"></a></dt>
@@ -3243,6 +3378,8 @@ object the first time, the query is executed.</p>
 <p>Represents the bottom tier of the DDI variable cascade:
 ConceptualVariable -&gt; RepresentedVariable -&gt; InstanceVariable.
 Relates to StudyUnit via its containing Datafile and DatafileVariable junction.</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.dataset.InstanceVariable.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.dataset.InstanceVariable.NotUpdated" title="Link to this definition"></a></dt>
@@ -3431,6 +3568,8 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.dataset.</span></span><span class="sig-name descname"><span class="pre">InstanceVariableScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/dataset.html#InstanceVariableScheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.dataset.InstanceVariableScheme" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIScheme" title="fairwddi.models.base.DDIScheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIScheme</span></code></a></p>
 <p>Named collection of instance variables (DDI-L InstanceVariableScheme).</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.dataset.InstanceVariableScheme.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.dataset.InstanceVariableScheme.NotUpdated" title="Link to this definition"></a></dt>
@@ -3635,6 +3774,8 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.dataset.</span></span><span class="sig-name descname"><span class="pre">StudyUnit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/dataset.html#StudyUnit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.dataset.StudyUnit" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#fairwddi.models.base.DDIResource" title="fairwddi.models.base.DDIResource"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDIResource</span></code></a></p>
 <p>A specific survey wave or dataset (renamed from Survey).</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.dataset.StudyUnit.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.dataset.StudyUnit.NotUpdated" title="Link to this definition"></a></dt>
@@ -3798,6 +3939,8 @@ object the first time, the query is executed.</p>
 <p>Logical grouping of related resources (e.g. study series, panels,
 thematic collections, or longitudinal waves) referenced via polymorphic
 typed URN references.</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.organization.Group.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.organization.Group.NotUpdated" title="Link to this definition"></a></dt>
@@ -3879,6 +4022,13 @@ object the first time, the query is executed.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.models.organization.Group.slug">
+<span class="sig-name descname"><span class="pre">slug</span></span><a class="headerlink" href="#fairwddi.models.organization.Group.slug" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="fairwddi.models.organization.Group.updated_at">
 <span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#fairwddi.models.organization.Group.updated_at" title="Link to this definition"></a></dt>
 <dd><p>A wrapper for a deferred-loading field. When the value is read from this
@@ -3901,6 +4051,8 @@ object the first time, the query is executed.</p>
 <p>Institutional organization resource in DDI-Lifecycle (maps to DDI-L Organization).</p>
 <p>Represents data distributors, archives, research centers, universities, funding bodies,
 and publishers in the DDI organizational hierarchy.</p>
+<dl class="field-list simple">
+</dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.organization.Organization.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.organization.Organization.NotUpdated" title="Link to this definition"></a></dt>
@@ -4000,13 +4152,6 @@ instant transactional rollback (<cite>undo_ingestion</cite>).</p>
 <dt class="sig sig-object py" id="fairwddi.models.infrastructure.IngestBatch.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.infrastructure.IngestBatch.NotUpdated" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.djangoproject.com/en/6.1/ref/exceptions/#django.core.exceptions.ObjectNotUpdated" title="(in Django v6.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectNotUpdated</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DatabaseError</span></code></p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="fairwddi.models.infrastructure.IngestBatch.created_aliases">
-<span class="sig-name descname"><span class="pre">created_aliases</span></span><a class="headerlink" href="#fairwddi.models.infrastructure.IngestBatch.created_aliases" title="Link to this definition"></a></dt>
-<dd><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4247,6 +4392,28 @@ object the first time, the query is executed.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.models.infrastructure.ResourceOrigin">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.infrastructure.</span></span><span class="sig-name descname"><span class="pre">ResourceOrigin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/infrastructure.html#ResourceOrigin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.infrastructure.ResourceOrigin" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TextChoices</span></code></p>
+<p>Categorization of how a DDI resource entered the ReQuest repository.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.models.infrastructure.ResourceOrigin.GENERATED">
+<span class="sig-name descname"><span class="pre">GENERATED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'generated'</span></span><a class="headerlink" href="#fairwddi.models.infrastructure.ResourceOrigin.GENERATED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.models.infrastructure.ResourceOrigin.IMPORTED">
+<span class="sig-name descname"><span class="pre">IMPORTED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'imported'</span></span><a class="headerlink" href="#fairwddi.models.infrastructure.ResourceOrigin.IMPORTED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.models.infrastructure.ResourceOrigin.INSTANTIATED">
+<span class="sig-name descname"><span class="pre">INSTANTIATED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'instantiated'</span></span><a class="headerlink" href="#fairwddi.models.infrastructure.ResourceOrigin.INSTANTIATED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="fairwddi.models.infrastructure.URNAlias">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.infrastructure.</span></span><span class="sig-name descname"><span class="pre">URNAlias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/infrastructure.html#URNAlias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.infrastructure.URNAlias" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
@@ -4329,8 +4496,9 @@ object the first time, the query is executed.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.models.infrastructure.</span></span><span class="sig-name descname"><span class="pre">UrnRegistry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/models/infrastructure.html#UrnRegistry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.models.infrastructure.UrnRegistry" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
 <p>Central registry mapping URNs and external URIs to their resource types.</p>
-<p>Provides referential integrity and O(1) URN-to-type crosswalk resolution
-for both DDI and non-DDI identifiers.</p>
+<p>Provides referential integrity, resource origin categorization
+(<code class="docutils literal notranslate"><span class="pre">imported</span></code>, <code class="docutils literal notranslate"><span class="pre">generated</span></code>, <code class="docutils literal notranslate"><span class="pre">instantiated</span></code>), and O(1) URN-to-type crosswalk
+resolution for both DDI and non-DDI identifiers.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="fairwddi.models.infrastructure.UrnRegistry.NotUpdated">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NotUpdated</span></span><a class="headerlink" href="#fairwddi.models.infrastructure.UrnRegistry.NotUpdated" title="Link to this definition"></a></dt>
@@ -4362,6 +4530,11 @@ object the first time, the query is executed.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.models.infrastructure.UrnRegistry.get_origin_display">
+<span class="sig-name descname"><span class="pre">get_origin_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;django.db.models.fields.CharField:</span> <span class="pre">origin&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fairwddi.models.infrastructure.UrnRegistry.get_origin_display" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="fairwddi.models.infrastructure.UrnRegistry.get_previous_by_created_at">
 <span class="sig-name descname"><span class="pre">get_previous_by_created_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">created_at&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fairwddi.models.infrastructure.UrnRegistry.get_previous_by_created_at" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -4375,6 +4548,13 @@ object the first time, the query is executed.</p>
 <dt class="sig sig-object py" id="fairwddi.models.infrastructure.UrnRegistry.objects">
 <span class="sig-name descname"><span class="pre">objects</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;django.db.models.manager.Manager</span> <span class="pre">object&gt;</span></span><a class="headerlink" href="#fairwddi.models.infrastructure.UrnRegistry.objects" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.models.infrastructure.UrnRegistry.origin">
+<span class="sig-name descname"><span class="pre">origin</span></span><a class="headerlink" href="#fairwddi.models.infrastructure.UrnRegistry.origin" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="fairwddi.models.infrastructure.UrnRegistry.resource_type">

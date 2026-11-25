@@ -47,6 +47,10 @@ class GroupReferenceSchema(BaseModel):
 class GroupSchema(DDIResourceSchema):
     """Schema for generic Group DDI resource."""
 
+    slug: str | None = Field(
+        default=None,
+        description="Short human-friendly slug/nickname for CLI & API lookup.",
+    )
     description: MultilingualText | None = Field(
         default=None, description="Multilingual description for the group."
     )
@@ -567,10 +571,7 @@ class IngestBatchSchema(BaseModel):
     status: str = "completed"
     options: dict[str, Any] = Field(default_factory=dict)
     created_urns: list[str] = Field(default_factory=list)
-    generated_urns: list[str] = Field(default_factory=list)
-    linked_urns: list[str] = Field(default_factory=list)
     reused_urns: list[str] = Field(default_factory=list)
-    created_aliases: list[str] = Field(default_factory=list)
     stats: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime | None = None
     updated_at: datetime | None = None

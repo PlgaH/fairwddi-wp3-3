@@ -504,7 +504,7 @@ uv run fairwddi preflight --help
 
 #### Preflight Readiness Check (`fairwddi preflight check`)
 
-Audits metadata structure and generates a zero-write plan (`.preflight.plan.yaml`) and report (`.report.md`):
+Audits metadata structure and generates a JSON summary (`.preflight.json`), Markdown report (`.preflight.report.md`), and zero-write plan (`.preflight.plan.yaml`) in the output directory (default: `.`):
 
 ```bash
 uv run fairwddi preflight check tests/fixtures/FSD3562_eng.ddic.xml \
@@ -513,7 +513,7 @@ uv run fairwddi preflight check tests/fixtures/FSD3562_eng.ddic.xml \
 ```
 
 *Key Options:*
-- `-o, --output-dir`: Destination directory for `.preflight.plan.yaml` and `.report.md`.
+- `-o, --output-dir`: Destination directory for `.preflight.json`, `.preflight.report.md`, and `.preflight.plan.yaml` (default: `.`).
 - `--auto-approve`: Automatically mark review gates as approved.
 
 #### Explicit DDI-C to DDI-L Upgrade on Disk (`fairwddi preflight upgrade`)
@@ -573,124 +573,125 @@ Lists all installed declarative import and validation profiles:
 uv run fairwddi preflight profiles
 ```
 
+#### Profile DDI Metadata (`fairwddi preflight profile`)
+
+Generates full DDI-Codebook or DDI-Lifecycle JSON (`.profile.json`) and Markdown (`.profile.md`) reports in the output directory (default: `.`):
+
+```bash
+uv run fairwddi preflight profile tests/fixtures/FSD3562_eng.ddic.xml --profile request
+```
+
 ---
 
-### 5.2 Direct Ingestion Stage (`fairwddi ingest`)
+### 5.2 Pure Deterministic Import Stage (`fairwddi import`)
 
-The `ingest` command group plans, applies, and rolls back direct file-to-core ingestion runs.
-
-```bash
-uv run fairwddi ingest --help
-```
-
-#### Generate Dry-Run Ingestion Plan (`fairwddi ingest plan`)
-
-Streams the document in constant memory, checks URNs in `UrnRegistry`, detects metadata drift, and plans core allocations with **zero database writes**:
+The `import` command group performs pure, deterministic file-to-core metadata loading with **zero cross-study harmonization**:
 
 ```bash
-uv run fairwddi ingest plan ./ingest_output/survey.ddi40.json \
+# Direct one-command import (preflight -> optional DDI-C upgrade -> plan -> execute)
+uv run fairwddi import survey.ddic.xml \
   --profile request \
-  --output-dir ./ingest_output
+  --category-scheme-mode per_codelist \
+  --output-dir ./import_output
+
+# Dry-run planning only
+uv run fairwddi import survey.ddic.xml --dry-run --output-dir ./import_output
 ```
 
-Emits `./ingest_output/survey.ddi40.ingest.plan.yaml` and `.report.md`.
+#### Generate Dry-Run Import Plan (`fairwddi import plan`)
 
-#### Review & Authorize via Interactive Ingest Plan Editor
+Streams the document in constant memory, checks URNs in `UrnRegistry`, detects metadata drift (`IMP-DRIFT-001`), and plans deterministic core allocations with **zero database writes**:
 
-Data managers and archivists can open the generated `.ingest.plan.yaml` file in the standalone browser-based **Ingest Plan Editor** ([`deliverables/research/ingest_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/ingest_plan_editor.html)):
+```bash
+uv run fairwddi import plan ./import_output/survey.ddi40.json \
+  --profile request \
+  --output-dir ./import_output
+```
 
-- **Visual Review Gate:** Inspect review readiness, toggle approval from `PENDING` to `APPROVED`, record reviewer ID, timestamp, and comments.
-- **Action Editing:** Change planned actions (`create`, `alias`, `reuse`, `quarantine`, `skip`), edit canonical target URNs, and add archivist notes.
-- **Bulk Authoring:** 1-click approve or reject all visible actions or filtered subsets.
-- **Direct Save & Export:** Save approved plans directly back to disk or download as clean YAML/JSON ready for CLI execution.
+Emits `./import_output/survey.ddi40.import.plan.yaml` and `.import.report.md`.
 
-#### Execute Ingestion Plan (`fairwddi ingest execute`)
+#### Execute Import Plan (`fairwddi import execute`)
 
 Executes insertion into PostgreSQL within an atomic transaction. Writes an `IngestBatch` receipt and bulk-loads frequency rows:
 
 ```bash
 # Execute from an approved plan YAML
-uv run fairwddi ingest execute ./ingest_output/survey.ddi40.ingest.plan.yaml
+uv run fairwddi import execute ./import_output/survey.ddi40.import.plan.yaml
 
-# Or execute directly from the metadata file (evaluating review gate)
-uv run fairwddi ingest execute ./ingest_output/survey.ddi40.json --auto-approve
+# Or execute directly from the metadata file
+uv run fairwddi import execute ./import_output/survey.ddi40.json --auto-approve
 ```
 
-#### One-Command Pipeline Runner (`fairwddi ingest run`)
-
-Automates preflight, upgrade, plan, apply, and optional harmonization in a single run:
+#### Atomic Rollback & Batch Inspection (`fairwddi import undo` / `list` / `status`)
 
 ```bash
-uv run fairwddi ingest run survey.ddic.xml \
-  --profile request \
-  --output-dir ./ingest_output \
-  --agency fr.cdsp \
-  --version 2.0.0 \
-  --harmonize \
-  --auto-approve
-```
-
-#### Atomic Rollback (`fairwddi ingest undo`)
-
-Rolls back newly minted resources and frequency rows in a single atomic transaction:
-
-```bash
-uv run fairwddi ingest undo 42
-```
-
-#### List & Inspect Ingestion Batches (`fairwddi ingest list` / `status`)
-
-```bash
-# List recent batches
-uv run fairwddi ingest list --limit 10
+# List recent import batches
+uv run fairwddi import list --limit 10
 
 # Inspect batch receipt details
-uv run fairwddi ingest status 42
+uv run fairwddi import status 42
+
+# Atomically roll back batch #42
+uv run fairwddi import undo 42
 ```
 
 ---
 
-### 5.3 Cross-Survey Similarity & Discovery (`fairwddi compare`)
+### 5.3 DDI Context Groups (`fairwddi group`)
 
-Finds reusable question and variable candidates across ingested survey waves using multi-tier similarity matching:
+Curate reusable DDI `Group` contexts (longitudinal series, thematic collections, question grids) identified by both canonical DDI URN and unique human-friendly `slug`:
 
 ```bash
-uv run fairwddi compare discover \
-  --batch 42 \
-  --threshold 0.85 \
+uv run fairwddi group create "ESS France Series" --slug ess-fr --type longitudinal_series \
+  --member urn:ddi:fr.cdsp:su_ess_w1:1.0.0 \
+  --member urn:ddi:fr.cdsp:su_ess_w2:1.0.0
+
+uv run fairwddi group list
+uv run fairwddi group show ess-fr
+uv run fairwddi group add ess-fr --member urn:ddi:fr.cdsp:su_ess_w3:1.0.0
+```
+
+---
+
+### 5.4 Read-Only Two-Set, Three-Layer Comparison (`fairwddi compare`)
+
+Compares any two resolved resource sets (`group:<slug|urn>`, `batch:<id>`, `study:<urn>`, `bank[:all|imported|harmonized]`, `urn:<u1,u2>`) across up to three layers (`syntactic`, `semantic`, `conceptual`) with independent CodeList qualification and zero database writes:
+
+```bash
+# List built-in presets (default, syntactic, semantic, multilingual)
+uv run fairwddi compare configs
+
+# Compare a newly imported batch against a curated series group
+uv run fairwddi compare run \
+  --source batch:42 \
+  --target group:ess-fr \
+  --level syntactic --level semantic \
+  --type QuestionItem --type RepresentedVariable \
   --output-dir ./compare_output
 ```
 
 ---
 
-### 5.4 Review-Gated Harmonization (`fairwddi harmonize`)
+### 5.5 Review-Gated Harmonization (`fairwddi harmonize`)
 
-Executes multilingual merging, cascade relinking, semantic link creation, resource elevation, and subsequent absorption:
+Consumes comparison outputs (`.comparison.yaml` / `.comparison.json`) under a declarative `HarmonizationPolicy` (defining explicit `auto_approve_high` criteria and CodeList divergence guardrails):
 
-#### 1. Automated Harmonization Pipeline (Stage 3b)
-
-```bash
-# Plan harmonization actions across discovered candidates
-uv run fairwddi harmonize plan ./compare_output/candidates.json --output-dir ./harm_output
-```
-
-#### Review & Authorize via Interactive Harmonization Plan Editor
-
-Archivists can inspect candidate matches in the standalone browser-based **Harmonization Plan Editor** ([`deliverables/research/harmonization_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/harmonization_plan_editor.html)):
-
-- **Question Grid Inspector:** Inspect detected common question stems (`SHARED_STEM_GRID`), view sub-item prompts, and configure `group_type: question_grid` groups.
-- **Wording Variant Curator:** Classify inclusive writing markers (`(e)`, `·es`), stylistic phrasing, and punctuation shifts; configure `canonical_text` overrides, manage `preserved_variants` (stored in `extended_attributes` for search discovery), and discard errata.
-- **Create Harmonized & Link Existing:** Switch operations between `generate_harmonized` (create new canonical bank-level generated entity from imported items) and `link_existing` (link wave into an existing generated or instantiated entity via `prov:wasDerivedFrom`).
-- **Side-by-Side Diff Inspector:** Compare source and target response codes, category labels, and question texts with visual discrepancy highlighting.
-- **1-Click Bulk Approval:** Instantly authorize all `FACET_EXACT` matches ($\ge 0.95$ confidence) while keeping fuzzy items for closer human inspection.
-- **Action Switching:** Reconfigure operations between `generate_harmonized`, `link_existing`, `group`, `alias`, `harmonize`, `merge_multilingual`, `link_semantic`, or `skip`.
-- **Review Gate Sign-Off:** Authorize the plan so `fairwddi harmonize apply` can run without manual bypass flags.
+#### 1. Plan & Execute Harmonization
 
 ```bash
-# Apply review-gated harmonization plan
-uv run fairwddi harmonize apply ./harm_output/harmonization.plan.yaml
+# Generate harmonization plan (all items pending manual review by default)
+uv run fairwddi harmonize plan ./compare_output/compare-abc12345.comparison.yaml \
+  --output-dir ./harm_output
 
-# Roll back harmonization changes using snapshot
+# Or auto-approve qualifying high-confidence items directly during plan creation
+uv run fairwddi harmonize plan ./compare_output/compare-abc12345.comparison.yaml \
+  --approve-high \
+  --output-dir ./harm_output
+
+# Execute approved harmonization actions atomically
+uv run fairwddi harmonize execute ./harm_output/harmonize-abc12345.harmonize.plan.yaml
+
+# Roll back harmonization changes using EventLog snapshot
 uv run fairwddi harmonize undo <job_id>
 ```
 

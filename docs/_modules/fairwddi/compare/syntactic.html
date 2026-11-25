@@ -1,0 +1,699 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>fairwddi.compare.syntactic &mdash; FAIRwDDI Lifecycle 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+<div class="portal-return-bar">
+  <a href="../index.html">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to FAIRwDDI Architecture Portal & Explorer
+  </a>
+  <span class="badge">CDSP • Sciences Po / CNRS</span>
+</div>
+ 
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+  
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FAIRwDDI Lifecycle
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+  <div style="margin-top: 10px; margin-bottom: 6px; padding: 0 4px;">
+    <a href="../index.html" style="font-size: 0.82rem; color: #38bdf8 !important; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Main Portal
+    </a>
+  </div>
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../admin/index.html">Administrator Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../admin/index.html#key-operational-responsibilities">Key Operational Responsibilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../admin/index.html#guide-outline">Guide Outline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/architecture.html">System Architecture &amp; Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#hardware-operating-system-recommendations">Hardware &amp; Operating System Recommendations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#software-dependencies">Software Dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/architecture.html#database-architecture">Database Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/installation.html">Installation &amp; Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#configuration-env">Configuration (.env)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#database-provisioning">Database Provisioning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/installation.html#verifying-installation">Verifying Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/cli_operations.html">CLI Operational Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#global-options">Global Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#deterministic-import-fairwddi-import">Deterministic Import (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#context-groups-fairwddi-group">Context Groups (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">group</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#three-layer-comparison-fairwddi-compare">Three-Layer Comparison (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">compare</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/cli_operations.html#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/ingestion_ops.html">Import &amp; Harmonization Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#pure-import-lifecycle-fairwddi-import">Pure Import Lifecycle (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/ingestion_ops.html#post-import-comparison-harmonization">Post-Import Comparison &amp; Harmonization</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../admin/deployment.html">Production Deployment &amp; Maintenance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#service-architecture">Service Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#asgi-application-server-setup">ASGI Application Server Setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#nginx-reverse-proxy-configuration">Nginx Reverse Proxy Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#database-maintenance-index-optimization">Database Maintenance &amp; Index Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../admin/deployment.html#backup-and-disaster-recovery">Backup and Disaster Recovery</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/index.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../developer/index.html#architectural-principles">Architectural Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../developer/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/variable_cascade.html">The DDI Variable Cascade</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#the-three-tiers-of-the-cascade">The Three Tiers of the Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#tier-definitions">Tier Definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#standards-crosswalk">Standards Crosswalk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/variable_cascade.html#orm-traversal-examples">ORM Traversal Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/data_model.html">The 30-Model Database Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#abstract-base-classes">Abstract Base Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#layer-model-breakdown">Layer &amp; Model Breakdown</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/data_model.html#polymorphic-cross-resource-relations">Polymorphic Cross-Resource Relations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/urn_registry.html">Universal URN Master Registry (UrnRegistry)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#the-problem-it-solves">The Problem It Solves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#the-supertype-master-pattern">The Supertype Master Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#lifecycle-guarantees">Lifecycle Guarantees</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/urn_registry.html#canonical-urn-syntax">Canonical URN Syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/multilingual_jsonb.html">Multilingual JSONB Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#jsonb-data-model">JSONB Data Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#string-normalization-pipeline">String Normalization Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#querying-multilingual-fields">Querying Multilingual Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/multilingual_jsonb.html#postgresql-17-icu-collations">PostgreSQL 17 ICU Collations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/fingerprinting.html">Content Fingerprinting &amp; Deduplication</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#the-multi-algorithm-approach">The Multi-Algorithm Approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#canonical-json-serialization">Canonical JSON Serialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#simple-vs-compound-hashing">Simple vs Compound Hashing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#deterministic-16-character-urn-hashes">Deterministic 16-Character URN Hashes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/importer_engine.html">The Import, Comparison &amp; Harmonization Engines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#api-architecture">API Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#endpoints-overview">Endpoints Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#example-endpoint-implementation">Example Endpoint Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/api_service.html#interactive-database-explorer">Interactive Database Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../developer/dartfx_integration.html">Data Artifex DDI Toolkit Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#overview-of-dartfx-ddi">Overview of dartfx-ddi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#ddi-lifecycle-fragment-streaming">DDI-Lifecycle Fragment Streaming</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#multilingual-codebook-merging">Multilingual Codebook Merging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../developer/dartfx_integration.html#ddi-cdi-assistant-framework">DDI-CDI Assistant Framework</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributor/index.html">Contributor Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributor/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/environment.html">Development Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#pre-commit-hooks">Pre-commit Hooks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/environment.html#running-quick-sanity-checks">Running Quick Sanity Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/conventions.html">Coding Conventions &amp; Standards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#python-stack-tooling">Python Stack &amp; Tooling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#code-formatting-linting-ruff">Code Formatting &amp; Linting (Ruff)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#type-annotations-static-typing">Type Annotations &amp; Static Typing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#django-migrations-zero-data-loss">Django Migrations &amp; Zero-Data-Loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/conventions.html#ddi-naming-conventions">DDI Naming Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/testing.html">Testing Guide &amp; Practices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#testing-stack">Testing Stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#running-tests">Running Tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#isolated-sqlite-test-configuration">Isolated SQLite Test Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/testing.html#testing-ingestion-streaming">Testing Ingestion &amp; Streaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contributor/workflows.html">Development Workflows &amp; Pull Requests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#git-branching-strategy">Git Branching Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#pull-request-checklist">Pull Request Checklist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contributor/workflows.html#building-documentation-locally">Building Documentation Locally</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Python API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/index.html#modules">Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/models.html">Models (fairwddi.models)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.base">Base Infrastructure &amp; Supertype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.concept">Concept Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.representation">Representation Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.instrument">Instrument &amp; Question Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.dataset">Dataset Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.organization">Organization &amp; Grouping Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.infrastructure">Batch &amp; Ingestion Infrastructure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/models.html#module-fairwddi.models.event">Audit &amp; Event Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/schemas.html">Pydantic Schemas (fairwddi.schemas)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/schemas.html#module-fairwddi.schemas.common">Common Value Objects &amp; Primitives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/schemas.html#module-fairwddi.schemas.entities">Entity Schemas</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/db.html">Database Layer (fairwddi.db)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/db.html#module-fairwddi.db.wipe">Wipe &amp; Lifecycle Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/importer.html">Pure Deterministic Import (fairwddi.importer)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.detector.MetadataFormatInfo"><code class="docutils literal notranslate"><span class="pre">MetadataFormatInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.detector.compute_file_sha256"><code class="docutils literal notranslate"><span class="pre">compute_file_sha256()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.detector.detect_metadata_format"><code class="docutils literal notranslate"><span class="pre">detect_metadata_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.RawResourceNode"><code class="docutils literal notranslate"><span class="pre">RawResourceNode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_json"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_xml"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.resource_to_json"><code class="docutils literal notranslate"><span class="pre">resource_to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.stream_ddi_c_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_c_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.stream_ddi_l_json"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.stream_ddi_l_jsonl"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_jsonl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.stream_ddi_l_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.stream_resources"><code class="docutils literal notranslate"><span class="pre">stream_resources()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.xml_elem_to_dict"><code class="docutils literal notranslate"><span class="pre">xml_elem_to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.streaming.xml_to_json_dict"><code class="docutils literal notranslate"><span class="pre">xml_to_json_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.profiles.ImportProfile"><code class="docutils literal notranslate"><span class="pre">ImportProfile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.profiles.ImportStrategies"><code class="docutils literal notranslate"><span class="pre">ImportStrategies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.profiles.list_available_profiles"><code class="docutils literal notranslate"><span class="pre">list_available_profiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.profiles.load_profile"><code class="docutils literal notranslate"><span class="pre">load_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.preflight.run_preflight_check"><code class="docutils literal notranslate"><span class="pre">run_preflight_check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.preflight.upgrade_ddic_to_ddil"><code class="docutils literal notranslate"><span class="pre">upgrade_ddic_to_ddil()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.plan.ImportActionItem"><code class="docutils literal notranslate"><span class="pre">ImportActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.plan.ImportPlan"><code class="docutils literal notranslate"><span class="pre">ImportPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.plan.PlanActionItem"><code class="docutils literal notranslate"><span class="pre">PlanActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.plan.PlanIssue"><code class="docutils literal notranslate"><span class="pre">PlanIssue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.plan.ReviewGate"><code class="docutils literal notranslate"><span class="pre">ReviewGate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.compute_resource_hashes"><code class="docutils literal notranslate"><span class="pre">compute_resource_hashes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.execute_import"><code class="docutils literal notranslate"><span class="pre">execute_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.get_import_batch_status"><code class="docutils literal notranslate"><span class="pre">get_import_batch_status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.list_import_batches"><code class="docutils literal notranslate"><span class="pre">list_import_batches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.parse_ddi_urn"><code class="docutils literal notranslate"><span class="pre">parse_ddi_urn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.plan_import"><code class="docutils literal notranslate"><span class="pre">plan_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.loader.undo_import"><code class="docutils literal notranslate"><span class="pre">undo_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/importer.html#fairwddi.importer.pipeline.run_import"><code class="docutils literal notranslate"><span class="pre">run_import()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/groups.html">Group Curation &amp; Set Resolution (fairwddi.groups)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.add_group_members"><code class="docutils literal notranslate"><span class="pre">add_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.create_group"><code class="docutils literal notranslate"><span class="pre">create_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.delete_group"><code class="docutils literal notranslate"><span class="pre">delete_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.get_group_details"><code class="docutils literal notranslate"><span class="pre">get_group_details()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.list_groups"><code class="docutils literal notranslate"><span class="pre">list_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.remove_group_members"><code class="docutils literal notranslate"><span class="pre">remove_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.rename_group"><code class="docutils literal notranslate"><span class="pre">rename_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.manager.resolve_group"><code class="docutils literal notranslate"><span class="pre">resolve_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet"><code class="docutils literal notranslate"><span class="pre">ResolvedResourceSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.resolver.ResourceSetSpec"><code class="docutils literal notranslate"><span class="pre">ResourceSetSpec</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.resolver.parse_resource_set_spec"><code class="docutils literal notranslate"><span class="pre">parse_resource_set_spec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/groups.html#fairwddi.groups.resolver.resolve_resource_set"><code class="docutils literal notranslate"><span class="pre">resolve_resource_set()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/compare.html">Three-Layer Comparison Engine (fairwddi.compare)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.models.CandidateCorrespondence"><code class="docutils literal notranslate"><span class="pre">CandidateCorrespondence</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.models.CodeListQualification"><code class="docutils literal notranslate"><span class="pre">CodeListQualification</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.models.ComparisonResultSet"><code class="docutils literal notranslate"><span class="pre">ComparisonResultSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.models.CorrespondenceLevel"><code class="docutils literal notranslate"><span class="pre">CorrespondenceLevel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.models.QualificationReport"><code class="docutils literal notranslate"><span class="pre">QualificationReport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.ComparisonConfig"><code class="docutils literal notranslate"><span class="pre">ComparisonConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.ConceptualRuleConfig"><code class="docutils literal notranslate"><span class="pre">ConceptualRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.QualificationRuleConfig"><code class="docutils literal notranslate"><span class="pre">QualificationRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.ResourceTypeComparisonRule"><code class="docutils literal notranslate"><span class="pre">ResourceTypeComparisonRule</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.SemanticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SemanticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.SyntacticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SyntacticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.list_comparison_configs"><code class="docutils literal notranslate"><span class="pre">list_comparison_configs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.config.load_comparison_config"><code class="docutils literal notranslate"><span class="pre">load_comparison_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.qualifier.evaluate_qualification"><code class="docutils literal notranslate"><span class="pre">evaluate_qualification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.syntactic.compare_syntactic_sets"><code class="docutils literal notranslate"><span class="pre">compare_syntactic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider"><code class="docutils literal notranslate"><span class="pre">SentenceTransformerEmbeddingProvider</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.semantic.compare_semantic_sets"><code class="docutils literal notranslate"><span class="pre">compare_semantic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.semantic.get_embedding_provider"><code class="docutils literal notranslate"><span class="pre">get_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.semantic.register_embedding_provider"><code class="docutils literal notranslate"><span class="pre">register_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.conceptual.ConceptAssigner"><code class="docutils literal notranslate"><span class="pre">ConceptAssigner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.conceptual.compare_conceptual_sets"><code class="docutils literal notranslate"><span class="pre">compare_conceptual_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.conceptual.register_concept_assigner"><code class="docutils literal notranslate"><span class="pre">register_concept_assigner()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/compare.html#fairwddi.compare.engine.run_comparison"><code class="docutils literal notranslate"><span class="pre">run_comparison()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/harmonize.html">Policy-Driven Harmonization (fairwddi.harmonize)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy"><code class="docutils literal notranslate"><span class="pre">AutoApproveHighPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.GuardrailPolicy"><code class="docutils literal notranslate"><span class="pre">GuardrailPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem"><code class="docutils literal notranslate"><span class="pre">HarmonizationActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.HarmonizationGuardrails"><code class="docutils literal notranslate"><span class="pre">HarmonizationGuardrails</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan"><code class="docutils literal notranslate"><span class="pre">HarmonizationPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy"><code class="docutils literal notranslate"><span class="pre">HarmonizationPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.plan.load_harmonization_policy"><code class="docutils literal notranslate"><span class="pre">load_harmonization_policy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.planner.approve_high_actions"><code class="docutils literal notranslate"><span class="pre">approve_high_actions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.planner.plan_harmonization"><code class="docutils literal notranslate"><span class="pre">plan_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.manager.create_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">create_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.manager.execute_harmonization"><code class="docutils literal notranslate"><span class="pre">execute_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.manager.link_to_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">link_to_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/harmonize.html#fairwddi.harmonize.manager.undo_harmonization"><code class="docutils literal notranslate"><span class="pre">undo_harmonization()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.router">Router &amp; Endpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.schemas">API Request &amp; Response Schemas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.views">Views &amp; Route Handlers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.server">ASGI Server Runner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/api_ref.html#module-fairwddi.api.explorer_html">Interactive Model Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/utils.html">Utilities (fairwddi.utils)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/utils.html#module-fairwddi.utils.urn">URN Helpers (urn.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/utils.html#module-fairwddi.utils.normalize_string">String Normalization (normalize_string.py)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/index.html">Standards &amp; Project Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../reference/index.html#reference-documents">Reference Documents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/glossary.html">DDI Canonical Terminology Glossary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/deliverables.html">Project Deliverables &amp; Research Reports</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#core-deliverables">Core Deliverables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#specialized-technical-research-papers">Specialized Technical Research Papers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/deliverables.html#interactive-exploration">Interactive Exploration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/changelog.html">Changelog &amp; Project Roadmap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/changelog.html#project-timeline-overview">Project Timeline Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../reference/changelog.html#release-history">Release History</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FAIRwDDI Lifecycle</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fairwddi.compare.syntactic</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for fairwddi.compare.syntactic</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Level 1 Syntactic &amp; Textual comparator using `dartfx.ddi.harmonizer` and TokenBlocker.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">difflib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dartfx.ddi.harmonizer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MatchType</span><span class="p">,</span>
+    <span class="n">NearExactComparator</span><span class="p">,</span>
+    <span class="n">TextNormalizer</span><span class="p">,</span>
+    <span class="n">TextVariantComparator</span><span class="p">,</span>
+    <span class="n">TokenBlocker</span><span class="p">,</span>
+    <span class="n">compare_codelists</span><span class="p">,</span>
+    <span class="n">compare_multilingual_texts</span><span class="p">,</span>
+    <span class="n">detect_shared_stem</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dartfx.ddi.harmonizer.domains.codes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Category</span> <span class="k">as</span> <span class="n">HCat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dartfx.ddi.harmonizer.domains.codes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Code</span> <span class="k">as</span> <span class="n">HCode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dartfx.ddi.harmonizer.domains.codes</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodeList</span> <span class="k">as</span> <span class="n">HCodeList</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.compare.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceTypeComparisonRule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fairwddi.compare.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">CorrespondenceLevel</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_BlockerItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">urn</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_detect_wording_or_typo</span><span class="p">(</span>
+    <span class="n">raw_a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">raw_b</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">normalizer</span><span class="p">:</span> <span class="n">TextNormalizer</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">lang</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">near_exact_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">tvc</span> <span class="o">=</span> <span class="n">TextVariantComparator</span><span class="p">(</span><span class="n">normalizer</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="n">lang</span><span class="p">)</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">raw_a</span><span class="p">,</span> <span class="n">raw_b</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tvc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">tvc</span><span class="o">.</span><span class="n">score</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">tvc</span><span class="o">.</span><span class="n">match_type</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;variant_type&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">tvc</span><span class="o">.</span><span class="n">match_type</span><span class="o">.</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+                <span class="s2">&quot;rationale&quot;</span><span class="p">:</span> <span class="n">tvc</span><span class="o">.</span><span class="n">rationale</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+
+    <span class="n">nec</span> <span class="o">=</span> <span class="n">NearExactComparator</span><span class="p">(</span>
+        <span class="n">normalizer</span><span class="p">,</span>
+        <span class="n">language</span><span class="o">=</span><span class="n">lang</span><span class="p">,</span>
+        <span class="n">near_exact_threshold</span><span class="o">=</span><span class="n">near_exact_threshold</span><span class="p">,</span>
+        <span class="n">syntactic_threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">raw_a</span><span class="p">,</span> <span class="n">raw_b</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nec</span><span class="o">.</span><span class="n">score</span> <span class="o">&gt;=</span> <span class="n">threshold</span> <span class="ow">and</span> <span class="n">nec</span><span class="o">.</span><span class="n">match_type</span> <span class="o">!=</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">DISTINCT</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">nec</span><span class="o">.</span><span class="n">score</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">nec</span><span class="o">.</span><span class="n">match_type</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+            <span class="p">{</span><span class="s2">&quot;variant_type&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nec</span><span class="o">.</span><span class="n">match_type</span><span class="o">.</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="s2">&quot;rationale&quot;</span><span class="p">:</span> <span class="n">nec</span><span class="o">.</span><span class="n">rationale</span><span class="p">},</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_blocker_text</span><span class="p">(</span><span class="n">rec</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">txt</span> <span class="ow">in</span> <span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ml_text&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">txt</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">lbl</span><span class="p">,</span> <span class="n">is_miss</span> <span class="ow">in</span> <span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codes&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_miss</span> <span class="ow">and</span> <span class="n">lbl</span><span class="p">:</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lbl</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parts</span> <span class="k">if</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="compare_syntactic_sets">
+<a class="viewcode-back" href="../../../api/compare.html#fairwddi.compare.syntactic.compare_syntactic_sets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compare_syntactic_sets</span><span class="p">(</span>
+    <span class="n">source_records</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="n">target_records</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="n">resource_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">rule</span><span class="p">:</span> <span class="n">ResourceTypeComparisonRule</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">exclude_same_urn</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">symmetric_sets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run Level 1 syntactic/textual comparisons between source and target records.&quot;&quot;&quot;</span>
+    <span class="n">syn_cfg</span> <span class="o">=</span> <span class="n">rule</span><span class="o">.</span><span class="n">syntactic</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">enabled</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">source_records</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">target_records</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="n">normalizer</span> <span class="o">=</span> <span class="n">TextNormalizer</span><span class="p">()</span>
+    <span class="n">blocker</span><span class="p">:</span> <span class="n">TokenBlocker</span><span class="p">[</span><span class="n">_BlockerItem</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">target_by_urn</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">]:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">target_records</span><span class="p">}</span>
+
+    <span class="n">use_blocker</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">syn_cfg</span><span class="o">.</span><span class="n">enable_token_blocking</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_records</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">25</span> <span class="ow">and</span> <span class="n">resource_type</span> <span class="o">!=</span> <span class="s2">&quot;CodeList&quot;</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_blocker</span><span class="p">:</span>
+        <span class="n">blocker</span> <span class="o">=</span> <span class="n">TokenBlocker</span><span class="p">[</span><span class="n">_BlockerItem</span><span class="p">](</span>
+            <span class="n">normalizer</span><span class="o">=</span><span class="n">normalizer</span><span class="p">,</span>
+            <span class="n">use_character_ngrams</span><span class="o">=</span><span class="n">syn_cfg</span><span class="o">.</span><span class="n">use_character_ngrams</span><span class="p">,</span>
+            <span class="n">ngram_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">min_token_length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">tgt</span> <span class="ow">in</span> <span class="n">target_records</span><span class="p">:</span>
+            <span class="n">blocker</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">_BlockerItem</span><span class="p">(</span><span class="n">urn</span><span class="o">=</span><span class="n">tgt</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">]),</span> <span class="n">text</span><span class="o">=</span><span class="n">_build_blocker_text</span><span class="p">(</span><span class="n">tgt</span><span class="p">))</span>
+
+    <span class="n">candidates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">seen_sym_pairs</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">source_records</span><span class="p">:</span>
+        <span class="n">src_urn</span> <span class="o">=</span> <span class="n">src</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">blocker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">blocked_items</span> <span class="o">=</span> <span class="n">blocker</span><span class="o">.</span><span class="n">get_candidates</span><span class="p">(</span>
+                <span class="n">_build_blocker_text</span><span class="p">(</span><span class="n">src</span><span class="p">),</span>
+                <span class="n">min_shared_tokens</span><span class="o">=</span><span class="n">syn_cfg</span><span class="o">.</span><span class="n">min_shared_tokens</span><span class="p">,</span>
+                <span class="n">top_k</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">tgt_pool</span> <span class="o">=</span> <span class="p">[</span><span class="n">target_by_urn</span><span class="p">[</span><span class="n">it</span><span class="o">.</span><span class="n">urn</span><span class="p">]</span> <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">blocked_items</span> <span class="k">if</span> <span class="n">it</span><span class="o">.</span><span class="n">urn</span> <span class="ow">in</span> <span class="n">target_by_urn</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tgt_pool</span> <span class="o">=</span> <span class="n">target_records</span>
+
+        <span class="k">for</span> <span class="n">tgt</span> <span class="ow">in</span> <span class="n">tgt_pool</span><span class="p">:</span>
+            <span class="n">tgt_urn</span> <span class="o">=</span> <span class="n">tgt</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">exclude_same_urn</span> <span class="ow">and</span> <span class="n">src_urn</span> <span class="o">==</span> <span class="n">tgt_urn</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">symmetric_sets</span><span class="p">:</span>
+                <span class="n">pair_key</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">src_urn</span><span class="p">,</span> <span class="n">tgt_urn</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">src_urn</span><span class="p">,</span> <span class="n">tgt_urn</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">pair_key</span> <span class="ow">in</span> <span class="n">seen_sym_pairs</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">seen_sym_pairs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pair_key</span><span class="p">)</span>
+
+            <span class="n">res</span> <span class="o">=</span> <span class="n">_compare_pair_syntactic</span><span class="p">(</span>
+                <span class="n">src</span><span class="p">,</span> <span class="n">tgt</span><span class="p">,</span> <span class="n">resource_type</span><span class="p">,</span> <span class="n">syn_cfg</span><span class="o">=</span><span class="n">syn_cfg</span><span class="p">,</span> <span class="n">normalizer</span><span class="o">=</span><span class="n">normalizer</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">candidates</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_compare_pair_syntactic</span><span class="p">(</span>
+    <span class="n">src</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">tgt</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">resource_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">syn_cfg</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">normalizer</span><span class="p">:</span> <span class="n">TextNormalizer</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">resource_type</span> <span class="o">==</span> <span class="s2">&quot;CodeList&quot;</span><span class="p">:</span>
+        <span class="n">sub_a</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codes&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+        <span class="n">sub_b</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="n">tgt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codes&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sub_a</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">sub_b</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">hcl_a</span> <span class="o">=</span> <span class="n">HCodeList</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">src</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">],</span>
+            <span class="n">urn</span><span class="o">=</span><span class="n">src</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">],</span>
+            <span class="n">codes</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">HCode</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">HCat</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">normalizer</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">lbl</span><span class="p">)</span><span class="o">.</span><span class="n">casefold</span><span class="p">()))</span>
+                <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">lbl</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">sub_a</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">hcl_b</span> <span class="o">=</span> <span class="n">HCodeList</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">tgt</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">],</span>
+            <span class="n">urn</span><span class="o">=</span><span class="n">tgt</span><span class="p">[</span><span class="s2">&quot;urn&quot;</span><span class="p">],</span>
+            <span class="n">codes</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">HCode</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">HCat</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">normalizer</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">lbl</span><span class="p">)</span><span class="o">.</span><span class="n">casefold</span><span class="p">()))</span>
+                <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">lbl</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">sub_b</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">cl_res</span> <span class="o">=</span> <span class="n">compare_codelists</span><span class="p">(</span><span class="n">hcl_a</span><span class="p">,</span> <span class="n">hcl_b</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">syn_cfg</span><span class="o">.</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cl_res</span><span class="o">.</span><span class="n">score</span> <span class="o">&lt;</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">threshold</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">match_type</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">MatchType</span><span class="o">.</span><span class="n">EXACT_IDENTICAL</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">if</span> <span class="n">cl_res</span><span class="o">.</span><span class="n">score</span> <span class="o">&gt;=</span> <span class="mf">0.999</span>
+            <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">cl_res</span><span class="o">.</span><span class="n">match_type</span><span class="o">.</span><span class="n">value</span> <span class="ow">or</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">NEAR_EXACT</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="n">CorrespondenceLevel</span><span class="o">.</span><span class="n">SYNTACTIC</span><span class="p">,</span>
+            <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="n">resource_type</span><span class="p">,</span>
+            <span class="s2">&quot;source_rec&quot;</span><span class="p">:</span> <span class="n">src</span><span class="p">,</span>
+            <span class="s2">&quot;target_rec&quot;</span><span class="p">:</span> <span class="n">tgt</span><span class="p">,</span>
+            <span class="s2">&quot;match_type&quot;</span><span class="p">:</span> <span class="n">match_type</span><span class="p">,</span>
+            <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cl_res</span><span class="o">.</span><span class="n">score</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="s2">&quot;requires_review&quot;</span><span class="p">:</span> <span class="n">cl_res</span><span class="o">.</span><span class="n">score</span> <span class="o">&lt;</span> <span class="mf">0.999</span><span class="p">,</span>
+            <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;codelist_score&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cl_res</span><span class="o">.</span><span class="n">score</span><span class="p">),</span> <span class="mi">4</span><span class="p">)},</span>
+        <span class="p">}</span>
+
+    <span class="n">src_ml</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ml_text&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">tgt_ml</span> <span class="o">=</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ml_text&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">src_raw_ml</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;raw_ml&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">src_ml</span>
+    <span class="n">tgt_raw_ml</span> <span class="o">=</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;raw_ml&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">tgt_ml</span>
+
+    <span class="n">best_score</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">best_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">best_details</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># 1. Cross-language or same-language multilingual check via dartfx-ddi</span>
+    <span class="k">if</span> <span class="n">src_ml</span> <span class="ow">and</span> <span class="n">tgt_ml</span><span class="p">:</span>
+        <span class="n">ml_res</span> <span class="o">=</span> <span class="n">compare_multilingual_texts</span><span class="p">(</span>
+            <span class="n">src_ml</span><span class="p">,</span>
+            <span class="n">tgt_ml</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">syn_cfg</span><span class="o">.</span><span class="n">multilingual_threshold</span><span class="p">,</span>
+            <span class="n">normalizer</span><span class="o">=</span><span class="n">normalizer</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">ml_res</span><span class="o">.</span><span class="n">score</span> <span class="o">&gt;=</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">threshold</span> <span class="ow">and</span> <span class="n">ml_res</span><span class="o">.</span><span class="n">score</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">:</span>
+            <span class="n">best_score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ml_res</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+            <span class="n">best_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ml_res</span><span class="o">.</span><span class="n">match_type</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">best_details</span><span class="p">[</span><span class="s2">&quot;rationale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ml_res</span><span class="o">.</span><span class="n">rationale</span>
+
+    <span class="c1"># 2. Same-language wording, punctuation, inclusive writing, and typo checks</span>
+    <span class="n">shared_langs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">src_raw_ml</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">tgt_raw_ml</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">shared_langs</span><span class="p">:</span>
+        <span class="n">raw_a</span> <span class="o">=</span> <span class="n">src_raw_ml</span><span class="p">[</span><span class="n">lang</span><span class="p">]</span>
+        <span class="n">raw_b</span> <span class="o">=</span> <span class="n">tgt_raw_ml</span><span class="p">[</span><span class="n">lang</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">detect_wording</span> <span class="ow">or</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">detect_typos</span> <span class="ow">or</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">detect_inclusive</span><span class="p">:</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">_detect_wording_or_typo</span><span class="p">(</span>
+                <span class="n">raw_a</span><span class="p">,</span>
+                <span class="n">raw_b</span><span class="p">,</span>
+                <span class="n">normalizer</span><span class="p">,</span>
+                <span class="n">lang</span><span class="o">=</span><span class="n">lang</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">syn_cfg</span><span class="o">.</span><span class="n">threshold</span><span class="p">,</span>
+                <span class="n">near_exact_threshold</span><span class="o">=</span><span class="n">syn_cfg</span><span class="o">.</span><span class="n">near_exact_threshold</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">best_score</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">var</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">TYPOGRAPHICAL_VARIANT</span><span class="o">.</span><span class="n">value</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">detect_typos</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">elif</span> <span class="p">(</span>
+                    <span class="n">var</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">INCLUSIVE_WRITING_VARIANT</span><span class="o">.</span><span class="n">value</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">detect_inclusive</span>
+                <span class="p">):</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">best_score</span><span class="p">,</span> <span class="n">best_type</span><span class="p">,</span> <span class="n">extra</span> <span class="o">=</span> <span class="n">var</span>
+                    <span class="n">best_details</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">extra</span><span class="p">)</span>
+
+        <span class="c1"># 3. Shared-stem question grid check</span>
+        <span class="k">if</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">detect_shared_stems</span> <span class="ow">and</span> <span class="n">resource_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;QuestionItem&quot;</span><span class="p">,</span> <span class="s2">&quot;RepresentedVariable&quot;</span><span class="p">):</span>
+            <span class="n">stem_res</span> <span class="o">=</span> <span class="n">detect_shared_stem</span><span class="p">(</span>
+                <span class="n">raw_a</span><span class="p">,</span>
+                <span class="n">raw_b</span><span class="p">,</span>
+                <span class="n">min_stem_len</span><span class="o">=</span><span class="n">syn_cfg</span><span class="o">.</span><span class="n">min_stem_length</span><span class="p">,</span>
+                <span class="n">context</span><span class="o">=</span><span class="s2">&quot;question_grid&quot;</span><span class="p">,</span>
+                <span class="n">normalizer</span><span class="o">=</span><span class="n">normalizer</span><span class="p">,</span>
+                <span class="n">lang</span><span class="o">=</span><span class="n">lang</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">stem_res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">stem_res</span><span class="o">.</span><span class="n">stem_similarity</span> <span class="o">&gt;=</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">threshold</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">stem_res</span><span class="o">.</span><span class="n">stem_similarity</span> <span class="o">&gt;</span> <span class="n">best_score</span> <span class="ow">or</span> <span class="n">best_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">best_score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">stem_res</span><span class="o">.</span><span class="n">stem_similarity</span><span class="p">)</span>
+                    <span class="n">best_type</span> <span class="o">=</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">SHARED_STEM</span><span class="o">.</span><span class="n">value</span>
+                    <span class="n">best_details</span><span class="p">[</span><span class="s2">&quot;shared_stem&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stem_res</span><span class="o">.</span><span class="n">shared_stem</span>
+                    <span class="n">best_details</span><span class="p">[</span><span class="s2">&quot;sub_item_a&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stem_res</span><span class="o">.</span><span class="n">sub_item_a</span>
+                    <span class="n">best_details</span><span class="p">[</span><span class="s2">&quot;sub_item_b&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stem_res</span><span class="o">.</span><span class="n">sub_item_b</span>
+                    <span class="n">best_details</span><span class="p">[</span><span class="s2">&quot;group_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stem_res</span><span class="o">.</span><span class="n">group_type</span>
+
+    <span class="c1"># Fallback direct string comparison when ml dictionaries are absent</span>
+    <span class="k">if</span> <span class="n">best_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">src</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">):</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="n">difflib</span><span class="o">.</span><span class="n">SequenceMatcher</span><span class="p">(</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="n">normalizer</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">src</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">casefold</span><span class="p">(),</span>
+            <span class="n">normalizer</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">tgt</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">casefold</span><span class="p">(),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">ratio</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ratio</span> <span class="o">&gt;=</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">threshold</span><span class="p">:</span>
+            <span class="n">best_score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ratio</span><span class="p">)</span>
+            <span class="n">best_type</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">MatchType</span><span class="o">.</span><span class="n">NEAR_EXACT</span><span class="o">.</span><span class="n">value</span>
+                <span class="k">if</span> <span class="n">ratio</span> <span class="o">&gt;=</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">near_exact_threshold</span>
+                <span class="k">else</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">SYNTACTIC_SIMILAR</span><span class="o">.</span><span class="n">value</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">best_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">best_score</span> <span class="o">&lt;</span> <span class="n">syn_cfg</span><span class="o">.</span><span class="n">threshold</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="n">CorrespondenceLevel</span><span class="o">.</span><span class="n">SYNTACTIC</span><span class="p">,</span>
+        <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="n">resource_type</span><span class="p">,</span>
+        <span class="s2">&quot;source_rec&quot;</span><span class="p">:</span> <span class="n">src</span><span class="p">,</span>
+        <span class="s2">&quot;target_rec&quot;</span><span class="p">:</span> <span class="n">tgt</span><span class="p">,</span>
+        <span class="s2">&quot;match_type&quot;</span><span class="p">:</span> <span class="n">best_type</span><span class="p">,</span>
+        <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">best_score</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s2">&quot;requires_review&quot;</span><span class="p">:</span> <span class="n">best_type</span>
+        <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MatchType</span><span class="o">.</span><span class="n">EXACT_IDENTICAL</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">MatchType</span><span class="o">.</span><span class="n">NORMALIZED_EXACT</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+        <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="n">best_details</span><span class="p">,</span>
+    <span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

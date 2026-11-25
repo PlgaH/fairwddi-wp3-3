@@ -168,6 +168,7 @@ Generic Group DDI resource (maps to DDI-L `<Group>` / `<SubGroup>`). Logical gro
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
 | `urn` | `CharField(512)` | PK | Canonical DDI-L Group URN |
+| `slug` | `SlugField(128)` | unique, indexed, nullable | Human-friendly short slug/nickname (`fairwddi group`) |
 | `name` | `JSONField` | required | Multilingual group name `[{"lang": "fr", "value": "..."}]` |
 | `description` | `JSONField` | nullable | Multilingual group description |
 | `group_type` | `CharField(64)` | default `'study_series'`, indexed | Group classification type (`'study_series'`, `'panel'`, `'thematic'`, `'collection'`) |
@@ -772,7 +773,7 @@ Holds incoming metadata that requires archivist review due to URN collisions or 
 ---
 
 #### IngestBatch
-Lightweight receipt tracking a completed or rolled-back file ingestion batch (`request_ddi_ingestbatch`). Stores one summary row per ingested file (zero per-node JSONB duplication) to prevent duplicate file ingestion via SHA-256, track batch statistics, and support instant transactional rollback (`undo_ingestion`).
+Lightweight receipt tracking a completed or rolled-back file import batch (`request_ddi_ingestbatch`). Stores one summary row per imported file (zero per-node JSONB duplication) to prevent duplicate imports via SHA-256, track batch statistics, and support instant transactional rollback (`undo_import`).
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
@@ -785,7 +786,6 @@ Lightweight receipt tracking a completed or rolled-back file ingestion batch (`r
 | `options` | `JSONField` | default `{}` | Batch configuration, job_id, profile, and options |
 | `created_urns` | `JSONField` | default `[]` | Ordered list of canonical URNs created exclusively by this batch |
 | `reused_urns` | `JSONField` | default `[]` | List of pre-existing canonical URNs reused during this batch |
-| `created_aliases` | `JSONField` | default `[]` | List of alias_urn values registered in URNAlias by this batch |
 | `stats` | `JSONField` | default `{}` | Summary counts of created entities, shortcuts, and frequencies |
 | `created_at` | `DateTimeField` | auto | Batch execution timestamp |
 | `updated_at` | `DateTimeField` | auto | Last update timestamp |

@@ -1,7 +1,7 @@
 Database Layer (fairwddi.db)
 ============================
 
-The ``fairwddi.db`` package contains configuration utilities, raw DDL exporters, SKOS vocabulary importers, and fixture seeders.
+The ``fairwddi.db`` package contains configuration utilities, raw DDL exporters, SKOS vocabulary importers, and database lifecycle wipe/recreate tools.
 
 Configuration & Environment
 ---------------------------
@@ -27,16 +27,8 @@ Vocabulary Importers
    :undoc-members:
    :show-inheritance:
 
-Seed & Fixture Management
--------------------------
-
-.. automodule:: fairwddi.db.seed
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Wipe Utilities
---------------
+Wipe & Lifecycle Utilities
+--------------------------
 
 .. automodule:: fairwddi.db.wipe
    :members:

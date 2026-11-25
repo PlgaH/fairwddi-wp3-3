@@ -31,11 +31,11 @@ flowchart TD
     B --> C["preflight.plan.yaml & report.md\n(Status: READY)"]
     C --> D["Step 2: fairwddi preflight upgrade\n(--format ddi4-jsonl --id-strategy content_hash)"]
     D --> E["FSD3562_eng.ddi40.jsonl\n(Deduplicated CodeLists & Categories)"]
-    E --> F["Step 3: fairwddi ingest plan"]
-    F --> G["ingest.plan.yaml & report.md\n(Zero DB Writes, Review Gate Checked)"]
-    G --> H["Step 4: fairwddi ingest execute"]
+    E --> F["Step 3: fairwddi import plan"]
+    F --> G["import.plan.yaml & report.md\n(Zero DB Writes, Review Gate Checked)"]
+    G --> H["Step 4: fairwddi import execute"]
     H --> I["PostgreSQL Core DB\n• IngestBatch Receipt (#1)\n• StudyUnit, Datafile, DatafileVariable\n• DatafileVariableFrequency (bulk SQL rows)\n• QuestionItem, Category, CodeList\n• RepresentedVariable, InstanceVariable"]
-    I --> J["Step 5: Post-Ingest Discovery\n(fairwddi compare discover)"]
+    I --> J["Step 5: Post-Ingest Discovery\n(fairwddi compare run)"]
 ```
 
 ### 2.2 Step-by-Step Execution
@@ -169,14 +169,14 @@ _Dedicated Statistics Output (`FSD3562_eng.stats.ddi40.json`):_
 Streams the upgraded `.ddi40.jsonl` file, checks existing URNs in `UrnRegistry`, verifies content hashes for drift detection, and plans core entity allocations.
 
 ```bash
-fairwddi ingest plan ./ingest_output/FSD3562_eng.ddi40.jsonl \
+fairwddi import plan ./ingest_output/FSD3562_eng.ddi40.jsonl \
   --profile request \
   --output-dir ./ingest_output
 ```
 
 _Expected Output:_
 
-- Emits `./ingest_output/FSD3562_eng.ddi40.ingest.plan.yaml` and `.report.md`.
+- Emits `./ingest_output/FSD3562_eng.ddi40.import.plan.yaml` and `.report.md`.
 - Summary registers planned entity counts:
   - `planned_frequency_rows`: Total categorical frequencies to insert.
   - `create`: New entities to insert.
@@ -186,14 +186,14 @@ _Expected Output:_
 
 > [!TIP]
 > **Interactive Review Gate Authoring:**
-> Archivists can load `./ingest_output/FSD3562_eng.ddi40.ingest.plan.yaml` into the browser-based **Ingest Plan Editor** ([`deliverables/research/ingest_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/ingest_plan_editor.html)) to inspect planned operations, author canonical URN aliases, approve items in bulk, and sign off the review gate prior to PostgreSQL execution.
+> Archivists can load `./ingest_output/FSD3562_eng.ddi40.import.plan.yaml` into the browser-based **Ingest Plan Editor** ([`deliverables/research/ingest_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/ingest_plan_editor.html)) to inspect planned operations, author canonical URN aliases, approve items in bulk, and sign off the review gate prior to PostgreSQL execution.
 
 #### Step 4: Execute Core Ingestion
 
 Executes the approved plan within an atomic PostgreSQL transaction.
 
 ```bash
-fairwddi ingest execute ./ingest_output/FSD3562_eng.ddi40.ingest.plan.yaml
+fairwddi import execute ./ingest_output/FSD3562_eng.ddi40.import.plan.yaml
 ```
 
 _What Happens in PostgreSQL:_
@@ -210,25 +210,25 @@ _What Happens in PostgreSQL:_
 Verify the batch status and entity counts:
 
 ```bash
-fairwddi ingest status 1
+fairwddi import status 1
 ```
 
 _To Roll Back (Undo):_
 
 ```bash
-fairwddi ingest undo 1
+fairwddi import undo 1
 ```
 
 ### 2.3 Python API Equivalent
 
 ```python
 from pathlib import Path
-from fairwddi.ingest import (
+from fairwddi.importer import (
     run_preflight_check,
     upgrade_ddic_to_ddil,
-    plan_ingestion,
-    apply_ingestion,
-    undo_ingestion,
+    plan_import,
+    execute_import,
+    undo_import,
 )
 
 src = Path("tests/fixtures/FSD3562_eng.ddic.xml")
@@ -249,10 +249,10 @@ upg = upgrade_ddic_to_ddil(
 )
 
 # 3. Plan Ingest
-ing_plan = plan_ingestion(upg["output_file"], profile="request", output_dir=out_dir)
+ing_plan = plan_import(upg["output_file"], profile="request", output_dir=out_dir)
 
 # 4. Apply
-res = apply_ingestion(ing_plan)
+res = execute_import(ing_plan)
 print(f"Batch #{res['batch_id']} completed: {res['created_count']} resources created.")
 ```
 
@@ -272,9 +272,9 @@ flowchart TD
     B --> C["Preflight Plan\n• Detected Languages: ['fr', 'en']\n• Multilingual Parity: 100%"]
     C --> D["fairwddi preflight upgrade\n(--format ddi4-json --agency fr.cdsp)"]
     D --> E["cdsp_bilingual.ddi40.json\n(Preserves Multilingual Dictionaries)"]
-    E --> F["fairwddi ingest plan"]
-    F --> G["ingest.plan.yaml\n(Multilingual Hash Computation)"]
-    G --> H["fairwddi ingest execute"]
+    E --> F["fairwddi import plan"]
+    F --> G["import.plan.yaml\n(Multilingual Hash Computation)"]
+    G --> H["fairwddi import execute"]
     H --> I["PostgreSQL JSONB Columns\n• Category.label = {'fr': '...', 'en': '...'}\n• QuestionItem.question_text = {'fr': '...', 'en': '...'}\n• QuestionItem.interviewer_instructions = {'fr': '...', 'en': '...'}\n• DatafileVariableFrequency (bulk SQL rows)\n• IngestBatch Receipt"]
 ```
 
@@ -339,7 +339,7 @@ _Structure Emitted in DDI 4 JSON:_
 Inspects multilingual payloads and plans insertions:
 
 ```bash
-fairwddi ingest plan ./ingest_output/cdsp_bilingual.ddi40.json \
+fairwddi import plan ./ingest_output/cdsp_bilingual.ddi40.json \
   --profile request \
   --output-dir ./ingest_output
 ```
@@ -349,7 +349,7 @@ fairwddi ingest plan ./ingest_output/cdsp_bilingual.ddi40.json \
 Executes insertion into core PostgreSQL tables:
 
 ```bash
-fairwddi ingest execute ./ingest_output/cdsp_bilingual.ddi40.json
+fairwddi import execute ./ingest_output/cdsp_bilingual.ddi40.json
 ```
 
 _Database Verification in PostgreSQL:_
@@ -380,9 +380,9 @@ SELECT urn, question_text, extended_attributes FROM request_ddi_questionitem LIM
 flowchart TD
     A["sample_cso.ddi33.xml"] --> B["fairwddi preflight check"]
     B --> C["Preflight Audit\n• Structural Topology\n• Reference Resolution\n• Quality Score & Grade"]
-    C --> D["fairwddi ingest plan\n(Streaming iterparse, Zero DB Writes)"]
-    D --> E["ingest.plan.yaml\n(Flattening Control Constructs)"]
-    E --> F["fairwddi ingest execute"]
+    C --> D["fairwddi import plan\n(Streaming iterparse, Zero DB Writes)"]
+    D --> E["import.plan.yaml\n(Flattening Control Constructs)"]
+    E --> F["fairwddi import execute"]
     F --> G["PostgreSQL Core DB\n• StudyUnit & Datafile\n• Instrument & StudyInstrument\n• InstrumentQuestion (flattened sequence path)\n• QuestionItem & Category & CodeList\n• DatafileVariable & DatafileVariableFrequency\n• IngestBatch Receipt"]
 ```
 
@@ -406,10 +406,10 @@ _Preflight Audit Output:_
 
 #### Step 2: Generate Direct Ingestion Plan
 
-DDI-L 3.3 XML does not require pre-conversion; it streams directly into `plan_ingestion()`:
+DDI-L 3.3 XML does not require pre-conversion; it streams directly into `plan_import()`:
 
 ```bash
-fairwddi ingest plan tests/fixtures/sample_cso.ddi33.xml \
+fairwddi import plan tests/fixtures/sample_cso.ddi33.xml \
   --profile request \
   --output-dir ./ingest_output
 ```
@@ -426,7 +426,7 @@ _Flattening Logic Applied During Planning:_
 Streams the XML document into PostgreSQL core tables:
 
 ```bash
-fairwddi ingest execute ./ingest_output/sample_cso.ddi33.ingest.plan.yaml
+fairwddi import execute ./ingest_output/sample_cso.ddi33.import.plan.yaml
 ```
 
 _Core Verification:_
@@ -447,12 +447,12 @@ LIMIT 5;
 
 ---
 
-## 5. Single-Command End-to-End Orchestrator (`fairwddi ingest run`)
+## 5. Single-Command End-to-End Orchestrator (`fairwddi import`)
 
 For routine ingestion of trusted files, the `ingest run` command combines preflight, upgrade, plan, and apply into a single automated pipeline:
 
 ```bash
-fairwddi ingest run tests/fixtures/FSD3562_eng.ddic.xml \
+fairwddi import tests/fixtures/FSD3562_eng.ddic.xml \
   --profile request \
   --output-dir ./ingest_output \
   --agency fi.fsd \
@@ -539,14 +539,14 @@ sequenceDiagram
     participant Alias as URNAlias
 
     Note over Archivist,DB: Phase A: Ingest Wave 1 (ELIPSS 2013)
-    Archivist->>CLI: fairwddi ingest execute elipss.2013.ddi40.json
+    Archivist->>CLI: fairwddi import execute elipss.2013.ddi40.json
     CLI->>Loader: Plan & Execute Ingestion
     Loader->>Registry: Register canonical URNs (action: create)
     Loader->>DB: Insert QuestionItems, Categories, Variables
     Note right of Registry: source_urn == canonical_urn<br/>(No alias needed)
 
     Note over Archivist,DB: Phase B: Plan Wave 2 (ELIPSS 2014)
-    Archivist->>CLI: fairwddi ingest plan elipss.2014.ddi40.json
+    Archivist->>CLI: fairwddi import plan elipss.2014.ddi40.json
     CLI->>Loader: Compute content/facet hashes
     Loader->>DB: Query existing QuestionItems & Categories by facet_hash
     DB-->>Loader: Found matches in 2013 canonical records!
@@ -554,7 +554,7 @@ sequenceDiagram
     CLI-->>Archivist: Markdown Report with 'Cross-Survey Deduplication' section
 
     Note over Archivist,DB: Phase C: Apply Wave 2 (ELIPSS 2014)
-    Archivist->>CLI: fairwddi ingest execute elipss.2014.ingest.plan.yaml
+    Archivist->>CLI: fairwddi import execute elipss.2014.import.plan.yaml
     CLI->>Loader: Execute mutations
     Loader->>Alias: Insert URNAlias(alias_urn=2014_URN, canonical_urn=2013_URN)
     Loader->>DB: Link 2014 InstanceVariables -> 2013 QuestionItem/RepresentedVariable
@@ -612,7 +612,7 @@ flowchart LR
 - When a subsequent survey wave is ingested (e.g. Wave 3) or an archivist links an imported study resource to a previously harmonized question, the pipeline **links** the new study item to the _already existing_ harmonized resource (Tier 1 match).
 - **In-Place Multilingual Enrichment:** Any newly provided translations are dynamically added to the target entity, while alternate phrasings are preserved in `extended_attributes` (`type: "wording_variant"`).
 - **Audit Provenance:** `target_obj.extended_attributes` and `SemanticRelationship` record structured derivation provenance (`prov:wasDerivedFrom`, `match_type`, `confidence`).
-- **Target-Preserving Undo:** Reverting an ingestion or linkage job (`fairwddi ingest undo <batch_id>` or `fairwddi harmonize undo <job_id>`) safely preserves the harmonized target if other survey waves still depend on it.
+- **Target-Preserving Undo:** Reverting an ingestion or linkage job (`fairwddi import undo <batch_id>` or `fairwddi harmonize undo <job_id>`) safely preserves the harmonized target if other survey waves still depend on it.
 
 > [!NOTE]
 > **Provenance Guarantee:** Historical study records are never mutated or retired. Lineage DAGs (`prov:wasDerivedFrom`) explicitly link harmonized bank concepts to raw study variables, providing full traceability for comparative and secondary data analysis.
@@ -621,7 +621,7 @@ flowchart LR
 
 ### 6.3 Interactive Harmonization Plan Review, Stratified Matching & Question Grids
 
-Archivists can review candidate matches discovered by `fairwddi compare discover` or planned via `fairwddi harmonize plan` in the standalone **Harmonization Plan Editor** ([`deliverables/research/harmonization_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/harmonization_plan_editor.html)) or via the generated YAML/Markdown harmonization plans:
+Archivists can review candidate matches discovered by `fairwddi compare run` or planned via `fairwddi harmonize plan` in the standalone **Harmonization Plan Editor** ([`deliverables/research/harmonization_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/harmonization_plan_editor.html)) or via the generated YAML/Markdown harmonization plans:
 
 - **Stratified Match Classification & Review Flagging (`requires_review: true`):**
   - `NEAR_EXACT`: Terminal punctuation variants (e.g., trailing `?` or French spacing before `?`) and sequence similarity $\ge 0.98$. Recommends `link_existing` (if harmonized target exists) or `generate_harmonized`.
@@ -635,10 +635,10 @@ Archivists can review candidate matches discovered by `fairwddi compare discover
   - Two-tier matching automatically recommends `link_existing` when one resource is already a bank harmonized item (`origin in ('generated', 'instantiated')`) and `generate_harmonized` when matching across unharmonized `imported` resources.
   - Use `fairwddi harmonize approve-high <plan.yaml> --min-confidence 0.96` to bulk-approve high-confidence and near-exact items while disabling lower-confidence candidates.
 - **CodeList & Question Text Side-by-Side Diff:** Compares incoming survey wave response codes and question wordings against canonical candidates.
-- **Execution Ready:** Emits validated `.harmonize.plan.yaml` with an approved review gate ready for `fairwddi harmonize apply` (and full rollback via `fairwddi harmonize undo <job_id>`).
+- **Execution Ready:** Emits validated `.harmonize.plan.yaml` with an approved review gate ready for `fairwddi harmonize execute` (and full rollback via `fairwddi harmonize undo <job_id>`).
   - Use `fairwddi harmonize approve-high <plan.yaml> --min-confidence 0.96` to bulk-approve high-confidence and near-exact items while disabling lower-confidence candidates.
 - **CodeList & Question Text Side-by-Side Diff:** Compares incoming survey wave response codes and question wordings against canonical candidates.
-- **Execution Ready:** Emits validated `.harmonize.plan.yaml` with an approved review gate ready for `fairwddi harmonize apply` (and full rollback via `fairwddi harmonize undo <job_id>`).
+- **Execution Ready:** Emits validated `.harmonize.plan.yaml` with an approved review gate ready for `fairwddi harmonize execute` (and full rollback via `fairwddi harmonize undo <job_id>`).
 
 ---
 
@@ -651,7 +651,7 @@ In DDI-Codebook, a variable (`<var>`) conflates the abstract question wording an
 - **`InstanceVariable`:** Physical dataset realization (column name, data file pointer).
   - Target URN: `urn:ddi:fr.cdsp:elipss.2013.iv_V1_q1:1.0.0`
 
-The dry-run ingestion plan (`.ingest.plan.yaml`) and Markdown report explicitly list both derived URNs in the item's `details` and `notes` to ensure archivist clarity prior to execution.
+The dry-run ingestion plan (`.import.plan.yaml`) and Markdown report explicitly list both derived URNs in the item's `details` and `notes` to ensure archivist clarity prior to execution.
 
 ---
 

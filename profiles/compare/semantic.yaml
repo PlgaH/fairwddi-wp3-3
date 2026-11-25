@@ -1,0 +1,78 @@
+name: semantic
+description: Level 2 Semantic comparison configuration (dense/TF-IDF vector similarity, cross-phrasing discovery, and independent CodeList qualification).
+levels:
+  - semantic
+resource_types:
+  - QuestionItem
+  - RepresentedVariable
+  - Category
+  - ConceptualVariable
+
+rules:
+  QuestionItem:
+    enabled: true
+    fields:
+      - question_text
+      - label
+    syntactic:
+      enabled: false
+    semantic:
+      enabled: true
+      min_score: 0.70
+      embedding_provider: tfidf
+      top_k: 5
+      agent_backend: mock
+    conceptual:
+      enabled: false
+
+  RepresentedVariable:
+    enabled: true
+    fields:
+      - label
+      - description
+      - question_text
+    syntactic:
+      enabled: false
+    semantic:
+      enabled: true
+      min_score: 0.70
+      embedding_provider: tfidf
+      top_k: 5
+      agent_backend: mock
+    conceptual:
+      enabled: false
+
+  Category:
+    enabled: true
+    fields:
+      - label
+    syntactic:
+      enabled: false
+    semantic:
+      enabled: true
+      min_score: 0.75
+      embedding_provider: tfidf
+      top_k: 5
+    conceptual:
+      enabled: false
+    qualification:
+      evaluate_codelists: false
+      flag_administration_context: false
+
+  ConceptualVariable:
+    enabled: true
+    fields:
+      - label
+      - description
+    syntactic:
+      enabled: false
+    semantic:
+      enabled: true
+      min_score: 0.72
+      embedding_provider: tfidf
+      top_k: 5
+    conceptual:
+      enabled: false
+    qualification:
+      evaluate_codelists: false
+      flag_administration_context: false

@@ -42,6 +42,7 @@ CREATE INDEX IF NOT EXISTS req_ddi_org_type_idx ON request_ddi_organization (org
 
 CREATE TABLE IF NOT EXISTS request_ddi_group (
     urn VARCHAR(512) PRIMARY KEY REFERENCES request_ddi_urnregistry(urn) ON DELETE CASCADE,
+    slug VARCHAR(128) UNIQUE,
     name JSONB NOT NULL DEFAULT '[]'::jsonb,
     description JSONB DEFAULT '[]'::jsonb,
     group_type VARCHAR(64),
@@ -53,6 +54,7 @@ CREATE TABLE IF NOT EXISTS request_ddi_group (
 );
 
 CREATE INDEX IF NOT EXISTS idx_group_group_type ON request_ddi_group (group_type);
+CREATE INDEX IF NOT EXISTS idx_group_slug ON request_ddi_group (slug);
 
 -- ----------------------------------------------------------------------------
 -- 3. Concept Layer (Controlled Vocabularies & Thesauri)
@@ -432,10 +434,7 @@ CREATE TABLE IF NOT EXISTS request_ddi_ingestbatch (
     status VARCHAR(32) NOT NULL DEFAULT 'completed',
     options JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_urns JSONB NOT NULL DEFAULT '[]'::jsonb,
-    generated_urns JSONB NOT NULL DEFAULT '[]'::jsonb,
-    linked_urns JSONB NOT NULL DEFAULT '[]'::jsonb,
     reused_urns JSONB NOT NULL DEFAULT '[]'::jsonb,
-    created_aliases JSONB NOT NULL DEFAULT '[]'::jsonb,
     stats JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

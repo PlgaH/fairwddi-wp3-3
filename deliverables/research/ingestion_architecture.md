@@ -319,13 +319,13 @@ classDiagram
 
 ---
 
-## 5. Review-Gated Plan Lifecycle (`IngestPlan`)
+## 5. Review-Gated Plan Lifecycle (`ImportPlan`)
 
-Every stage produces a machine-readable plan (`.plan.yaml`) and a human-readable report (`.report.md`):
+Every import stage produces a machine-readable plan (`.import.plan.yaml`) and a human-readable report (`.import.report.md`), completely decoupled from post-import comparison (`fairwddi compare`) and harmonization (`fairwddi harmonize`):
 
 ```mermaid
 stateDiagram-v2
-    [*] --> PlanGenerated: fairwddi ingest plan <file>
+    [*] --> PlanGenerated: fairwddi import plan <file>
     
     PlanGenerated --> Evaluated: Check plan.is_ready_to_execute()
     
@@ -333,27 +333,26 @@ stateDiagram-v2
     Evaluated --> AutoApproved: 0 errors AND 0 pending reviews
     Evaluated --> RequiresReview: pending_review_count > 0 OR errors > 0
     
-    AutoApproved --> Applied: fairwddi ingest execute <plan.yaml>
+    AutoApproved --> Executed: fairwddi import execute <plan.yaml>
     
-    RequiresReview --> Blocked: fairwddi ingest execute (Fails with PermissionError)
+    RequiresReview --> Blocked: fairwddi import execute (Fails with PermissionError)
     Blocked --> ReviewYAML: Archivist edits .plan.yaml\n(Sets review_gate.approved: true)
     Blocked --> ForceCLI: Archivist passes --auto-approve
     
-    ReviewYAML --> Applied: fairwddi ingest execute <plan.yaml>
-    ForceCLI --> Applied: fairwddi ingest execute <plan.yaml> --auto-approve
+    ReviewYAML --> Executed: fairwddi import execute <plan.yaml>
+    ForceCLI --> Executed: fairwddi import execute <plan.yaml> --auto-approve
     
-    Applied --> Rollback: fairwddi ingest undo <batch_id>
+    Executed --> Rollback: fairwddi import undo <batch_id>
     Rollback --> [*]: Clean Cascade Reset
-    Applied --> [*]: Done
+    Executed --> [*]: Done
 ```
 
-### Plan Action Types (`PlanActionItem.action`)
+### Plan Action Types (`ImportActionItem.action`)
 
-- `create`: Resource is new to the database; it will be inserted into its core table and registered in `UrnRegistry`.
-- `reuse`: Canonical URN already exists with an identical content hash; the existing record is reused with zero mutations.
-- `alias`: Resource content matches an existing record under a different URN (e.g. cross-wave question repetition); a `URNAlias` record will be created mapping incoming `source_urn` to existing `canonical_urn` without creating duplicate table rows.
-- `skip`: Structural packaging wrapper or envelope construct (e.g. `LogicalProduct`, `DataCollection`, `DDIInstance`) that is pruned during ingestion in accordance with the lightweight profile guarantee.
-- `quarantine`: Resource URN matches an existing record, but the content hash differs (`ING-DRIFT-001`). The incoming payload is isolated in `MetadataQuarantine`.
+- `create`: Resource is new to the database; it will be inserted faithfully with `origin='imported'` into its core table and registered in `UrnRegistry`.
+- `reuse`: Canonical URN already exists with an identical content hash (`IMP-URN-REUSE-001`); flagged for human review before cross-file reuse.
+- `skip`: Structural packaging wrapper or envelope construct (e.g. `LogicalProduct`, `DataCollection`, `DDIInstance`) that is pruned during import in accordance with the lightweight profile guarantee.
+- `quarantine`: Resource URN matches an existing record, but the content hash differs (`IMP-DRIFT-001`). The incoming payload is isolated in `MetadataQuarantine`.
 
 ---
 

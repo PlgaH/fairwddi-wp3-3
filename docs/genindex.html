@@ -82,20 +82,17 @@
 <li class="toctree-l3"><a class="reference internal" href="admin/cli_operations.html">CLI Operational Reference</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="admin/cli_operations.html#global-options">Global Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="admin/cli_operations.html#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin/cli_operations.html#vocabulary-administration-fairwddi-vocab">Vocabulary Administration (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">vocab</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="admin/cli_operations.html#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin/cli_operations.html#ingestion-pipeline-fairwddi-ingest">Ingestion Pipeline (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">ingest</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin/cli_operations.html#deterministic-import-fairwddi-import">Deterministic Import (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin/cli_operations.html#context-groups-fairwddi-group">Context Groups (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">group</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin/cli_operations.html#three-layer-comparison-fairwddi-compare">Three-Layer Comparison (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">compare</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="admin/cli_operations.html#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="admin/cli_operations.html#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="admin/ingestion_ops.html">Ingestion &amp; Pipeline Operations</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="admin/ingestion_ops.html#the-2-stage-ingestion-lifecycle">The 2-Stage Ingestion Lifecycle</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin/ingestion_ops.html#the-4-phase-comparison-cascade">The 4-Phase Comparison Cascade</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin/ingestion_ops.html#reviewing-ingestion-plans">Reviewing Ingestion Plans</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin/ingestion_ops.html#executing-batch-transactions">Executing Batch Transactions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin/ingestion_ops.html#handling-quarantine-records">Handling Quarantine Records</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin/ingestion_ops.html#rolling-back-a-batch">Rolling Back a Batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="admin/ingestion_ops.html">Import &amp; Harmonization Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="admin/ingestion_ops.html#pure-import-lifecycle-fairwddi-import">Pure Import Lifecycle (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin/ingestion_ops.html#post-import-comparison-harmonization">Post-Import Comparison &amp; Harmonization</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="admin/deployment.html">Production Deployment &amp; Maintenance</a><ul>
@@ -148,14 +145,7 @@
 <li class="toctree-l4"><a class="reference internal" href="developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="developer/ingest_engine.html">The Ingestion Engine (fairwddi.ingest)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="developer/ingest_engine.html#package-architecture">Package Architecture</a></li>
-<li class="toctree-l4"><a class="reference internal" href="developer/ingest_engine.html#format-detection-detector-py">Format Detection (detector.py)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="developer/ingest_engine.html#streaming-xml-iteration-streaming-py">Streaming XML Iteration (streaming.py)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="developer/ingest_engine.html#comparator-and-execution-plan-comparator-py-plan-py">Comparator and Execution Plan (comparator.py &amp; plan.py)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="developer/ingest_engine.html#batch-transaction-loading-loader-py">Batch Transaction Loading (loader.py)</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="developer/importer_engine.html">The Import, Comparison &amp; Harmonization Engines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
 <li class="toctree-l4"><a class="reference internal" href="developer/api_service.html#api-architecture">API Architecture</a></li>
@@ -232,20 +222,100 @@
 <li class="toctree-l4"><a class="reference internal" href="api/db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/db.html#module-fairwddi.db.seed">Seed &amp; Fixture Management</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/db.html#module-fairwddi.db.wipe">Wipe Utilities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/db.html#module-fairwddi.db.wipe">Wipe &amp; Lifecycle Utilities</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="api/ingest.html">Ingestion &amp; Pipeline (fairwddi.ingest)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="api/ingest.html#module-fairwddi.ingest.detector">Format Detection</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/ingest.html#module-fairwddi.ingest.streaming">Streaming XML Parsing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/ingest.html#module-fairwddi.ingest.profiles">Extraction Profiles</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/ingest.html#module-fairwddi.ingest.preflight">Preflight Static Analysis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/ingest.html#module-fairwddi.ingest.comparator">Database Comparison</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/ingest.html#module-fairwddi.ingest.plan">Ingestion Execution Plan</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/ingest.html#module-fairwddi.ingest.loader">Batch Loader</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/ingest.html#module-fairwddi.ingest.pipeline">Pipeline Orchestration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/ingest.html#module-fairwddi.ingest.harmonizer">Harmonization &amp; Cross-Survey Clustering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/importer.html">Pure Deterministic Import (fairwddi.importer)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.detector.MetadataFormatInfo"><code class="docutils literal notranslate"><span class="pre">MetadataFormatInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.detector.compute_file_sha256"><code class="docutils literal notranslate"><span class="pre">compute_file_sha256()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.detector.detect_metadata_format"><code class="docutils literal notranslate"><span class="pre">detect_metadata_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.streaming.RawResourceNode"><code class="docutils literal notranslate"><span class="pre">RawResourceNode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_json"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_xml"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.streaming.resource_to_json"><code class="docutils literal notranslate"><span class="pre">resource_to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.streaming.stream_ddi_c_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_c_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.streaming.stream_ddi_l_json"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.streaming.stream_ddi_l_jsonl"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_jsonl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.streaming.stream_ddi_l_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.streaming.stream_resources"><code class="docutils literal notranslate"><span class="pre">stream_resources()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.streaming.xml_elem_to_dict"><code class="docutils literal notranslate"><span class="pre">xml_elem_to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.streaming.xml_to_json_dict"><code class="docutils literal notranslate"><span class="pre">xml_to_json_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.profiles.ImportProfile"><code class="docutils literal notranslate"><span class="pre">ImportProfile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.profiles.ImportStrategies"><code class="docutils literal notranslate"><span class="pre">ImportStrategies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.profiles.list_available_profiles"><code class="docutils literal notranslate"><span class="pre">list_available_profiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.profiles.load_profile"><code class="docutils literal notranslate"><span class="pre">load_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.preflight.run_preflight_check"><code class="docutils literal notranslate"><span class="pre">run_preflight_check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.preflight.upgrade_ddic_to_ddil"><code class="docutils literal notranslate"><span class="pre">upgrade_ddic_to_ddil()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.plan.ImportActionItem"><code class="docutils literal notranslate"><span class="pre">ImportActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.plan.ImportPlan"><code class="docutils literal notranslate"><span class="pre">ImportPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.plan.PlanActionItem"><code class="docutils literal notranslate"><span class="pre">PlanActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.plan.PlanIssue"><code class="docutils literal notranslate"><span class="pre">PlanIssue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.plan.ReviewGate"><code class="docutils literal notranslate"><span class="pre">ReviewGate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.loader.compute_resource_hashes"><code class="docutils literal notranslate"><span class="pre">compute_resource_hashes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.loader.execute_import"><code class="docutils literal notranslate"><span class="pre">execute_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.loader.get_import_batch_status"><code class="docutils literal notranslate"><span class="pre">get_import_batch_status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.loader.list_import_batches"><code class="docutils literal notranslate"><span class="pre">list_import_batches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.loader.parse_ddi_urn"><code class="docutils literal notranslate"><span class="pre">parse_ddi_urn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.loader.plan_import"><code class="docutils literal notranslate"><span class="pre">plan_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.loader.undo_import"><code class="docutils literal notranslate"><span class="pre">undo_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/importer.html#fairwddi.importer.pipeline.run_import"><code class="docutils literal notranslate"><span class="pre">run_import()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/groups.html">Group Curation &amp; Set Resolution (fairwddi.groups)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/groups.html#fairwddi.groups.manager.add_group_members"><code class="docutils literal notranslate"><span class="pre">add_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/groups.html#fairwddi.groups.manager.create_group"><code class="docutils literal notranslate"><span class="pre">create_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/groups.html#fairwddi.groups.manager.delete_group"><code class="docutils literal notranslate"><span class="pre">delete_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/groups.html#fairwddi.groups.manager.get_group_details"><code class="docutils literal notranslate"><span class="pre">get_group_details()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/groups.html#fairwddi.groups.manager.list_groups"><code class="docutils literal notranslate"><span class="pre">list_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/groups.html#fairwddi.groups.manager.remove_group_members"><code class="docutils literal notranslate"><span class="pre">remove_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/groups.html#fairwddi.groups.manager.rename_group"><code class="docutils literal notranslate"><span class="pre">rename_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/groups.html#fairwddi.groups.manager.resolve_group"><code class="docutils literal notranslate"><span class="pre">resolve_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet"><code class="docutils literal notranslate"><span class="pre">ResolvedResourceSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/groups.html#fairwddi.groups.resolver.ResourceSetSpec"><code class="docutils literal notranslate"><span class="pre">ResourceSetSpec</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/groups.html#fairwddi.groups.resolver.parse_resource_set_spec"><code class="docutils literal notranslate"><span class="pre">parse_resource_set_spec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/groups.html#fairwddi.groups.resolver.resolve_resource_set"><code class="docutils literal notranslate"><span class="pre">resolve_resource_set()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/compare.html">Three-Layer Comparison Engine (fairwddi.compare)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence"><code class="docutils literal notranslate"><span class="pre">CandidateCorrespondence</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.models.CodeListQualification"><code class="docutils literal notranslate"><span class="pre">CodeListQualification</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.models.ComparisonResultSet"><code class="docutils literal notranslate"><span class="pre">ComparisonResultSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.models.CorrespondenceLevel"><code class="docutils literal notranslate"><span class="pre">CorrespondenceLevel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.models.QualificationReport"><code class="docutils literal notranslate"><span class="pre">QualificationReport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.config.ComparisonConfig"><code class="docutils literal notranslate"><span class="pre">ComparisonConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.config.ConceptualRuleConfig"><code class="docutils literal notranslate"><span class="pre">ConceptualRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.config.QualificationRuleConfig"><code class="docutils literal notranslate"><span class="pre">QualificationRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.config.ResourceTypeComparisonRule"><code class="docutils literal notranslate"><span class="pre">ResourceTypeComparisonRule</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.config.SemanticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SemanticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SyntacticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.config.list_comparison_configs"><code class="docutils literal notranslate"><span class="pre">list_comparison_configs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.config.load_comparison_config"><code class="docutils literal notranslate"><span class="pre">load_comparison_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.qualifier.evaluate_qualification"><code class="docutils literal notranslate"><span class="pre">evaluate_qualification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.syntactic.compare_syntactic_sets"><code class="docutils literal notranslate"><span class="pre">compare_syntactic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider"><code class="docutils literal notranslate"><span class="pre">SentenceTransformerEmbeddingProvider</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.semantic.compare_semantic_sets"><code class="docutils literal notranslate"><span class="pre">compare_semantic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.semantic.get_embedding_provider"><code class="docutils literal notranslate"><span class="pre">get_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.semantic.register_embedding_provider"><code class="docutils literal notranslate"><span class="pre">register_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.conceptual.ConceptAssigner"><code class="docutils literal notranslate"><span class="pre">ConceptAssigner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.conceptual.compare_conceptual_sets"><code class="docutils literal notranslate"><span class="pre">compare_conceptual_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.conceptual.register_concept_assigner"><code class="docutils literal notranslate"><span class="pre">register_concept_assigner()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/compare.html#fairwddi.compare.engine.run_comparison"><code class="docutils literal notranslate"><span class="pre">run_comparison()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/harmonize.html">Policy-Driven Harmonization (fairwddi.harmonize)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy"><code class="docutils literal notranslate"><span class="pre">AutoApproveHighPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.plan.GuardrailPolicy"><code class="docutils literal notranslate"><span class="pre">GuardrailPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem"><code class="docutils literal notranslate"><span class="pre">HarmonizationActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationGuardrails"><code class="docutils literal notranslate"><span class="pre">HarmonizationGuardrails</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan"><code class="docutils literal notranslate"><span class="pre">HarmonizationPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy"><code class="docutils literal notranslate"><span class="pre">HarmonizationPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.plan.load_harmonization_policy"><code class="docutils literal notranslate"><span class="pre">load_harmonization_policy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.planner.approve_high_actions"><code class="docutils literal notranslate"><span class="pre">approve_high_actions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.planner.plan_harmonization"><code class="docutils literal notranslate"><span class="pre">plan_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.manager.create_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">create_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.manager.execute_harmonization"><code class="docutils literal notranslate"><span class="pre">execute_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.manager.link_to_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">link_to_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/harmonize.html#fairwddi.harmonize.manager.undo_harmonization"><code class="docutils literal notranslate"><span class="pre">undo_harmonization()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="api/api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
@@ -312,7 +382,8 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#A"><strong>A</strong></a>
+ <a href="#_"><strong>_</strong></a>
+ | <a href="#A"><strong>A</strong></a>
  | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
@@ -322,6 +393,7 @@
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#J"><strong>J</strong></a>
+ | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -338,11 +410,23 @@
  | <a href="#Y"><strong>Y</strong></a>
  
 </div>
+<h2 id="_">_</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/compare.html#fairwddi.compare.conceptual.ConceptAssigner.__init__">__init__() (fairwddi.compare.conceptual.ConceptAssigner method)</a>
+
+      <ul>
+        <li><a href="api/compare.html#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider.__init__">(fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider method)</a>
+</li>
+        <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.__init__">(fairwddi.models.base.DDIIdentifiable method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.harmonizer.absorb_resource">absorb_resource() (in module fairwddi.ingest.harmonizer)</a>
-</li>
       <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.Meta.abstract">abstract (fairwddi.models.base.DDIIdentifiable.Meta attribute)</a>
 
       <ul>
@@ -351,11 +435,23 @@
         <li><a href="api/models.html#fairwddi.models.base.DDIScheme.Meta.abstract">(fairwddi.models.base.DDIScheme.Meta attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.action">action (fairwddi.ingest.plan.PlanActionItem attribute)</a>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.action">action (fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
+
+      <ul>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem.action">(fairwddi.importer.plan.ImportActionItem attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.actions">actions (fairwddi.ingest.plan.IngestPlan attribute)</a>
+      </ul></li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.actions">actions (fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
+
+      <ul>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.actions">(fairwddi.importer.plan.ImportPlan attribute)</a>
 </li>
+      </ul></li>
       <li><a href="api/schemas.html#fairwddi.schemas.common.MultilingualText.add">add() (fairwddi.schemas.common.MultilingualText method)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.manager.add_group_members">add_group_members() (in module fairwddi.groups.manager)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.administration_context_caveat">administration_context_caveat (fairwddi.compare.models.QualificationReport attribute)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.agency">agency (fairwddi.models.base.DDIIdentifiable property)</a>
 
@@ -363,10 +459,10 @@
         <li><a href="api/schemas.html#fairwddi.schemas.common.DDIIdentifiableSchema.agency">(fairwddi.schemas.common.DDIIdentifiableSchema property)</a>
 </li>
       </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SemanticRuleConfig.agent_backend">agent_backend (fairwddi.compare.config.SemanticRuleConfig attribute)</a>
+</li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.OverviewStats.alias_count">alias_count (fairwddi.api.schemas.OverviewStats attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.AliasItem.alias_urn">alias_urn (fairwddi.api.schemas.AliasItem attribute)</a>
 
       <ul>
@@ -381,18 +477,48 @@
         <li><a href="api/api_ref.html#fairwddi.api.schemas.QuestionItemSummary.aliases">(fairwddi.api.schemas.QuestionItemSummary attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.AliasItem">AliasItem (class in fairwddi.api.schemas)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.harmonizer.apply_harmonization">apply_harmonization() (in module fairwddi.ingest.harmonizer)</a>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet.all_urns">all_urns (fairwddi.groups.resolver.ResolvedResourceSet property)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.loader.apply_ingestion">apply_ingestion() (in module fairwddi.ingest.loader)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.ConceptualRuleConfig.allow_hierarchy_ancestors">allow_hierarchy_ancestors (fairwddi.compare.config.ConceptualRuleConfig attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.approved">approved (fairwddi.ingest.plan.PlanActionItem attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.QualificationRuleConfig.allow_recoded_same_categories">allow_recoded_same_categories (fairwddi.compare.config.QualificationRuleConfig attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy.allowed_actions">allowed_actions (fairwddi.harmonize.plan.AutoApproveHighPolicy attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy.allowed_codelist_qualifications">allowed_codelist_qualifications (fairwddi.harmonize.plan.AutoApproveHighPolicy attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy.allowed_levels">allowed_levels (fairwddi.harmonize.plan.AutoApproveHighPolicy attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy.allowed_match_types">allowed_match_types (fairwddi.harmonize.plan.AutoApproveHighPolicy attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.approval_tier">approval_tier (fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.planner.approve_high_actions">approve_high_actions() (in module fairwddi.harmonize.planner)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.approve_high_applied">approve_high_applied (fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.approved">approved (fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
 
       <ul>
-        <li><a href="api/ingest.html#fairwddi.ingest.plan.ReviewGate.approved">(fairwddi.ingest.plan.ReviewGate attribute)</a>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem.approved">(fairwddi.importer.plan.ImportActionItem attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ReviewGate.approved">(fairwddi.importer.plan.ReviewGate attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.approved_count">approved_count (fairwddi.harmonize.plan.HarmonizationPlan property)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.conceptual.ConceptAssigner.assign_concepts">assign_concepts() (fairwddi.compare.conceptual.ConceptAssigner method)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy.auto_approve_high">auto_approve_high (fairwddi.harmonize.plan.HarmonizationPolicy attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.ConceptualRuleConfig.auto_assign_concepts">auto_assign_concepts (fairwddi.compare.config.ConceptualRuleConfig attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy">AutoApproveHighPolicy (class in fairwddi.harmonize.plan)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -403,7 +529,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.batch_id">batch_id (fairwddi.ingest.plan.IngestPlan attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.batch_id">batch_id (fairwddi.importer.plan.ImportPlan attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -411,7 +537,13 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.detector.MetadataFormatInfo.canonical_slug">canonical_slug (fairwddi.ingest.detector.MetadataFormatInfo attribute)</a>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.candidate_id">candidate_id (fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence">CandidateCorrespondence (class in fairwddi.compare.models)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.candidates">candidates (fairwddi.compare.models.ComparisonResultSet attribute)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.detector.MetadataFormatInfo.canonical_slug">canonical_slug (fairwddi.importer.detector.MetadataFormatInfo attribute)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.AliasItem.canonical_urn">canonical_urn (fairwddi.api.schemas.AliasItem attribute)</a>
 
@@ -473,7 +605,7 @@
       </ul></li>
       <li><a href="api/models.html#fairwddi.models.representation.Code">Code (class in fairwddi.models.representation)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanIssue.code">code (fairwddi.ingest.plan.PlanIssue attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.PlanIssue.code">code (fairwddi.importer.plan.PlanIssue attribute)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.representation.Code.NotUpdated">Code.NotUpdated</a>
 </li>
@@ -539,6 +671,18 @@
         <li><a href="api/api_ref.html#fairwddi.api.schemas.OverviewStats.codelist_count">(fairwddi.api.schemas.OverviewStats attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.config.QualificationRuleConfig.codelist_label_threshold">codelist_label_threshold (fairwddi.compare.config.QualificationRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.codelist_qualification">codelist_qualification (fairwddi.compare.models.QualificationReport attribute)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.codelist_qualification">(fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.codelist_similarity">codelist_similarity (fairwddi.compare.models.QualificationReport attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CodeListQualification">CodeListQualification (class in fairwddi.compare.models)</a>
+</li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.CodeListQuestionRef">CodeListQuestionRef (class in fairwddi.api.schemas)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.CategorySummary.codelists">codelists (fairwddi.api.schemas.CategorySummary attribute)</a>
@@ -557,15 +701,29 @@
       </ul></li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.CodeSchema">CodeSchema (class in fairwddi.schemas.entities)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.ReviewGate.comments">comments (fairwddi.ingest.plan.ReviewGate attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ReviewGate.comments">comments (fairwddi.importer.plan.ReviewGate attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.comparator.compare_batch">compare_batch() (in module fairwddi.ingest.comparator)</a>
+      <li><a href="api/compare.html#fairwddi.compare.conceptual.compare_conceptual_sets">compare_conceptual_sets() (in module fairwddi.compare.conceptual)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.RawResourceNode.compute_content_fingerprint">compute_content_fingerprint() (fairwddi.ingest.streaming.RawResourceNode method)</a>
+      <li><a href="api/compare.html#fairwddi.compare.semantic.compare_semantic_sets">compare_semantic_sets() (in module fairwddi.compare.semantic)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.detector.compute_file_sha256">compute_file_sha256() (in module fairwddi.ingest.detector)</a>
+      <li><a href="api/compare.html#fairwddi.compare.syntactic.compare_syntactic_sets">compare_syntactic_sets() (in module fairwddi.compare.syntactic)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.loader.compute_resource_hashes">compute_resource_hashes() (in module fairwddi.ingest.loader)</a>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.comparison_job_id">comparison_job_id (fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.comparison_version">comparison_version (fairwddi.compare.models.ComparisonResultSet attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.ComparisonConfig">ComparisonConfig (class in fairwddi.compare.config)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet">ComparisonResultSet (class in fairwddi.compare.models)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.compatible_for_merge">compatible_for_merge (fairwddi.compare.models.QualificationReport attribute)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.RawResourceNode.compute_content_fingerprint">compute_content_fingerprint() (fairwddi.importer.streaming.RawResourceNode method)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.detector.compute_file_sha256">compute_file_sha256() (in module fairwddi.importer.detector)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.loader.compute_resource_hashes">compute_resource_hashes() (in module fairwddi.importer.loader)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.concept.Concept">Concept (class in fairwddi.models.concept)</a>
 </li>
@@ -595,6 +753,8 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.ConceptualVariableSchema.concept_urn">(fairwddi.schemas.entities.ConceptualVariableSchema attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.conceptual.ConceptAssigner">ConceptAssigner (class in fairwddi.compare.conceptual)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.concept.ConceptScheme.concepts">concepts (fairwddi.models.concept.ConceptScheme attribute)</a>
 
       <ul>
@@ -603,14 +763,18 @@
       </ul></li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.ConceptSchema">ConceptSchema (class in fairwddi.schemas.entities)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/models.html#fairwddi.models.concept.ConceptScheme">ConceptScheme (class in fairwddi.models.concept)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.concept.ConceptScheme.NotUpdated">ConceptScheme.NotUpdated</a>
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.ConceptSchemeSchema">ConceptSchemeSchema (class in fairwddi.schemas.entities)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/compare.html#fairwddi.compare.config.ResourceTypeComparisonRule.conceptual">conceptual (fairwddi.compare.config.ResourceTypeComparisonRule attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CorrespondenceLevel.CONCEPTUAL">CONCEPTUAL (fairwddi.compare.models.CorrespondenceLevel attribute)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.representation.RepresentedVariable.conceptual_variable">conceptual_variable (fairwddi.models.representation.RepresentedVariable attribute)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.representation.RepresentedVariable.conceptual_variable_id">conceptual_variable_id (fairwddi.models.representation.RepresentedVariable attribute)</a>
@@ -625,6 +789,8 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.ConceptualVariableSchemeSchema.conceptual_variables">(fairwddi.schemas.entities.ConceptualVariableSchemeSchema attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.config.ConceptualRuleConfig">ConceptualRuleConfig (class in fairwddi.compare.config)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.concept.ConceptualVariable">ConceptualVariable (class in fairwddi.models.concept)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.concept.ConceptualVariable.NotUpdated">ConceptualVariable.NotUpdated</a>
@@ -637,7 +803,15 @@
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.ConceptualVariableSchemeSchema">ConceptualVariableSchemeSchema (class in fairwddi.schemas.entities)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.confidence">confidence (fairwddi.ingest.plan.PlanActionItem attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.confidence">confidence (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.confidence">(fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem.confidence">(fairwddi.importer.plan.ImportActionItem attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.config_name">config_name (fairwddi.compare.models.ComparisonResultSet attribute)</a>
 </li>
       <li><a href="api/db.html#fairwddi.db.config.configure_django_for_cli">configure_django_for_cli() (in module fairwddi.db.config)</a>
 </li>
@@ -647,20 +821,26 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.MetadataQuarantineSchema.conflict_type">(fairwddi.schemas.entities.MetadataQuarantineSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.RawResourceNode.content_fingerprint">content_fingerprint (fairwddi.ingest.streaming.RawResourceNode attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.RawResourceNode.content_fingerprint">content_fingerprint (fairwddi.importer.streaming.RawResourceNode attribute)</a>
 </li>
-      <li><a href="api/models.html#fairwddi.models.infrastructure.IngestBatch.created_aliases">created_aliases (fairwddi.models.infrastructure.IngestBatch attribute)</a>
-
-      <ul>
-        <li><a href="api/schemas.html#fairwddi.schemas.entities.IngestBatchSchema.created_aliases">(fairwddi.schemas.entities.IngestBatchSchema attribute)</a>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.correspondence_level">correspondence_level (fairwddi.harmonize.plan.HarmonizationActionItem property)</a>
 </li>
-      </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CorrespondenceLevel">CorrespondenceLevel (class in fairwddi.compare.models)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.manager.create_group">create_group() (in module fairwddi.groups.manager)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.manager.create_harmonized_resource">create_harmonized_resource() (in module fairwddi.harmonize.manager)</a>
+</li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.AliasItem.created_at">created_at (fairwddi.api.schemas.AliasItem attribute)</a>
 
       <ul>
         <li><a href="api/api_ref.html#fairwddi.api.schemas.SurveyItem.created_at">(fairwddi.api.schemas.SurveyItem attribute)</a>
 </li>
-        <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.created_at">(fairwddi.ingest.plan.IngestPlan attribute)</a>
+        <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.created_at">(fairwddi.compare.models.ComparisonResultSet attribute)</a>
+</li>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.created_at">(fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.created_at">(fairwddi.importer.plan.ImportPlan attribute)</a>
 </li>
         <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.created_at">(fairwddi.models.base.DDIIdentifiable attribute)</a>
 </li>
@@ -881,14 +1061,20 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.ConceptSchema.definition">(fairwddi.schemas.entities.ConceptSchema attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.delete">delete() (fairwddi.models.base.DDIIdentifiable method)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.manager.delete_group">delete_group() (in module fairwddi.groups.manager)</a>
+</li>
+      <li><a href="api/api_ref.html#fairwddi.api.schemas.QuestionItemSummary.derived_from">derived_from (fairwddi.api.schemas.QuestionItemSummary attribute)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.CodeListSummary.description">description (fairwddi.api.schemas.CodeListSummary attribute)</a>
 
       <ul>
-        <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportProfile.description">(fairwddi.ingest.profiles.ImportProfile attribute)</a>
+        <li><a href="api/compare.html#fairwddi.compare.config.ComparisonConfig.description">(fairwddi.compare.config.ComparisonConfig attribute)</a>
+</li>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy.description">(fairwddi.harmonize.plan.HarmonizationPolicy attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.profiles.ImportProfile.description">(fairwddi.importer.profiles.ImportProfile attribute)</a>
 </li>
         <li><a href="api/models.html#fairwddi.models.base.DDIScheme.description">(fairwddi.models.base.DDIScheme attribute)</a>
 </li>
@@ -947,11 +1133,37 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.StudyUnitSchema.description">(fairwddi.schemas.entities.StudyUnitSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.details">details (fairwddi.ingest.plan.PlanActionItem attribute)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.details">details (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.details">(fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.detector.detect_metadata_format">detect_metadata_format() (in module fairwddi.ingest.detector)</a>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem.details">(fairwddi.importer.plan.ImportActionItem attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.comparator.discover_candidates">discover_candidates() (in module fairwddi.ingest.comparator)</a>
+      </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SemanticRuleConfig.detect_dimension_mismatch">detect_dimension_mismatch (fairwddi.compare.config.SemanticRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.detect_inclusive">detect_inclusive (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.detector.detect_metadata_format">detect_metadata_format() (in module fairwddi.importer.detector)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.detect_shared_stems">detect_shared_stems (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.detect_typos">detect_typos (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.detect_wording">detect_wording (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CodeListQualification.DIMENSION_MISMATCH_SUSPECTED">DIMENSION_MISMATCH_SUSPECTED (fairwddi.compare.models.CodeListQualification attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.dimension_note">dimension_note (fairwddi.compare.models.QualificationReport attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.GuardrailPolicy.downgrade_dimension_mismatch_to_semantic_link">downgrade_dimension_mismatch_to_semantic_link (fairwddi.harmonize.plan.GuardrailPolicy attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.GuardrailPolicy.downgrade_scale_cardinality_diff_to_semantic_link">downgrade_scale_cardinality_diff_to_semantic_link (fairwddi.harmonize.plan.GuardrailPolicy attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.GuardrailPolicy.downgrade_uncoded_to_semantic_link">downgrade_uncoded_to_semantic_link (fairwddi.harmonize.plan.GuardrailPolicy attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -959,8 +1171,22 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.harmonizer.elevate_resource">elevate_resource() (in module fairwddi.ingest.harmonizer)</a>
+      <li><a href="api/compare.html#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider.embed_texts">embed_texts() (fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider method)</a>
 </li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.enable_token_blocking">enable_token_blocking (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.ConceptualRuleConfig.enabled">enabled (fairwddi.compare.config.ConceptualRuleConfig attribute)</a>
+
+      <ul>
+        <li><a href="api/compare.html#fairwddi.compare.config.QualificationRuleConfig.enabled">(fairwddi.compare.config.QualificationRuleConfig attribute)</a>
+</li>
+        <li><a href="api/compare.html#fairwddi.compare.config.ResourceTypeComparisonRule.enabled">(fairwddi.compare.config.ResourceTypeComparisonRule attribute)</a>
+</li>
+        <li><a href="api/compare.html#fairwddi.compare.config.SemanticRuleConfig.enabled">(fairwddi.compare.config.SemanticRuleConfig attribute)</a>
+</li>
+        <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.enabled">(fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.AliasItem.entity_type">entity_type (fairwddi.api.schemas.AliasItem attribute)</a>
 
       <ul>
@@ -973,7 +1199,9 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.URNAliasSchema.entity_type">(fairwddi.schemas.entities.URNAliasSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.error_count">error_count (fairwddi.ingest.plan.IngestPlan property)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.error_count">error_count (fairwddi.importer.plan.ImportPlan property)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.qualifier.evaluate_qualification">evaluate_qualification() (in module fairwddi.compare.qualifier)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.event.EventLog.event_data">event_data (fairwddi.models.event.EventLog attribute)</a>
 
@@ -993,9 +1221,15 @@
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.EventLogSchema">EventLogSchema (class in fairwddi.schemas.entities)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportProfile.exclude_types">exclude_types (fairwddi.ingest.profiles.ImportProfile attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.QualificationRuleConfig.exclude_missing_from_scale_diff">exclude_missing_from_scale_diff (fairwddi.compare.config.QualificationRuleConfig attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.loader.execute_ingestion">execute_ingestion() (in module fairwddi.ingest.loader)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.ComparisonConfig.exclude_same_urn">exclude_same_urn (fairwddi.compare.config.ComparisonConfig attribute)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.profiles.ImportProfile.exclude_types">exclude_types (fairwddi.importer.profiles.ImportProfile attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.manager.execute_harmonization">execute_harmonization() (in module fairwddi.harmonize.manager)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.loader.execute_import">execute_import() (in module fairwddi.importer.loader)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.infrastructure.MetadataQuarantine.existing_content_hash">existing_content_hash (fairwddi.models.infrastructure.MetadataQuarantine attribute)</a>
 
@@ -1099,9 +1333,9 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.StudyUnitSchema.external_ref">(fairwddi.schemas.entities.StudyUnitSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.extract_referenced_urns_from_json">extract_referenced_urns_from_json() (in module fairwddi.ingest.streaming)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_json">extract_referenced_urns_from_json() (in module fairwddi.importer.streaming)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.extract_referenced_urns_from_xml">extract_referenced_urns_from_xml() (in module fairwddi.ingest.streaming)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_xml">extract_referenced_urns_from_xml() (in module fairwddi.importer.streaming)</a>
 </li>
       <li><a href="api/db.html#fairwddi.db.vocab.extract_urn">extract_urn() (in module fairwddi.db.vocab)</a>
 </li>
@@ -1147,6 +1381,55 @@
 </li>
       </ul></li>
       <li>
+    fairwddi.compare.conceptual
+
+      <ul>
+        <li><a href="api/compare.html#module-fairwddi.compare.conceptual">module</a>
+</li>
+      </ul></li>
+      <li>
+    fairwddi.compare.config
+
+      <ul>
+        <li><a href="api/compare.html#module-fairwddi.compare.config">module</a>
+</li>
+      </ul></li>
+      <li>
+    fairwddi.compare.engine
+
+      <ul>
+        <li><a href="api/compare.html#module-fairwddi.compare.engine">module</a>
+</li>
+      </ul></li>
+      <li>
+    fairwddi.compare.models
+
+      <ul>
+        <li><a href="api/compare.html#module-fairwddi.compare.models">module</a>
+</li>
+      </ul></li>
+      <li>
+    fairwddi.compare.qualifier
+
+      <ul>
+        <li><a href="api/compare.html#module-fairwddi.compare.qualifier">module</a>
+</li>
+      </ul></li>
+      <li>
+    fairwddi.compare.semantic
+
+      <ul>
+        <li><a href="api/compare.html#module-fairwddi.compare.semantic">module</a>
+</li>
+      </ul></li>
+      <li>
+    fairwddi.compare.syntactic
+
+      <ul>
+        <li><a href="api/compare.html#module-fairwddi.compare.syntactic">module</a>
+</li>
+      </ul></li>
+      <li>
     fairwddi.db.config
 
       <ul>
@@ -1158,13 +1441,6 @@
 
       <ul>
         <li><a href="api/db.html#module-fairwddi.db.ddl">module</a>
-</li>
-      </ul></li>
-      <li>
-    fairwddi.db.seed
-
-      <ul>
-        <li><a href="api/db.html#module-fairwddi.db.seed">module</a>
 </li>
       </ul></li>
       <li>
@@ -1182,66 +1458,89 @@
 </li>
       </ul></li>
       <li>
-    fairwddi.ingest.comparator
+    fairwddi.groups.manager
 
       <ul>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.comparator">module</a>
+        <li><a href="api/groups.html#module-fairwddi.groups.manager">module</a>
 </li>
       </ul></li>
       <li>
-    fairwddi.ingest.detector
+    fairwddi.groups.resolver
 
       <ul>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.detector">module</a>
+        <li><a href="api/groups.html#module-fairwddi.groups.resolver">module</a>
 </li>
       </ul></li>
       <li>
-    fairwddi.ingest.harmonizer
+    fairwddi.harmonize.manager
 
       <ul>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.harmonizer">module</a>
+        <li><a href="api/harmonize.html#module-fairwddi.harmonize.manager">module</a>
 </li>
       </ul></li>
       <li>
-    fairwddi.ingest.loader
+    fairwddi.harmonize.plan
 
       <ul>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.loader">module</a>
+        <li><a href="api/harmonize.html#module-fairwddi.harmonize.plan">module</a>
 </li>
       </ul></li>
       <li>
-    fairwddi.ingest.pipeline
+    fairwddi.harmonize.planner
 
       <ul>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.pipeline">module</a>
+        <li><a href="api/harmonize.html#module-fairwddi.harmonize.planner">module</a>
 </li>
       </ul></li>
       <li>
-    fairwddi.ingest.plan
+    fairwddi.importer.detector
 
       <ul>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.plan">module</a>
+        <li><a href="api/importer.html#module-fairwddi.importer.detector">module</a>
 </li>
       </ul></li>
       <li>
-    fairwddi.ingest.preflight
+    fairwddi.importer.loader
 
       <ul>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.preflight">module</a>
+        <li><a href="api/importer.html#module-fairwddi.importer.loader">module</a>
 </li>
       </ul></li>
       <li>
-    fairwddi.ingest.profiles
+    fairwddi.importer.pipeline
 
       <ul>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.profiles">module</a>
+        <li><a href="api/importer.html#module-fairwddi.importer.pipeline">module</a>
 </li>
       </ul></li>
       <li>
-    fairwddi.ingest.streaming
+    fairwddi.importer.plan
 
       <ul>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.streaming">module</a>
+        <li><a href="api/importer.html#module-fairwddi.importer.plan">module</a>
+</li>
+      </ul></li>
+      <li>
+    fairwddi.importer.preflight
+
+      <ul>
+        <li><a href="api/importer.html#module-fairwddi.importer.preflight">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    fairwddi.importer.profiles
+
+      <ul>
+        <li><a href="api/importer.html#module-fairwddi.importer.profiles">module</a>
+</li>
+      </ul></li>
+      <li>
+    fairwddi.importer.streaming
+
+      <ul>
+        <li><a href="api/importer.html#module-fairwddi.importer.streaming">module</a>
 </li>
       </ul></li>
       <li>
@@ -1258,8 +1557,6 @@
         <li><a href="api/models.html#module-fairwddi.models.concept">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     fairwddi.models.dataset
 
@@ -1330,6 +1627,8 @@
         <li><a href="api/utils.html#module-fairwddi.utils.urn">module</a>
 </li>
       </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.config.ResourceTypeComparisonRule.fields">fields (fairwddi.compare.config.ResourceTypeComparisonRule attribute)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.dataset.Datafile.file_name">file_name (fairwddi.models.dataset.Datafile property)</a>
 
       <ul>
@@ -1344,7 +1643,7 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.IngestBatchSchema.file_path">(fairwddi.schemas.entities.IngestBatchSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.file_sha256">file_sha256 (fairwddi.ingest.plan.IngestPlan attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.file_sha256">file_sha256 (fairwddi.importer.plan.ImportPlan attribute)</a>
 
       <ul>
         <li><a href="api/models.html#fairwddi.models.infrastructure.IngestBatch.file_sha256">(fairwddi.models.infrastructure.IngestBatch attribute)</a>
@@ -1352,7 +1651,7 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.IngestBatchSchema.file_sha256">(fairwddi.schemas.entities.IngestBatchSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.detector.MetadataFormatInfo.flavor">flavor (fairwddi.ingest.detector.MetadataFormatInfo attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.detector.MetadataFormatInfo.flavor">flavor (fairwddi.importer.detector.MetadataFormatInfo attribute)</a>
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.common.MultilingualItem.format">format (fairwddi.schemas.common.MultilingualItem attribute)</a>
 </li>
@@ -1378,8 +1677,14 @@
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.common.MultilingualText.from_single">from_single() (fairwddi.schemas.common.MultilingualText class method)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.from_yaml">from_yaml() (fairwddi.ingest.plan.IngestPlan class method)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.from_yaml">from_yaml() (fairwddi.compare.models.ComparisonResultSet class method)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.from_yaml">(fairwddi.harmonize.plan.HarmonizationPlan class method)</a>
 </li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.from_yaml">(fairwddi.importer.plan.ImportPlan class method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1390,6 +1695,10 @@
 </li>
       <li><a href="api/utils.html#fairwddi.utils.urn.generate_generic_urn">generate_generic_urn() (in module fairwddi.utils.urn)</a>
 </li>
+      <li><a href="api/models.html#fairwddi.models.infrastructure.ResourceOrigin.GENERATED">GENERATED (fairwddi.models.infrastructure.ResourceOrigin attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.generated_urn">generated_urn (fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
+</li>
       <li><a href="api/schemas.html#fairwddi.schemas.common.MultilingualText.get">get() (fairwddi.schemas.common.MultilingualText method)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.router.get_category">get_category() (in module fairwddi.api.router)</a>
@@ -1398,9 +1707,13 @@
 </li>
       <li><a href="api/db.html#fairwddi.db.config.get_database_config">get_database_config() (in module fairwddi.db.config)</a>
 </li>
+      <li><a href="api/compare.html#fairwddi.compare.semantic.get_embedding_provider">get_embedding_provider() (in module fairwddi.compare.semantic)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.manager.get_group_details">get_group_details() (in module fairwddi.groups.manager)</a>
+</li>
       <li><a href="api/api_ref.html#fairwddi.api.router.get_harmonization_matrix">get_harmonization_matrix() (in module fairwddi.api.router)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.loader.get_ingest_batch_status">get_ingest_batch_status() (in module fairwddi.ingest.loader)</a>
+      <li><a href="api/importer.html#fairwddi.importer.loader.get_import_batch_status">get_import_batch_status() (in module fairwddi.importer.loader)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.get_next_by_created_at">get_next_by_created_at() (fairwddi.models.base.DDIIdentifiable method)</a>
 
@@ -1532,6 +1845,8 @@
         <li><a href="api/models.html#fairwddi.models.representation.RepresentedVariableScheme.get_next_by_updated_at">(fairwddi.models.representation.RepresentedVariableScheme method)</a>
 </li>
       </ul></li>
+      <li><a href="api/models.html#fairwddi.models.infrastructure.UrnRegistry.get_origin_display">get_origin_display() (fairwddi.models.infrastructure.UrnRegistry method)</a>
+</li>
       <li><a href="api/api_ref.html#fairwddi.api.router.get_overview">get_overview() (in module fairwddi.api.router)</a>
 </li>
   </ul></td>
@@ -1678,15 +1993,23 @@
 </li>
       <li><a href="api/models.html#fairwddi.models.organization.Group.NotUpdated">Group.NotUpdated</a>
 </li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.GuardrailPolicy.group_shared_stem_grids">group_shared_stem_grids (fairwddi.harmonize.plan.GuardrailPolicy attribute)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.organization.Group.group_type">group_type (fairwddi.models.organization.Group attribute)</a>
 
       <ul>
         <li><a href="api/schemas.html#fairwddi.schemas.entities.GroupSchema.group_type">(fairwddi.schemas.entities.GroupSchema attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet.group_urns">group_urns (fairwddi.groups.resolver.ResolvedResourceSet attribute)</a>
+</li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.GroupReferenceSchema">GroupReferenceSchema (class in fairwddi.schemas.entities)</a>
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.GroupSchema">GroupSchema (class in fairwddi.schemas.entities)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.GuardrailPolicy">GuardrailPolicy (class in fairwddi.harmonize.plan)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy.guardrails">guardrails (fairwddi.harmonize.plan.HarmonizationPolicy attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1694,6 +2017,14 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem">HarmonizationActionItem (class in fairwddi.harmonize.plan)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationGuardrails">HarmonizationGuardrails (in module fairwddi.harmonize.plan)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan">HarmonizationPlan (class in fairwddi.harmonize.plan)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy">HarmonizationPolicy (class in fairwddi.harmonize.plan)</a>
+</li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.AliasItem.hash_strategy">hash_strategy (fairwddi.api.schemas.AliasItem attribute)</a>
 
       <ul>
@@ -1739,6 +2070,10 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.high_tier_count">high_tier_count (fairwddi.harmonize.plan.HarmonizationPlan property)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="I">I</h2>
@@ -1749,7 +2084,11 @@
       <ul>
         <li><a href="api/api_ref.html#fairwddi.api.schemas.GraphNode.id">(fairwddi.api.schemas.GraphNode attribute)</a>
 </li>
-        <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.id">(fairwddi.ingest.plan.PlanActionItem attribute)</a>
+        <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.id">(fairwddi.compare.models.CandidateCorrespondence attribute)</a>
+</li>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.id">(fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem.id">(fairwddi.importer.plan.ImportActionItem attribute)</a>
 </li>
         <li><a href="api/models.html#fairwddi.models.concept.SemanticRelationship.id">(fairwddi.models.concept.SemanticRelationship attribute)</a>
 </li>
@@ -1794,9 +2133,13 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.URNAliasSchema.id">(fairwddi.schemas.entities.URNAliasSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.identifier">identifier (fairwddi.models.base.DDIIdentifiable property)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.CodeListQualification.IDENTICAL">IDENTICAL (fairwddi.compare.models.CodeListQualification attribute)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.ResourceSetSpec.identifier">identifier (fairwddi.groups.resolver.ResourceSetSpec attribute)</a>
 
       <ul>
+        <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.identifier">(fairwddi.models.base.DDIIdentifiable property)</a>
+</li>
         <li><a href="api/schemas.html#fairwddi.schemas.common.DDIIdentifiableSchema.identifier">(fairwddi.schemas.common.DDIIdentifiableSchema property)</a>
 </li>
       </ul></li>
@@ -1806,13 +2149,19 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.MetadataQuarantineSchema.import_task_id">(fairwddi.schemas.entities.MetadataQuarantineSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportProfile">ImportProfile (class in fairwddi.ingest.profiles)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem">ImportActionItem (class in fairwddi.importer.plan)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportStrategies">ImportStrategies (class in fairwddi.ingest.profiles)</a>
+      <li><a href="api/models.html#fairwddi.models.infrastructure.ResourceOrigin.IMPORTED">IMPORTED (fairwddi.models.infrastructure.ResourceOrigin attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportProfile.include_referenced_resources">include_referenced_resources (fairwddi.ingest.profiles.ImportProfile attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan">ImportPlan (class in fairwddi.importer.plan)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportProfile.include_types">include_types (fairwddi.ingest.profiles.ImportProfile attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.profiles.ImportProfile">ImportProfile (class in fairwddi.importer.profiles)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.profiles.ImportStrategies">ImportStrategies (class in fairwddi.importer.profiles)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.profiles.ImportProfile.include_referenced_resources">include_referenced_resources (fairwddi.importer.profiles.ImportProfile attribute)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.profiles.ImportProfile.include_types">include_types (fairwddi.importer.profiles.ImportProfile attribute)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.infrastructure.MetadataQuarantine.incoming_content">incoming_content (fairwddi.models.infrastructure.MetadataQuarantine attribute)</a>
 
@@ -1837,8 +2186,6 @@
       <li><a href="api/models.html#fairwddi.models.infrastructure.IngestBatch.NotUpdated">IngestBatch.NotUpdated</a>
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.IngestBatchSchema">IngestBatchSchema (class in fairwddi.schemas.entities)</a>
-</li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan">IngestPlan (class in fairwddi.ingest.plan)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.dataset.DatafileVariable.instance_variable">instance_variable (fairwddi.models.dataset.DatafileVariable attribute)</a>
 
@@ -1890,6 +2237,8 @@
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.InstanceVariableSchemeSchema">InstanceVariableSchemeSchema (class in fairwddi.schemas.entities)</a>
 </li>
+      <li><a href="api/models.html#fairwddi.models.infrastructure.ResourceOrigin.INSTANTIATED">INSTANTIATED (fairwddi.models.infrastructure.ResourceOrigin attribute)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.instrument.Instrument">Instrument (class in fairwddi.models.instrument)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.dataset.StudyInstrument.instrument">instrument (fairwddi.models.dataset.StudyInstrument attribute)</a>
@@ -1930,6 +2279,8 @@
         <li><a href="api/schemas.html#fairwddi.schemas.common.DDIIdentifiableSchema.is_canonical_ddi">(fairwddi.schemas.common.DDIIdentifiableSchema property)</a>
 </li>
       </ul></li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.is_high_confidence">is_high_confidence (fairwddi.harmonize.plan.HarmonizationActionItem property)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.is_maintainable_scoped">is_maintainable_scoped (fairwddi.models.base.DDIIdentifiable property)</a>
 
       <ul>
@@ -1952,8 +2303,12 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.CodeSchema.is_missing">(fairwddi.schemas.entities.CodeSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.is_ready_to_execute">is_ready_to_execute() (fairwddi.ingest.plan.IngestPlan method)</a>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.is_ready_to_execute">is_ready_to_execute() (fairwddi.harmonize.plan.HarmonizationPlan method)</a>
+
+      <ul>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.is_ready_to_execute">(fairwddi.importer.plan.ImportPlan method)</a>
 </li>
+      </ul></li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.CategorySummary.is_reused">is_reused (fairwddi.api.schemas.CategorySummary attribute)</a>
 
       <ul>
@@ -1964,7 +2319,7 @@
       </ul></li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.MatrixRow.is_shared">is_shared (fairwddi.api.schemas.MatrixRow attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.issues">issues (fairwddi.ingest.plan.IngestPlan attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.issues">issues (fairwddi.importer.plan.ImportPlan attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1972,8 +2327,26 @@
 <h2 id="J">J</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.job_id">job_id (fairwddi.ingest.plan.IngestPlan attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.job_id">job_id (fairwddi.compare.models.ComparisonResultSet attribute)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.job_id">(fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
 </li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.job_id">(fairwddi.importer.plan.ImportPlan attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet.kind">kind (fairwddi.groups.resolver.ResolvedResourceSet attribute)</a>
+
+      <ul>
+        <li><a href="api/groups.html#fairwddi.groups.resolver.ResourceSetSpec.kind">(fairwddi.groups.resolver.ResourceSetSpec attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1988,6 +2361,8 @@
         <li><a href="api/api_ref.html#fairwddi.api.schemas.GraphNode.label">(fairwddi.api.schemas.GraphNode attribute)</a>
 </li>
         <li><a href="api/api_ref.html#fairwddi.api.schemas.RepresentedVariableUsage.label">(fairwddi.api.schemas.RepresentedVariableUsage attribute)</a>
+</li>
+        <li><a href="api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet.label">(fairwddi.groups.resolver.ResolvedResourceSet attribute)</a>
 </li>
         <li><a href="api/models.html#fairwddi.models.concept.Concept.label">(fairwddi.models.concept.Concept attribute)</a>
 </li>
@@ -2020,33 +2395,63 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.RepresentedVariableSchema.label">(fairwddi.schemas.entities.RepresentedVariableSchema attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.CategorySummary.label_display">label_display (fairwddi.api.schemas.CategorySummary attribute)</a>
 </li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CodeListQualification.LABELS_SLIGHT_DIFF">LABELS_SLIGHT_DIFF (fairwddi.compare.models.CodeListQualification attribute)</a>
+</li>
       <li><a href="api/schemas.html#fairwddi.schemas.common.MultilingualItem.lang">lang (fairwddi.schemas.common.MultilingualItem attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.language">language (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.ResourceTypeComparisonRule.languages">languages (fairwddi.compare.config.ResourceTypeComparisonRule attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.level">level (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.level">(fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.config.ComparisonConfig.levels">levels (fairwddi.compare.config.ComparisonConfig attribute)</a>
+
+      <ul>
+        <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.levels">(fairwddi.compare.models.ComparisonResultSet attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.manager.link_to_harmonized_resource">link_to_harmonized_resource() (in module fairwddi.harmonize.manager)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.QuestionCascadeGraph.links">links (fairwddi.api.schemas.QuestionCascadeGraph attribute)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.router.list_aliases">list_aliases() (in module fairwddi.api.router)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.profiles.list_available_profiles">list_available_profiles() (in module fairwddi.ingest.profiles)</a>
+      <li><a href="api/importer.html#fairwddi.importer.profiles.list_available_profiles">list_available_profiles() (in module fairwddi.importer.profiles)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.router.list_categories">list_categories() (in module fairwddi.api.router)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.router.list_codelists">list_codelists() (in module fairwddi.api.router)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.loader.list_ingest_batches">list_ingest_batches() (in module fairwddi.ingest.loader)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.list_comparison_configs">list_comparison_configs() (in module fairwddi.compare.config)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.manager.list_groups">list_groups() (in module fairwddi.groups.manager)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.loader.list_import_batches">list_import_batches() (in module fairwddi.importer.loader)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.router.list_questions">list_questions() (in module fairwddi.api.router)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.router.list_surveys">list_surveys() (in module fairwddi.api.router)</a>
 </li>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.load">load() (fairwddi.compare.models.ComparisonResultSet class method)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.load_comparison_config">load_comparison_config() (in module fairwddi.compare.config)</a>
+</li>
       <li><a href="api/db.html#fairwddi.db.config.load_dotenv_config">load_dotenv_config() (in module fairwddi.db.config)</a>
 </li>
       <li><a href="api/db.html#fairwddi.db.vocab.load_elsst_vocabulary">load_elsst_vocabulary() (in module fairwddi.db.vocab)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.profiles.load_profile">load_profile() (in module fairwddi.ingest.profiles)</a>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.load_harmonization_policy">load_harmonization_policy() (in module fairwddi.harmonize.plan)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.profiles.load_profile">load_profile() (in module fairwddi.importer.profiles)</a>
 </li>
       <li><a href="api/db.html#fairwddi.db.vocab.load_skos_vocabulary">load_skos_vocabulary() (in module fairwddi.db.vocab)</a>
 </li>
@@ -2062,15 +2467,23 @@
         <li><a href="api/schemas.html#fairwddi.schemas.common.DDIIdentifiableSchema.maintainable_id">(fairwddi.schemas.common.DDIIdentifiableSchema property)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.match_type">match_type (fairwddi.ingest.plan.PlanActionItem attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.match_type">match_type (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.match_type">(fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
 </li>
+      </ul></li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.MatrixRow">MatrixRow (class in fairwddi.api.schemas)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.MatrixWaveEntry">MatrixWaveEntry (class in fairwddi.api.schemas)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanIssue.message">message (fairwddi.ingest.plan.PlanIssue attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.ComparisonConfig.max_candidates_per_source">max_candidates_per_source (fairwddi.compare.config.ComparisonConfig attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.detector.MetadataFormatInfo">MetadataFormatInfo (class in fairwddi.ingest.detector)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.ConceptualRuleConfig.max_hierarchy_hops">max_hierarchy_hops (fairwddi.compare.config.ConceptualRuleConfig attribute)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.plan.PlanIssue.message">message (fairwddi.importer.plan.PlanIssue attribute)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.detector.MetadataFormatInfo">MetadataFormatInfo (class in fairwddi.importer.detector)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.infrastructure.MetadataQuarantine">MetadataQuarantine (class in fairwddi.models.infrastructure)</a>
 </li>
@@ -2078,7 +2491,19 @@
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.MetadataQuarantineSchema">MetadataQuarantineSchema (class in fairwddi.schemas.entities)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.harmonizer.migrate_urn">migrate_urn() (in module fairwddi.ingest.harmonizer)</a>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy.min_confidence">min_confidence (fairwddi.harmonize.plan.AutoApproveHighPolicy attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.min_shared_tokens">min_shared_tokens (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.min_stem_length">min_stem_length (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.missing_count_source">missing_count_source (fairwddi.compare.models.QualificationReport attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.missing_count_target">missing_count_target (fairwddi.compare.models.QualificationReport attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.missing_values_excluded">missing_values_excluded (fairwddi.compare.models.QualificationReport attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CodeListQualification.MISSING_VALUES_ONLY">MISSING_VALUES_ONLY (fairwddi.compare.models.CodeListQualification attribute)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.AliasItem.model_config">model_config (fairwddi.api.schemas.AliasItem attribute)</a>
 
@@ -2111,21 +2536,53 @@
 </li>
         <li><a href="api/api_ref.html#fairwddi.api.schemas.SurveyItem.model_config">(fairwddi.api.schemas.SurveyItem attribute)</a>
 </li>
-        <li><a href="api/ingest.html#fairwddi.ingest.detector.MetadataFormatInfo.model_config">(fairwddi.ingest.detector.MetadataFormatInfo attribute)</a>
+        <li><a href="api/compare.html#fairwddi.compare.config.ComparisonConfig.model_config">(fairwddi.compare.config.ComparisonConfig attribute)</a>
 </li>
-        <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.model_config">(fairwddi.ingest.plan.IngestPlan attribute)</a>
+        <li><a href="api/compare.html#fairwddi.compare.config.ConceptualRuleConfig.model_config">(fairwddi.compare.config.ConceptualRuleConfig attribute)</a>
 </li>
-        <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.model_config">(fairwddi.ingest.plan.PlanActionItem attribute)</a>
+        <li><a href="api/compare.html#fairwddi.compare.config.QualificationRuleConfig.model_config">(fairwddi.compare.config.QualificationRuleConfig attribute)</a>
 </li>
-        <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanIssue.model_config">(fairwddi.ingest.plan.PlanIssue attribute)</a>
+        <li><a href="api/compare.html#fairwddi.compare.config.ResourceTypeComparisonRule.model_config">(fairwddi.compare.config.ResourceTypeComparisonRule attribute)</a>
 </li>
-        <li><a href="api/ingest.html#fairwddi.ingest.plan.ReviewGate.model_config">(fairwddi.ingest.plan.ReviewGate attribute)</a>
+        <li><a href="api/compare.html#fairwddi.compare.config.SemanticRuleConfig.model_config">(fairwddi.compare.config.SemanticRuleConfig attribute)</a>
 </li>
-        <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportProfile.model_config">(fairwddi.ingest.profiles.ImportProfile attribute)</a>
+        <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.model_config">(fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
 </li>
-        <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportStrategies.model_config">(fairwddi.ingest.profiles.ImportStrategies attribute)</a>
+        <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.model_config">(fairwddi.compare.models.CandidateCorrespondence attribute)</a>
 </li>
-        <li><a href="api/ingest.html#fairwddi.ingest.streaming.RawResourceNode.model_config">(fairwddi.ingest.streaming.RawResourceNode attribute)</a>
+        <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.model_config">(fairwddi.compare.models.ComparisonResultSet attribute)</a>
+</li>
+        <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.model_config">(fairwddi.compare.models.QualificationReport attribute)</a>
+</li>
+        <li><a href="api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet.model_config">(fairwddi.groups.resolver.ResolvedResourceSet attribute)</a>
+</li>
+        <li><a href="api/groups.html#fairwddi.groups.resolver.ResourceSetSpec.model_config">(fairwddi.groups.resolver.ResourceSetSpec attribute)</a>
+</li>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy.model_config">(fairwddi.harmonize.plan.AutoApproveHighPolicy attribute)</a>
+</li>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.GuardrailPolicy.model_config">(fairwddi.harmonize.plan.GuardrailPolicy attribute)</a>
+</li>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.model_config">(fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
+</li>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.model_config">(fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
+</li>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy.model_config">(fairwddi.harmonize.plan.HarmonizationPolicy attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.detector.MetadataFormatInfo.model_config">(fairwddi.importer.detector.MetadataFormatInfo attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem.model_config">(fairwddi.importer.plan.ImportActionItem attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.model_config">(fairwddi.importer.plan.ImportPlan attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.PlanIssue.model_config">(fairwddi.importer.plan.PlanIssue attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ReviewGate.model_config">(fairwddi.importer.plan.ReviewGate attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.profiles.ImportProfile.model_config">(fairwddi.importer.profiles.ImportProfile attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.profiles.ImportStrategies.model_config">(fairwddi.importer.profiles.ImportStrategies attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.streaming.RawResourceNode.model_config">(fairwddi.importer.streaming.RawResourceNode attribute)</a>
 </li>
         <li><a href="api/schemas.html#fairwddi.schemas.common.DDIIdentifiableSchema.model_config">(fairwddi.schemas.common.DDIIdentifiableSchema attribute)</a>
 </li>
@@ -2204,6 +2661,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/compare.html#fairwddi.compare.config.SemanticRuleConfig.model_name">model_name (fairwddi.compare.config.SemanticRuleConfig attribute)</a>
+</li>
       <li>
     module
 
@@ -2218,33 +2677,51 @@
 </li>
         <li><a href="api/api_ref.html#module-fairwddi.api.views">fairwddi.api.views</a>
 </li>
+        <li><a href="api/compare.html#module-fairwddi.compare.conceptual">fairwddi.compare.conceptual</a>
+</li>
+        <li><a href="api/compare.html#module-fairwddi.compare.config">fairwddi.compare.config</a>
+</li>
+        <li><a href="api/compare.html#module-fairwddi.compare.engine">fairwddi.compare.engine</a>
+</li>
+        <li><a href="api/compare.html#module-fairwddi.compare.models">fairwddi.compare.models</a>
+</li>
+        <li><a href="api/compare.html#module-fairwddi.compare.qualifier">fairwddi.compare.qualifier</a>
+</li>
+        <li><a href="api/compare.html#module-fairwddi.compare.semantic">fairwddi.compare.semantic</a>
+</li>
+        <li><a href="api/compare.html#module-fairwddi.compare.syntactic">fairwddi.compare.syntactic</a>
+</li>
         <li><a href="api/db.html#module-fairwddi.db.config">fairwddi.db.config</a>
 </li>
         <li><a href="api/db.html#module-fairwddi.db.ddl">fairwddi.db.ddl</a>
-</li>
-        <li><a href="api/db.html#module-fairwddi.db.seed">fairwddi.db.seed</a>
 </li>
         <li><a href="api/db.html#module-fairwddi.db.vocab">fairwddi.db.vocab</a>
 </li>
         <li><a href="api/db.html#module-fairwddi.db.wipe">fairwddi.db.wipe</a>
 </li>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.comparator">fairwddi.ingest.comparator</a>
+        <li><a href="api/groups.html#module-fairwddi.groups.manager">fairwddi.groups.manager</a>
 </li>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.detector">fairwddi.ingest.detector</a>
+        <li><a href="api/groups.html#module-fairwddi.groups.resolver">fairwddi.groups.resolver</a>
 </li>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.harmonizer">fairwddi.ingest.harmonizer</a>
+        <li><a href="api/harmonize.html#module-fairwddi.harmonize.manager">fairwddi.harmonize.manager</a>
 </li>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.loader">fairwddi.ingest.loader</a>
+        <li><a href="api/harmonize.html#module-fairwddi.harmonize.plan">fairwddi.harmonize.plan</a>
 </li>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.pipeline">fairwddi.ingest.pipeline</a>
+        <li><a href="api/harmonize.html#module-fairwddi.harmonize.planner">fairwddi.harmonize.planner</a>
 </li>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.plan">fairwddi.ingest.plan</a>
+        <li><a href="api/importer.html#module-fairwddi.importer.detector">fairwddi.importer.detector</a>
 </li>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.preflight">fairwddi.ingest.preflight</a>
+        <li><a href="api/importer.html#module-fairwddi.importer.loader">fairwddi.importer.loader</a>
 </li>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.profiles">fairwddi.ingest.profiles</a>
+        <li><a href="api/importer.html#module-fairwddi.importer.pipeline">fairwddi.importer.pipeline</a>
 </li>
-        <li><a href="api/ingest.html#module-fairwddi.ingest.streaming">fairwddi.ingest.streaming</a>
+        <li><a href="api/importer.html#module-fairwddi.importer.plan">fairwddi.importer.plan</a>
+</li>
+        <li><a href="api/importer.html#module-fairwddi.importer.preflight">fairwddi.importer.preflight</a>
+</li>
+        <li><a href="api/importer.html#module-fairwddi.importer.profiles">fairwddi.importer.profiles</a>
+</li>
+        <li><a href="api/importer.html#module-fairwddi.importer.streaming">fairwddi.importer.streaming</a>
 </li>
         <li><a href="api/models.html#module-fairwddi.models.base">fairwddi.models.base</a>
 </li>
@@ -2271,6 +2748,8 @@
         <li><a href="api/utils.html#module-fairwddi.utils.urn">fairwddi.utils.urn</a>
 </li>
       </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.multilingual_threshold">multilingual_threshold (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
       <li><a href="api/schemas.html#fairwddi.schemas.common.MultilingualItem">MultilingualItem (class in fairwddi.schemas.common)</a>
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.common.MultilingualText">MultilingualText (class in fairwddi.schemas.common)</a>
@@ -2294,7 +2773,11 @@
 </li>
         <li><a href="api/api_ref.html#fairwddi.api.schemas.SurveyItem.name">(fairwddi.api.schemas.SurveyItem attribute)</a>
 </li>
-        <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportProfile.name">(fairwddi.ingest.profiles.ImportProfile attribute)</a>
+        <li><a href="api/compare.html#fairwddi.compare.config.ComparisonConfig.name">(fairwddi.compare.config.ComparisonConfig attribute)</a>
+</li>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy.name">(fairwddi.harmonize.plan.HarmonizationPolicy attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.profiles.ImportProfile.name">(fairwddi.importer.profiles.ImportProfile attribute)</a>
 </li>
         <li><a href="api/models.html#fairwddi.models.base.DDIResource.name">(fairwddi.models.base.DDIResource attribute)</a>
 </li>
@@ -2353,7 +2836,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/models.html#fairwddi.models.concept.Concept.narrower_concepts">narrower_concepts (fairwddi.models.concept.Concept attribute)</a>
 </li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.near_exact_threshold">near_exact_threshold (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SemanticRuleConfig.ngram_range">ngram_range (fairwddi.compare.config.SemanticRuleConfig attribute)</a>
+</li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.QuestionCascadeGraph.nodes">nodes (fairwddi.api.schemas.QuestionCascadeGraph attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy.non_high_behavior">non_high_behavior (fairwddi.harmonize.plan.AutoApproveHighPolicy attribute)</a>
 </li>
       <li><a href="api/utils.html#fairwddi.utils.normalize_string.normalize_string">normalize_string() (in module fairwddi.utils.normalize_string)</a>
 </li>
@@ -2361,14 +2850,22 @@
 </li>
       <li><a href="api/utils.html#fairwddi.utils.normalize_string.normalize_string_for_database">normalize_string_for_database() (in module fairwddi.utils.normalize_string)</a>
 </li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CodeListQualification.NOT_APPLICABLE">NOT_APPLICABLE (fairwddi.compare.models.CodeListQualification attribute)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.concept.Concept.notation">notation (fairwddi.models.concept.Concept attribute)</a>
 
       <ul>
         <li><a href="api/schemas.html#fairwddi.schemas.entities.ConceptSchema.notation">(fairwddi.schemas.entities.ConceptSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.notes">notes (fairwddi.ingest.plan.PlanActionItem attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.notes">notes (fairwddi.compare.models.QualificationReport attribute)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.notes">(fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
 </li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem.notes">(fairwddi.importer.plan.ImportActionItem attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -2457,11 +2954,11 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportStrategies.on_content_drift">on_content_drift (fairwddi.ingest.profiles.ImportStrategies attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.profiles.ImportStrategies.on_content_drift">on_content_drift (fairwddi.importer.profiles.ImportStrategies attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportStrategies.on_duplicate_file">on_duplicate_file (fairwddi.ingest.profiles.ImportStrategies attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.profiles.ImportStrategies.on_duplicate_file">on_duplicate_file (fairwddi.importer.profiles.ImportStrategies attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportStrategies.on_existing_resource">on_existing_resource (fairwddi.ingest.profiles.ImportStrategies attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.profiles.ImportStrategies.on_existing_resource">on_existing_resource (fairwddi.importer.profiles.ImportStrategies attribute)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.infrastructure.IngestBatch.options">options (fairwddi.models.infrastructure.IngestBatch attribute)</a>
 
@@ -2511,6 +3008,22 @@
       </ul></li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.OrganizationSchema">OrganizationSchema (class in fairwddi.schemas.entities)</a>
 </li>
+      <li><a href="api/api_ref.html#fairwddi.api.schemas.CategorySummary.origin">origin (fairwddi.api.schemas.CategorySummary attribute)</a>
+
+      <ul>
+        <li><a href="api/api_ref.html#fairwddi.api.schemas.CodeListSummary.origin">(fairwddi.api.schemas.CodeListSummary attribute)</a>
+</li>
+        <li><a href="api/api_ref.html#fairwddi.api.schemas.QuestionItemSummary.origin">(fairwddi.api.schemas.QuestionItemSummary attribute)</a>
+</li>
+        <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.origin">(fairwddi.models.base.DDIIdentifiable property)</a>
+</li>
+        <li><a href="api/models.html#fairwddi.models.infrastructure.UrnRegistry.origin">(fairwddi.models.infrastructure.UrnRegistry attribute)</a>
+</li>
+        <li><a href="api/schemas.html#fairwddi.schemas.common.DDIIdentifiableSchema.origin">(fairwddi.schemas.common.DDIIdentifiableSchema attribute)</a>
+</li>
+        <li><a href="api/schemas.html#fairwddi.schemas.entities.UrnRegistrySchema.origin">(fairwddi.schemas.entities.UrnRegistrySchema attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.OverviewStats">OverviewStats (class in fairwddi.api.schemas)</a>
 </li>
   </ul></td>
@@ -2545,7 +3058,9 @@
       </ul></li>
       <li><a href="api/db.html#fairwddi.db.config.parse_database_url">parse_database_url() (in module fairwddi.db.config)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.loader.parse_ddi_urn">parse_ddi_urn() (in module fairwddi.ingest.loader)</a>
+      <li><a href="api/importer.html#fairwddi.importer.loader.parse_ddi_urn">parse_ddi_urn() (in module fairwddi.importer.loader)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.parse_resource_set_spec">parse_resource_set_spec() (in module fairwddi.groups.resolver)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.dataset.StudyInstrument.path">path (fairwddi.models.dataset.StudyInstrument attribute)</a>
 
@@ -2565,17 +3080,27 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.pending_review_count">pending_review_count (fairwddi.ingest.plan.IngestPlan property)</a>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.pending_review_count">pending_review_count (fairwddi.harmonize.plan.HarmonizationPlan property)</a>
+
+      <ul>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.pending_review_count">(fairwddi.importer.plan.ImportPlan property)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.harmonizer.plan_harmonization">plan_harmonization() (in module fairwddi.ingest.harmonizer)</a>
+      </ul></li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.planner.plan_harmonization">plan_harmonization() (in module fairwddi.harmonize.planner)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.loader.plan_ingestion">plan_ingestion() (in module fairwddi.ingest.loader)</a>
+      <li><a href="api/importer.html#fairwddi.importer.loader.plan_import">plan_import() (in module fairwddi.importer.loader)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.plan_version">plan_version (fairwddi.ingest.plan.IngestPlan attribute)</a>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.plan_version">plan_version (fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
+
+      <ul>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.plan_version">(fairwddi.importer.plan.ImportPlan attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem">PlanActionItem (class in fairwddi.ingest.plan)</a>
+      </ul></li>
+      <li><a href="api/importer.html#fairwddi.importer.plan.PlanActionItem">PlanActionItem (in module fairwddi.importer.plan)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanIssue">PlanIssue (class in fairwddi.ingest.plan)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.PlanIssue">PlanIssue (class in fairwddi.importer.plan)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.policy_name">policy_name (fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.concept.SemanticRelationship.predicate">predicate (fairwddi.models.concept.SemanticRelationship attribute)</a>
 
@@ -2583,7 +3108,9 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.SemanticRelationshipSchema.predicate">(fairwddi.schemas.entities.SemanticRelationshipSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.profile">profile (fairwddi.ingest.plan.IngestPlan attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.profile">profile (fairwddi.importer.plan.ImportPlan attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SemanticRuleConfig.provider">provider (fairwddi.compare.config.SemanticRuleConfig attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2591,6 +3118,18 @@
 <h2 id="Q">Q</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/compare.html#fairwddi.compare.config.ResourceTypeComparisonRule.qualification">qualification (fairwddi.compare.config.ResourceTypeComparisonRule attribute)</a>
+
+      <ul>
+        <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.qualification">(fairwddi.compare.models.CandidateCorrespondence attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport">QualificationReport (class in fairwddi.compare.models)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.QualificationRuleConfig">QualificationRuleConfig (class in fairwddi.compare.config)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy.qualifies_as_high">qualifies_as_high() (fairwddi.harmonize.plan.HarmonizationPolicy method)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.instrument.Instrument.question_associations">question_associations (fairwddi.models.instrument.Instrument attribute)</a>
 
       <ul>
@@ -2683,13 +3222,21 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.RawResourceNode.raw_urn">raw_urn (fairwddi.ingest.streaming.RawResourceNode attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.rationale">rationale (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.RawResourceNode.raw_value">raw_value (fairwddi.ingest.streaming.RawResourceNode attribute)</a>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.ResourceSetSpec.raw_spec">raw_spec (fairwddi.groups.resolver.ResourceSetSpec attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.RawResourceNode">RawResourceNode (class in fairwddi.ingest.streaming)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.RawResourceNode.raw_urn">raw_urn (fairwddi.importer.streaming.RawResourceNode attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.RawResourceNode.referenced_urns">referenced_urns (fairwddi.ingest.streaming.RawResourceNode attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.RawResourceNode.raw_value">raw_value (fairwddi.importer.streaming.RawResourceNode attribute)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.RawResourceNode">RawResourceNode (class in fairwddi.importer.streaming)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CodeListQualification.RECODED_SAME_CATEGORIES">RECODED_SAME_CATEGORIES (fairwddi.compare.models.CodeListQualification attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.recommended_action">recommended_action (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.RawResourceNode.referenced_urns">referenced_urns (fairwddi.importer.streaming.RawResourceNode attribute)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.organization.Group.references">references (fairwddi.models.organization.Group attribute)</a>
 
@@ -2697,6 +3244,16 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.GroupSchema.references">(fairwddi.schemas.entities.GroupSchema attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.refresh_from_db">refresh_from_db() (fairwddi.models.base.DDIIdentifiable method)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.conceptual.register_concept_assigner">register_concept_assigner() (in module fairwddi.compare.conceptual)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.semantic.register_embedding_provider">register_embedding_provider() (in module fairwddi.compare.semantic)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.manager.remove_group_members">remove_group_members() (in module fairwddi.groups.manager)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.manager.rename_group">rename_group() (in module fairwddi.groups.manager)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.dataset.InstanceVariable.represented_variable">represented_variable (fairwddi.models.dataset.InstanceVariable attribute)</a>
 
       <ul>
@@ -2741,10 +3298,16 @@
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.RepresentedVariableUsage">RepresentedVariableUsage (class in fairwddi.api.schemas)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.requires_review">requires_review (fairwddi.ingest.plan.PlanActionItem attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.ConceptualRuleConfig.require_shared_concept">require_shared_concept (fairwddi.compare.config.ConceptualRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.requires_review">requires_review (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
 
       <ul>
-        <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanIssue.requires_review">(fairwddi.ingest.plan.PlanIssue attribute)</a>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.requires_review">(fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem.requires_review">(fairwddi.importer.plan.ImportActionItem attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.PlanIssue.requires_review">(fairwddi.importer.plan.PlanIssue attribute)</a>
 </li>
       </ul></li>
       <li><a href="api/models.html#fairwddi.models.infrastructure.MetadataQuarantine.resolution">resolution (fairwddi.models.infrastructure.MetadataQuarantine attribute)</a>
@@ -2755,6 +3318,10 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/groups.html#fairwddi.groups.manager.resolve_group">resolve_group() (in module fairwddi.groups.manager)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.resolve_resource_set">resolve_resource_set() (in module fairwddi.groups.resolver)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.infrastructure.MetadataQuarantine.resolved_at">resolved_at (fairwddi.models.infrastructure.MetadataQuarantine attribute)</a>
 
       <ul>
@@ -2767,14 +3334,20 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.MetadataQuarantineSchema.resolved_by">(fairwddi.schemas.entities.MetadataQuarantineSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.resource_to_json">resource_to_json() (in module fairwddi.ingest.streaming)</a>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet">ResolvedResourceSet (class in fairwddi.groups.resolver)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.resource_type">resource_type (fairwddi.ingest.plan.PlanActionItem attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.resource_to_json">resource_to_json() (in module fairwddi.importer.streaming)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.resource_type">resource_type (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
 
       <ul>
-        <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanIssue.resource_type">(fairwddi.ingest.plan.PlanIssue attribute)</a>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.resource_type">(fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
 </li>
-        <li><a href="api/ingest.html#fairwddi.ingest.streaming.RawResourceNode.resource_type">(fairwddi.ingest.streaming.RawResourceNode attribute)</a>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem.resource_type">(fairwddi.importer.plan.ImportActionItem attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.PlanIssue.resource_type">(fairwddi.importer.plan.PlanIssue attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.streaming.RawResourceNode.resource_type">(fairwddi.importer.streaming.RawResourceNode attribute)</a>
 </li>
         <li><a href="api/models.html#fairwddi.models.infrastructure.UrnRegistry.resource_type">(fairwddi.models.infrastructure.UrnRegistry attribute)</a>
 </li>
@@ -2783,7 +3356,19 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.UrnRegistrySchema.resource_type">(fairwddi.schemas.entities.UrnRegistrySchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanIssue.resource_urn">resource_urn (fairwddi.ingest.plan.PlanIssue attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.ComparisonConfig.resource_types">resource_types (fairwddi.compare.config.ComparisonConfig attribute)</a>
+
+      <ul>
+        <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.resource_types">(fairwddi.compare.models.ComparisonResultSet attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/importer.html#fairwddi.importer.plan.PlanIssue.resource_urn">resource_urn (fairwddi.importer.plan.PlanIssue attribute)</a>
+</li>
+      <li><a href="api/models.html#fairwddi.models.infrastructure.ResourceOrigin">ResourceOrigin (class in fairwddi.models.infrastructure)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.ResourceSetSpec">ResourceSetSpec (class in fairwddi.groups.resolver)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.ResourceTypeComparisonRule">ResourceTypeComparisonRule (class in fairwddi.compare.config)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.representation.QuestionItem.response_domain">response_domain (fairwddi.models.representation.QuestionItem attribute)</a>
 
@@ -2799,21 +3384,31 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.IngestBatchSchema.reused_urns">(fairwddi.schemas.entities.IngestBatchSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.review_gate">review_gate (fairwddi.ingest.plan.IngestPlan attribute)</a>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.review_gate">review_gate (fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
+
+      <ul>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.review_gate">(fairwddi.importer.plan.ImportPlan attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.ReviewGate.reviewed_at">reviewed_at (fairwddi.ingest.plan.ReviewGate attribute)</a>
+      </ul></li>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ReviewGate.reviewed_at">reviewed_at (fairwddi.importer.plan.ReviewGate attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.ReviewGate.reviewer">reviewer (fairwddi.ingest.plan.ReviewGate attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ReviewGate.reviewer">reviewer (fairwddi.importer.plan.ReviewGate attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.ReviewGate">ReviewGate (class in fairwddi.ingest.plan)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ReviewGate">ReviewGate (class in fairwddi.importer.plan)</a>
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.common.MultilingualText.root">root (fairwddi.schemas.common.MultilingualText attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.detector.MetadataFormatInfo.root_tag_or_type">root_tag_or_type (fairwddi.ingest.detector.MetadataFormatInfo attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.detector.MetadataFormatInfo.root_tag_or_type">root_tag_or_type (fairwddi.importer.detector.MetadataFormatInfo attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.pipeline.run_ingestion_pipeline">run_ingestion_pipeline() (in module fairwddi.ingest.pipeline)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.ComparisonConfig.rule_for">rule_for() (fairwddi.compare.config.ComparisonConfig method)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.preflight.run_preflight_check">run_preflight_check() (in module fairwddi.ingest.preflight)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.ComparisonConfig.rules">rules (fairwddi.compare.config.ComparisonConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.engine.run_comparison">run_comparison() (in module fairwddi.compare.engine)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.pipeline.run_import">run_import() (in module fairwddi.importer.pipeline)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.preflight.run_preflight_check">run_preflight_check() (in module fairwddi.importer.preflight)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.server.run_server">run_server() (in module fairwddi.api.server)</a>
 </li>
@@ -2823,7 +3418,7 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanIssue.samples">samples (fairwddi.ingest.plan.PlanIssue attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.PlanIssue.samples">samples (fairwddi.importer.plan.PlanIssue attribute)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.save">save() (fairwddi.models.base.DDIIdentifiable method)</a>
 
@@ -2835,6 +3430,8 @@
         <li><a href="api/models.html#fairwddi.models.representation.RepresentedVariable.save">(fairwddi.models.representation.RepresentedVariable method)</a>
 </li>
       </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CodeListQualification.SCALE_CARDINALITY_DIFF">SCALE_CARDINALITY_DIFF (fairwddi.compare.models.CodeListQualification attribute)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.concept.Concept.scheme">scheme (fairwddi.models.concept.Concept attribute)</a>
 
       <ul>
@@ -2883,7 +3480,9 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.RepresentedVariableSchema.scheme_urn">(fairwddi.schemas.entities.RepresentedVariableSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/db.html#fairwddi.db.seed.seed_sample_data">seed_sample_data() (in module fairwddi.db.seed)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.ResourceTypeComparisonRule.semantic">semantic (fairwddi.compare.config.ResourceTypeComparisonRule attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CorrespondenceLevel.SEMANTIC">SEMANTIC (fairwddi.compare.models.CorrespondenceLevel attribute)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.concept.SemanticRelationship">SemanticRelationship (class in fairwddi.models.concept)</a>
 </li>
@@ -2891,20 +3490,32 @@
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.SemanticRelationshipSchema">SemanticRelationshipSchema (class in fairwddi.schemas.entities)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.detector.MetadataFormatInfo.serialization">serialization (fairwddi.ingest.detector.MetadataFormatInfo attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.SemanticRuleConfig">SemanticRuleConfig (class in fairwddi.compare.config)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanIssue.severity">severity (fairwddi.ingest.plan.PlanIssue attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider">SentenceTransformerEmbeddingProvider (class in fairwddi.compare.semantic)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportProfile.should_include">should_include() (fairwddi.ingest.profiles.ImportProfile method)</a>
+      <li><a href="api/importer.html#fairwddi.importer.detector.MetadataFormatInfo.serialization">serialization (fairwddi.importer.detector.MetadataFormatInfo attribute)</a>
 </li>
+      <li><a href="api/importer.html#fairwddi.importer.plan.PlanIssue.severity">severity (fairwddi.importer.plan.PlanIssue attribute)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.profiles.ImportProfile.should_include">should_include() (fairwddi.importer.profiles.ImportProfile method)</a>
+</li>
+      <li><a href="api/models.html#fairwddi.models.organization.Group.slug">slug (fairwddi.models.organization.Group attribute)</a>
+
+      <ul>
+        <li><a href="api/schemas.html#fairwddi.schemas.entities.GroupSchema.slug">(fairwddi.schemas.entities.GroupSchema attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/utils.html#fairwddi.utils.urn.slugify">slugify() (in module fairwddi.utils.urn)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.GraphLink.source">source (fairwddi.api.schemas.GraphLink attribute)</a>
 </li>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.source_codelist_urn">source_codelist_urn (fairwddi.compare.models.QualificationReport attribute)</a>
+</li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.AliasItem.source_file">source_file (fairwddi.api.schemas.AliasItem attribute)</a>
 
       <ul>
-        <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.source_file">(fairwddi.ingest.plan.IngestPlan attribute)</a>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.source_file">(fairwddi.importer.plan.ImportPlan attribute)</a>
 </li>
         <li><a href="api/models.html#fairwddi.models.infrastructure.MetadataQuarantine.source_file">(fairwddi.models.infrastructure.MetadataQuarantine attribute)</a>
 </li>
@@ -2915,7 +3526,7 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.URNAliasSchema.source_file">(fairwddi.schemas.entities.URNAliasSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.source_format">source_format (fairwddi.ingest.plan.IngestPlan attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.source_format">source_format (fairwddi.importer.plan.ImportPlan attribute)</a>
 
       <ul>
         <li><a href="api/models.html#fairwddi.models.infrastructure.IngestBatch.source_format">(fairwddi.models.infrastructure.IngestBatch attribute)</a>
@@ -2923,20 +3534,40 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.IngestBatchSchema.source_format">(fairwddi.schemas.entities.IngestBatchSchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.source_path">source_path (fairwddi.ingest.plan.IngestPlan attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.source_origin">source_origin (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.source_urn">source_urn (fairwddi.ingest.plan.PlanActionItem attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.source_path">source_path (fairwddi.importer.plan.ImportPlan attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.detector.MetadataFormatInfo.specification">specification (fairwddi.ingest.detector.MetadataFormatInfo attribute)</a>
-</li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.stage">stage (fairwddi.ingest.plan.IngestPlan attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.source_spec">source_spec (fairwddi.compare.models.ComparisonResultSet attribute)</a>
 
       <ul>
-        <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.stage">(fairwddi.ingest.plan.PlanActionItem attribute)</a>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.source_spec">(fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.source_text">source_text (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.source_urn">source_urn (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.source_urn">(fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem.source_urn">(fairwddi.importer.plan.ImportActionItem attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet.spec">spec (fairwddi.groups.resolver.ResolvedResourceSet attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/importer.html#fairwddi.importer.detector.MetadataFormatInfo.specification">specification (fairwddi.importer.detector.MetadataFormatInfo attribute)</a>
+</li>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.stage">stage (fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
+
+      <ul>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem.stage">(fairwddi.importer.plan.ImportActionItem attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.stage">(fairwddi.importer.plan.ImportPlan attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/models.html#fairwddi.models.dataset.DatafileVariable.statistics">statistics (fairwddi.models.dataset.DatafileVariable attribute)</a>
 
       <ul>
@@ -2959,17 +3590,17 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.UrnRegistrySchema.status">(fairwddi.schemas.entities.UrnRegistrySchema attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.profiles.ImportProfile.strategies">strategies (fairwddi.ingest.profiles.ImportProfile attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.profiles.ImportProfile.strategies">strategies (fairwddi.importer.profiles.ImportProfile attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.stream_ddi_c_xml">stream_ddi_c_xml() (in module fairwddi.ingest.streaming)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.stream_ddi_c_xml">stream_ddi_c_xml() (in module fairwddi.importer.streaming)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.stream_ddi_l_json">stream_ddi_l_json() (in module fairwddi.ingest.streaming)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.stream_ddi_l_json">stream_ddi_l_json() (in module fairwddi.importer.streaming)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.stream_ddi_l_jsonl">stream_ddi_l_jsonl() (in module fairwddi.ingest.streaming)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.stream_ddi_l_jsonl">stream_ddi_l_jsonl() (in module fairwddi.importer.streaming)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.stream_ddi_l_xml">stream_ddi_l_xml() (in module fairwddi.ingest.streaming)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.stream_ddi_l_xml">stream_ddi_l_xml() (in module fairwddi.importer.streaming)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.stream_resources">stream_resources() (in module fairwddi.ingest.streaming)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.stream_resources">stream_resources() (in module fairwddi.importer.streaming)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.dataset.Datafile.study">study (fairwddi.models.dataset.Datafile property)</a>
 </li>
@@ -2999,6 +3630,8 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.StudyUnitVariableSchema.study_unit_urn">(fairwddi.schemas.entities.StudyUnitVariableSchema attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet.study_urns">study_urns (fairwddi.groups.resolver.ResolvedResourceSet attribute)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.dataset.StudyInstrument">StudyInstrument (class in fairwddi.models.dataset)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.dataset.StudyInstrument.NotUpdated">StudyInstrument.NotUpdated</a>
@@ -3031,8 +3664,18 @@
       </ul></li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.GraphNode.sublabel">sublabel (fairwddi.api.schemas.GraphNode attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.summary">summary (fairwddi.ingest.plan.IngestPlan attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.substantive_count_source">substantive_count_source (fairwddi.compare.models.QualificationReport attribute)</a>
 </li>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.substantive_count_target">substantive_count_target (fairwddi.compare.models.QualificationReport attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.summary">summary (fairwddi.compare.models.ComparisonResultSet attribute)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.summary">(fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.summary">(fairwddi.importer.plan.ImportPlan attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.OverviewStats.survey_count">survey_count (fairwddi.api.schemas.OverviewStats attribute)</a>
 
       <ul>
@@ -3053,6 +3696,12 @@
         <li><a href="api/api_ref.html#fairwddi.api.schemas.RepresentedVariableUsage.surveys">(fairwddi.api.schemas.RepresentedVariableUsage attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.config.ResourceTypeComparisonRule.syntactic">syntactic (fairwddi.compare.config.ResourceTypeComparisonRule attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CorrespondenceLevel.SYNTACTIC">SYNTACTIC (fairwddi.compare.models.CorrespondenceLevel attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig">SyntacticRuleConfig (class in fairwddi.compare.config)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -3061,12 +3710,38 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.GraphLink.target">target (fairwddi.api.schemas.GraphLink attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.PlanActionItem.target_urn">target_urn (fairwddi.ingest.plan.PlanActionItem attribute)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.QualificationReport.target_codelist_urn">target_codelist_urn (fairwddi.compare.models.QualificationReport attribute)</a>
 </li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.target_origin">target_origin (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.target_spec">target_spec (fairwddi.compare.models.ComparisonResultSet attribute)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.target_spec">(fairwddi.harmonize.plan.HarmonizationPlan attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.target_text">target_text (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.models.CandidateCorrespondence.target_urn">target_urn (fairwddi.compare.models.CandidateCorrespondence attribute)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem.target_urn">(fairwddi.harmonize.plan.HarmonizationActionItem attribute)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportActionItem.target_urn">(fairwddi.importer.plan.ImportActionItem attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.CodeListQuestionRef.text">text (fairwddi.api.schemas.CodeListQuestionRef attribute)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.QuestionItemSummary.text_display">text_display (fairwddi.api.schemas.QuestionItemSummary attribute)</a>
 </li>
+      <li><a href="api/compare.html#fairwddi.compare.config.ConceptualRuleConfig.threshold">threshold (fairwddi.compare.config.ConceptualRuleConfig attribute)</a>
+
+      <ul>
+        <li><a href="api/compare.html#fairwddi.compare.config.SemanticRuleConfig.threshold">(fairwddi.compare.config.SemanticRuleConfig attribute)</a>
+</li>
+        <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.threshold">(fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/models.html#fairwddi.models.event.EventLog.timestamp">timestamp (fairwddi.models.event.EventLog attribute)</a>
 
       <ul>
@@ -3083,17 +3758,41 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.to_dict">to_dict() (fairwddi.ingest.plan.IngestPlan method)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.to_dict">to_dict() (fairwddi.compare.models.ComparisonResultSet method)</a>
 
       <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.to_dict">(fairwddi.harmonize.plan.HarmonizationPlan method)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.to_dict">(fairwddi.importer.plan.ImportPlan method)</a>
+</li>
         <li><a href="api/schemas.html#fairwddi.schemas.common.MultilingualText.to_dict">(fairwddi.schemas.common.MultilingualText method)</a>
 </li>
       </ul></li>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.RawResourceNode.to_json">to_json() (fairwddi.ingest.streaming.RawResourceNode method)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.to_json">to_json() (fairwddi.compare.models.ComparisonResultSet method)</a>
+
+      <ul>
+        <li><a href="api/importer.html#fairwddi.importer.streaming.RawResourceNode.to_json">(fairwddi.importer.streaming.RawResourceNode method)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.to_markdown">to_markdown() (fairwddi.ingest.plan.IngestPlan method)</a>
+      </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.to_markdown">to_markdown() (fairwddi.compare.models.ComparisonResultSet method)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.to_markdown">(fairwddi.harmonize.plan.HarmonizationPlan method)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.to_yaml">to_yaml() (fairwddi.ingest.plan.IngestPlan method)</a>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.to_markdown">(fairwddi.importer.plan.ImportPlan method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.models.ComparisonResultSet.to_yaml">to_yaml() (fairwddi.compare.models.ComparisonResultSet method)</a>
+
+      <ul>
+        <li><a href="api/harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan.to_yaml">(fairwddi.harmonize.plan.HarmonizationPlan method)</a>
+</li>
+        <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.to_yaml">(fairwddi.importer.plan.ImportPlan method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SemanticRuleConfig.top_k">top_k (fairwddi.compare.config.SemanticRuleConfig attribute)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet.total_count">total_count (fairwddi.groups.resolver.ResolvedResourceSet property)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.GraphLink.type">type (fairwddi.api.schemas.GraphLink attribute)</a>
 
@@ -3109,9 +3808,11 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.harmonizer.undo_harmonization">undo_harmonization() (in module fairwddi.ingest.harmonizer)</a>
+      <li><a href="api/compare.html#fairwddi.compare.models.CodeListQualification.UNCOMPARABLE_OR_UNCODED">UNCOMPARABLE_OR_UNCODED (fairwddi.compare.models.CodeListQualification attribute)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.loader.undo_ingestion">undo_ingestion() (in module fairwddi.ingest.loader)</a>
+      <li><a href="api/harmonize.html#fairwddi.harmonize.manager.undo_harmonization">undo_harmonization() (in module fairwddi.harmonize.manager)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.loader.undo_import">undo_import() (in module fairwddi.importer.loader)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.updated_at">updated_at (fairwddi.models.base.DDIIdentifiable attribute)</a>
 
@@ -3231,7 +3932,7 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.preflight.upgrade_ddic_to_ddil">upgrade_ddic_to_ddil() (in module fairwddi.ingest.preflight)</a>
+      <li><a href="api/importer.html#fairwddi.importer.preflight.upgrade_ddic_to_ddil">upgrade_ddic_to_ddil() (in module fairwddi.importer.preflight)</a>
 </li>
       <li><a href="api/models.html#fairwddi.models.concept.Concept.uri">uri (fairwddi.models.concept.Concept attribute)</a>
 
@@ -3321,6 +4022,12 @@
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.UrnRegistrySchema">UrnRegistrySchema (class in fairwddi.schemas.entities)</a>
 </li>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet.urns_by_type">urns_by_type (fairwddi.groups.resolver.ResolvedResourceSet attribute)</a>
+</li>
+      <li><a href="api/groups.html#fairwddi.groups.resolver.ResolvedResourceSet.urns_for">urns_for() (fairwddi.groups.resolver.ResolvedResourceSet method)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.use_character_ngrams">use_character_ngrams (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -3369,7 +4076,7 @@
 </li>
       <li><a href="api/schemas.html#fairwddi.schemas.entities.VariableFrequencySchema">VariableFrequencySchema (in module fairwddi.schemas.entities)</a>
 </li>
-      <li><a href="api/ingest.html#fairwddi.ingest.detector.MetadataFormatInfo.version">version (fairwddi.ingest.detector.MetadataFormatInfo attribute)</a>
+      <li><a href="api/importer.html#fairwddi.importer.detector.MetadataFormatInfo.version">version (fairwddi.importer.detector.MetadataFormatInfo attribute)</a>
 
       <ul>
         <li><a href="api/models.html#fairwddi.models.base.DDIIdentifiable.version">(fairwddi.models.base.DDIIdentifiable property)</a>
@@ -3377,6 +4084,8 @@
         <li><a href="api/schemas.html#fairwddi.schemas.common.DDIIdentifiableSchema.version">(fairwddi.schemas.common.DDIIdentifiableSchema property)</a>
 </li>
       </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.config.ConceptualRuleConfig.vocabularies">vocabularies (fairwddi.compare.config.ConceptualRuleConfig attribute)</a>
+</li>
       <li><a href="api/models.html#fairwddi.models.concept.Concept.vocabulary">vocabulary (fairwddi.models.concept.Concept attribute)</a>
 
       <ul>
@@ -3389,7 +4098,13 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.plan.IngestPlan.warning_count">warning_count (fairwddi.ingest.plan.IngestPlan property)</a>
+      <li><a href="api/compare.html#fairwddi.compare.config.QualificationRuleConfig.warn_on_administration_context">warn_on_administration_context (fairwddi.compare.config.QualificationRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.QualificationRuleConfig.warn_on_dimension_mismatch">warn_on_dimension_mismatch (fairwddi.compare.config.QualificationRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.QualificationRuleConfig.warn_on_scale_cardinality_diff">warn_on_scale_cardinality_diff (fairwddi.compare.config.QualificationRuleConfig attribute)</a>
+</li>
+      <li><a href="api/importer.html#fairwddi.importer.plan.ImportPlan.warning_count">warning_count (fairwddi.importer.plan.ImportPlan property)</a>
 </li>
       <li><a href="api/api_ref.html#fairwddi.api.schemas.MatrixRow.waves">waves (fairwddi.api.schemas.MatrixRow attribute)</a>
 </li>
@@ -3401,6 +4116,10 @@
         <li><a href="api/schemas.html#fairwddi.schemas.entities.DatafileVariableFrequencySchema.weight">(fairwddi.schemas.entities.DatafileVariableFrequencySchema attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.weight_codelist">weight_codelist (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
+      <li><a href="api/compare.html#fairwddi.compare.config.SyntacticRuleConfig.weight_label">weight_label (fairwddi.compare.config.SyntacticRuleConfig attribute)</a>
+</li>
       <li><a href="api/db.html#fairwddi.db.wipe.wipe_database">wipe_database() (in module fairwddi.db.wipe)</a>
 </li>
   </ul></td>
@@ -3409,11 +4128,11 @@
 <h2 id="X">X</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.xml_elem_to_dict">xml_elem_to_dict() (in module fairwddi.ingest.streaming)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.xml_elem_to_dict">xml_elem_to_dict() (in module fairwddi.importer.streaming)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ingest.html#fairwddi.ingest.streaming.xml_to_json_dict">xml_to_json_dict() (in module fairwddi.ingest.streaming)</a>
+      <li><a href="api/importer.html#fairwddi.importer.streaming.xml_to_json_dict">xml_to_json_dict() (in module fairwddi.importer.streaming)</a>
 </li>
   </ul></td>
 </tr></table>

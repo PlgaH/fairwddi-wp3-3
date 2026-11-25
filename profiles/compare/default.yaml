@@ -1,0 +1,145 @@
+name: "default"
+description: "Balanced ReQuest three-layer comparison config enabling syntactic (L1), semantic TF-IDF (L2), and conceptual graph discovery (L3) with independent CodeList qualification."
+levels:
+  - syntactic
+  - semantic
+  - conceptual
+resource_types:
+  - QuestionItem
+  - RepresentedVariable
+  - CodeList
+  - Category
+  - ConceptualVariable
+exclude_same_urn: true
+max_candidates_per_source: 5
+
+rules:
+  QuestionItem:
+    enabled: true
+    fields: ["question_text", "label"]
+    languages: []
+    syntactic:
+      enabled: true
+      min_score: 0.75
+      near_exact_threshold: 0.90
+      enable_wording_variants: true
+      enable_typo_variants: true
+      enable_stem_grids: true
+      min_stem_len: 12
+      enable_token_blocking: true
+    semantic:
+      enabled: true
+      min_score: 0.72
+      embedding_provider: "tfidf"
+      top_k: 5
+      agent_backend: "none"
+    conceptual:
+      enabled: true
+      require_shared_concept: true
+      allow_hierarchy_ancestors: true
+      max_hierarchy_hops: 2
+      auto_assign_concepts: false
+    qualification:
+      evaluate_codelists: true
+      isolate_missing_values: true
+      flag_scale_differences: true
+      flag_dimension_mismatch: true
+      flag_administration_context: true
+
+  RepresentedVariable:
+    enabled: true
+    fields: ["label", "description", "question_text"]
+    languages: []
+    syntactic:
+      enabled: true
+      min_score: 0.75
+      near_exact_threshold: 0.90
+      enable_wording_variants: true
+      enable_typo_variants: true
+      enable_stem_grids: true
+      min_stem_len: 10
+      enable_token_blocking: true
+    semantic:
+      enabled: true
+      min_score: 0.72
+      embedding_provider: "tfidf"
+      top_k: 5
+      agent_backend: "none"
+    conceptual:
+      enabled: true
+      require_shared_concept: true
+      allow_hierarchy_ancestors: true
+      max_hierarchy_hops: 2
+      auto_assign_concepts: false
+    qualification:
+      evaluate_codelists: true
+      isolate_missing_values: true
+      flag_scale_differences: true
+      flag_dimension_mismatch: true
+      flag_administration_context: true
+
+  CodeList:
+    enabled: true
+    fields: ["label", "codes"]
+    syntactic:
+      enabled: true
+      min_score: 0.80
+      enable_token_blocking: false
+    semantic:
+      enabled: false
+    conceptual:
+      enabled: true
+      max_hierarchy_hops: 1
+      auto_assign_concepts: false
+    qualification:
+      evaluate_codelists: true
+      isolate_missing_values: true
+      flag_scale_differences: true
+      flag_dimension_mismatch: false
+      flag_administration_context: false
+
+  Category:
+    enabled: true
+    fields: ["label"]
+    syntactic:
+      enabled: true
+      min_score: 0.80
+      near_exact_threshold: 0.90
+      enable_wording_variants: true
+      enable_typo_variants: true
+      enable_stem_grids: false
+      enable_token_blocking: true
+    semantic:
+      enabled: true
+      min_score: 0.78
+      embedding_provider: "tfidf"
+      top_k: 5
+    conceptual:
+      enabled: true
+      max_hierarchy_hops: 2
+      auto_assign_concepts: false
+    qualification:
+      evaluate_codelists: false
+      flag_administration_context: false
+
+  ConceptualVariable:
+    enabled: true
+    fields: ["label", "description"]
+    syntactic:
+      enabled: true
+      min_score: 0.75
+      enable_token_blocking: true
+    semantic:
+      enabled: true
+      min_score: 0.75
+      embedding_provider: "tfidf"
+      top_k: 5
+    conceptual:
+      enabled: true
+      require_shared_concept: true
+      allow_hierarchy_ancestors: true
+      max_hierarchy_hops: 2
+      auto_assign_concepts: false
+    qualification:
+      evaluate_codelists: false
+      flag_administration_context: false

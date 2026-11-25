@@ -315,7 +315,7 @@ wheels = [
 [[package]]
 name = "dartfx-ddi"
 version = "0.3.0"
-source = { git = "https://github.com/DataArtifex/ddi-toolkit.git?rev=main#637844ff3b1303af85221949986691e325d5e81a" }
+source = { git = "https://github.com/DataArtifex/ddi-toolkit.git?rev=main#5329468a64d9d1db3c5a19678d1b3b765049a367" }
 dependencies = [
     { name = "dartfx-rdf" },
     { name = "httpx" },

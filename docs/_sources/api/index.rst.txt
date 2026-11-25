@@ -12,6 +12,9 @@ Modules
    models
    schemas
    db
-   ingest
+   importer
+   groups
+   compare
+   harmonize
    api_ref
    utils

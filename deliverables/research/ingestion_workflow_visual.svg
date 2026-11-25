@@ -89,7 +89,7 @@
         <circle cx="54" cy="22" r="5" fill="#10b981" />
         <text x="75" y="26" class="font-mono" font-size="11" fill="#64748b">Single-Command Automated Ingest</text>
         <text x="20" y="48" class="font-mono" font-size="13" font-weight="600" fill="#38bdf8">
-            fairwddi ingest run <tspan fill="#f8fafc">survey.xml</tspan> <tspan fill="#f59e0b">--agency fr.cdsp</tspan> <tspan fill="#34d399">--harmonize</tspan>
+            fairwddi import <tspan fill="#f8fafc">survey.xml</tspan> <tspan fill="#f59e0b">--agency fr.cdsp</tspan> <tspan fill="#34d399">--category-scheme-mode per_codelist</tspan>
         </text>
     </g>
 </g>
@@ -283,7 +283,7 @@
             <rect width="365" height="75" rx="8" fill="#131d31" stroke="#1e293b" />
             <text x="16" y="24" class="font-sans" font-size="13" font-weight="700" fill="#10b981">IngestBatch Receipt &amp; Undo</text>
             <text x="16" y="44" class="font-sans" font-size="12" fill="#cbd5e1">1 row records batch ID &amp; created URNs.</text>
-            <text x="16" y="62" class="font-mono" font-size="11" fill="#38bdf8">1-Click: fairwddi ingest undo &lt;id&gt;</text>
+            <text x="16" y="62" class="font-mono" font-size="11" fill="#38bdf8">1-Click: fairwddi import undo &lt;id&gt;</text>
         </g>
     </g>
 </g>
@@ -406,7 +406,7 @@
             <text x="28" y="33" text-anchor="middle" class="font-sans" font-size="14" font-weight="700" fill="#22d3ee">🛡️</text>
             <text x="56" y="26" class="font-sans" font-size="14" font-weight="700" fill="#f8fafc">1-Click Atomic Rollback</text>
             <text x="56" y="46" class="font-sans" font-size="12" fill="#cbd5e1">Receipts track all created URNs in a single batch row.</text>
-            <text x="56" y="64" class="font-mono" font-size="11" fill="#38bdf8">fairwddi ingest undo &lt;id&gt; <tspan font-family="sans-serif" fill="#94a3b8">(cascading purge)</tspan></text>
+            <text x="56" y="64" class="font-mono" font-size="11" fill="#38bdf8">fairwddi import undo &lt;id&gt; <tspan font-family="sans-serif" fill="#94a3b8">(cascading purge)</tspan></text>
         </g>
 
         <!-- Benefit 3 -->

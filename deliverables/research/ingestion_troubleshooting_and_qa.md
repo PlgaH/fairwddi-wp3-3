@@ -139,7 +139,7 @@ Pending Review Count: 14
 
 *Remedy:*
 1. The ingestion engine safely ingests asymmetrical multilingual dictionaries (e.g. `label={"fr": "Oui"}` without an `"en"` key).
-2. When the English translation file becomes available later, ingest it or run `fairwddi compare discover` $\rightarrow$ `fairwddi harmonize apply` to execute a `merge_multilingual` action, which enriches the existing French records with English labels.
+2. When the English translation file becomes available later, import it cleanly and run `fairwddi compare run` $\rightarrow$ `fairwddi harmonize plan` $\rightarrow$ `fairwddi harmonize execute` to link or generate multilingual records.
 
 ---
 
@@ -158,7 +158,7 @@ The active import profile ([`profiles/request.yaml`](file:///Users/pascal/git-pl
    ```
 2. If full DDI ingestion is needed without ReQuest profile pruning, use the `all_ddi` profile:
    ```bash
-   fairwddi ingest plan metadata.xml --profile all_ddi
+   fairwddi import plan metadata.xml --profile all_ddi
    ```
 
 ---
@@ -247,7 +247,7 @@ flowchart TD
     Hash --> Check{"Active IngestBatch\nwith matching SHA-256?"}
     Check -->|No| Plan["Proceed to Plan / Apply"]
     Check -->|Yes & No --force-reload| Skip["Return status: already_ingested\n(Zero Database Mutations)"]
-    Check -->|Yes & --force-reload| Rollback["undo_ingestion(existing_batch.id)\n(Clean Cascade Deletion)"]
+    Check -->|Yes & --force-reload| Rollback["undo_import(existing_batch.id)\n(Clean Cascade Deletion)"]
     Rollback --> Fresh["Apply Fresh Ingestion\n(Mint new IngestBatch #ID)"]
 ```
 
@@ -256,14 +256,14 @@ The file's SHA-256 cryptographic hash matches an existing record in `request_ddi
 
 *Remedy:*
 - **If the file was re-uploaded accidentally:** No action required; the existing batch protects the database from duplicate insertion.
-- **If the file needs to be reloaded:** Supply `--force-reload`. The system will automatically trigger `undo_ingestion()` on the old batch, deleting previously created entities, and perform a clean re-ingestion:
+- **If the file needs to be reloaded:** Supply `--force-reload`. The system will automatically trigger `undo_import()` on the old batch, deleting previously created entities, and perform a clean re-import:
   ```bash
-  fairwddi ingest execute survey.xml --force-reload
+  fairwddi import execute survey.xml --force-reload
   ```
 
 ---
 
-### Issue 3.2: Content Drift Detected (`ING-DRIFT-001` & Quarantine)
+### Issue 3.2: Content Drift Detected (`IMP-DRIFT-001` & Quarantine)
 
 *Symptom:*
 The ingestion plan reports:
@@ -284,7 +284,7 @@ flowchart TD
     Quarantine --> PlanHalt["Plan requires review\n(pending_review_count = 1)"]
     PlanHalt --> Triage{"Archivist Decision"}
     Triage -->|Reject Drift| Drop["Discard incoming file"]
-    Triage -->|Accept Drift as Quarantine| ApplyQuar["fairwddi ingest execute --auto-approve\n(Isolated in MetadataQuarantine)"]
+    Triage -->|Accept Drift as Quarantine| ApplyQuar["fairwddi import execute --auto-approve\n(Isolated in MetadataQuarantine)"]
     Triage -->|Bump Version| Version["Update source version to 1.0.1 in file\n(New canonical URN)"]
 ```
 
@@ -309,7 +309,7 @@ An incoming element declares a canonical URN that is already registered in `UrnR
 ### Issue 3.3: Execution Blocked by Review Gate (`PermissionError`)
 
 *Symptom:*
-Executing `fairwddi ingest execute` fails with:
+Executing `fairwddi import execute` fails with:
 ```
 PermissionError: Ingestion plan 'ingest-survey-7a2b9c' has 2 pending review item(s).
 Approve the plan YAML (review_gate.approved: true) or pass --auto-approve.
@@ -317,7 +317,7 @@ Approve the plan YAML (review_gate.approved: true) or pass --auto-approve.
 
 *Remedy:*
 Option A — **Human-in-the-Loop Review (Recommended):**
-1. Open the plan YAML file (e.g. `./ingest_output/survey.ingest.plan.yaml`).
+1. Open the plan YAML file (e.g. `./import_output/survey.import.plan.yaml`).
 2. Inspect the `issues` and `actions` sections marked with `requires_review: true`.
 3. Set `review_gate.approved: true` and specify `reviewer`:
    ```yaml
@@ -326,12 +326,12 @@ Option A — **Human-in-the-Loop Review (Recommended):**
      reviewer: "Archivist QA Lead"
      notes: "Reviewed drift items; confirmed acceptable for quarantine."
    ```
-4. Re-run `fairwddi ingest execute ./ingest_output/survey.ingest.plan.yaml`.
+4. Re-run `fairwddi import execute ./import_output/survey.import.plan.yaml`.
 
 Option B — **Automated Script Override:**
 If executing in an unattended CI/CD pipeline, pass the bypass flag:
 ```bash
-fairwddi ingest execute ./ingest_output/survey.ingest.plan.yaml --auto-approve
+fairwddi import execute ./import_output/survey.import.plan.yaml --auto-approve
 ```
 
 ---
@@ -346,7 +346,7 @@ An unhandled exception occurs mid-ingestion (e.g. network disconnect or disk ful
 - If an unhandled exception occurs, PostgreSQL rolls back all inserts completely. No orphaned records remain in `UrnRegistry` or core tables.
 - If an `IngestBatch` was successfully committed but needs removal for any reason, invoke 1-click rollback:
   ```bash
-  fairwddi ingest undo <batch_id>
+  fairwddi import undo <batch_id>
   ```
 
 ---
@@ -356,7 +356,7 @@ An unhandled exception occurs mid-ingestion (e.g. network disconnect or disk ful
 ### Issue 4.1: False-Positive Candidate Matches in Discovery
 
 *Symptom:*
-`fairwddi compare discover` suggests linking two questions that have high string similarity but different substantive meanings:
+`fairwddi compare run` suggests linking two questions that have high string similarity but different substantive meanings or response scales:
 ```
 Type: QuestionItem | Match Tier: SYNTACTIC_SIMILAR | Conf: 0.82
 Source: urn:ddi:fr.cdsp:qi_trust_parliament:1.0.0
@@ -382,7 +382,7 @@ Tier 6 (`SYNTACTIC_SIMILAR`) uses normalized string distance. Questions sharing 
    ```
 5. Apply the approved plan:
    ```bash
-   fairwddi harmonize apply ./harm_plans/<job_id>.harmonize.plan.yaml
+   fairwddi harmonize execute ./harm_plans/<job_id>.harmonize.plan.yaml
    ```
    Items marked `approved: false` will be completely skipped.
 
@@ -415,7 +415,7 @@ Before releasing ingested survey datasets to production or Elasticsearch indexin
 
 | Verification Item | Command / Query | Expected Result |
 | :--- | :--- | :--- |
-| **IngestBatch Status** | `fairwddi ingest status <batch_id>` | `status = "completed"`, `quarantine_count = 0`. |
+| **IngestBatch Status** | `fairwddi import status <batch_id>` | `status = "completed"`, `quarantine_count = 0`. |
 | **DDI Cascade Integrity** | `SELECT count(*) FROM request_ddi_instancevariable WHERE represented_variable_urn IS NULL;` | Exactly `0` (all instance variables linked). |
 | **Question Association** | `SELECT count(*) FROM request_ddi_questionvariable;` | Matches or exceeds total `RepresentedVariable` count. |
 | **Frequency Rows** | `SELECT count(*) FROM request_ddi_datafilevariablefrequency WHERE datafile_urn = '<df_urn>';` | Matches total categories across survey variables. |

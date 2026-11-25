@@ -167,21 +167,30 @@ uv run fairwddi db recreate --force --seed --load-vocab
 # Wipe all database records (requires 4-digit confirmation code)
 uv run fairwddi db wipe
 
-# --- Metadata Import & Staging (fairwddi import) ---
-# Stage a DDI-Lifecycle 3.3 XML file with ReQuest profile
-uv run fairwddi import file path/to/study.ddi33.xml --profile request
+# --- Pure Deterministic Metadata Import (fairwddi import) ---
+# Direct one-command import (DDI-C auto-upgraded to DDI-L; zero cross-study harmonization)
+uv run fairwddi import path/to/study.ddic.xml --category-scheme-mode per_codelist
 
-# List available YAML/JSON import profiles
-uv run fairwddi import list-profiles
+# List recent import batches and inspect status
+uv run fairwddi import list
+uv run fairwddi import status 1
 
-# List recent staged import batches
-uv run fairwddi import list --status staged
+# --- DDI Context Groups (fairwddi group) ---
+uv run fairwddi group create "ESS France Series" --slug ess-fr --type longitudinal_series \
+  --member urn:ddi:fr.cdsp:su_ess_w1:1.0.0
+uv run fairwddi group list
 
-# View detailed statistics and cross-tabulation
-uv run fairwddi import stats 1
+# --- Read-Only Two-Set, Three-Layer Comparison (fairwddi compare) ---
+uv run fairwddi compare run \
+  --source batch:2 \
+  --target group:ess-fr \
+  --level syntactic --level semantic \
+  --type QuestionItem --type RepresentedVariable \
+  --output-dir ./compare_output
 
-# Query and filter staged resource nodes (with JSON payload preview)
-uv run fairwddi import query --type QuestionItem --show-json --limit 5
+# --- Comparison-Driven Harmonization (fairwddi harmonize) ---
+uv run fairwddi harmonize plan ./compare_output/compare-*.comparison.yaml --approve-high
+uv run fairwddi harmonize execute ./compare_output/harmonize-*.harmonize.plan.yaml
 ```
 
 > 📖 **Full CLI Documentation:** See the **[CLI User Guide](deliverables/research/cli_user_guide.md)** for complete command options, environment variables, and programmatic Python examples.

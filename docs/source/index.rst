@@ -28,7 +28,7 @@ Core Capabilities
 * **Supertype Master Registry**: Universal ``UrnRegistry`` master table guaranteeing universal referential integrity across all 30 entities, :math:`O(1)` type resolution, and clean polymorphic foreign key cascades.
 * **Multilingual JSONB Architecture**: Native support for multilingual labels, descriptions, and interviewer instructions stored as ISO 639-1 dictionary payloads (e.g., ``{"fr": "...", "en": "..."}``) indexed with PostgreSQL GIN and normalized with Unicode NFKC and French typographical rules.
 * **Multi-Algorithm Content Fingerprinting**: Cryptographic fingerprinting combining SHA-256 and BLAKE3 over canonical JSON representations to detect metadata drift, generate deterministic 16-character URN hashes, and quarantine conflicting updates.
-* **Pluggable Ingestion Pipeline**: 2-stage ingestion engine featuring low-memory streaming XML parsing (``lxml.etree.iterparse``), automatic format detection (DDI-Codebook 2.5/2.6, DDI-Lifecycle 3.2/3.3, DDI 4.0), and 4-phase comparison planning (Create, Link, Re-version, Quarantine).
+* **Pure Deterministic Import & Post-Import Harmonization**: Decoupled architecture separating pure file-to-core import (``fairwddi.importer`` with ``lxml.etree.iterparse``, DDI-C → DDI-L conversion with ``single`` / ``per_codelist`` ``CategoryScheme`` granularity, and zero cross-study matching) from DDI group curation (``fairwddi.groups``), read-only three-layer comparison (``fairwddi.compare``), and policy-driven harmonization (``fairwddi.harmonize``).
 * **Controlled Vocabulary & SKOS Anchoring**: Vocabulary-agnostic concept hierarchy supporting CESSDA ELSST, DDI-CV, and custom taxonomies.
 * **Django Ninja REST API & Interactive Explorer**: Modern async-ready REST API with auto-generated OpenAPI 3.0 documentation and an interactive client-side 28-model architecture explorer.
 * **Data Artifex Integration**: Deep integration with the Data Artifex DDI Toolkit (``dartfx-ddi``) for DDI-Lifecycle streaming and crosswalks.
@@ -58,8 +58,8 @@ The FAIRwDDI architecture organizes metadata into 5 logical layers:
      - ``VariableGroup``, ``Organization``, ``Individual``
      - Thematic grouping of variables, research agencies, data creators, and contributors.
    * - **Infrastructure Layer**
-     - ``UrnRegistry``, ``IngestBatch``, ``IngestionPlan``, ``EventLog``
-     - Referential integrity, batch receipts, audit logs, and deduplication records.
+     - ``UrnRegistry``, ``IngestBatch``, ``ImportPlan``, ``EventLog``
+     - Referential integrity, batch receipts, audit logs, and deterministic import plans.
 
 Quick Start
 -----------
@@ -93,11 +93,16 @@ The ``fairwddi`` CLI provides complete operational tooling::
    # Preflight check an incoming DDI-Lifecycle or DDI-Codebook XML file
    uv run fairwddi preflight check sample_study.xml
 
-   # Generate a 4-phase comparison plan before importing
-   uv run fairwddi ingest plan sample_study.xml --report-out plan.yaml
+   # Import deterministically (auto-upgrading DDI-C; zero cross-study harmonization)
+   uv run fairwddi import sample_study.xml --category-scheme-mode per_codelist
 
-   # Execute batch ingestion
-   uv run fairwddi ingest execute plan.yaml
+   # Curate a context group and compare a batch across syntactic & semantic layers
+   uv run fairwddi group create "Survey Series" --slug series-a --member urn:ddi:fr.cdsp:su_1:1.0.0
+   uv run fairwddi compare run --source batch:2 --target group:series-a --output-dir ./cmp
+
+   # Plan & execute policy-driven harmonization
+   uv run fairwddi harmonize plan ./cmp/compare-*.comparison.yaml --approve-high
+   uv run fairwddi harmonize execute ./cmp/harmonize-*.harmonize.plan.yaml
 
    # Start the REST API server with live Swagger documentation
    uv run fairwddi serve --port 8000

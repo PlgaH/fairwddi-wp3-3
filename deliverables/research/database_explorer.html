@@ -1676,6 +1676,7 @@
         pos: { x: 60, y: 170 },
         fields: [
           { name: "urn", type: "VARCHAR(512)", pk: true, req: true, fk: "UrnRegistry", notes: "Canonical DDI-L Group URN (Supertype FK -> UrnRegistry.urn)" },
+          { name: "slug", type: "VARCHAR(128)", idx: true, notes: "Optional unique short slug/nickname for CLI & comparison group selection" },
           { name: "name", type: "JSONB", req: true, notes: "Multilingual group name [{'lang': 'fr', 'value': '...'}]" },
           { name: "description", type: "JSONB", notes: "Multilingual group description" },
           { name: "group_type", type: "VARCHAR(64)", req: true, idx: true, notes: "Group classification ('study_series', 'panel', 'thematic', 'collection')" },
@@ -2450,7 +2451,6 @@
           { name: "options", type: "JSONB", notes: "Batch configuration, job_id, profile, and options" },
           { name: "created_urns", type: "JSONB", notes: "Ordered list of canonical URNs created exclusively by batch" },
           { name: "reused_urns", type: "JSONB", notes: "List of pre-existing canonical URNs reused during batch" },
-          { name: "created_aliases", type: "JSONB", notes: "List of alias_urn values registered in URNAlias" },
           { name: "stats", type: "JSONB", notes: "Summary counts of created entities, shortcuts, and frequencies" },
           { name: "created_at", type: "TIMESTAMP", req: true, notes: "Batch execution timestamp" },
           { name: "updated_at", type: "TIMESTAMP", req: true, notes: "Last update timestamp" }

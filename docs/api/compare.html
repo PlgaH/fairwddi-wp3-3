@@ -1,0 +1,1285 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Three-Layer Comparison Engine (fairwddi.compare) &mdash; FAIRwDDI Lifecycle 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Policy-Driven Harmonization (fairwddi.harmonize)" href="harmonize.html" />
+    <link rel="prev" title="Group Curation &amp; Set Resolution (fairwddi.groups)" href="groups.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+<div class="portal-return-bar">
+  <a href="../index.html">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to FAIRwDDI Architecture Portal & Explorer
+  </a>
+  <span class="badge">CDSP • Sciences Po / CNRS</span>
+</div>
+ 
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+  
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FAIRwDDI Lifecycle
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+  <div style="margin-top: 10px; margin-bottom: 6px; padding: 0 4px;">
+    <a href="../index.html" style="font-size: 0.82rem; color: #38bdf8 !important; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Main Portal
+    </a>
+  </div>
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../admin/index.html">Administrator Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../admin/index.html#key-operational-responsibilities">Key Operational Responsibilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/index.html#guide-outline">Guide Outline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../admin/architecture.html">System Architecture &amp; Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/architecture.html#hardware-operating-system-recommendations">Hardware &amp; Operating System Recommendations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/architecture.html#software-dependencies">Software Dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/architecture.html#database-architecture">Database Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/installation.html">Installation &amp; Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#configuration-env">Configuration (.env)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#database-provisioning">Database Provisioning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#verifying-installation">Verifying Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/cli_operations.html">CLI Operational Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#global-options">Global Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#deterministic-import-fairwddi-import">Deterministic Import (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#context-groups-fairwddi-group">Context Groups (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">group</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#three-layer-comparison-fairwddi-compare">Three-Layer Comparison (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">compare</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/ingestion_ops.html">Import &amp; Harmonization Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#pure-import-lifecycle-fairwddi-import">Pure Import Lifecycle (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#post-import-comparison-harmonization">Post-Import Comparison &amp; Harmonization</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/deployment.html">Production Deployment &amp; Maintenance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#service-architecture">Service Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#asgi-application-server-setup">ASGI Application Server Setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#nginx-reverse-proxy-configuration">Nginx Reverse Proxy Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#database-maintenance-index-optimization">Database Maintenance &amp; Index Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#backup-and-disaster-recovery">Backup and Disaster Recovery</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../developer/index.html#architectural-principles">Architectural Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../developer/variable_cascade.html">The DDI Variable Cascade</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#the-three-tiers-of-the-cascade">The Three Tiers of the Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#tier-definitions">Tier Definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#standards-crosswalk">Standards Crosswalk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#orm-traversal-examples">ORM Traversal Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/data_model.html">The 30-Model Database Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/data_model.html#abstract-base-classes">Abstract Base Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/data_model.html#layer-model-breakdown">Layer &amp; Model Breakdown</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/data_model.html#polymorphic-cross-resource-relations">Polymorphic Cross-Resource Relations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/urn_registry.html">Universal URN Master Registry (UrnRegistry)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#the-problem-it-solves">The Problem It Solves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#the-supertype-master-pattern">The Supertype Master Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#lifecycle-guarantees">Lifecycle Guarantees</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#canonical-urn-syntax">Canonical URN Syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/multilingual_jsonb.html">Multilingual JSONB Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#jsonb-data-model">JSONB Data Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#string-normalization-pipeline">String Normalization Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#querying-multilingual-fields">Querying Multilingual Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#postgresql-17-icu-collations">PostgreSQL 17 ICU Collations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/fingerprinting.html">Content Fingerprinting &amp; Deduplication</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#the-multi-algorithm-approach">The Multi-Algorithm Approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#canonical-json-serialization">Canonical JSON Serialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#simple-vs-compound-hashing">Simple vs Compound Hashing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#deterministic-16-character-urn-hashes">Deterministic 16-Character URN Hashes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/importer_engine.html">The Import, Comparison &amp; Harmonization Engines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#api-architecture">API Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#endpoints-overview">Endpoints Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#example-endpoint-implementation">Example Endpoint Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#interactive-database-explorer">Interactive Database Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/dartfx_integration.html">Data Artifex DDI Toolkit Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#overview-of-dartfx-ddi">Overview of dartfx-ddi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#ddi-lifecycle-fragment-streaming">DDI-Lifecycle Fragment Streaming</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#multilingual-codebook-merging">Multilingual Codebook Merging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#ddi-cdi-assistant-framework">DDI-CDI Assistant Framework</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributor/index.html">Contributor Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../contributor/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/environment.html">Development Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#pre-commit-hooks">Pre-commit Hooks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#running-quick-sanity-checks">Running Quick Sanity Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/conventions.html">Coding Conventions &amp; Standards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#python-stack-tooling">Python Stack &amp; Tooling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#code-formatting-linting-ruff">Code Formatting &amp; Linting (Ruff)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#type-annotations-static-typing">Type Annotations &amp; Static Typing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#django-migrations-zero-data-loss">Django Migrations &amp; Zero-Data-Loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#ddi-naming-conventions">DDI Naming Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/testing.html">Testing Guide &amp; Practices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#testing-stack">Testing Stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#running-tests">Running Tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#isolated-sqlite-test-configuration">Isolated SQLite Test Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#testing-ingestion-streaming">Testing Ingestion &amp; Streaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/workflows.html">Development Workflows &amp; Pull Requests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#git-branching-strategy">Git Branching Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#pull-request-checklist">Pull Request Checklist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#building-documentation-locally">Building Documentation Locally</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Python API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="models.html">Models (fairwddi.models)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.base">Base Infrastructure &amp; Supertype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.concept">Concept Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.representation">Representation Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.instrument">Instrument &amp; Question Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.dataset">Dataset Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.organization">Organization &amp; Grouping Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.infrastructure">Batch &amp; Ingestion Infrastructure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.event">Audit &amp; Event Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="schemas.html">Pydantic Schemas (fairwddi.schemas)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="schemas.html#module-fairwddi.schemas.common">Common Value Objects &amp; Primitives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="schemas.html#module-fairwddi.schemas.entities">Entity Schemas</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="db.html">Database Layer (fairwddi.db)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.wipe">Wipe &amp; Lifecycle Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="importer.html">Pure Deterministic Import (fairwddi.importer)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.detector.MetadataFormatInfo"><code class="docutils literal notranslate"><span class="pre">MetadataFormatInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.detector.compute_file_sha256"><code class="docutils literal notranslate"><span class="pre">compute_file_sha256()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.detector.detect_metadata_format"><code class="docutils literal notranslate"><span class="pre">detect_metadata_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.RawResourceNode"><code class="docutils literal notranslate"><span class="pre">RawResourceNode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_json"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_xml"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.resource_to_json"><code class="docutils literal notranslate"><span class="pre">resource_to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_ddi_c_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_c_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_ddi_l_json"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_ddi_l_jsonl"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_jsonl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_ddi_l_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_resources"><code class="docutils literal notranslate"><span class="pre">stream_resources()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.xml_elem_to_dict"><code class="docutils literal notranslate"><span class="pre">xml_elem_to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.xml_to_json_dict"><code class="docutils literal notranslate"><span class="pre">xml_to_json_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.profiles.ImportProfile"><code class="docutils literal notranslate"><span class="pre">ImportProfile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.profiles.ImportStrategies"><code class="docutils literal notranslate"><span class="pre">ImportStrategies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.profiles.list_available_profiles"><code class="docutils literal notranslate"><span class="pre">list_available_profiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.profiles.load_profile"><code class="docutils literal notranslate"><span class="pre">load_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.preflight.run_preflight_check"><code class="docutils literal notranslate"><span class="pre">run_preflight_check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.preflight.upgrade_ddic_to_ddil"><code class="docutils literal notranslate"><span class="pre">upgrade_ddic_to_ddil()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.ImportActionItem"><code class="docutils literal notranslate"><span class="pre">ImportActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.ImportPlan"><code class="docutils literal notranslate"><span class="pre">ImportPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.PlanActionItem"><code class="docutils literal notranslate"><span class="pre">PlanActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.PlanIssue"><code class="docutils literal notranslate"><span class="pre">PlanIssue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.ReviewGate"><code class="docutils literal notranslate"><span class="pre">ReviewGate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.compute_resource_hashes"><code class="docutils literal notranslate"><span class="pre">compute_resource_hashes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.execute_import"><code class="docutils literal notranslate"><span class="pre">execute_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.get_import_batch_status"><code class="docutils literal notranslate"><span class="pre">get_import_batch_status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.list_import_batches"><code class="docutils literal notranslate"><span class="pre">list_import_batches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.parse_ddi_urn"><code class="docutils literal notranslate"><span class="pre">parse_ddi_urn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.plan_import"><code class="docutils literal notranslate"><span class="pre">plan_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.undo_import"><code class="docutils literal notranslate"><span class="pre">undo_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.pipeline.run_import"><code class="docutils literal notranslate"><span class="pre">run_import()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="groups.html">Group Curation &amp; Set Resolution (fairwddi.groups)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.add_group_members"><code class="docutils literal notranslate"><span class="pre">add_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.create_group"><code class="docutils literal notranslate"><span class="pre">create_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.delete_group"><code class="docutils literal notranslate"><span class="pre">delete_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.get_group_details"><code class="docutils literal notranslate"><span class="pre">get_group_details()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.list_groups"><code class="docutils literal notranslate"><span class="pre">list_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.remove_group_members"><code class="docutils literal notranslate"><span class="pre">remove_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.rename_group"><code class="docutils literal notranslate"><span class="pre">rename_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.resolve_group"><code class="docutils literal notranslate"><span class="pre">resolve_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.ResolvedResourceSet"><code class="docutils literal notranslate"><span class="pre">ResolvedResourceSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.ResourceSetSpec"><code class="docutils literal notranslate"><span class="pre">ResourceSetSpec</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.parse_resource_set_spec"><code class="docutils literal notranslate"><span class="pre">parse_resource_set_spec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.resolve_resource_set"><code class="docutils literal notranslate"><span class="pre">resolve_resource_set()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Three-Layer Comparison Engine (fairwddi.compare)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.models.CandidateCorrespondence"><code class="docutils literal notranslate"><span class="pre">CandidateCorrespondence</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.models.CodeListQualification"><code class="docutils literal notranslate"><span class="pre">CodeListQualification</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.models.ComparisonResultSet"><code class="docutils literal notranslate"><span class="pre">ComparisonResultSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.models.CorrespondenceLevel"><code class="docutils literal notranslate"><span class="pre">CorrespondenceLevel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.models.QualificationReport"><code class="docutils literal notranslate"><span class="pre">QualificationReport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.config.ComparisonConfig"><code class="docutils literal notranslate"><span class="pre">ComparisonConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.config.ConceptualRuleConfig"><code class="docutils literal notranslate"><span class="pre">ConceptualRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.config.QualificationRuleConfig"><code class="docutils literal notranslate"><span class="pre">QualificationRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.config.ResourceTypeComparisonRule"><code class="docutils literal notranslate"><span class="pre">ResourceTypeComparisonRule</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.config.SemanticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SemanticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.config.SyntacticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SyntacticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.config.list_comparison_configs"><code class="docutils literal notranslate"><span class="pre">list_comparison_configs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.config.load_comparison_config"><code class="docutils literal notranslate"><span class="pre">load_comparison_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.qualifier.evaluate_qualification"><code class="docutils literal notranslate"><span class="pre">evaluate_qualification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.syntactic.compare_syntactic_sets"><code class="docutils literal notranslate"><span class="pre">compare_syntactic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider"><code class="docutils literal notranslate"><span class="pre">SentenceTransformerEmbeddingProvider</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.semantic.compare_semantic_sets"><code class="docutils literal notranslate"><span class="pre">compare_semantic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.semantic.get_embedding_provider"><code class="docutils literal notranslate"><span class="pre">get_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.semantic.register_embedding_provider"><code class="docutils literal notranslate"><span class="pre">register_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.conceptual.ConceptAssigner"><code class="docutils literal notranslate"><span class="pre">ConceptAssigner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.conceptual.compare_conceptual_sets"><code class="docutils literal notranslate"><span class="pre">compare_conceptual_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.conceptual.register_concept_assigner"><code class="docutils literal notranslate"><span class="pre">register_concept_assigner()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.compare.engine.run_comparison"><code class="docutils literal notranslate"><span class="pre">run_comparison()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="harmonize.html">Policy-Driven Harmonization (fairwddi.harmonize)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.AutoApproveHighPolicy"><code class="docutils literal notranslate"><span class="pre">AutoApproveHighPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.GuardrailPolicy"><code class="docutils literal notranslate"><span class="pre">GuardrailPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.HarmonizationActionItem"><code class="docutils literal notranslate"><span class="pre">HarmonizationActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.HarmonizationGuardrails"><code class="docutils literal notranslate"><span class="pre">HarmonizationGuardrails</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.HarmonizationPlan"><code class="docutils literal notranslate"><span class="pre">HarmonizationPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.HarmonizationPolicy"><code class="docutils literal notranslate"><span class="pre">HarmonizationPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.plan.load_harmonization_policy"><code class="docutils literal notranslate"><span class="pre">load_harmonization_policy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.planner.approve_high_actions"><code class="docutils literal notranslate"><span class="pre">approve_high_actions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.planner.plan_harmonization"><code class="docutils literal notranslate"><span class="pre">plan_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.manager.create_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">create_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.manager.execute_harmonization"><code class="docutils literal notranslate"><span class="pre">execute_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.manager.link_to_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">link_to_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="harmonize.html#fairwddi.harmonize.manager.undo_harmonization"><code class="docutils literal notranslate"><span class="pre">undo_harmonization()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.router">Router &amp; Endpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.schemas">API Request &amp; Response Schemas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.views">Views &amp; Route Handlers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.server">ASGI Server Runner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.explorer_html">Interactive Model Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">Utilities (fairwddi.utils)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#module-fairwddi.utils.urn">URN Helpers (urn.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#module-fairwddi.utils.normalize_string">String Normalization (normalize_string.py)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Standards &amp; Project Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#reference-documents">Reference Documents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/glossary.html">DDI Canonical Terminology Glossary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/deliverables.html">Project Deliverables &amp; Research Reports</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/deliverables.html#core-deliverables">Core Deliverables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/deliverables.html#specialized-technical-research-papers">Specialized Technical Research Papers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/deliverables.html#interactive-exploration">Interactive Exploration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/changelog.html">Changelog &amp; Project Roadmap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/changelog.html#project-timeline-overview">Project Timeline Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/changelog.html#release-history">Release History</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FAIRwDDI Lifecycle</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Python API Reference</a></li>
+      <li class="breadcrumb-item active">Three-Layer Comparison Engine (fairwddi.compare)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/compare.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-fairwddi.compare.models">
+<span id="three-layer-comparison-engine-fairwddi-compare"></span><h1>Three-Layer Comparison Engine (fairwddi.compare)<a class="headerlink" href="#module-fairwddi.compare.models" title="Link to this heading"></a></h1>
+<p>Structured data models for three-layer DDI resource comparison and qualification.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.models.</span></span><span class="sig-name descname"><span class="pre">CandidateCorrespondence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_urn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_urn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'imported'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'imported'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recommended_action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'review'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">requires_review</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rationale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualification</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/models.html#CandidateCorrespondence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Single discovered correspondence candidate between a source and target resource.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.confidence">
+<span class="sig-name descname"><span class="pre">confidence</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.confidence" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.details">
+<span class="sig-name descname"><span class="pre">details</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.details" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.level">
+<span class="sig-name descname"><span class="pre">level</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#fairwddi.compare.models.CorrespondenceLevel" title="fairwddi.compare.models.CorrespondenceLevel"><span class="pre">CorrespondenceLevel</span></a></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.level" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.match_type">
+<span class="sig-name descname"><span class="pre">match_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.match_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.qualification">
+<span class="sig-name descname"><span class="pre">qualification</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#fairwddi.compare.models.QualificationReport" title="fairwddi.compare.models.QualificationReport"><span class="pre">QualificationReport</span></a></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.qualification" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.rationale">
+<span class="sig-name descname"><span class="pre">rationale</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.rationale" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.recommended_action">
+<span class="sig-name descname"><span class="pre">recommended_action</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'link_existing'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'generate_harmonized'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'link_semantic'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'group'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'review'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.recommended_action" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.requires_review">
+<span class="sig-name descname"><span class="pre">requires_review</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.requires_review" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.resource_type">
+<span class="sig-name descname"><span class="pre">resource_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.resource_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.source_origin">
+<span class="sig-name descname"><span class="pre">source_origin</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.source_origin" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.source_text">
+<span class="sig-name descname"><span class="pre">source_text</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.source_text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.source_urn">
+<span class="sig-name descname"><span class="pre">source_urn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.source_urn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.target_origin">
+<span class="sig-name descname"><span class="pre">target_origin</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.target_origin" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.target_text">
+<span class="sig-name descname"><span class="pre">target_text</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.target_text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CandidateCorrespondence.target_urn">
+<span class="sig-name descname"><span class="pre">target_urn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.CandidateCorrespondence.target_urn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CodeListQualification">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.models.</span></span><span class="sig-name descname"><span class="pre">CodeListQualification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/models.html#CodeListQualification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.models.CodeListQualification" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></a></p>
+<p>Independent response-domain qualification attached to variable/question comparisons.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CodeListQualification.DIMENSION_MISMATCH_SUSPECTED">
+<span class="sig-name descname"><span class="pre">DIMENSION_MISMATCH_SUSPECTED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DIMENSION_MISMATCH_SUSPECTED'</span></span><a class="headerlink" href="#fairwddi.compare.models.CodeListQualification.DIMENSION_MISMATCH_SUSPECTED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CodeListQualification.IDENTICAL">
+<span class="sig-name descname"><span class="pre">IDENTICAL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'IDENTICAL'</span></span><a class="headerlink" href="#fairwddi.compare.models.CodeListQualification.IDENTICAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CodeListQualification.LABELS_SLIGHT_DIFF">
+<span class="sig-name descname"><span class="pre">LABELS_SLIGHT_DIFF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LABELS_SLIGHT_DIFF'</span></span><a class="headerlink" href="#fairwddi.compare.models.CodeListQualification.LABELS_SLIGHT_DIFF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CodeListQualification.MISSING_VALUES_ONLY">
+<span class="sig-name descname"><span class="pre">MISSING_VALUES_ONLY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MISSING_VALUES_ONLY'</span></span><a class="headerlink" href="#fairwddi.compare.models.CodeListQualification.MISSING_VALUES_ONLY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CodeListQualification.NOT_APPLICABLE">
+<span class="sig-name descname"><span class="pre">NOT_APPLICABLE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'NOT_APPLICABLE'</span></span><a class="headerlink" href="#fairwddi.compare.models.CodeListQualification.NOT_APPLICABLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CodeListQualification.RECODED_SAME_CATEGORIES">
+<span class="sig-name descname"><span class="pre">RECODED_SAME_CATEGORIES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RECODED_SAME_CATEGORIES'</span></span><a class="headerlink" href="#fairwddi.compare.models.CodeListQualification.RECODED_SAME_CATEGORIES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CodeListQualification.SCALE_CARDINALITY_DIFF">
+<span class="sig-name descname"><span class="pre">SCALE_CARDINALITY_DIFF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SCALE_CARDINALITY_DIFF'</span></span><a class="headerlink" href="#fairwddi.compare.models.CodeListQualification.SCALE_CARDINALITY_DIFF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CodeListQualification.UNCOMPARABLE_OR_UNCODED">
+<span class="sig-name descname"><span class="pre">UNCOMPARABLE_OR_UNCODED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'UNCOMPARABLE_OR_UNCODED'</span></span><a class="headerlink" href="#fairwddi.compare.models.CodeListQualification.UNCOMPARABLE_OR_UNCODED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.models.</span></span><span class="sig-name descname"><span class="pre">ComparisonResultSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">job_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">candidates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/models.html#ComparisonResultSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Serializable comparison output consumed by analysts and <cite>harmonize plan</cite>.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.candidates">
+<span class="sig-name descname"><span class="pre">candidates</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#fairwddi.compare.models.CandidateCorrespondence" title="fairwddi.compare.models.CandidateCorrespondence"><span class="pre">CandidateCorrespondence</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.candidates" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.comparison_version">
+<span class="sig-name descname"><span class="pre">comparison_version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.comparison_version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.config_name">
+<span class="sig-name descname"><span class="pre">config_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.config_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.created_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.from_yaml">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/models.html#ComparisonResultSet.from_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.from_yaml" title="Link to this definition"></a></dt>
+<dd><p>Load a ComparisonResultSet from YAML/JSON.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.job_id">
+<span class="sig-name descname"><span class="pre">job_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.job_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.levels">
+<span class="sig-name descname"><span class="pre">levels</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#fairwddi.compare.models.CorrespondenceLevel" title="fairwddi.compare.models.CorrespondenceLevel"><span class="pre">CorrespondenceLevel</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.levels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.load">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/models.html#ComparisonResultSet.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.load" title="Link to this definition"></a></dt>
+<dd><p>Load a ComparisonResultSet from a YAML or JSON file path or string.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.resource_types">
+<span class="sig-name descname"><span class="pre">resource_types</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.resource_types" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.source_spec">
+<span class="sig-name descname"><span class="pre">source_spec</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.source_spec" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.summary">
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.summary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.target_spec">
+<span class="sig-name descname"><span class="pre">target_spec</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.target_spec" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/models.html#ComparisonResultSet.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Serialize to plain JSON-compatible dictionary.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/models.html#ComparisonResultSet.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.to_json" title="Link to this definition"></a></dt>
+<dd><p>Serialize comparison result set to JSON and optionally write to disk.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.to_markdown">
+<span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/models.html#ComparisonResultSet.to_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Render a detailed analytical comparison report grouped by correspondence level.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.compare.models.ComparisonResultSet.to_yaml">
+<span class="sig-name descname"><span class="pre">to_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/models.html#ComparisonResultSet.to_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.models.ComparisonResultSet.to_yaml" title="Link to this definition"></a></dt>
+<dd><p>Serialize comparison result set to YAML and optionally write to disk.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CorrespondenceLevel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.models.</span></span><span class="sig-name descname"><span class="pre">CorrespondenceLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/models.html#CorrespondenceLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.models.CorrespondenceLevel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></a></p>
+<p>Canonical DDI correspondence discovery level aligned with CDSP ReQuest framing.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CorrespondenceLevel.CONCEPTUAL">
+<span class="sig-name descname"><span class="pre">CONCEPTUAL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'conceptual'</span></span><a class="headerlink" href="#fairwddi.compare.models.CorrespondenceLevel.CONCEPTUAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CorrespondenceLevel.SEMANTIC">
+<span class="sig-name descname"><span class="pre">SEMANTIC</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'semantic'</span></span><a class="headerlink" href="#fairwddi.compare.models.CorrespondenceLevel.SEMANTIC" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.CorrespondenceLevel.SYNTACTIC">
+<span class="sig-name descname"><span class="pre">SYNTACTIC</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'syntactic'</span></span><a class="headerlink" href="#fairwddi.compare.models.CorrespondenceLevel.SYNTACTIC" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.models.</span></span><span class="sig-name descname"><span class="pre">QualificationReport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codelist_qualification</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">CodeListQualification.NOT_APPLICABLE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_codelist_urn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_codelist_urn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substantive_count_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substantive_count_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_count_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_count_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_values_excluded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codelist_similarity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administration_context_caveat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compatible_for_merge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/models.html#QualificationReport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.models.QualificationReport" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Response-scale, missing-value, and administration-context qualification for a candidate.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.administration_context_caveat">
+<span class="sig-name descname"><span class="pre">administration_context_caveat</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.administration_context_caveat" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.codelist_qualification">
+<span class="sig-name descname"><span class="pre">codelist_qualification</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#fairwddi.compare.models.CodeListQualification" title="fairwddi.compare.models.CodeListQualification"><span class="pre">CodeListQualification</span></a></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.codelist_qualification" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.codelist_similarity">
+<span class="sig-name descname"><span class="pre">codelist_similarity</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.codelist_similarity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.compatible_for_merge">
+<span class="sig-name descname"><span class="pre">compatible_for_merge</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.compatible_for_merge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.dimension_note">
+<span class="sig-name descname"><span class="pre">dimension_note</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.dimension_note" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.missing_count_source">
+<span class="sig-name descname"><span class="pre">missing_count_source</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.missing_count_source" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.missing_count_target">
+<span class="sig-name descname"><span class="pre">missing_count_target</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.missing_count_target" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.missing_values_excluded">
+<span class="sig-name descname"><span class="pre">missing_values_excluded</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.missing_values_excluded" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.notes">
+<span class="sig-name descname"><span class="pre">notes</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.notes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.source_codelist_urn">
+<span class="sig-name descname"><span class="pre">source_codelist_urn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.source_codelist_urn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.substantive_count_source">
+<span class="sig-name descname"><span class="pre">substantive_count_source</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.substantive_count_source" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.substantive_count_target">
+<span class="sig-name descname"><span class="pre">substantive_count_target</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.substantive_count_target" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.models.QualificationReport.target_codelist_urn">
+<span class="sig-name descname"><span class="pre">target_codelist_urn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.compare.models.QualificationReport.target_codelist_urn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<p id="module-fairwddi.compare.config">Declarative configuration schema and YAML loader for three-layer DDI comparison.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ComparisonConfig">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.config.</span></span><span class="sig-name descname"><span class="pre">ComparisonConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_same_urn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_candidates_per_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/config.html#ComparisonConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.config.ComparisonConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Top-level declarative configuration governing a two-set DDI comparison run.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ComparisonConfig.description">
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ComparisonConfig.description" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ComparisonConfig.exclude_same_urn">
+<span class="sig-name descname"><span class="pre">exclude_same_urn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ComparisonConfig.exclude_same_urn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ComparisonConfig.levels">
+<span class="sig-name descname"><span class="pre">levels</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#fairwddi.compare.models.CorrespondenceLevel" title="fairwddi.compare.models.CorrespondenceLevel"><span class="pre">CorrespondenceLevel</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.config.ComparisonConfig.levels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ComparisonConfig.max_candidates_per_source">
+<span class="sig-name descname"><span class="pre">max_candidates_per_source</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ComparisonConfig.max_candidates_per_source" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ComparisonConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.compare.config.ComparisonConfig.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ComparisonConfig.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ComparisonConfig.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ComparisonConfig.resource_types">
+<span class="sig-name descname"><span class="pre">resource_types</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.config.ComparisonConfig.resource_types" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ComparisonConfig.rule_for">
+<span class="sig-name descname"><span class="pre">rule_for</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/config.html#ComparisonConfig.rule_for"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.config.ComparisonConfig.rule_for" title="Link to this definition"></a></dt>
+<dd><p>Return configured rule for <cite>resource_type</cite>, falling back to canonical defaults.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ComparisonConfig.rules">
+<span class="sig-name descname"><span class="pre">rules</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#fairwddi.compare.config.ResourceTypeComparisonRule" title="fairwddi.compare.config.ResourceTypeComparisonRule"><span class="pre">ResourceTypeComparisonRule</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.config.ComparisonConfig.rules" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ConceptualRuleConfig">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.config.</span></span><span class="sig-name descname"><span class="pre">ConceptualRuleConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_shared_concept</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_hierarchy_ancestors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_hierarchy_hops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vocabularies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_assign_concepts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/config.html#ConceptualRuleConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.config.ConceptualRuleConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Configuration rules for Level 3 controlled-vocabulary / concept-graph comparison.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ConceptualRuleConfig.allow_hierarchy_ancestors">
+<span class="sig-name descname"><span class="pre">allow_hierarchy_ancestors</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ConceptualRuleConfig.allow_hierarchy_ancestors" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ConceptualRuleConfig.auto_assign_concepts">
+<span class="sig-name descname"><span class="pre">auto_assign_concepts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ConceptualRuleConfig.auto_assign_concepts" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ConceptualRuleConfig.enabled">
+<span class="sig-name descname"><span class="pre">enabled</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ConceptualRuleConfig.enabled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ConceptualRuleConfig.max_hierarchy_hops">
+<span class="sig-name descname"><span class="pre">max_hierarchy_hops</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ConceptualRuleConfig.max_hierarchy_hops" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ConceptualRuleConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.compare.config.ConceptualRuleConfig.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ConceptualRuleConfig.require_shared_concept">
+<span class="sig-name descname"><span class="pre">require_shared_concept</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ConceptualRuleConfig.require_shared_concept" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ConceptualRuleConfig.threshold">
+<span class="sig-name descname"><span class="pre">threshold</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ConceptualRuleConfig.threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ConceptualRuleConfig.vocabularies">
+<span class="sig-name descname"><span class="pre">vocabularies</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.config.ConceptualRuleConfig.vocabularies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.config.QualificationRuleConfig">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.config.</span></span><span class="sig-name descname"><span class="pre">QualificationRuleConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_missing_from_scale_diff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warn_on_scale_cardinality_diff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warn_on_dimension_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warn_on_administration_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_recoded_same_categories</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codelist_label_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.85</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/config.html#QualificationRuleConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.config.QualificationRuleConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Rules for independent response-scale (CodeList) and missing-value qualification.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.QualificationRuleConfig.allow_recoded_same_categories">
+<span class="sig-name descname"><span class="pre">allow_recoded_same_categories</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.QualificationRuleConfig.allow_recoded_same_categories" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.QualificationRuleConfig.codelist_label_threshold">
+<span class="sig-name descname"><span class="pre">codelist_label_threshold</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#fairwddi.compare.config.QualificationRuleConfig.codelist_label_threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.QualificationRuleConfig.enabled">
+<span class="sig-name descname"><span class="pre">enabled</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.QualificationRuleConfig.enabled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.QualificationRuleConfig.exclude_missing_from_scale_diff">
+<span class="sig-name descname"><span class="pre">exclude_missing_from_scale_diff</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.QualificationRuleConfig.exclude_missing_from_scale_diff" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.QualificationRuleConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.compare.config.QualificationRuleConfig.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.QualificationRuleConfig.warn_on_administration_context">
+<span class="sig-name descname"><span class="pre">warn_on_administration_context</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.QualificationRuleConfig.warn_on_administration_context" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.QualificationRuleConfig.warn_on_dimension_mismatch">
+<span class="sig-name descname"><span class="pre">warn_on_dimension_mismatch</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.QualificationRuleConfig.warn_on_dimension_mismatch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.QualificationRuleConfig.warn_on_scale_cardinality_diff">
+<span class="sig-name descname"><span class="pre">warn_on_scale_cardinality_diff</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.QualificationRuleConfig.warn_on_scale_cardinality_diff" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ResourceTypeComparisonRule">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.config.</span></span><span class="sig-name descname"><span class="pre">ResourceTypeComparisonRule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">languages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">syntactic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semantic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conceptual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualification</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/config.html#ResourceTypeComparisonRule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.config.ResourceTypeComparisonRule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Per-resource-type comparison configuration combining all three layers + qualification.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ResourceTypeComparisonRule.conceptual">
+<span class="sig-name descname"><span class="pre">conceptual</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#fairwddi.compare.config.ConceptualRuleConfig" title="fairwddi.compare.config.ConceptualRuleConfig"><span class="pre">ConceptualRuleConfig</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ResourceTypeComparisonRule.conceptual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ResourceTypeComparisonRule.enabled">
+<span class="sig-name descname"><span class="pre">enabled</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ResourceTypeComparisonRule.enabled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ResourceTypeComparisonRule.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.config.ResourceTypeComparisonRule.fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ResourceTypeComparisonRule.languages">
+<span class="sig-name descname"><span class="pre">languages</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.config.ResourceTypeComparisonRule.languages" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ResourceTypeComparisonRule.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.compare.config.ResourceTypeComparisonRule.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ResourceTypeComparisonRule.qualification">
+<span class="sig-name descname"><span class="pre">qualification</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#fairwddi.compare.config.QualificationRuleConfig" title="fairwddi.compare.config.QualificationRuleConfig"><span class="pre">QualificationRuleConfig</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ResourceTypeComparisonRule.qualification" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ResourceTypeComparisonRule.semantic">
+<span class="sig-name descname"><span class="pre">semantic</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#fairwddi.compare.config.SemanticRuleConfig" title="fairwddi.compare.config.SemanticRuleConfig"><span class="pre">SemanticRuleConfig</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ResourceTypeComparisonRule.semantic" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.ResourceTypeComparisonRule.syntactic">
+<span class="sig-name descname"><span class="pre">syntactic</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#fairwddi.compare.config.SyntacticRuleConfig" title="fairwddi.compare.config.SyntacticRuleConfig"><span class="pre">SyntacticRuleConfig</span></a></span><a class="headerlink" href="#fairwddi.compare.config.ResourceTypeComparisonRule.syntactic" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SemanticRuleConfig">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.config.</span></span><span class="sig-name descname"><span class="pre">SemanticRuleConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.72</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">provider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tfidf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngram_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">2)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detect_dimension_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/config.html#SemanticRuleConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.config.SemanticRuleConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Configuration rules for Level 2 vector/embedding &amp; agent-assisted semantic comparison.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SemanticRuleConfig.agent_backend">
+<span class="sig-name descname"><span class="pre">agent_backend</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'none'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'mock'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.config.SemanticRuleConfig.agent_backend" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SemanticRuleConfig.detect_dimension_mismatch">
+<span class="sig-name descname"><span class="pre">detect_dimension_mismatch</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SemanticRuleConfig.detect_dimension_mismatch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SemanticRuleConfig.enabled">
+<span class="sig-name descname"><span class="pre">enabled</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SemanticRuleConfig.enabled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SemanticRuleConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.compare.config.SemanticRuleConfig.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SemanticRuleConfig.model_name">
+<span class="sig-name descname"><span class="pre">model_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SemanticRuleConfig.model_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SemanticRuleConfig.ngram_range">
+<span class="sig-name descname"><span class="pre">ngram_range</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.compare.config.SemanticRuleConfig.ngram_range" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SemanticRuleConfig.provider">
+<span class="sig-name descname"><span class="pre">provider</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SemanticRuleConfig.provider" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SemanticRuleConfig.threshold">
+<span class="sig-name descname"><span class="pre">threshold</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SemanticRuleConfig.threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SemanticRuleConfig.top_k">
+<span class="sig-name descname"><span class="pre">top_k</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SemanticRuleConfig.top_k" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.config.</span></span><span class="sig-name descname"><span class="pre">SyntacticRuleConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">near_exact_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multilingual_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detect_typos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detect_inclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detect_wording</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detect_shared_stems</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_stem_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_token_blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_character_ngrams</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_shared_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fr'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_codelist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/config.html#SyntacticRuleConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Configuration rules for Level 1 syntactic/textual comparison.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.detect_inclusive">
+<span class="sig-name descname"><span class="pre">detect_inclusive</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.detect_inclusive" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.detect_shared_stems">
+<span class="sig-name descname"><span class="pre">detect_shared_stems</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.detect_shared_stems" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.detect_typos">
+<span class="sig-name descname"><span class="pre">detect_typos</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.detect_typos" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.detect_wording">
+<span class="sig-name descname"><span class="pre">detect_wording</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.detect_wording" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.enable_token_blocking">
+<span class="sig-name descname"><span class="pre">enable_token_blocking</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.enable_token_blocking" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.enabled">
+<span class="sig-name descname"><span class="pre">enabled</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.enabled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.language">
+<span class="sig-name descname"><span class="pre">language</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.language" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.min_shared_tokens">
+<span class="sig-name descname"><span class="pre">min_shared_tokens</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.min_shared_tokens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.min_stem_length">
+<span class="sig-name descname"><span class="pre">min_stem_length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.min_stem_length" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.multilingual_threshold">
+<span class="sig-name descname"><span class="pre">multilingual_threshold</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.multilingual_threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.near_exact_threshold">
+<span class="sig-name descname"><span class="pre">near_exact_threshold</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.near_exact_threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.threshold">
+<span class="sig-name descname"><span class="pre">threshold</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.use_character_ngrams">
+<span class="sig-name descname"><span class="pre">use_character_ngrams</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.use_character_ngrams" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.weight_codelist">
+<span class="sig-name descname"><span class="pre">weight_codelist</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.weight_codelist" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.compare.config.SyntacticRuleConfig.weight_label">
+<span class="sig-name descname"><span class="pre">weight_label</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#fairwddi.compare.config.SyntacticRuleConfig.weight_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.compare.config.list_comparison_configs">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.compare.config.</span></span><span class="sig-name descname"><span class="pre">list_comparison_configs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/config.html#list_comparison_configs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.config.list_comparison_configs" title="Link to this definition"></a></dt>
+<dd><p>List available comparison presets discovered in <code class="docutils literal notranslate"><span class="pre">profiles/compare</span></code>.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.compare.config.load_comparison_config">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.compare.config.</span></span><span class="sig-name descname"><span class="pre">load_comparison_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_or_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/config.html#load_comparison_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.config.load_comparison_config" title="Link to this definition"></a></dt>
+<dd><p>Load a ComparisonConfig from a built-in preset name or YAML/JSON file path.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<p id="module-fairwddi.compare.qualifier">Independent CodeList &amp; context qualification engine (<cite>fairwddi.compare.qualifier</cite>).</p>
+<p>Implements CDSP ReQuest safeguards:
+- Isolates missing/sentinel codes (DDI-C <cite>=missingvalue</cite>, <cite>is_missing=True</cite>) from</p>
+<blockquote>
+<div><p>substantive response categories before comparing scales.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>Evaluates response-domain similarity independently of question/variable wording,
+flagging scale cardinality mismatches (e.g. 4 vs 5, 5 vs 7) and suspected dimension
+shifts (e.g. intensity vs frequency, <cite>peu</cite> vs <cite>un peu</cite>) so they are never silently merged.</p></li>
+<li><p>Attaches administration-context caveats reminding analysts that routing, filters,
+and survey mode (PAPI/CAPI/CAWI) sit outside automated wording comparisons.</p></li>
+</ul>
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.compare.qualifier.evaluate_qualification">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.compare.qualifier.</span></span><span class="sig-name descname"><span class="pre">evaluate_qualification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rec_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rec_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/qualifier.html#evaluate_qualification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.qualifier.evaluate_qualification" title="Link to this definition"></a></dt>
+<dd><p>Evaluate response-domain qualification and context caveats independently.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<p id="module-fairwddi.compare.syntactic">Level 1 Syntactic &amp; Textual comparator using <cite>dartfx.ddi.harmonizer</cite> and TokenBlocker.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.compare.syntactic.compare_syntactic_sets">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.compare.syntactic.</span></span><span class="sig-name descname"><span class="pre">compare_syntactic_sets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_records</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_records</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_same_urn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric_sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/syntactic.html#compare_syntactic_sets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.syntactic.compare_syntactic_sets" title="Link to this definition"></a></dt>
+<dd><p>Run Level 1 syntactic/textual comparisons between source and target records.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<p id="module-fairwddi.compare.semantic">Level 2 Semantic Vector &amp; Agent-Assisted comparator (<cite>fairwddi.compare.semantic</cite>).</p>
+<p>Uses pluggable <cite>EmbeddingProvider</cite> backends (default: <cite>DefaultTfIdfEmbeddingProvider</cite>
+from <cite>dartfx.ddi.harmonizer</cite>, optional local/HF <cite>sentence-transformers</cite> hook) and
+optional <cite>AgentComparator</cite> qualification (<cite>RuleBasedMockAgentComparator</cite>) to discover
+paraphrases and semantic correspondences beyond surface spelling.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.semantic.</span></span><span class="sig-name descname"><span class="pre">SentenceTransformerEmbeddingProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BAAI/bge-m3'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/semantic.html#SentenceTransformerEmbeddingProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Lazy-imported optional dense embedding provider backed by <cite>sentence-transformers</cite>.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BAAI/bge-m3'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/semantic.html#SentenceTransformerEmbeddingProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider.embed_texts">
+<span class="sig-name descname"><span class="pre">embed_texts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">texts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/semantic.html#SentenceTransformerEmbeddingProvider.embed_texts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider.embed_texts" title="Link to this definition"></a></dt>
+<dd><p>Encode <cite>texts</cite> into dense vectors (requires optional <cite>sentence-transformers</cite>).</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.compare.semantic.compare_semantic_sets">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.compare.semantic.</span></span><span class="sig-name descname"><span class="pre">compare_semantic_sets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_records</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_records</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_same_urn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric_sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/semantic.html#compare_semantic_sets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.semantic.compare_semantic_sets" title="Link to this definition"></a></dt>
+<dd><p>Run Level 2 batch vector similarity + optional agent nuance checks.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.compare.semantic.get_embedding_provider">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.compare.semantic.</span></span><span class="sig-name descname"><span class="pre">get_embedding_provider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/semantic.html#get_embedding_provider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.semantic.get_embedding_provider" title="Link to this definition"></a></dt>
+<dd><p>Resolve an <cite>EmbeddingProvider</cite> instance from a rule’s semantic configuration.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.compare.semantic.register_embedding_provider">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.compare.semantic.</span></span><span class="sig-name descname"><span class="pre">register_embedding_provider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/semantic.html#register_embedding_provider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.semantic.register_embedding_provider" title="Link to this definition"></a></dt>
+<dd><p>Register a custom EmbeddingProvider factory under <cite>name</cite>.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<p id="module-fairwddi.compare.conceptual">Level 3 Conceptual &amp; Controlled-Vocabulary Graph Discovery (<cite>fairwddi.compare.conceptual</cite>).</p>
+<p>Performs read-only graph discovery over existing <code class="docutils literal notranslate"><span class="pre">Concept</span></code> anchors and SKOS/DDI
+semantic relations (e.g. CESSDA ELSST / SKOS thesaurus hierarchies linked to
+<code class="docutils literal notranslate"><span class="pre">ConceptualVariable</span></code> or <code class="docutils literal notranslate"><span class="pre">Category</span></code>). Defines a forward-compatible <code class="docutils literal notranslate"><span class="pre">ConceptAssigner</span></code>
+extension hook while raising <code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code> if <code class="docutils literal notranslate"><span class="pre">auto_assign_concepts=True</span></code>
+is requested without a registered automated indexer.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.compare.conceptual.ConceptAssigner">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.compare.conceptual.</span></span><span class="sig-name descname"><span class="pre">ConceptAssigner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/conceptual.html#ConceptAssigner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.conceptual.ConceptAssigner" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Protocol" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
+<p>Protocol for future automated thesaurus / LLM concept assignment plugins.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.compare.conceptual.ConceptAssigner.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fairwddi.compare.conceptual.ConceptAssigner.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.compare.conceptual.ConceptAssigner.assign_concepts">
+<span class="sig-name descname"><span class="pre">assign_concepts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resources</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/conceptual.html#ConceptAssigner.assign_concepts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.conceptual.ConceptAssigner.assign_concepts" title="Link to this definition"></a></dt>
+<dd><p>Return <cite>{resource_urn: [concept_urn, …]}</cite> for unannotated resources.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.compare.conceptual.compare_conceptual_sets">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.compare.conceptual.</span></span><span class="sig-name descname"><span class="pre">compare_conceptual_sets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_records</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_records</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_same_urn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric_sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/conceptual.html#compare_conceptual_sets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.conceptual.compare_conceptual_sets" title="Link to this definition"></a></dt>
+<dd><p>Discover Level 3 correspondences sharing Concepts or SKOS/ELSST ancestors.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.compare.conceptual.register_concept_assigner">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.compare.conceptual.</span></span><span class="sig-name descname"><span class="pre">register_concept_assigner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigner</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/conceptual.html#register_concept_assigner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.conceptual.register_concept_assigner" title="Link to this definition"></a></dt>
+<dd><p>Register a custom Level 3 <cite>ConceptAssigner</cite> implementation.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<p id="module-fairwddi.compare.engine">Two-set, three-layer read-only comparison orchestrator (<cite>fairwddi.compare.engine</cite>).</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.compare.engine.run_comparison">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.compare.engine.</span></span><span class="sig-name descname"><span class="pre">run_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'yaml'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/compare/engine.html#run_comparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.compare.engine.run_comparison" title="Link to this definition"></a></dt>
+<dd><p>Compare two resolved DDI resource sets across configured comparison levels (read-only).</p>
+<p>Creates ZERO database writes. Returns a serialized <code class="xref py py-class docutils literal notranslate"><span class="pre">ComparisonResultSet</span></code>
+ready for human inspection or downstream <code class="docutils literal notranslate"><span class="pre">harmonize</span> <span class="pre">plan</span></code>.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="groups.html" class="btn btn-neutral float-left" title="Group Curation &amp; Set Resolution (fairwddi.groups)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="harmonize.html" class="btn btn-neutral float-right" title="Policy-Driven Harmonization (fairwddi.harmonize)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

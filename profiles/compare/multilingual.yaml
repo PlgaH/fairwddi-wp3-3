@@ -1,0 +1,67 @@
+name: "multilingual"
+description: "Cross-lingual comparison profile (language-bridge translation equivalence + semantic vectors)."
+levels:
+  - syntactic
+  - semantic
+  - conceptual
+resource_types:
+  - QuestionItem
+  - RepresentedVariable
+  - CodeList
+  - Category
+  - ConceptualVariable
+exclude_same_urn: true
+max_candidates_per_source: 5
+
+rules:
+  QuestionItem:
+    enabled: true
+    fields: ["question_text", "label"]
+    syntactic:
+      enabled: true
+      min_score: 0.70
+      near_exact_threshold: 0.88
+      enable_wording_variants: true
+      enable_typo_variants: true
+      enable_stem_grids: true
+      enable_token_blocking: true
+    semantic:
+      enabled: true
+      min_score: 0.65
+      embedding_provider: "tfidf"
+      top_k: 5
+      agent_backend: "none"
+    conceptual:
+      enabled: true
+      max_hierarchy_hops: 2
+    qualification:
+      evaluate_codelists: true
+      isolate_missing_values: true
+      flag_scale_differences: true
+      flag_dimension_mismatch: true
+      flag_administration_context: true
+
+  RepresentedVariable:
+    enabled: true
+    fields: ["label", "description", "question_text"]
+    syntactic:
+      enabled: true
+      min_score: 0.70
+      near_exact_threshold: 0.88
+      enable_wording_variants: true
+      enable_typo_variants: true
+      enable_stem_grids: false
+    semantic:
+      enabled: true
+      min_score: 0.65
+      embedding_provider: "tfidf"
+      top_k: 5
+    conceptual:
+      enabled: true
+      max_hierarchy_hops: 2
+    qualification:
+      evaluate_codelists: true
+      isolate_missing_values: true
+      flag_scale_differences: true
+      flag_dimension_mismatch: true
+      flag_administration_context: true

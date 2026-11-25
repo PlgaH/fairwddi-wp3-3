@@ -224,27 +224,10 @@ class IngestBatch(models.Model):
         blank=True,
         help_text="Ordered list of canonical imported URNs created exclusively by this batch.",
     )
-    generated_urns = models.JSONField(
-        default=list,
-        blank=True,
-        help_text="Ordered list of 'generated' harmonized URNs created during this batch.",
-    )
-    linked_urns = models.JSONField(
-        default=list,
-        blank=True,
-        help_text=(
-            "List of pre-existing 'generated'/'instantiated' URNs linked/enriched by this batch."
-        ),
-    )
     reused_urns = models.JSONField(
         default=list,
         blank=True,
         help_text="List of pre-existing canonical URNs reused during this batch.",
-    )
-    created_aliases = models.JSONField(
-        default=list,
-        blank=True,
-        help_text="List of alias_urn values registered in URNAlias by this batch.",
     )
     stats = models.JSONField(
         default=dict,

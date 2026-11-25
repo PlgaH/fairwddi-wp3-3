@@ -94,13 +94,12 @@ Alternatively, view or export the raw PostgreSQL DDL script for execution by an 
 3. Load Controlled Vocabularies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Seed initial administrative taxonomies and load external CESSDA ELSST SKOS vocabularies::
+Load external CESSDA ELSST or custom SKOS vocabularies into the Concept table:
 
-   # Load basic seed data
-   uv run fairwddi db seed
+.. code-block:: bash
 
-   # Load SKOS RDF/XML vocabulary (e.g., ELSST)
-   uv run fairwddi vocab load-skos vocab/elsst_fr_en.rdf --vocabulary-name ELSST
+   # Load SKOS RDF/XML or Turtle vocabulary (e.g., ELSST)
+   uv run fairwddi db load-vocab vocab/elsst_fr_en.rdf --vocabulary-name ELSST --levels 2
 
 Verifying Installation
 ----------------------

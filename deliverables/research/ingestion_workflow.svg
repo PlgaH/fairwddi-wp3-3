@@ -345,7 +345,7 @@
         <text x="16" y="70" class="font-sans box-desc" font-size="12">• Counts planned frequency bulk rows</text>
         <text x="16" y="90" class="font-sans box-desc" font-size="12">• Detects missing reference targets</text>
         <text x="16" y="110" class="font-sans box-desc" font-size="12">• Database remains completely untouched</text>
-        <text x="16" y="132" class="font-mono code-text" font-size="11">fairwddi ingest plan --profile request</text>
+        <text x="16" y="132" class="font-mono code-text" font-size="11">fairwddi import plan --profile request</text>
     </g>
 
     <!-- Planning Step 4: Human-in-the-Loop Review Gate -->
@@ -433,7 +433,7 @@
     <g transform="translate(20, 130)">
         <rect width="382" height="145" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
         <text x="16" y="26" class="font-sans box-title" font-size="13">1. 1-Click Atomic Rollback (Undo)</text>
-        <text x="16" y="48" class="font-mono code-text" font-size="11">fairwddi ingest undo &lt;batch_id&gt;</text>
+        <text x="16" y="48" class="font-mono code-text" font-size="11">fairwddi import undo &lt;batch_id&gt;</text>
         <text x="16" y="70" class="font-sans box-desc" font-size="12">• Reads created_urns from IngestBatch</text>
         <text x="16" y="90" class="font-sans box-desc" font-size="12">• Deletes matching UrnRegistry records</text>
         <text x="16" y="110" class="font-sans box-desc" font-size="12">• ON DELETE CASCADE purges core tables</text>
@@ -444,11 +444,11 @@
     <g transform="translate(20, 290)">
         <rect width="382" height="135" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
         <text x="16" y="26" class="font-sans box-title" font-size="13">2. Ingest Receipts &amp; Auditing</text>
-        <text x="16" y="48" class="font-mono code-text" font-size="11">fairwddi ingest status &lt;batch_id&gt;</text>
+        <text x="16" y="48" class="font-mono code-text" font-size="11">fairwddi import status &lt;batch_id&gt;</text>
         <text x="16" y="70" class="font-sans box-desc" font-size="12">• Detailed receipt: created vs reused URNs</text>
         <text x="16" y="90" class="font-sans box-desc" font-size="12">• Quarantine count &amp; frequency row totals</text>
         <text x="16" y="110" class="font-sans box-desc" font-size="12">• Full provenance history in request_ddi_eventlog</text>
-        <text x="16" y="126" class="font-mono code-text" font-size="10">fairwddi ingest list</text>
+        <text x="16" y="126" class="font-mono code-text" font-size="10">fairwddi import list</text>
     </g>
 
     <!-- Post Step 3: Metadata Quarantine -->
@@ -465,11 +465,11 @@
     <g transform="translate(20, 585)">
         <rect width="382" height="140" rx="10" fill="url(#boxBg)" stroke="#1e293b" stroke-width="1" />
         <text x="16" y="26" class="font-sans box-title" font-size="13">4. Post-Ingest Harmonization</text>
-        <text x="16" y="48" class="font-mono code-text" font-size="11">fairwddi compare discover --threshold 0.5</text>
+        <text x="16" y="48" class="font-mono code-text" font-size="11">fairwddi compare run --source batch:42 --target bank:all</text>
         <text x="16" y="70" class="font-sans box-desc" font-size="12">• Clusters question items across survey waves</text>
         <text x="16" y="90" class="font-sans box-desc" font-size="12">• Merges bilingual question equivalents</text>
         <text x="16" y="110" class="font-sans box-desc" font-size="12">• Anchors variables to ELSST / CESSDA concepts</text>
-        <text x="16" y="128" class="font-mono code-text" font-size="10">fairwddi compare batch &lt;batch_id&gt;</text>
+        <text x="16" y="128" class="font-mono code-text" font-size="10">fairwddi harmonize plan &lt;comparison.yaml&gt; --approve-high</text>
     </g>
 </g>
 
@@ -565,10 +565,10 @@
         <circle cx="20" cy="18" r="5" fill="#ef4444" />
         <circle cx="36" cy="18" r="5" fill="#f59e0b" />
         <circle cx="52" cy="18" r="5" fill="#10b981" />
-        <text x="75" y="22" class="font-mono" font-size="11" fill="#64748b">bash — fairwddi ingest run</text>
+        <text x="75" y="22" class="font-mono" font-size="11" fill="#64748b">bash — fairwddi import</text>
 
         <!-- Command Code -->
-        <text x="20" y="52" class="font-mono" font-size="12" fill="#38bdf8">$ fairwddi ingest run survey.ddic.xml \</text>
+        <text x="20" y="52" class="font-mono" font-size="12" fill="#38bdf8">$ fairwddi import survey.ddic.xml \</text>
         <text x="40" y="72" class="font-mono" font-size="12" fill="#e2e8f0">  --profile request \</text>
         <text x="40" y="92" class="font-mono" font-size="12" fill="#e2e8f0">  --agency fr.cdsp \</text>
         <text x="40" y="112" class="font-mono" font-size="12" fill="#e2e8f0">  --harmonize --auto-approve</text>
@@ -651,7 +651,7 @@
             
             <g transform="translate(14, 65)">
                 <rect width="255" height="18" rx="4" fill="#1e293b" />
-                <text x="10" y="13" class="font-mono" font-size="10" fill="#38bdf8">1-Click Undo: fairwddi ingest undo 42</text>
+                <text x="10" y="13" class="font-mono" font-size="10" fill="#38bdf8">1-Click Undo: fairwddi import undo 42</text>
             </g>
         </g>
     </g>

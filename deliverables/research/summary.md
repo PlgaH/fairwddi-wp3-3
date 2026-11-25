@@ -34,32 +34,39 @@ flowchart TD
     end
 
     subgraph PreflightPhase ["2. Preflight & Explicit Upgrade Engine"]
-        Detector["fairwddi.ingest.detector\n(Format Detection & SHA-256)"]
-        QA["fairwddi.ingest.preflight\n(Profile QA & URN Link Audit)"]
+        Detector["fairwddi.importer.detector\n(Format Detection & SHA-256)"]
+        QA["fairwddi.importer.preflight\n(Profile QA & URN Link Audit)"]
         Upgrade["upgrade_ddic_to_ddil / dartfx-ddi ddic2l\n(DDI-C to DDI 4.0 Disk Converter)\n• Primary: *.ddi40.json (ReQuest Core)\n• Secondary: *.stats.ddi40.json (VariableStatistics)"]
-        DedupeMetrics["Deduplication Engine\n(Raw count, duplicates removed, % reduction)"]
+        DedupeMetrics["Intra-File Deduplication & CategoryScheme Mode\n(single vs. per_codelist)"]
         PlanPre["preflight.plan.yaml\n(Readiness Gate & Quality Scorecard)"]
     end
 
-    subgraph IngestPhase ["3. Direct Ingestion Engine (fairwddi.ingest.loader)"]
-        Streaming["fairwddi.ingest.streaming\n(Constant Memory iterparse / JSON Streamer)"]
-        PlanIng["ingest.plan.yaml\n(Zero-Write Dry-Run Plan)"]
-        Apply["apply_ingestion\n(Atomic Single Transaction)"]
+    subgraph ImportPhase ["3. Pure Deterministic Import Engine (fairwddi.importer.loader)"]
+        Streaming["fairwddi.importer.streaming\n(Constant Memory iterparse / JSON Streamer)"]
+        PlanImp["import.plan.yaml\n(Zero-Write Dry-Run Plan)"]
+        ExecImp["execute_import\n(Atomic Single Transaction, Zero Harmonization)"]
     end
 
-    subgraph CoreStore ["4. Standard-Agnostic PostgreSQL 17 Core"]
+    subgraph PostImport ["4. Post-Import Groups, Compare & Harmonize"]
+        Groups["fairwddi.groups\n(DDI Groups + Slugs)"]
+        Compare["fairwddi.compare\n(Read-Only Syntactic / Semantic / Conceptual + CodeList Qual)"]
+        Harmonize["fairwddi.harmonize\n(Policy-Driven --approve-high Plan & Execute)"]
+    end
+
+    subgraph CoreStore ["5. Standard-Agnostic PostgreSQL 17 Core"]
         Receipt["IngestBatch (1 row per file)\n(file_sha256, status, created_urns, reused_urns, stats)"]
         Cascade["DDI Variable Cascade\n(ConceptualVariable ➔ RepresentedVariable ➔ InstanceVariable)"]
         Representation["Representation Core\n(QuestionItem, CodeList, Category, StudyUnit)"]
         Frequencies["Bulk Relational SQL\n(DatafileVariableFrequency & DatafileVariable.statistics)"]
-        Registry["UrnRegistry & URNAlias\n(Universal Foreign Key Supertype & Provenance)"]
+        Registry["UrnRegistry\n(Universal Foreign Key Supertype & Provenance)"]
         Quarantine["MetadataQuarantine\n(Content Drift Isolation)"]
     end
 
     DDIC & DDIC_ML --> Detector --> Upgrade --> DedupeMetrics --> PlanPre
     DDIL33 & DDIL4 --> Detector --> QA --> PlanPre
-    PlanPre --> Streaming --> PlanIng --> Apply
-    Apply --> Receipt & Cascade & Representation & Frequencies & Registry & Quarantine
+    PlanPre --> Streaming --> PlanImp --> ExecImp
+    ExecImp --> Receipt & Cascade & Representation & Frequencies & Registry & Quarantine
+    CoreStore --> Groups --> Compare --> Harmonize
 ```
 
 ---
@@ -98,12 +105,12 @@ flowchart TD
    - Stage 1 preflight evaluates incoming DDI-Codebook files against declarative YAML quality profiles.
    - Enforces required elements (e.g., variables required as fatal errors) and recommended archival best practices (e.g., standalone question items as warnings) with weighted quality scorecards.
 7. **Zero-Write Dry-Run Plans & One-Click Rollbacks:**
-   - `plan_ingestion` reads disk files, checks existing identities against `UrnRegistry`, and outputs an `ingest.plan.yaml` with zero database writes.
+   - `plan_import` reads disk files, checks existing identities against `UrnRegistry`, and outputs an `import.plan.yaml` with zero database writes and zero cross-study harmonization.
    - Changes are gated by review flags (`requires_review = True`).
-   - `apply_ingestion` executes mutations in an atomic single transaction.
-   - `undo_ingestion` atomically removes all created URNs via `UrnRegistry` cascading foreign keys, leaving zero orphaned records.
+   - `execute_import` executes deterministic loading in an atomic single transaction (`origin='imported'`).
+   - `undo_import` atomically removes all created URNs via `UrnRegistry` cascading foreign keys, leaving zero orphaned records.
 8. **Pluggable & Standalone CLI Tools:**
-   - Complete pipeline accessible via `fairwddi preflight`, `fairwddi ingest`, `fairwddi compare`, and `fairwddi harmonize`.
+   - Complete decoupled pipeline accessible via `fairwddi preflight`, `fairwddi import <file>`, `fairwddi group`, `fairwddi compare`, and `fairwddi harmonize plan --approve-high` / `execute`.
    - Standalone DDI conversion utility available directly in `ddi-toolkit` as `dartfx-ddi ddic2l`, supporting independent DDI-C to DDI 4.0 / DDI 3.3 conversions with code harmonization and secondary statistics export.
 
 ---

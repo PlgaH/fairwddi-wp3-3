@@ -151,6 +151,7 @@ erDiagram
 
     Group {
         string urn PK
+        string slug UK
         jsonb name
         jsonb description
         string group_type
@@ -470,7 +471,6 @@ erDiagram
         jsonb options
         jsonb created_urns
         jsonb reused_urns
-        jsonb created_aliases
         jsonb stats
         timestamp created_at
         timestamp updated_at

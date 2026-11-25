@@ -1,0 +1,880 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Policy-Driven Harmonization (fairwddi.harmonize) &mdash; FAIRwDDI Lifecycle 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API &amp; Server (fairwddi.api)" href="api_ref.html" />
+    <link rel="prev" title="Three-Layer Comparison Engine (fairwddi.compare)" href="compare.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+<div class="portal-return-bar">
+  <a href="../index.html">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to FAIRwDDI Architecture Portal & Explorer
+  </a>
+  <span class="badge">CDSP • Sciences Po / CNRS</span>
+</div>
+ 
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+  
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FAIRwDDI Lifecycle
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+  <div style="margin-top: 10px; margin-bottom: 6px; padding: 0 4px;">
+    <a href="../index.html" style="font-size: 0.82rem; color: #38bdf8 !important; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Main Portal
+    </a>
+  </div>
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../admin/index.html">Administrator Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../admin/index.html#key-operational-responsibilities">Key Operational Responsibilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/index.html#guide-outline">Guide Outline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../admin/architecture.html">System Architecture &amp; Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/architecture.html#hardware-operating-system-recommendations">Hardware &amp; Operating System Recommendations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/architecture.html#software-dependencies">Software Dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/architecture.html#database-architecture">Database Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/installation.html">Installation &amp; Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#configuration-env">Configuration (.env)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#database-provisioning">Database Provisioning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/installation.html#verifying-installation">Verifying Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/cli_operations.html">CLI Operational Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#global-options">Global Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#database-management-fairwddi-db">Database Management (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">db</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#preflight-analysis-fairwddi-preflight">Preflight Analysis (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">preflight</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#deterministic-import-fairwddi-import">Deterministic Import (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#context-groups-fairwddi-group">Context Groups (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">group</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#three-layer-comparison-fairwddi-compare">Three-Layer Comparison (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">compare</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#harmonization-fairwddi-harmonize">Harmonization (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">harmonize</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/cli_operations.html#api-server-fairwddi-serve">API Server (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">serve</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/ingestion_ops.html">Import &amp; Harmonization Operations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#pure-import-lifecycle-fairwddi-import">Pure Import Lifecycle (<code class="docutils literal notranslate"><span class="pre">fairwddi</span> <span class="pre">import</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/ingestion_ops.html#post-import-comparison-harmonization">Post-Import Comparison &amp; Harmonization</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../admin/deployment.html">Production Deployment &amp; Maintenance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#service-architecture">Service Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#asgi-application-server-setup">ASGI Application Server Setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#nginx-reverse-proxy-configuration">Nginx Reverse Proxy Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#database-maintenance-index-optimization">Database Maintenance &amp; Index Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../admin/deployment.html#backup-and-disaster-recovery">Backup and Disaster Recovery</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../developer/index.html#architectural-principles">Architectural Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../developer/variable_cascade.html">The DDI Variable Cascade</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#the-three-tiers-of-the-cascade">The Three Tiers of the Cascade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#tier-definitions">Tier Definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#standards-crosswalk">Standards Crosswalk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/variable_cascade.html#orm-traversal-examples">ORM Traversal Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/data_model.html">The 30-Model Database Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/data_model.html#abstract-base-classes">Abstract Base Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/data_model.html#layer-model-breakdown">Layer &amp; Model Breakdown</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/data_model.html#polymorphic-cross-resource-relations">Polymorphic Cross-Resource Relations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/urn_registry.html">Universal URN Master Registry (UrnRegistry)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#the-problem-it-solves">The Problem It Solves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#the-supertype-master-pattern">The Supertype Master Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#lifecycle-guarantees">Lifecycle Guarantees</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/urn_registry.html#canonical-urn-syntax">Canonical URN Syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/multilingual_jsonb.html">Multilingual JSONB Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#jsonb-data-model">JSONB Data Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#string-normalization-pipeline">String Normalization Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#querying-multilingual-fields">Querying Multilingual Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/multilingual_jsonb.html#postgresql-17-icu-collations">PostgreSQL 17 ICU Collations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/fingerprinting.html">Content Fingerprinting &amp; Deduplication</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#the-multi-algorithm-approach">The Multi-Algorithm Approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#canonical-json-serialization">Canonical JSON Serialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#simple-vs-compound-hashing">Simple vs Compound Hashing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#deterministic-16-character-urn-hashes">Deterministic 16-Character URN Hashes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/fingerprinting.html#detecting-metadata-drift">Detecting Metadata Drift</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/importer_engine.html">The Import, Comparison &amp; Harmonization Engines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/api_service.html">REST API &amp; Interactive Explorer (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#key-advantages-of-django-ninja">Key Advantages of Django Ninja</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#api-architecture">API Architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#endpoints-overview">Endpoints Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#example-endpoint-implementation">Example Endpoint Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/api_service.html#interactive-database-explorer">Interactive Database Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../developer/dartfx_integration.html">Data Artifex DDI Toolkit Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#overview-of-dartfx-ddi">Overview of dartfx-ddi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#ddi-lifecycle-fragment-streaming">DDI-Lifecycle Fragment Streaming</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#multilingual-codebook-merging">Multilingual Codebook Merging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../developer/dartfx_integration.html#ddi-cdi-assistant-framework">DDI-CDI Assistant Framework</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributor/index.html">Contributor Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../contributor/index.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/environment.html">Development Environment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#cloning-and-virtual-environment">Cloning and Virtual Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#pre-commit-hooks">Pre-commit Hooks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/environment.html#running-quick-sanity-checks">Running Quick Sanity Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/conventions.html">Coding Conventions &amp; Standards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#python-stack-tooling">Python Stack &amp; Tooling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#code-formatting-linting-ruff">Code Formatting &amp; Linting (Ruff)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#type-annotations-static-typing">Type Annotations &amp; Static Typing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#django-migrations-zero-data-loss">Django Migrations &amp; Zero-Data-Loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/conventions.html#ddi-naming-conventions">DDI Naming Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/testing.html">Testing Guide &amp; Practices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#testing-stack">Testing Stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#running-tests">Running Tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#isolated-sqlite-test-configuration">Isolated SQLite Test Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/testing.html#testing-ingestion-streaming">Testing Ingestion &amp; Streaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contributor/workflows.html">Development Workflows &amp; Pull Requests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#git-branching-strategy">Git Branching Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#commit-message-guidelines">Commit Message Guidelines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#pull-request-checklist">Pull Request Checklist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contributor/workflows.html#building-documentation-locally">Building Documentation Locally</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Python API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="models.html">Models (fairwddi.models)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.base">Base Infrastructure &amp; Supertype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.concept">Concept Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.representation">Representation Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.instrument">Instrument &amp; Question Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.dataset">Dataset Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.organization">Organization &amp; Grouping Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.infrastructure">Batch &amp; Ingestion Infrastructure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#module-fairwddi.models.event">Audit &amp; Event Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="schemas.html">Pydantic Schemas (fairwddi.schemas)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="schemas.html#module-fairwddi.schemas.common">Common Value Objects &amp; Primitives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="schemas.html#module-fairwddi.schemas.entities">Entity Schemas</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="db.html">Database Layer (fairwddi.db)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.config">Configuration &amp; Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.ddl">DDL Generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.vocab">Vocabulary Importers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="db.html#module-fairwddi.db.wipe">Wipe &amp; Lifecycle Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="importer.html">Pure Deterministic Import (fairwddi.importer)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.detector.MetadataFormatInfo"><code class="docutils literal notranslate"><span class="pre">MetadataFormatInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.detector.compute_file_sha256"><code class="docutils literal notranslate"><span class="pre">compute_file_sha256()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.detector.detect_metadata_format"><code class="docutils literal notranslate"><span class="pre">detect_metadata_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.RawResourceNode"><code class="docutils literal notranslate"><span class="pre">RawResourceNode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_json"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.extract_referenced_urns_from_xml"><code class="docutils literal notranslate"><span class="pre">extract_referenced_urns_from_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.resource_to_json"><code class="docutils literal notranslate"><span class="pre">resource_to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_ddi_c_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_c_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_ddi_l_json"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_ddi_l_jsonl"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_jsonl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_ddi_l_xml"><code class="docutils literal notranslate"><span class="pre">stream_ddi_l_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.stream_resources"><code class="docutils literal notranslate"><span class="pre">stream_resources()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.xml_elem_to_dict"><code class="docutils literal notranslate"><span class="pre">xml_elem_to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.streaming.xml_to_json_dict"><code class="docutils literal notranslate"><span class="pre">xml_to_json_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.profiles.ImportProfile"><code class="docutils literal notranslate"><span class="pre">ImportProfile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.profiles.ImportStrategies"><code class="docutils literal notranslate"><span class="pre">ImportStrategies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.profiles.list_available_profiles"><code class="docutils literal notranslate"><span class="pre">list_available_profiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.profiles.load_profile"><code class="docutils literal notranslate"><span class="pre">load_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.preflight.run_preflight_check"><code class="docutils literal notranslate"><span class="pre">run_preflight_check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.preflight.upgrade_ddic_to_ddil"><code class="docutils literal notranslate"><span class="pre">upgrade_ddic_to_ddil()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.ImportActionItem"><code class="docutils literal notranslate"><span class="pre">ImportActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.ImportPlan"><code class="docutils literal notranslate"><span class="pre">ImportPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.PlanActionItem"><code class="docutils literal notranslate"><span class="pre">PlanActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.PlanIssue"><code class="docutils literal notranslate"><span class="pre">PlanIssue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.plan.ReviewGate"><code class="docutils literal notranslate"><span class="pre">ReviewGate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.compute_resource_hashes"><code class="docutils literal notranslate"><span class="pre">compute_resource_hashes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.execute_import"><code class="docutils literal notranslate"><span class="pre">execute_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.get_import_batch_status"><code class="docutils literal notranslate"><span class="pre">get_import_batch_status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.list_import_batches"><code class="docutils literal notranslate"><span class="pre">list_import_batches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.parse_ddi_urn"><code class="docutils literal notranslate"><span class="pre">parse_ddi_urn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.plan_import"><code class="docutils literal notranslate"><span class="pre">plan_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.loader.undo_import"><code class="docutils literal notranslate"><span class="pre">undo_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="importer.html#fairwddi.importer.pipeline.run_import"><code class="docutils literal notranslate"><span class="pre">run_import()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="groups.html">Group Curation &amp; Set Resolution (fairwddi.groups)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.add_group_members"><code class="docutils literal notranslate"><span class="pre">add_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.create_group"><code class="docutils literal notranslate"><span class="pre">create_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.delete_group"><code class="docutils literal notranslate"><span class="pre">delete_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.get_group_details"><code class="docutils literal notranslate"><span class="pre">get_group_details()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.list_groups"><code class="docutils literal notranslate"><span class="pre">list_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.remove_group_members"><code class="docutils literal notranslate"><span class="pre">remove_group_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.rename_group"><code class="docutils literal notranslate"><span class="pre">rename_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.manager.resolve_group"><code class="docutils literal notranslate"><span class="pre">resolve_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.ResolvedResourceSet"><code class="docutils literal notranslate"><span class="pre">ResolvedResourceSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.ResourceSetSpec"><code class="docutils literal notranslate"><span class="pre">ResourceSetSpec</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.parse_resource_set_spec"><code class="docutils literal notranslate"><span class="pre">parse_resource_set_spec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="groups.html#fairwddi.groups.resolver.resolve_resource_set"><code class="docutils literal notranslate"><span class="pre">resolve_resource_set()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="compare.html">Three-Layer Comparison Engine (fairwddi.compare)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.CandidateCorrespondence"><code class="docutils literal notranslate"><span class="pre">CandidateCorrespondence</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.CodeListQualification"><code class="docutils literal notranslate"><span class="pre">CodeListQualification</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.ComparisonResultSet"><code class="docutils literal notranslate"><span class="pre">ComparisonResultSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.CorrespondenceLevel"><code class="docutils literal notranslate"><span class="pre">CorrespondenceLevel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.models.QualificationReport"><code class="docutils literal notranslate"><span class="pre">QualificationReport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.ComparisonConfig"><code class="docutils literal notranslate"><span class="pre">ComparisonConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.ConceptualRuleConfig"><code class="docutils literal notranslate"><span class="pre">ConceptualRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.QualificationRuleConfig"><code class="docutils literal notranslate"><span class="pre">QualificationRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.ResourceTypeComparisonRule"><code class="docutils literal notranslate"><span class="pre">ResourceTypeComparisonRule</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.SemanticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SemanticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.SyntacticRuleConfig"><code class="docutils literal notranslate"><span class="pre">SyntacticRuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.list_comparison_configs"><code class="docutils literal notranslate"><span class="pre">list_comparison_configs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.config.load_comparison_config"><code class="docutils literal notranslate"><span class="pre">load_comparison_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.qualifier.evaluate_qualification"><code class="docutils literal notranslate"><span class="pre">evaluate_qualification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.syntactic.compare_syntactic_sets"><code class="docutils literal notranslate"><span class="pre">compare_syntactic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.semantic.SentenceTransformerEmbeddingProvider"><code class="docutils literal notranslate"><span class="pre">SentenceTransformerEmbeddingProvider</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.semantic.compare_semantic_sets"><code class="docutils literal notranslate"><span class="pre">compare_semantic_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.semantic.get_embedding_provider"><code class="docutils literal notranslate"><span class="pre">get_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.semantic.register_embedding_provider"><code class="docutils literal notranslate"><span class="pre">register_embedding_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.conceptual.ConceptAssigner"><code class="docutils literal notranslate"><span class="pre">ConceptAssigner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.conceptual.compare_conceptual_sets"><code class="docutils literal notranslate"><span class="pre">compare_conceptual_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.conceptual.register_concept_assigner"><code class="docutils literal notranslate"><span class="pre">register_concept_assigner()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="compare.html#fairwddi.compare.engine.run_comparison"><code class="docutils literal notranslate"><span class="pre">run_comparison()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Policy-Driven Harmonization (fairwddi.harmonize)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.plan.AutoApproveHighPolicy"><code class="docutils literal notranslate"><span class="pre">AutoApproveHighPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.plan.GuardrailPolicy"><code class="docutils literal notranslate"><span class="pre">GuardrailPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.plan.HarmonizationActionItem"><code class="docutils literal notranslate"><span class="pre">HarmonizationActionItem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.plan.HarmonizationGuardrails"><code class="docutils literal notranslate"><span class="pre">HarmonizationGuardrails</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.plan.HarmonizationPlan"><code class="docutils literal notranslate"><span class="pre">HarmonizationPlan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.plan.HarmonizationPolicy"><code class="docutils literal notranslate"><span class="pre">HarmonizationPolicy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.plan.load_harmonization_policy"><code class="docutils literal notranslate"><span class="pre">load_harmonization_policy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.planner.approve_high_actions"><code class="docutils literal notranslate"><span class="pre">approve_high_actions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.planner.plan_harmonization"><code class="docutils literal notranslate"><span class="pre">plan_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.manager.create_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">create_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.manager.execute_harmonization"><code class="docutils literal notranslate"><span class="pre">execute_harmonization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.manager.link_to_harmonized_resource"><code class="docutils literal notranslate"><span class="pre">link_to_harmonized_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairwddi.harmonize.manager.undo_harmonization"><code class="docutils literal notranslate"><span class="pre">undo_harmonization()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_ref.html">API &amp; Server (fairwddi.api)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.router">Router &amp; Endpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.schemas">API Request &amp; Response Schemas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.views">Views &amp; Route Handlers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.server">ASGI Server Runner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_ref.html#module-fairwddi.api.explorer_html">Interactive Model Explorer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">Utilities (fairwddi.utils)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#module-fairwddi.utils.urn">URN Helpers (urn.py)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#module-fairwddi.utils.normalize_string">String Normalization (normalize_string.py)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Standards &amp; Project Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#reference-documents">Reference Documents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/glossary.html">DDI Canonical Terminology Glossary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/deliverables.html">Project Deliverables &amp; Research Reports</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/deliverables.html#core-deliverables">Core Deliverables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/deliverables.html#specialized-technical-research-papers">Specialized Technical Research Papers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/deliverables.html#interactive-exploration">Interactive Exploration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/changelog.html">Changelog &amp; Project Roadmap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/changelog.html#project-timeline-overview">Project Timeline Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/changelog.html#release-history">Release History</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FAIRwDDI Lifecycle</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Python API Reference</a></li>
+      <li class="breadcrumb-item active">Policy-Driven Harmonization (fairwddi.harmonize)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/harmonize.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-fairwddi.harmonize.plan">
+<span id="policy-driven-harmonization-fairwddi-harmonize"></span><h1>Policy-Driven Harmonization (fairwddi.harmonize)<a class="headerlink" href="#module-fairwddi.harmonize.plan" title="Link to this heading"></a></h1>
+<p>Harmonization policy, action plan, and Markdown report models (<cite>fairwddi.harmonize.plan</cite>).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.AutoApproveHighPolicy">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.plan.</span></span><span class="sig-name descname"><span class="pre">AutoApproveHighPolicy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_match_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_codelist_qualifications</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_high_behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pending_review'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/plan.html#AutoApproveHighPolicy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.plan.AutoApproveHighPolicy" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Explicit definition of what counts as <code class="docutils literal notranslate"><span class="pre">high</span></code> for <code class="docutils literal notranslate"><span class="pre">--approve-high</span></code> auto-approval.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.AutoApproveHighPolicy.allowed_actions">
+<span class="sig-name descname"><span class="pre">allowed_actions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.harmonize.plan.AutoApproveHighPolicy.allowed_actions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.AutoApproveHighPolicy.allowed_codelist_qualifications">
+<span class="sig-name descname"><span class="pre">allowed_codelist_qualifications</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.harmonize.plan.AutoApproveHighPolicy.allowed_codelist_qualifications" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.AutoApproveHighPolicy.allowed_levels">
+<span class="sig-name descname"><span class="pre">allowed_levels</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.harmonize.plan.AutoApproveHighPolicy.allowed_levels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.AutoApproveHighPolicy.allowed_match_types">
+<span class="sig-name descname"><span class="pre">allowed_match_types</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.harmonize.plan.AutoApproveHighPolicy.allowed_match_types" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.AutoApproveHighPolicy.min_confidence">
+<span class="sig-name descname"><span class="pre">min_confidence</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.AutoApproveHighPolicy.min_confidence" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.AutoApproveHighPolicy.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.harmonize.plan.AutoApproveHighPolicy.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.AutoApproveHighPolicy.non_high_behavior">
+<span class="sig-name descname"><span class="pre">non_high_behavior</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'pending_review'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'skip'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.harmonize.plan.AutoApproveHighPolicy.non_high_behavior" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.GuardrailPolicy">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.plan.</span></span><span class="sig-name descname"><span class="pre">GuardrailPolicy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">downgrade_scale_cardinality_diff_to_semantic_link</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downgrade_dimension_mismatch_to_semantic_link</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downgrade_uncoded_to_semantic_link</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_shared_stem_grids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/plan.html#GuardrailPolicy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.plan.GuardrailPolicy" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Safety guardrails preventing invalid structural merges.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.GuardrailPolicy.downgrade_dimension_mismatch_to_semantic_link">
+<span class="sig-name descname"><span class="pre">downgrade_dimension_mismatch_to_semantic_link</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.GuardrailPolicy.downgrade_dimension_mismatch_to_semantic_link" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.GuardrailPolicy.downgrade_scale_cardinality_diff_to_semantic_link">
+<span class="sig-name descname"><span class="pre">downgrade_scale_cardinality_diff_to_semantic_link</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.GuardrailPolicy.downgrade_scale_cardinality_diff_to_semantic_link" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.GuardrailPolicy.downgrade_uncoded_to_semantic_link">
+<span class="sig-name descname"><span class="pre">downgrade_uncoded_to_semantic_link</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.GuardrailPolicy.downgrade_uncoded_to_semantic_link" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.GuardrailPolicy.group_shared_stem_grids">
+<span class="sig-name descname"><span class="pre">group_shared_stem_grids</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.GuardrailPolicy.group_shared_stem_grids" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.GuardrailPolicy.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.harmonize.plan.GuardrailPolicy.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.plan.</span></span><span class="sig-name descname"><span class="pre">HarmonizationActionItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">candidate_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_urn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_urn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generated_urn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">CorrespondenceLevel.SYNTACTIC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codelist_qualification</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">CodeListQualification.NOT_APPLICABLE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">approval_tier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'review_required'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">approved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">requires_review</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/plan.html#HarmonizationActionItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Planned or approved harmonization write action derived from a comparison candidate.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.action">
+<span class="sig-name descname"><span class="pre">action</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'link_existing'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'generate_harmonized'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'link_semantic'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'group'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'skip'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.action" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.approval_tier">
+<span class="sig-name descname"><span class="pre">approval_tier</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'high'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'review_required'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.approval_tier" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.approved">
+<span class="sig-name descname"><span class="pre">approved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.approved" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.candidate_id">
+<span class="sig-name descname"><span class="pre">candidate_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.candidate_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.codelist_qualification">
+<span class="sig-name descname"><span class="pre">codelist_qualification</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="compare.html#fairwddi.compare.models.CodeListQualification" title="fairwddi.compare.models.CodeListQualification"><span class="pre">CodeListQualification</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.codelist_qualification" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.confidence">
+<span class="sig-name descname"><span class="pre">confidence</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.confidence" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.correspondence_level">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">correspondence_level</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.correspondence_level" title="Link to this definition"></a></dt>
+<dd><p>Canonical string value for the candidate’s correspondence level.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.details">
+<span class="sig-name descname"><span class="pre">details</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.details" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.generated_urn">
+<span class="sig-name descname"><span class="pre">generated_urn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.generated_urn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.is_high_confidence">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_high_confidence</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.is_high_confidence" title="Link to this definition"></a></dt>
+<dd><p>True if this action qualified under the policy’s <code class="docutils literal notranslate"><span class="pre">auto_approve_high</span></code> tier.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.level">
+<span class="sig-name descname"><span class="pre">level</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="compare.html#fairwddi.compare.models.CorrespondenceLevel" title="fairwddi.compare.models.CorrespondenceLevel"><span class="pre">CorrespondenceLevel</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.level" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.match_type">
+<span class="sig-name descname"><span class="pre">match_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.match_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.notes">
+<span class="sig-name descname"><span class="pre">notes</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.notes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.requires_review">
+<span class="sig-name descname"><span class="pre">requires_review</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.requires_review" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.resource_type">
+<span class="sig-name descname"><span class="pre">resource_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.resource_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.source_urn">
+<span class="sig-name descname"><span class="pre">source_urn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.source_urn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationActionItem.target_urn">
+<span class="sig-name descname"><span class="pre">target_urn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationActionItem.target_urn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationGuardrails">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.plan.</span></span><span class="sig-name descname"><span class="pre">HarmonizationGuardrails</span></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationGuardrails" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#fairwddi.harmonize.plan.GuardrailPolicy" title="fairwddi.harmonize.plan.GuardrailPolicy"><code class="xref py py-class docutils literal notranslate"><span class="pre">GuardrailPolicy</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.plan.</span></span><span class="sig-name descname"><span class="pre">HarmonizationPlan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plan_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'2.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'harmonize'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">job_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison_job_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">approve_high_applied</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">review_gate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/plan.html#HarmonizationPlan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Serializable, review-gated harmonization execution plan.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.actions">
+<span class="sig-name descname"><span class="pre">actions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#fairwddi.harmonize.plan.HarmonizationActionItem" title="fairwddi.harmonize.plan.HarmonizationActionItem"><span class="pre">HarmonizationActionItem</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.actions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.approve_high_applied">
+<span class="sig-name descname"><span class="pre">approve_high_applied</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.approve_high_applied" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.approved_count">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">approved_count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.approved_count" title="Link to this definition"></a></dt>
+<dd><p>Count of approved non-skip actions.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.comparison_job_id">
+<span class="sig-name descname"><span class="pre">comparison_job_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.comparison_job_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.created_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.from_yaml">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/plan.html#HarmonizationPlan.from_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.from_yaml" title="Link to this definition"></a></dt>
+<dd><p>Load a HarmonizationPlan from YAML file path or string.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.high_tier_count">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">high_tier_count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.high_tier_count" title="Link to this definition"></a></dt>
+<dd><p>Count of actions qualifying as <cite>high</cite> under policy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.is_ready_to_execute">
+<span class="sig-name descname"><span class="pre">is_ready_to_execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auto_approve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/plan.html#HarmonizationPlan.is_ready_to_execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.is_ready_to_execute" title="Link to this definition"></a></dt>
+<dd><p>Return True if authorized to execute approved actions.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.job_id">
+<span class="sig-name descname"><span class="pre">job_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.job_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.pending_review_count">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">pending_review_count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.pending_review_count" title="Link to this definition"></a></dt>
+<dd><p>Count of non-skip actions awaiting review.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.plan_version">
+<span class="sig-name descname"><span class="pre">plan_version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.plan_version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.policy_name">
+<span class="sig-name descname"><span class="pre">policy_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.policy_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.review_gate">
+<span class="sig-name descname"><span class="pre">review_gate</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="importer.html#fairwddi.importer.plan.ReviewGate" title="fairwddi.importer.plan.ReviewGate"><span class="pre">ReviewGate</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.review_gate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.source_spec">
+<span class="sig-name descname"><span class="pre">source_spec</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.source_spec" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.stage">
+<span class="sig-name descname"><span class="pre">stage</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'harmonize'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.stage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.summary">
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.summary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.target_spec">
+<span class="sig-name descname"><span class="pre">target_spec</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.target_spec" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/plan.html#HarmonizationPlan.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Serialize plan to JSON-safe dictionary with live summary counts.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.to_markdown">
+<span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/plan.html#HarmonizationPlan.to_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Render human-readable Markdown summary for this harmonization plan.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPlan.to_yaml">
+<span class="sig-name descname"><span class="pre">to_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/plan.html#HarmonizationPlan.to_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPlan.to_yaml" title="Link to this definition"></a></dt>
+<dd><p>Serialize plan to YAML and optionally write to disk.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPolicy">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.plan.</span></span><span class="sig-name descname"><span class="pre">HarmonizationPolicy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_approve_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guardrails</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/plan.html#HarmonizationPolicy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPolicy" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pydantic.dev/docs/validation/latest/api/pydantic/base_model/#pydantic.BaseModel" title="(in Pydantic v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Policy governing conversion of comparison candidates into harmonization actions.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPolicy.auto_approve_high">
+<span class="sig-name descname"><span class="pre">auto_approve_high</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#fairwddi.harmonize.plan.AutoApproveHighPolicy" title="fairwddi.harmonize.plan.AutoApproveHighPolicy"><span class="pre">AutoApproveHighPolicy</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPolicy.auto_approve_high" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPolicy.description">
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPolicy.description" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPolicy.guardrails">
+<span class="sig-name descname"><span class="pre">guardrails</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#fairwddi.harmonize.plan.GuardrailPolicy" title="fairwddi.harmonize.plan.GuardrailPolicy"><span class="pre">GuardrailPolicy</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPolicy.guardrails" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPolicy.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPolicy.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPolicy.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPolicy.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.HarmonizationPolicy.qualifies_as_high">
+<span class="sig-name descname"><span class="pre">qualifies_as_high</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_threshold_override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/plan.html#HarmonizationPolicy.qualifies_as_high"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.plan.HarmonizationPolicy.qualifies_as_high" title="Link to this definition"></a></dt>
+<dd><p>Return True iff <cite>item</cite> satisfies every criterion in <cite>auto_approve_high</cite>.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.harmonize.plan.load_harmonization_policy">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.plan.</span></span><span class="sig-name descname"><span class="pre">load_harmonization_policy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_or_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/plan.html#load_harmonization_policy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.plan.load_harmonization_policy" title="Link to this definition"></a></dt>
+<dd><p>Load a HarmonizationPolicy from a built-in preset name or YAML file.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<p id="module-fairwddi.harmonize.planner">Comparison-driven Harmonization Planner (<cite>fairwddi.harmonize.planner</cite>).</p>
+<p>Consumes a <code class="xref py py-class docutils literal notranslate"><span class="pre">ComparisonResultSet</span></code> (or <code class="docutils literal notranslate"><span class="pre">*.comparison.yaml/.json</span></code>) and applies
+a <code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonizationPolicy</span></code> to emit a review-gated <code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonizationPlan</span></code>.
+Supports <code class="docutils literal notranslate"><span class="pre">--approve-high</span></code> / <code class="docutils literal notranslate"><span class="pre">approve_high=True</span></code> using explicit thresholds and
+allowlists defined in <code class="docutils literal notranslate"><span class="pre">HarmonizationPolicy.auto_approve_high</span></code>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.harmonize.planner.approve_high_actions">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.planner.</span></span><span class="sig-name descname"><span class="pre">approve_high_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plan_or_path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/planner.html#approve_high_actions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.planner.approve_high_actions" title="Link to this definition"></a></dt>
+<dd><p>Retroactively mark eligible high-confidence actions as approved on an existing plan.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.harmonize.planner.plan_harmonization">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.planner.</span></span><span class="sig-name descname"><span class="pre">plan_harmonization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comparison</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">approve_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_pending</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/planner.html#plan_harmonization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.planner.plan_harmonization" title="Link to this definition"></a></dt>
+<dd><p>Translate a comparison result set into a review-gated <code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonizationPlan</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>comparison</strong> (<a class="reference internal" href="compare.html#fairwddi.compare.models.ComparisonResultSet" title="fairwddi.compare.models.ComparisonResultSet"><em>ComparisonResultSet</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – In-memory <code class="xref py py-class docutils literal notranslate"><span class="pre">ComparisonResultSet</span></code> or path to <cite>*.comparison.yaml/.json</cite>.</p></li>
+<li><p><strong>policy</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a><em> | </em><a class="reference internal" href="#fairwddi.harmonize.plan.HarmonizationPolicy" title="fairwddi.harmonize.plan.HarmonizationPolicy"><em>HarmonizationPolicy</em></a><em> | </em><em>None</em>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonizationPolicy</span></code>, preset name (<cite>default</cite>), or YAML file path.</p></li>
+<li><p><strong>approve_high</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – When True (and <cite>keep_pending</cite> is False), immediately approve actions
+satisfying <cite>policy.auto_approve_high</cite> criteria.</p></li>
+<li><p><strong>high_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em> | </em><em>None</em>) – Optional override for <cite>policy.auto_approve_high.min_confidence</cite>.</p></li>
+<li><p><strong>keep_pending</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – Explicitly suppress auto-approval so all actions remain pending review.</p></li>
+<li><p><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a><em> | </em><em>None</em>) – Optional directory to write <cite>*.harmonize.plan.yaml</cite> and <cite>.report.md</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-fairwddi.harmonize.manager">Comparison-driven Harmonization Execution &amp; Lineage Manager (<cite>fairwddi.harmonize.manager</cite>).</p>
+<p>Supports:</p>
+<ul class="simple">
+<li><p>Linking <code class="docutils literal notranslate"><span class="pre">imported</span></code> resources into existing <code class="docutils literal notranslate"><span class="pre">generated</span></code> or <code class="docutils literal notranslate"><span class="pre">instantiated</span></code> resources
+(<code class="docutils literal notranslate"><span class="pre">link_to_harmonized_resource</span></code>) while enriching metadata (alternate spellings, languages).</p></li>
+<li><p>Creating new <code class="docutils literal notranslate"><span class="pre">generated</span></code> or <code class="docutils literal notranslate"><span class="pre">instantiated</span></code> harmonized resources from <code class="docutils literal notranslate"><span class="pre">imported</span></code>
+resources (<code class="docutils literal notranslate"><span class="pre">create_harmonized_resource</span></code>).</p></li>
+<li><p>Declarative shared-stem grouping (<code class="docutils literal notranslate"><span class="pre">Group</span></code> with <code class="docutils literal notranslate"><span class="pre">dcterms:isPartOf</span></code>).</p></li>
+<li><p>Explicit W3C PROV-O / SKOS lineage (<code class="docutils literal notranslate"><span class="pre">prov:wasDerivedFrom</span></code>, <code class="docutils literal notranslate"><span class="pre">skos:closeMatch</span></code>,
+<code class="docutils literal notranslate"><span class="pre">skos:relatedMatch</span></code>) with <code class="docutils literal notranslate"><span class="pre">correspondence_level</span></code>, <code class="docutils literal notranslate"><span class="pre">match_type</span></code>, <code class="docutils literal notranslate"><span class="pre">confidence</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">codelist_qualification</span></code> metadata.</p></li>
+<li><p>Transactional rollback (<code class="docutils literal notranslate"><span class="pre">undo_harmonization</span></code>) via EventLog snapshots.</p></li>
+</ul>
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.harmonize.manager.create_harmonized_resource">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.manager.</span></span><span class="sig-name descname"><span class="pre">create_harmonized_resource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_urns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_urn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'generated'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">provenance_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonical_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserved_variants</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discarded_variants</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correspondence_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codelist_qualification</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">job_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/manager.html#create_harmonized_resource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.manager.create_harmonized_resource" title="Link to this definition"></a></dt>
+<dd><p>Create a new <code class="docutils literal notranslate"><span class="pre">generated</span></code> or <code class="docutils literal notranslate"><span class="pre">instantiated</span></code> harmonized resource from <code class="docutils literal notranslate"><span class="pre">imported</span></code> sources.</p>
+<p>Source records remain intact in the database and are linked via <code class="docutils literal notranslate"><span class="pre">prov:wasDerivedFrom</span></code>.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.harmonize.manager.execute_harmonization">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.manager.</span></span><span class="sig-name descname"><span class="pre">execute_harmonization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plan_or_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_approve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/manager.html#execute_harmonization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.manager.execute_harmonization" title="Link to this definition"></a></dt>
+<dd><p>Execute approved actions from a HarmonizationPlan and record EventLog undo snapshots.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.harmonize.manager.link_to_harmonized_resource">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.manager.</span></span><span class="sig-name descname"><span class="pre">link_to_harmonized_resource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_urns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_urn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">provenance_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonical_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserved_variants</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discarded_variants</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correspondence_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codelist_qualification</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">job_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/manager.html#link_to_harmonized_resource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.manager.link_to_harmonized_resource" title="Link to this definition"></a></dt>
+<dd><p>Link <code class="docutils literal notranslate"><span class="pre">imported</span></code> resources to an existing <code class="docutils literal notranslate"><span class="pre">generated</span></code>/<code class="docutils literal notranslate"><span class="pre">instantiated</span></code> resource.</p>
+<p>Preserves all <code class="docutils literal notranslate"><span class="pre">imported</span></code> source records intact, enriches the target with missing
+language translations and alternate spellings (<code class="docutils literal notranslate"><span class="pre">wording_variant</span></code>), recomputes hashes,
+and records <code class="docutils literal notranslate"><span class="pre">prov:wasDerivedFrom</span></code> lineage in <code class="docutils literal notranslate"><span class="pre">SemanticRelationship</span></code>.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fairwddi.harmonize.manager.undo_harmonization">
+<span class="sig-prename descclassname"><span class="pre">fairwddi.harmonize.manager.</span></span><span class="sig-name descname"><span class="pre">undo_harmonization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fairwddi/harmonize/manager.html#undo_harmonization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fairwddi.harmonize.manager.undo_harmonization" title="Link to this definition"></a></dt>
+<dd><p>Revert an applied Harmonization Job using its EventLog snapshot.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="compare.html" class="btn btn-neutral float-left" title="Three-Layer Comparison Engine (fairwddi.compare)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api_ref.html" class="btn btn-neutral float-right" title="API &amp; Server (fairwddi.api)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
