@@ -1,0 +1,212 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 960" width="1440" height="960" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="55%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#312E81"/>
+    </linearGradient>
+    <linearGradient id="pipeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F8FAFC"/>
+      <stop offset="100%" stop-color="#EEF2FF"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-4%" y="-4%" width="108%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.07"/>
+    </filter>
+    <marker id="arrowSlate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+    </marker>
+    <marker id="arrowIndigo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#4F46E5"/>
+    </marker>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1440" height="960" fill="#F8FAFC"/>
+
+  <!-- Header -->
+  <rect width="1440" height="104" fill="url(#headerGrad)"/>
+  <text x="48" y="46" fill="#FFFFFF" font-size="25" font-weight="700" letter-spacing="-0.3">
+    Three Levels of Harmonization in FAIRwDDI
+  </text>
+  <text x="48" y="76" fill="#CBD5E1" font-size="14" font-weight="400">
+    Decoupled Read-Only Discovery (fairwddi compare) &amp; Policy-Driven Harmonization (fairwddi harmonize)
+  </text>
+  <rect x="1136" y="28" width="260" height="46" rx="8" fill="#1E1B4B" stroke="#818CF8" stroke-width="1.2"/>
+  <text x="1266" y="48" text-anchor="middle" fill="#A5B4FC" font-size="11" font-weight="700" letter-spacing="0.8">CORRESPONDENCE MODEL</text>
+  <text x="1266" y="65" text-anchor="middle" fill="#FFFFFF" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">syntactic → semantic → conceptual</text>
+
+  <!-- Priority / Abstraction Banner -->
+  <rect x="44" y="122" width="1352" height="32" rx="6" fill="#EEF2FF" stroke="#C7D2FE" stroke-width="1"/>
+  <text x="720" y="142" text-anchor="middle" fill="#3730A3" font-size="12" font-weight="700" letter-spacing="0.4">
+    ABSTRACTION SPECTRUM:  Surface Wording &amp; CodeList Equivalence (Level 1)  ⟶  Multilingual Meaning Similarity (Level 2)  ⟶  Shared Thesaurus Concepts (Level 3)
+  </text>
+
+  <!-- ==================== LEVEL 1: SYNTACTIC ==================== -->
+  <g filter="url(#cardShadow)">
+    <rect x="44" y="168" width="430" height="486" rx="12" fill="#FFFFFF" stroke="#93C5FD" stroke-width="1.4"/>
+    <rect x="44" y="168" width="430" height="52" rx="12" fill="#2563EB"/>
+    <rect x="44" y="208" width="430" height="12" fill="#2563EB"/>
+    <circle cx="76" cy="194" r="14" fill="#FFFFFF"/>
+    <text x="76" y="199" text-anchor="middle" fill="#2563EB" font-size="14" font-weight="800">L1</text>
+    <text x="102" y="192" fill="#FFFFFF" font-size="17" font-weight="700">Syntactic &amp; Textual Level</text>
+    <text x="102" y="210" fill="#DBEAFE" font-size="11.5" font-weight="500">CorrespondenceLevel.SYNTACTIC · Priority 1</text>
+  </g>
+
+  <rect x="64" y="234" width="390" height="36" rx="6" fill="#0F172A"/>
+  <text x="76" y="256" fill="#93C5FD" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">$ fairwddi compare run ... --level syntactic</text>
+
+  <text x="64" y="294" fill="#0F172A" font-size="13" font-weight="700">Matching Mechanisms</text>
+  <text x="64" y="316" fill="#334155" font-size="12">• Unicode NFKC, French punctuation &amp; whitespace normalization</text>
+  <text x="64" y="336" fill="#334155" font-size="12">• TokenBlocker candidate blocking + fuzzy/token similarity</text>
+  <text x="64" y="356" fill="#334155" font-size="12">• Independent CodeList Qualification check:</text>
+  <rect x="76" y="366" width="378" height="28" rx="5" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="265" y="384" text-anchor="middle" fill="#1E40AF" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">exact | compatible | incompatible | unknown</text>
+
+  <line x1="64" y1="410" x2="454" y2="410" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="64" y="432" fill="#0F172A" font-size="13" font-weight="700">Harmonization Outcome</text>
+  <rect x="64" y="444" width="390" height="84" rx="8" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="78" y="465" fill="#1E3A8A" font-size="12" font-weight="700">• promote_reuse / reuse_or_link</text>
+  <text x="90" y="483" fill="#334155" font-size="11.5">When CodeList is exact/compatible &amp; high confidence</text>
+  <text x="78" y="503" fill="#1E3A8A" font-size="12" font-weight="700">• link_only (when CodeList is incompatible)</text>
+  <text x="90" y="520" fill="#334155" font-size="11.5">Records SKOS match without merging response scales</text>
+
+  <rect x="64" y="542" width="390" height="96" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="78" y="563" fill="#475569" font-size="11" font-weight="700" letter-spacing="0.4">EXAMPLE &amp; APPROVAL TIER</text>
+  <text x="78" y="583" fill="#0F172A" font-size="11.5" font-weight="600">"Age of respondent" ↔ "Respondent age" (1–5 scale)</text>
+  <text x="78" y="602" fill="#334155" font-size="11.5">Tier: high (when ≥ high_confidence_threshold)</text>
+  <text x="78" y="621" fill="#2563EB" font-size="11.5" font-weight="600">Eligible for --approve-high batch approval</text>
+
+  <!-- Arrow L1 -> L2 -->
+  <line x1="474" y1="410" x2="500" y2="410" stroke="#475569" stroke-width="2" marker-end="url(#arrowSlate)"/>
+
+  <!-- ==================== LEVEL 2: SEMANTIC ==================== -->
+  <g filter="url(#cardShadow)">
+    <rect x="505" y="168" width="430" height="486" rx="12" fill="#FFFFFF" stroke="#5EEAD4" stroke-width="1.4"/>
+    <rect x="505" y="168" width="430" height="52" rx="12" fill="#0D9488"/>
+    <rect x="505" y="208" width="430" height="12" fill="#0D9488"/>
+    <circle cx="537" cy="194" r="14" fill="#FFFFFF"/>
+    <text x="537" y="199" text-anchor="middle" fill="#0D9488" font-size="14" font-weight="800">L2</text>
+    <text x="563" y="192" fill="#FFFFFF" font-size="17" font-weight="700">Semantic &amp; Cross-Lingual Level</text>
+    <text x="563" y="210" fill="#CCFBF1" font-size="11.5" font-weight="500">CorrespondenceLevel.SEMANTIC · Priority 2</text>
+  </g>
+
+  <rect x="525" y="234" width="390" height="36" rx="6" fill="#0F172A"/>
+  <text x="537" y="256" fill="#5EEAD4" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">$ fairwddi compare run ... --level semantic</text>
+
+  <text x="525" y="294" fill="#0F172A" font-size="13" font-weight="700">Matching Mechanisms</text>
+  <text x="525" y="316" fill="#334155" font-size="12">• Multilingual vector embeddings &amp; cosine similarity</text>
+  <text x="525" y="336" fill="#334155" font-size="12">• Cross-language alignment (xml:lang: fr ↔ en ↔ fi)</text>
+  <text x="525" y="356" fill="#334155" font-size="12">• Optional LLM / agent nuance verification:</text>
+  <rect x="537" y="366" width="378" height="28" rx="5" fill="#F0FDFA" stroke="#99F6E4"/>
+  <text x="726" y="384" text-anchor="middle" fill="#115E59" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">min_vector_similarity · enable_agent_nuance</text>
+
+  <line x1="525" y1="410" x2="915" y2="410" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="525" y="432" fill="#0F172A" font-size="13" font-weight="700">Harmonization Outcome</text>
+  <rect x="525" y="444" width="390" height="84" rx="8" fill="#F0FDFA" stroke="#99F6E4"/>
+  <text x="539" y="465" fill="#115E59" font-size="12" font-weight="700">• link_only (skos:closeMatch / skos:relatedMatch)</text>
+  <text x="551" y="483" fill="#334155" font-size="11.5">Persisted in SemanticRelationship with confidence</text>
+  <text x="539" y="503" fill="#115E59" font-size="12" font-weight="700">• cluster_concept (when conceptual clustering enabled)</text>
+  <text x="551" y="520" fill="#334155" font-size="11.5">Groups semantically equivalent items under a concept</text>
+
+  <rect x="525" y="542" width="390" height="96" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="539" y="563" fill="#475569" font-size="11" font-weight="700" letter-spacing="0.4">EXAMPLE &amp; APPROVAL TIER</text>
+  <text x="539" y="583" fill="#0F172A" font-size="11.5" font-weight="600">"Intérêt pour la politique" ↔ "Interest in politics"</text>
+  <text x="539" y="602" fill="#334155" font-size="11.5">Tier: review_required (human-in-the-loop gate)</text>
+  <text x="539" y="621" fill="#0D9488" font-size="11.5" font-weight="600">Records provenance: correspondence_level="semantic"</text>
+
+  <!-- Arrow L2 -> L3 -->
+  <line x1="935" y1="410" x2="961" y2="410" stroke="#475569" stroke-width="2" marker-end="url(#arrowSlate)"/>
+
+  <!-- ==================== LEVEL 3: CONCEPTUAL ==================== -->
+  <g filter="url(#cardShadow)">
+    <rect x="966" y="168" width="430" height="486" rx="12" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.4"/>
+    <rect x="966" y="168" width="430" height="52" rx="12" fill="#6D28D9"/>
+    <rect x="966" y="208" width="430" height="12" fill="#6D28D9"/>
+    <circle cx="998" cy="194" r="14" fill="#FFFFFF"/>
+    <text x="998" y="199" text-anchor="middle" fill="#6D28D9" font-size="14" font-weight="800">L3</text>
+    <text x="1024" y="192" fill="#FFFFFF" font-size="17" font-weight="700">Conceptual &amp; Thesaurus Level</text>
+    <text x="1024" y="210" fill="#EDE9FE" font-size="11.5" font-weight="500">CorrespondenceLevel.CONCEPTUAL · Priority 3</text>
+  </g>
+
+  <rect x="986" y="234" width="390" height="36" rx="6" fill="#0F172A"/>
+  <text x="998" y="256" fill="#C4B5FD" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">$ fairwddi compare run ... --level conceptual</text>
+
+  <text x="986" y="294" fill="#0F172A" font-size="13" font-weight="700">Matching Mechanisms</text>
+  <text x="986" y="316" fill="#334155" font-size="12">• Controlled vocabulary &amp; SKOS/XKOS thesaurus anchoring</text>
+  <text x="986" y="336" fill="#334155" font-size="12">• Shared Concept.uri (CESSDA ELSST, Topics, DDI-CV)</text>
+  <text x="986" y="356" fill="#334155" font-size="12">• ConceptScheme hierarchy &amp; graph distance:</text>
+  <rect x="998" y="366" width="378" height="28" rx="5" fill="#F5F3FF" stroke="#DDD6FE"/>
+  <text x="1187" y="384" text-anchor="middle" fill="#5B21B6" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">exactMatch | broadMatch | narrowMatch | graph_hops</text>
+
+  <line x1="986" y1="410" x2="1376" y2="410" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="986" y="432" fill="#0F172A" font-size="13" font-weight="700">Harmonization Outcome</text>
+  <rect x="986" y="444" width="390" height="84" rx="8" fill="#F5F3FF" stroke="#DDD6FE"/>
+  <text x="1000" y="465" fill="#4C1D95" font-size="12" font-weight="700">• cluster_concept (ConceptualVariable)</text>
+  <text x="1012" y="483" fill="#334155" font-size="11.5">Binds distinct RepresentedVariables across waves</text>
+  <text x="1000" y="503" fill="#4C1D95" font-size="12" font-weight="700">• Preserves local wording &amp; response scales</text>
+  <text x="1012" y="520" fill="#334155" font-size="11.5">Enables thematic discovery without altering datasets</text>
+
+  <rect x="986" y="542" width="390" height="96" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="1000" y="563" fill="#475569" font-size="11" font-weight="700" letter-spacing="0.4">EXAMPLE &amp; APPROVAL TIER</text>
+  <text x="1000" y="583" fill="#0F172A" font-size="11.5" font-weight="600">7-pt &amp; 11-pt Left-Right scales → ELSST "POLITICAL ATTITUDES"</text>
+  <text x="1000" y="602" fill="#334155" font-size="11.5">Tier: high (exact Concept.uri) or review_required (broader)</text>
+  <text x="1000" y="621" fill="#6D28D9" font-size="11.5" font-weight="600">Anchors Variable Cascade to ConceptualVariable</text>
+
+  <!-- ==================== EXECUTION PIPELINE BAR ==================== -->
+  <g filter="url(#cardShadow)">
+    <rect x="44" y="684" width="1352" height="232" rx="14" fill="url(#pipeGrad)" stroke="#4F46E5" stroke-width="1.5"/>
+  </g>
+  <text x="68" y="714" fill="#1E1B4B" font-size="17" font-weight="800">
+    End-to-End Harmonization Workflow (Read-Only Comparison → Policy Plan → Atomic DB Execution)
+  </text>
+  <text x="68" y="734" fill="#4338CA" font-size="12" font-weight="500">
+    All three levels run in a single comparison pass with configurable weights, thresholds, and full rollback support
+  </text>
+
+  <!-- Step A -->
+  <rect x="68" y="752" width="404" height="146" rx="10" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="1.2"/>
+  <rect x="68" y="752" width="404" height="34" rx="10" fill="#312E81"/>
+  <rect x="68" y="776" width="404" height="10" fill="#312E81"/>
+  <text x="84" y="774" fill="#FFFFFF" font-size="13" font-weight="700">1. Compare Two Sets (Zero DB Writes)</text>
+  <text x="84" y="806" fill="#0F172A" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">$ fairwddi compare run --source batch:2 \</text>
+  <text x="94" y="822" fill="#0F172A" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">  --target group:series-a --level all</text>
+  <text x="84" y="848" fill="#475569" font-size="11.5">• Evaluates L1 + L2 + L3 + CodeListQualification</text>
+  <text x="84" y="867" fill="#475569" font-size="11.5">• Emits *.comparison.{yaml,json} &amp; .report.md</text>
+  <text x="84" y="886" fill="#475569" font-size="11.5">• Filterable by --resource-type</text>
+
+  <!-- Arrow A -> B -->
+  <line x1="472" y1="825" x2="502" y2="825" stroke="#4F46E5" stroke-width="2.2" marker-end="url(#arrowIndigo)"/>
+
+  <!-- Step B -->
+  <rect x="506" y="752" width="428" height="146" rx="10" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="1.2"/>
+  <rect x="506" y="752" width="428" height="34" rx="10" fill="#4338CA"/>
+  <rect x="506" y="776" width="428" height="10" fill="#4338CA"/>
+  <text x="522" y="774" fill="#FFFFFF" font-size="13" font-weight="700">2. Generate Harmonization Plan (Policy Gate)</text>
+  <text x="522" y="806" fill="#0F172A" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">$ fairwddi harmonize plan compare.yaml \</text>
+  <text x="532" y="822" fill="#0F172A" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">  [--approve-high]</text>
+  <text x="522" y="848" fill="#475569" font-size="11.5">• Priority resolution: Syntactic → Semantic → Conceptual</text>
+  <text x="522" y="867" fill="#475569" font-size="11.5">• Assigns approval_tier: high vs review_required</text>
+  <text x="522" y="886" fill="#475569" font-size="11.5">• Emits *.harmonize.plan.yaml &amp; .report.md</text>
+
+  <!-- Arrow B -> C -->
+  <line x1="934" y1="825" x2="964" y2="825" stroke="#4F46E5" stroke-width="2.2" marker-end="url(#arrowIndigo)"/>
+
+  <!-- Step C -->
+  <rect x="968" y="752" width="404" height="146" rx="10" fill="#FFFFFF" stroke="#A7F3D0" stroke-width="1.4"/>
+  <rect x="968" y="752" width="404" height="34" rx="10" fill="#059669"/>
+  <rect x="968" y="776" width="404" height="10" fill="#059669"/>
+  <text x="984" y="774" fill="#FFFFFF" font-size="13" font-weight="700">3. Execute &amp; Audit in PostgreSQL 17</text>
+  <text x="984" y="806" fill="#0F172A" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">$ fairwddi harmonize execute harm.plan.yaml</text>
+  <text x="984" y="822" fill="#0F172A" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"># or manual: harmonize create / link / undo</text>
+  <text x="984" y="848" fill="#475569" font-size="11.5">• Persists SemanticRelationship &amp; ConceptualVariable</text>
+  <text x="984" y="867" fill="#475569" font-size="11.5">• Tags correspondence_level &amp; confidence on links</text>
+  <text x="984" y="886" fill="#475569" font-size="11.5">• Full EventLog audit + fairwddi harmonize undo</text>
+
+  <!-- Footer -->
+  <text x="48" y="942" fill="#64748B" font-size="11">
+    FAIRwDDI WP3 ST3 · Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS · Three-Layer Harmonization Architecture
+  </text>
+  <text x="1396" y="942" text-anchor="end" fill="#64748B" font-size="11">
+    three_levels_of_harmonization_infographic.svg
+  </text>
+</svg>

@@ -641,6 +641,9 @@ def _normalize_node(
             if title_ml:
                 label_ml = label_ml or title_ml
                 citation_ml = {"title": title_ml}
+                if not name_ml:
+                    name_ml = title_ml
+                    name_str = str(next(iter(title_ml.values())))[:255]
         abstract_ml = _extract_multilingual(raw_value.get("Abstract"))
 
     hash_fields: dict[str, Any] = {
@@ -893,6 +896,7 @@ def plan_import(
         "quarantine": 0,
         "skip": 0,
     }
+    planned_codes = 0
     planned_frequency_rows = 0
     planned_summary_stat_vars = 0
 
@@ -948,8 +952,14 @@ def plan_import(
             planned_summary_stat_vars += 1
         planned_frequency_rows += len(norm["frequencies"])
 
+        extra_details: dict[str, Any] = {}
+        notes_suffix = ""
         if r_type == "CodeList":
             codelist_urns.add(c_urn)
+            code_count = len(norm.get("codes") or [])
+            planned_codes += code_count
+            extra_details["code_count"] = code_count
+            notes_suffix = f" ({code_count} code(s))"
 
         if r_type == "Variable":
             # Synthesize study-specific imported RepresentedVariable (+ optional QuestionItem)
@@ -1036,7 +1046,7 @@ def plan_import(
             actions.append(
                 _plan_resource(
                     action_id=f"imp-{act_seq:04d}",
-                    r_type="Variable",
+                    r_type="InstanceVariable",
                     source_urn=node.raw_urn,
                     c_urn=c_urn,
                     norm=norm,
@@ -1044,9 +1054,7 @@ def plan_import(
                     action_counts=action_counts,
                     issues=issues,
                     extra_details=var_extra,
-                    notes_suffix=(
-                        f" -> InstanceVariable + RepresentedVariable ({rv_urn}){extra_note}"
-                    ),
+                    notes_suffix=(f" (+ RepresentedVariable {rv_urn}){extra_note}"),
                 )
             )
             continue
@@ -1062,6 +1070,8 @@ def plan_import(
                 existing_urns=existing_urns,
                 action_counts=action_counts,
                 issues=issues,
+                extra_details=extra_details or None,
+                notes_suffix=notes_suffix,
             )
         )
 
@@ -1078,6 +1088,7 @@ def plan_import(
         summary={
             "streamed_nodes": len(nodes),
             "planned_actions": len(actions),
+            "planned_codes": planned_codes,
             "planned_frequency_rows": planned_frequency_rows,
             "planned_summary_stat_variables": planned_summary_stat_vars,
             **action_counts,
@@ -1290,7 +1301,7 @@ def execute_import(
             if status == "create":
                 primary_study = StudyUnit.objects.create(
                     urn=c_urn,
-                    name=norm["name"],
+                    name=norm["name_ml"] or norm["name"],
                     title=norm["label"] or norm["citation"],
                     description=norm["description"] or norm["abstract"],
                     hashes=norm["hashes"],
@@ -1301,6 +1312,10 @@ def execute_import(
             else:
                 primary_study = StudyUnit.objects.filter(urn=c_urn).first() or primary_study
 
+            pi_node_urns = {
+                _normalize_node("PhysicalInstance", p.raw_urn, p.raw_value)["canonical_urn"]
+                for p in nodes_by_type.get("PhysicalInstance", [])
+            }
             pi_refs = node.raw_value.get("PhysicalInstanceReference") or []
             if isinstance(pi_refs, dict):
                 pi_refs = [pi_refs]
@@ -1312,7 +1327,11 @@ def execute_import(
                     )
                     pi_norm = _normalize_node("PhysicalInstance", str(pi_urn_raw), pi_dict)
                     pi_c_urn = pi_norm["canonical_urn"]
-                    if primary_study and not Datafile.objects.filter(urn=pi_c_urn).exists():
+                    if (
+                        primary_study
+                        and pi_c_urn not in pi_node_urns
+                        and not Datafile.objects.filter(urn=pi_c_urn).exists()
+                    ):
                         f_name, ext_attrs = _extract_datafile_attributes(pi_dict, pi_norm)
                         primary_datafile = Datafile.objects.create(
                             urn=pi_c_urn,

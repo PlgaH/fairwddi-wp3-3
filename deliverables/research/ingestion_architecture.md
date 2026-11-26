@@ -46,7 +46,7 @@ flowchart TD
         Detector["fairwddi.ingest.detector\n(Format Detection & SHA-256)"]
         QA["fairwddi.ingest.preflight\n(Profile QA & URN Link Audit)"]
         Upgrade["upgrade_ddic_to_ddil\n(DDI-C ➔ DDI-L 4 Conversion on Disk)\n• Primary: *.ddi40.json (ReQuest Core)\n• Secondary: *.stats.ddi40.json (VariableStatistics)"]
-        PlanPre["preflight.plan.yaml\n(Readiness Gate & Report)"]
+        PlanPre["preflight.json &amp; report.md\n(Readiness Gate &amp; Report)"]
     end
 
     subgraph IngestPhase ["3. Direct Ingestion Engine (fairwddi.ingest.loader)"]

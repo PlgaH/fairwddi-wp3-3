@@ -18,22 +18,40 @@ from fairwddi.api.schemas import (
     CodeItemInfo,
     CodeListQuestionRef,
     CodeListSummary,
+    ConceptualVariableSummary,
+    DatafileOccurrence,
+    FrequencyBarItem,
+    GenericResourceSummary,
     GraphLink,
     GraphNode,
+    GroupMemberSummary,
+    GroupSummary,
+    IngestBatchSummary,
+    InstanceVariableSummary,
     MatrixRow,
     MatrixWaveEntry,
     OverviewStats,
+    QuarantineSummary,
     QuestionCascadeGraph,
     QuestionItemSummary,
+    RepresentedVariableDetail,
     RepresentedVariableUsage,
+    ResourceTypeCount,
+    SemanticLinkInfo,
     SurveyItem,
+    VariableRefItem,
 )
 from fairwddi.models import (
     Category,
     CodeList,
+    ConceptualVariable,
+    DatafileVariableFrequency,
+    Group,
     IngestBatch,
     InstanceVariable,
+    MetadataQuarantine,
     QuestionItem,
+    RepresentedVariable,
     SemanticRelationship,
     StudyUnit,
     URNAlias,
@@ -79,16 +97,62 @@ def _extract_display_text(val: Any, preferred_lang: str = "fr") -> str:
     return str(val)
 
 
+def _resolve_batch_urns(batch_id: int | None) -> set[str] | None:
+    """Return all created/reused URNs for an IngestBatch, or None when unfiltered."""
+    if batch_id is None:
+        return None
+    batch = IngestBatch.objects.filter(id=batch_id).first()
+    if batch is None:
+        return set()
+    return set(batch.created_urns or []) | set(batch.reused_urns or [])
+
+
 @api.get("/overview", response=OverviewStats, summary="Global bank overview and reuse statistics")
-def get_overview(request: Any) -> OverviewStats:
+def get_overview(
+    request: Any,
+    study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
+    batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
+) -> OverviewStats:
     """Return counts of surveys, questions, harmonized questions, and URN aliases."""
-    total_surveys = StudyUnit.objects.count()
-    total_questions = QuestionItem.objects.count()
-    total_variables = InstanceVariable.objects.count()
-    total_categories = Category.objects.count()
-    total_codelists = CodeList.objects.count()
+    batch_urns = _resolve_batch_urns(batch_id)
+
+    su_qs = StudyUnit.objects.all()
+    q_qs = QuestionItem.objects.all()
+    iv_qs = InstanceVariable.objects.all()
+    cat_qs = Category.objects.all()
+    cl_qs = CodeList.objects.all()
+
+    if study_urn:
+        su_qs = su_qs.filter(urn=study_urn)
+        q_qs = q_qs.filter(
+            variable_associations__represented_variable__instance_variables__datafile_variables__datafile__study_unit__urn=study_urn
+        ).distinct()
+        iv_qs = iv_qs.filter(datafile_variables__datafile__study_unit__urn=study_urn).distinct()
+        cl_qs = cl_qs.filter(
+            represented_variables__instance_variables__datafile_variables__datafile__study_unit__urn=study_urn
+        ).distinct()
+        cat_qs = cat_qs.filter(
+            code_memberships__code_list__represented_variables__instance_variables__datafile_variables__datafile__study_unit__urn=study_urn
+        ).distinct()
+
+    if batch_urns is not None:
+        su_qs = su_qs.filter(urn__in=batch_urns)
+        q_qs = q_qs.filter(urn__in=batch_urns)
+        iv_qs = iv_qs.filter(urn__in=batch_urns)
+        cl_qs = cl_qs.filter(urn__in=batch_urns)
+        cat_qs = cat_qs.filter(urn__in=batch_urns)
+
+    total_surveys = su_qs.count()
+    total_questions = q_qs.count()
+    total_variables = iv_qs.count()
+    total_categories = cat_qs.count()
+    total_codelists = cl_qs.count()
     total_aliases = URNAlias.objects.count()
-    total_batches = IngestBatch.objects.count()
+    total_batches = (
+        1
+        if (batch_id is not None and batch_urns)
+        else (0 if batch_id is not None else IngestBatch.objects.count())
+    )
 
     # Reused questions: harmonized QuestionItems with prov:wasDerivedFrom or URNAliases
     aliased_question_urns = set(
@@ -100,7 +164,11 @@ def get_overview(request: Any) -> OverviewStats:
             subject_type="QuestionItem",
         ).values_list("subject_urn", flat=True)
     )
-    reused_count = len(aliased_question_urns | derived_question_urns)
+    reused_q_urns = aliased_question_urns | derived_question_urns
+    if study_urn or batch_urns is not None:
+        scoped_q_urns = set(q_qs.values_list("urn", flat=True))
+        reused_q_urns &= scoped_q_urns
+    reused_count = len(reused_q_urns)
 
     return OverviewStats(
         survey_count=total_surveys,
@@ -130,6 +198,7 @@ def list_surveys(request: Any) -> list[SurveyItem]:
                 created_at=su.created_at.isoformat() if su.created_at else None,
             )
         )
+    surveys.sort(key=lambda s: (s.title or s.name or s.urn).lower())
     return surveys
 
 
@@ -140,6 +209,8 @@ def list_questions(
     reused_only: bool = Query(
         False, description="Filter for cross-survey harmonized questions only"
     ),
+    study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
+    batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ) -> list[QuestionItemSummary]:
@@ -147,6 +218,13 @@ def list_questions(
     qs = QuestionItem.objects.all().prefetch_related(
         "variable_associations__represented_variable__instance_variables__datafile_variables__datafile__study_unit"
     )
+    if study_urn:
+        qs = qs.filter(
+            variable_associations__represented_variable__instance_variables__datafile_variables__datafile__study_unit__urn=study_urn
+        ).distinct()
+    batch_urns = _resolve_batch_urns(batch_id)
+    if batch_urns is not None:
+        qs = qs.filter(urn__in=batch_urns)
 
     origin_map = dict(UrnRegistry.objects.values_list("urn", "origin"))
 
@@ -677,6 +755,8 @@ def list_codelists(
     reused_only: bool = Query(
         False, description="Filter for code lists used across multiple variables"
     ),
+    study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
+    batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
 ) -> list[CodeListSummary]:
     """Return all code lists with their response categories and variable usages."""
     qs = (
@@ -688,6 +768,13 @@ def list_codelists(
         )
         .order_by("name", "urn")
     )
+    if study_urn:
+        qs = qs.filter(
+            represented_variables__instance_variables__datafile_variables__datafile__study_unit__urn=study_urn
+        ).distinct()
+    batch_urns = _resolve_batch_urns(batch_id)
+    if batch_urns is not None:
+        qs = qs.filter(urn__in=batch_urns)
 
     results: list[CodeListSummary] = []
     q_lower = q.lower().strip() if isinstance(q, str) else ""
@@ -730,6 +817,8 @@ def list_categories(
         False,
         description="Filter for categories used across multiple code lists",
     ),
+    study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
+    batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
 ) -> list[CategorySummary]:
     """Return all categories with their code list memberships and survey footprints."""
     qs = (
@@ -739,6 +828,13 @@ def list_categories(
         )
         .order_by("name", "urn")
     )
+    if study_urn:
+        qs = qs.filter(
+            code_memberships__code_list__represented_variables__instance_variables__datafile_variables__datafile__study_unit__urn=study_urn
+        ).distinct()
+    batch_urns = _resolve_batch_urns(batch_id)
+    if batch_urns is not None:
+        qs = qs.filter(urn__in=batch_urns)
 
     results: list[CategorySummary] = []
     q_lower = q.lower().strip()
@@ -893,3 +989,736 @@ def get_category(request: Any, urn: str) -> CategorySummary:
         surveys=sorted(list(surveys_set)),
         is_reused=is_reused,
     )
+
+
+@api.get(
+    "/groups",
+    response=list[GroupSummary],
+    summary="List curated DDI Groups",
+)
+def list_groups_api(
+    request: Any,
+    group_type: str | None = Query(None, description="Filter by group_type"),
+    q: str | None = Query(None, description="Filter by slug, name, or URN"),
+    limit: int = Query(100, ge=1, le=500),
+) -> list[GroupSummary]:
+    """Return curated DDI Groups with their slugs, types, and member references."""
+    qs = Group.objects.all().order_by("slug", "urn")
+    if group_type:
+        qs = qs.filter(group_type=group_type)
+
+    results: list[GroupSummary] = []
+    q_lower = q.lower().strip() if q else None
+    for grp in qs:
+        name_str = _extract_display_text(grp.name) or grp.slug or grp.urn
+        desc_str = _extract_display_text(grp.description)
+        if q_lower:
+            hay = f"{grp.slug or ''} {name_str} {grp.urn} {grp.group_type}".lower()
+            if q_lower not in hay:
+                continue
+        members = [
+            GroupMemberSummary(
+                resource_type=str(ref.get("resource_type", "Resource")),
+                urn=str(ref.get("urn", "")),
+                label=str(ref.get("label", "")),
+            )
+            for ref in (grp.references or [])
+            if isinstance(ref, dict) and ref.get("urn")
+        ]
+        results.append(
+            GroupSummary(
+                urn=grp.urn,
+                slug=grp.slug,
+                name=name_str,
+                description=desc_str,
+                group_type=grp.group_type or "custom",
+                member_count=len(members),
+                members=members,
+            )
+        )
+        if len(results) >= limit:
+            break
+    return results
+
+
+@api.get(
+    "/batches",
+    response=list[IngestBatchSummary],
+    summary="List IngestBatch import receipts",
+)
+def list_batches_api(
+    request: Any,
+    status: str | None = Query(None, description="Filter by batch status"),
+    limit: int = Query(100, ge=1, le=500),
+) -> list[IngestBatchSummary]:
+    """Return recent IngestBatch receipts ordered newest first."""
+    qs = IngestBatch.objects.all().order_by("-id")
+    if status:
+        qs = qs.filter(status=status)
+
+    return [
+        IngestBatchSummary(
+            id=b.id,
+            source_format=b.source_format,
+            file_name=b.file_name,
+            file_sha256=b.file_sha256,
+            status=b.status,
+            created_count=len(b.created_urns or []),
+            reused_count=len(b.reused_urns or []),
+            stats=b.stats or {},
+            created_at=b.created_at.isoformat() if b.created_at else None,
+        )
+        for b in qs[:limit]
+    ]
+
+
+@api.get(
+    "/quarantine",
+    response=list[QuarantineSummary],
+    summary="List MetadataQuarantine drift records",
+)
+def list_quarantine_api(
+    request: Any,
+    status: str | None = Query(None, description="Filter by quarantine status"),
+    limit: int = Query(100, ge=1, le=500),
+) -> list[QuarantineSummary]:
+    """Return MetadataQuarantine records ordered newest first."""
+    qs = MetadataQuarantine.objects.all().order_by("-id")
+    if status == "pending":
+        qs = qs.filter(resolution__isnull=True)
+    elif status:
+        qs = qs.filter(resolution=status)
+
+    return [
+        QuarantineSummary(
+            id=q_rec.id,
+            incoming_urn=q_rec.incoming_urn,
+            existing_urn=q_rec.existing_urn,
+            entity_type=q_rec.entity_type,
+            conflict_type=q_rec.conflict_type,
+            status=q_rec.resolution or "pending",
+            source_file=q_rec.source_file,
+            existing_content_hash=q_rec.existing_content_hash,
+            incoming_content_hash=q_rec.incoming_content_hash,
+            created_at=q_rec.created_at.isoformat() if q_rec.created_at else None,
+        )
+        for q_rec in qs[:limit]
+    ]
+
+
+def _build_instance_variable_summary(
+    iv: InstanceVariable,
+    origin_map: dict[str, str],
+    include_occurrences: bool = False,
+) -> InstanceVariableSummary:
+    """Build an InstanceVariableSummary with cascade references and optional stats/frequencies."""
+    iv_name = _extract_display_text(iv.name) or iv.urn
+    iv_label = _extract_display_text(iv.label)
+    iv_desc = _extract_display_text(iv.description)
+
+    rv = iv.represented_variable
+    rv_urn = rv.urn if rv else None
+    rv_name = (_extract_display_text(rv.name) or rv.urn) if rv else None
+    cv = rv.conceptual_variable if rv else None
+    cv_urn = cv.urn if cv else None
+    cv_name = (_extract_display_text(cv.name) or cv.urn) if cv else None
+    cl = rv.code_list if rv else None
+    cl_urn = cl.urn if cl else None
+    cl_name = (_extract_display_text(cl.name) or cl.urn) if cl else None
+
+    code_label_map: dict[str, tuple[str, bool]] = {}
+    if cl is not None and include_occurrences:
+        for ci in cl.codes.all():
+            cat_lbl = (
+                _extract_display_text(ci.category.label or ci.category.name) if ci.category else ""
+            )
+            code_label_map[str(ci.code_value)] = (cat_lbl, bool(ci.is_missing))
+
+    questions: list[VariableRefItem] = []
+    if rv is not None:
+        for qv in rv.question_associations.all():
+            qi = qv.question_item
+            if qi:
+                questions.append(
+                    VariableRefItem(
+                        urn=qi.urn,
+                        name=_extract_display_text(qi.name) or qi.urn,
+                        label=_extract_display_text(qi.question_text) or "",
+                        resource_type="QuestionItem",
+                    )
+                )
+
+    surveys_set: set[str] = set()
+    df_vars = list(iv.datafile_variables.all())
+    has_stats = any(bool(dfv.statistics) for dfv in df_vars)
+
+    freqs_by_df: dict[str, list[DatafileVariableFrequency]] = {}
+    freq_total_count = 0
+    for f_row in iv.frequencies.all():
+        freqs_by_df.setdefault(f_row.datafile_id, []).append(f_row)
+        freq_total_count += 1
+    if freq_total_count > 0:
+        has_stats = True
+
+    occurrences: list[DatafileOccurrence] = []
+    for dfv in df_vars:
+        df = dfv.datafile
+        su = df.study_unit if df else None
+        su_name = _extract_display_text(su.name) if su else None
+        if su_name:
+            surveys_set.add(su_name)
+        if include_occurrences and df is not None:
+            raw_freqs = freqs_by_df.get(df.urn, [])
+            valid_sum = sum(
+                f.frequency
+                for f in raw_freqs
+                if not code_label_map.get(str(f.code_value), ("", False))[1]
+            )
+            denom = valid_sum if valid_sum > 0 else sum(f.frequency for f in raw_freqs)
+            freq_items = [
+                FrequencyBarItem(
+                    code_value=str(f.code_value),
+                    category_label=code_label_map.get(str(f.code_value), ("", False))[0],
+                    is_missing=code_label_map.get(str(f.code_value), ("", False))[1],
+                    frequency=float(f.frequency),
+                    percentage=round((float(f.frequency) / denom) * 100.0, 2)
+                    if denom > 0
+                    else None,
+                    weight=f.weight,
+                )
+                for f in raw_freqs
+            ]
+            occurrences.append(
+                DatafileOccurrence(
+                    datafile_urn=df.urn,
+                    datafile_name=df.name or df.urn,
+                    study_urn=su.urn if su else None,
+                    study_name=su_name,
+                    order=dfv.order,
+                    statistics=dfv.statistics or {},
+                    frequencies=freq_items,
+                )
+            )
+
+    return InstanceVariableSummary(
+        urn=iv.urn,
+        origin=origin_map.get(iv.urn, "imported"),
+        name=iv_name,
+        label=iv_label,
+        description=iv_desc,
+        represented_variable_urn=rv_urn,
+        represented_variable_name=rv_name,
+        conceptual_variable_urn=cv_urn,
+        conceptual_variable_name=cv_name,
+        codelist_urn=cl_urn,
+        codelist_name=cl_name,
+        questions=questions,
+        surveys=sorted(surveys_set),
+        datafile_count=len(df_vars),
+        frequency_count=freq_total_count,
+        has_statistics=has_stats,
+        occurrences=occurrences,
+    )
+
+
+@api.get(
+    "/variables/instance",
+    response=list[InstanceVariableSummary],
+    summary="List InstanceVariables with datafile/statistics indicators",
+)
+def list_instance_variables(
+    request: Any,
+    q: str = Query("", description="Search by name, label, or URN"),
+    has_stats: bool = Query(False, description="Only variables with statistics or frequencies"),
+    study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
+    batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+) -> list[InstanceVariableSummary]:
+    """List dataset-level InstanceVariables with optional study/batch and stats filters."""
+    qs = (
+        InstanceVariable.objects.all()
+        .select_related(
+            "represented_variable__conceptual_variable",
+            "represented_variable__code_list",
+        )
+        .prefetch_related(
+            "represented_variable__question_associations__question_item",
+            "datafile_variables__datafile__study_unit",
+            "frequencies",
+        )
+        .order_by("name", "urn")
+    )
+    if study_urn:
+        qs = qs.filter(datafile_variables__datafile__study_unit__urn=study_urn).distinct()
+    batch_urns = _resolve_batch_urns(batch_id)
+    if batch_urns is not None:
+        qs = qs.filter(urn__in=batch_urns)
+
+    origin_map = dict(UrnRegistry.objects.values_list("urn", "origin"))
+    q_lower = q.lower().strip()
+    results: list[InstanceVariableSummary] = []
+
+    for iv in qs:
+        summary = _build_instance_variable_summary(iv, origin_map, include_occurrences=False)
+        if has_stats and not summary.has_statistics:
+            continue
+        if q_lower:
+            hay = (
+                f"{summary.name} {summary.label} {summary.urn} {summary.codelist_name or ''}"
+            ).lower()
+            if q_lower not in hay:
+                continue
+        results.append(summary)
+
+    return results[offset : offset + limit]
+
+
+@api.get(
+    "/variables/instance/{path:urn}",
+    response=InstanceVariableSummary,
+    summary="Get single InstanceVariable detail with statistics and frequencies",
+)
+def get_instance_variable(request: Any, urn: str) -> InstanceVariableSummary:
+    """Return full InstanceVariable detail including Datafile statistics and frequency bars."""
+    urn = unquote(urn)
+    iv = (
+        InstanceVariable.objects.filter(urn=urn)
+        .select_related(
+            "represented_variable__conceptual_variable",
+            "represented_variable__code_list",
+        )
+        .prefetch_related(
+            "represented_variable__code_list__codes__category",
+            "represented_variable__question_associations__question_item",
+            "datafile_variables__datafile__study_unit",
+            "frequencies",
+        )
+        .first()
+    )
+    if not iv:
+        raise ValueError(f"InstanceVariable '{urn}' not found.")
+    origin_map = dict(UrnRegistry.objects.filter(urn=urn).values_list("urn", "origin"))
+    return _build_instance_variable_summary(iv, origin_map, include_occurrences=True)
+
+
+def _build_represented_variable_detail(
+    rv: RepresentedVariable,
+    origin_map: dict[str, str],
+    links_by_subject: dict[str, list[SemanticLinkInfo]],
+) -> RepresentedVariableDetail:
+    """Build a RepresentedVariableDetail with cascade, children, and harmonization links."""
+    rv_name = _extract_display_text(rv.name) or rv.urn
+    rv_label = _extract_display_text(rv.label)
+    rv_desc = _extract_display_text(rv.description)
+    cv = rv.conceptual_variable
+    cl = rv.code_list
+
+    questions = [
+        VariableRefItem(
+            urn=qv.question_item.urn,
+            name=_extract_display_text(qv.question_item.name) or qv.question_item.urn,
+            label=_extract_display_text(qv.question_item.question_text) or "",
+            resource_type="QuestionItem",
+        )
+        for qv in rv.question_associations.all()
+        if qv.question_item
+    ]
+
+    ivs: list[VariableRefItem] = []
+    surveys_set: set[str] = set()
+    for iv in rv.instance_variables.all():
+        iv_study: str | None = None
+        for dfv in iv.datafile_variables.all():
+            if dfv.datafile and dfv.datafile.study_unit:
+                s_name = _extract_display_text(dfv.datafile.study_unit.name)
+                if s_name:
+                    surveys_set.add(s_name)
+                    iv_study = iv_study or s_name
+        ivs.append(
+            VariableRefItem(
+                urn=iv.urn,
+                name=_extract_display_text(iv.name) or iv.urn,
+                label=_extract_display_text(iv.label) or "",
+                resource_type="InstanceVariable",
+                study_name=iv_study,
+            )
+        )
+
+    sem_links = links_by_subject.get(rv.urn, [])
+    is_reused = len(ivs) > 1 or len(surveys_set) > 1 or len(sem_links) > 0
+
+    return RepresentedVariableDetail(
+        urn=rv.urn,
+        origin=origin_map.get(rv.urn, "imported"),
+        name=rv_name,
+        label=rv_label,
+        description=rv_desc,
+        conceptual_variable_urn=cv.urn if cv else None,
+        conceptual_variable_name=(_extract_display_text(cv.name) or cv.urn) if cv else None,
+        codelist_urn=cl.urn if cl else None,
+        codelist_name=(_extract_display_text(cl.name) or cl.urn) if cl else None,
+        value_representation=rv.value_representation
+        if isinstance(rv.value_representation, dict)
+        else {},
+        questions=questions,
+        instance_variables=ivs,
+        surveys=sorted(surveys_set),
+        semantic_links=sem_links,
+        is_reused=is_reused,
+    )
+
+
+def _fetch_rv_semantic_links(urns: list[str] | None = None) -> dict[str, list[SemanticLinkInfo]]:
+    """Fetch outgoing SemanticRelationship links for RepresentedVariables."""
+    qs = SemanticRelationship.objects.filter(subject_type="RepresentedVariable")
+    if urns is not None:
+        qs = qs.filter(subject_urn__in=urns)
+    out: dict[str, list[SemanticLinkInfo]] = {}
+    for rel in qs:
+        lvl = None
+        conf = None
+        for attr in rel.extended_attributes or []:
+            if isinstance(attr, dict):
+                if attr.get("type") == "correspondence_level":
+                    lvl = str(attr.get("value"))
+                elif attr.get("type") == "confidence":
+                    try:
+                        conf = float(attr.get("value"))
+                    except (TypeError, ValueError):
+                        conf = None
+        out.setdefault(rel.subject_urn, []).append(
+            SemanticLinkInfo(
+                predicate=rel.predicate,
+                target_urn=rel.object_urn,
+                target_type=rel.object_type or "",
+                correspondence_level=lvl,
+                confidence=conf,
+            )
+        )
+    return out
+
+
+@api.get(
+    "/variables/represented",
+    response=list[RepresentedVariableDetail],
+    summary="List RepresentedVariables with cascade and harmonization links",
+)
+def list_represented_variables(
+    request: Any,
+    q: str = Query("", description="Search by name, label, or URN"),
+    reused_only: bool = Query(
+        False, description="Only variables reused across >1 IV/study or linked"
+    ),
+    has_codelist: bool = Query(False, description="Only variables with a linked CodeList"),
+    study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
+    batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+) -> list[RepresentedVariableDetail]:
+    """List reusable RepresentedVariables with optional study/batch and reuse filters."""
+    qs = (
+        RepresentedVariable.objects.all()
+        .select_related("conceptual_variable", "code_list")
+        .prefetch_related(
+            "question_associations__question_item",
+            "instance_variables__datafile_variables__datafile__study_unit",
+        )
+        .order_by("name", "urn")
+    )
+    if has_codelist:
+        qs = qs.filter(code_list__isnull=False)
+    if study_urn:
+        qs = qs.filter(
+            instance_variables__datafile_variables__datafile__study_unit__urn=study_urn
+        ).distinct()
+    batch_urns = _resolve_batch_urns(batch_id)
+    if batch_urns is not None:
+        qs = qs.filter(urn__in=batch_urns)
+
+    origin_map = dict(UrnRegistry.objects.values_list("urn", "origin"))
+    links_map = _fetch_rv_semantic_links()
+    q_lower = q.lower().strip()
+    results: list[RepresentedVariableDetail] = []
+
+    for rv in qs:
+        detail = _build_represented_variable_detail(rv, origin_map, links_map)
+        if reused_only and not detail.is_reused:
+            continue
+        if q_lower:
+            hay = f"{detail.name} {detail.label} {detail.urn} {detail.codelist_name or ''}".lower()
+            if q_lower not in hay:
+                continue
+        results.append(detail)
+
+    return results[offset : offset + limit]
+
+
+@api.get(
+    "/variables/represented/{path:urn}",
+    response=RepresentedVariableDetail,
+    summary="Get single RepresentedVariable detail by URN",
+)
+def get_represented_variable(request: Any, urn: str) -> RepresentedVariableDetail:
+    """Return complete detail for a single RepresentedVariable."""
+    urn = unquote(urn)
+    rv = (
+        RepresentedVariable.objects.filter(urn=urn)
+        .select_related("conceptual_variable", "code_list")
+        .prefetch_related(
+            "question_associations__question_item",
+            "instance_variables__datafile_variables__datafile__study_unit",
+        )
+        .first()
+    )
+    if not rv:
+        raise ValueError(f"RepresentedVariable '{urn}' not found.")
+    origin_map = dict(UrnRegistry.objects.filter(urn=urn).values_list("urn", "origin"))
+    links_map = _fetch_rv_semantic_links([urn])
+    return _build_represented_variable_detail(rv, origin_map, links_map)
+
+
+def _build_conceptual_variable_summary(
+    cv: ConceptualVariable,
+    origin_map: dict[str, str],
+) -> ConceptualVariableSummary:
+    """Build a ConceptualVariableSummary with Concept anchor and clustered RVs."""
+    cv_name = _extract_display_text(cv.name) or cv.urn
+    cv_label = _extract_display_text(cv.label)
+    cv_desc = _extract_display_text(cv.description)
+    concept = cv.concept
+
+    rvs: list[VariableRefItem] = []
+    surveys_set: set[str] = set()
+    for rv in cv.represented_variables.all():
+        for iv in rv.instance_variables.all():
+            for dfv in iv.datafile_variables.all():
+                if dfv.datafile and dfv.datafile.study_unit:
+                    s_name = _extract_display_text(dfv.datafile.study_unit.name)
+                    if s_name:
+                        surveys_set.add(s_name)
+        rvs.append(
+            VariableRefItem(
+                urn=rv.urn,
+                name=_extract_display_text(rv.name) or rv.urn,
+                label=_extract_display_text(rv.label) or "",
+                resource_type="RepresentedVariable",
+            )
+        )
+
+    return ConceptualVariableSummary(
+        urn=cv.urn,
+        origin=origin_map.get(cv.urn, "imported"),
+        name=cv_name,
+        label=cv_label,
+        description=cv_desc,
+        concept_urn=concept.urn if concept else None,
+        concept_uri=concept.uri if concept else None,
+        concept_vocabulary=concept.vocabulary if concept else None,
+        concept_label=(_extract_display_text(concept.label) or concept.urn) if concept else None,
+        represented_variables=rvs,
+        surveys=sorted(surveys_set),
+        represented_count=len(rvs),
+    )
+
+
+@api.get(
+    "/variables/conceptual",
+    response=list[ConceptualVariableSummary],
+    summary="List ConceptualVariables with thesaurus anchors and clustered RVs",
+)
+def list_conceptual_variables(
+    request: Any,
+    q: str = Query("", description="Search by name, label, concept URI, or URN"),
+    study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
+    batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+) -> list[ConceptualVariableSummary]:
+    """List abstract ConceptualVariables with their Concept anchors and clustered RVs."""
+    qs = (
+        ConceptualVariable.objects.all()
+        .select_related("concept")
+        .prefetch_related(
+            "represented_variables__instance_variables__datafile_variables__datafile__study_unit"
+        )
+        .order_by("name", "urn")
+    )
+    if study_urn:
+        qs = qs.filter(
+            represented_variables__instance_variables__datafile_variables__datafile__study_unit__urn=study_urn
+        ).distinct()
+    batch_urns = _resolve_batch_urns(batch_id)
+    if batch_urns is not None:
+        qs = qs.filter(urn__in=batch_urns)
+
+    origin_map = dict(UrnRegistry.objects.values_list("urn", "origin"))
+    q_lower = q.lower().strip()
+    results: list[ConceptualVariableSummary] = []
+
+    for cv in qs:
+        summary = _build_conceptual_variable_summary(cv, origin_map)
+        if q_lower:
+            hay = (
+                f"{summary.name} {summary.label} {summary.urn} "
+                f"{summary.concept_uri or ''} {summary.concept_label or ''}"
+            ).lower()
+            if q_lower not in hay:
+                continue
+        results.append(summary)
+
+    return results[offset : offset + limit]
+
+
+@api.get(
+    "/variables/conceptual/{path:urn}",
+    response=ConceptualVariableSummary,
+    summary="Get single ConceptualVariable detail by URN",
+)
+def get_conceptual_variable(request: Any, urn: str) -> ConceptualVariableSummary:
+    """Return complete detail for a single ConceptualVariable."""
+    urn = unquote(urn)
+    cv = (
+        ConceptualVariable.objects.filter(urn=urn)
+        .select_related("concept")
+        .prefetch_related(
+            "represented_variables__instance_variables__datafile_variables__datafile__study_unit"
+        )
+        .first()
+    )
+    if not cv:
+        raise ValueError(f"ConceptualVariable '{urn}' not found.")
+    origin_map = dict(UrnRegistry.objects.filter(urn=urn).values_list("urn", "origin"))
+    return _build_conceptual_variable_summary(cv, origin_map)
+
+
+def _serialize_generic_resource(reg: UrnRegistry, obj: Any | None) -> GenericResourceSummary:
+    """Extract common DDI attributes from any concrete model instance."""
+    name_val = ""
+    label_val = ""
+    desc_val = ""
+    scheme_urn = None
+    ext_attrs: list[dict[str, Any]] = []
+    hashes_val: dict[str, Any] = {}
+    created_at = reg.created_at.isoformat() if reg.created_at else None
+    updated_at = reg.updated_at.isoformat() if reg.updated_at else None
+
+    if obj is not None:
+        raw_name = getattr(obj, "name", None)
+        name_val = _extract_display_text(raw_name) or reg.urn
+        raw_label = getattr(obj, "label", None) or getattr(obj, "title", None)
+        label_val = _extract_display_text(raw_label)
+        raw_desc = getattr(obj, "description", None)
+        desc_val = _extract_display_text(raw_desc)
+        scheme_urn = getattr(obj, "scheme_id", None)
+        raw_ext = getattr(obj, "extended_attributes", None)
+        if isinstance(raw_ext, list):
+            ext_attrs = [item for item in raw_ext if isinstance(item, dict)]
+        raw_hashes = getattr(obj, "hashes", None)
+        if isinstance(raw_hashes, dict):
+            hashes_val = raw_hashes
+        obj_created = getattr(obj, "created_at", None)
+        obj_updated = getattr(obj, "updated_at", None)
+        if obj_created is not None:
+            created_at = obj_created.isoformat()
+        if obj_updated is not None:
+            updated_at = obj_updated.isoformat()
+
+    return GenericResourceSummary(
+        urn=reg.urn,
+        resource_type=reg.resource_type,
+        origin=reg.origin,
+        name=name_val or reg.urn,
+        label=label_val,
+        description=desc_val,
+        scheme_urn=scheme_urn,
+        extended_attributes=ext_attrs,
+        hashes=hashes_val,
+        created_at=created_at,
+        updated_at=updated_at,
+    )
+
+
+@api.get(
+    "/resources/types",
+    response=list[ResourceTypeCount],
+    summary="List registered DDI resource types and counts",
+)
+def list_resource_types(request: Any) -> list[ResourceTypeCount]:
+    """Return all resource_type values in UrnRegistry with counts sorted alphabetically."""
+    from django.db.models import Count
+
+    rows = (
+        UrnRegistry.objects.values("resource_type")
+        .annotate(count=Count("urn"))
+        .order_by("resource_type")
+    )
+    return [ResourceTypeCount(resource_type=r["resource_type"], count=r["count"]) for r in rows]
+
+
+@api.get(
+    "/resources",
+    response=list[GenericResourceSummary],
+    summary="Browse any DDI resource registered in UrnRegistry by type and keyword",
+)
+def list_generic_resources(
+    request: Any,
+    resource_type: str | None = Query(None, description="Filter by UrnRegistry resource_type"),
+    q: str = Query("", description="Search by URN, name, or label"),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+) -> list[GenericResourceSummary]:
+    """List common attributes for registered DDI resources filtered by type and search query."""
+    from django.apps import apps
+
+    qs = UrnRegistry.objects.all().order_by("resource_type", "urn")
+    if resource_type:
+        qs = qs.filter(resource_type=resource_type)
+
+    reg_rows = list(qs)
+    urns_by_type: dict[str, list[str]] = {}
+    for r in reg_rows:
+        urns_by_type.setdefault(r.resource_type, []).append(r.urn)
+
+    obj_map: dict[str, Any] = {}
+    for r_type, urns in urns_by_type.items():
+        try:
+            model_cls = apps.get_model("fairwddi", r_type)
+            for obj in model_cls.objects.filter(urn__in=urns):
+                obj_map[obj.urn] = obj
+        except LookupError:
+            continue
+
+    q_lower = q.lower().strip()
+    results: list[GenericResourceSummary] = []
+    for r in reg_rows:
+        item = _serialize_generic_resource(r, obj_map.get(r.urn))
+        if q_lower:
+            hay = f"{item.urn} {item.resource_type} {item.name} {item.label}".lower()
+            if q_lower not in hay:
+                continue
+        results.append(item)
+
+    return results[offset : offset + limit]
+
+
+@api.get(
+    "/resources/{path:urn}",
+    response=GenericResourceSummary,
+    summary="Get common attributes for any DDI resource by URN",
+)
+def get_generic_resource(request: Any, urn: str) -> GenericResourceSummary:
+    """Return common attributes for a single registered DDI resource."""
+    from django.apps import apps
+
+    urn = unquote(urn)
+    reg = UrnRegistry.objects.filter(urn=urn).first()
+    if not reg:
+        raise ValueError(f"Resource '{urn}' not found in UrnRegistry.")
+    obj = None
+    try:
+        model_cls = apps.get_model("fairwddi", reg.resource_type)
+        obj = model_cls.objects.filter(urn=urn).first()
+    except LookupError:
+        pass
+    return _serialize_generic_resource(reg, obj)

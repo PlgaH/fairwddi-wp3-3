@@ -38,7 +38,7 @@ flowchart TD
         QA["fairwddi.importer.preflight\n(Profile QA & URN Link Audit)"]
         Upgrade["upgrade_ddic_to_ddil / dartfx-ddi ddic2l\n(DDI-C to DDI 4.0 Disk Converter)\n• Primary: *.ddi40.json (ReQuest Core)\n• Secondary: *.stats.ddi40.json (VariableStatistics)"]
         DedupeMetrics["Intra-File Deduplication & CategoryScheme Mode\n(single vs. per_codelist)"]
-        PlanPre["preflight.plan.yaml\n(Readiness Gate & Quality Scorecard)"]
+        PlanPre["preflight.json &amp; report.md\n(Readiness Gate &amp; Quality Scorecard)"]
     end
 
     subgraph ImportPhase ["3. Pure Deterministic Import Engine (fairwddi.importer.loader)"]

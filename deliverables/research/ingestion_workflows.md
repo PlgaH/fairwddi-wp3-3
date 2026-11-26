@@ -28,7 +28,7 @@ The FAIRwDDI Phase 2 ingestion engine supports three primary operational workflo
 ```mermaid
 flowchart TD
     A["FSD3562_eng.ddic.xml"] --> B["Step 1: fairwddi preflight check"]
-    B --> C["preflight.plan.yaml & report.md\n(Status: READY)"]
+    B --> C["preflight.json &amp; report.md\n(Status: READY)"]
     C --> D["Step 2: fairwddi preflight upgrade\n(--format ddi4-jsonl --id-strategy content_hash)"]
     D --> E["FSD3562_eng.ddi40.jsonl\n(Deduplicated CodeLists & Categories)"]
     E --> F["Step 3: fairwddi import plan"]
@@ -52,7 +52,7 @@ fairwddi preflight check tests/fixtures/FSD3562_eng.ddic.xml \
 
 _Expected Output:_
 
-- Emits `./ingest_output/FSD3562_eng.ddic.preflight.plan.yaml` and `.report.md`.
+- Emits `./ingest_output/FSD3562_eng.ddic.preflight.json` and `.preflight.report.md`.
 - Summary reports: `specification: DDI-C`, `version: 2.5`, `is_multilingual: false`, `variable_count: 74`.
 - If zero errors are reported, `is_ready_to_execute()` evaluates to `True`.
 
@@ -186,7 +186,7 @@ _Expected Output:_
 
 > [!TIP]
 > **Interactive Review Gate Authoring:**
-> Archivists can load `./ingest_output/FSD3562_eng.ddi40.import.plan.yaml` into the browser-based **Ingest Plan Editor** ([`deliverables/research/ingest_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/ingest_plan_editor.html)) to inspect planned operations, author canonical URN aliases, approve items in bulk, and sign off the review gate prior to PostgreSQL execution.
+> Archivists can load `./ingest_output/FSD3562_eng.ddi40.import.plan.yaml` into the browser-based **Import Plan Editor** ([`deliverables/editors/import_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/editors/import_plan_editor.html)) to inspect planned operations, author canonical URN aliases, approve items in bulk, and sign off the review gate prior to PostgreSQL execution.
 
 #### Step 4: Execute Core Ingestion
 
@@ -621,7 +621,7 @@ flowchart LR
 
 ### 6.3 Interactive Harmonization Plan Review, Stratified Matching & Question Grids
 
-Archivists can review candidate matches discovered by `fairwddi compare run` or planned via `fairwddi harmonize plan` in the standalone **Harmonization Plan Editor** ([`deliverables/research/harmonization_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/research/harmonization_plan_editor.html)) or via the generated YAML/Markdown harmonization plans:
+Archivists can review candidate matches discovered by `fairwddi compare run` or planned via `fairwddi harmonize plan` in the standalone **Harmonization Plan Editor** ([`deliverables/editors/harmonization_plan_editor.html`](file:///Users/pascal/git-plgah/fairwddi-lifecycle/deliverables/editors/harmonization_plan_editor.html)) or via the generated YAML/Markdown harmonization plans:
 
 - **Stratified Match Classification & Review Flagging (`requires_review: true`):**
   - `NEAR_EXACT`: Terminal punctuation variants (e.g., trailing `?` or French spacing before `?`) and sequence similarity $\ge 0.98$. Recommends `link_existing` (if harmonized target exists) or `generate_harmonized`.

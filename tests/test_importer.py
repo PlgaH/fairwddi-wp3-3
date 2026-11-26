@@ -320,10 +320,9 @@ def test_cli_preflight_check_default_output(
     stem = sample_fsd_ddic.stem
     json_file = tmp_path / f"{stem}.preflight.json"
     md_file = tmp_path / f"{stem}.preflight.report.md"
-    yaml_file = tmp_path / f"{stem}.preflight.plan.yaml"
     assert json_file.exists()
     assert md_file.exists()
-    assert yaml_file.exists()
+    assert not (tmp_path / f"{stem}.preflight.plan.yaml").exists()
     payload = json.loads(json_file.read_text(encoding="utf-8"))
     assert payload["stage"] == "preflight"
     assert payload["source_file"] == sample_fsd_ddic.name
@@ -349,6 +348,96 @@ def test_cli_preflight_profile_default_output(
     payload = json.loads(json_file.read_text(encoding="utf-8"))
     assert payload["source_file"] == sample_fsd_ddic.name
     assert "# DDI-Codebook Profile:" in md_file.read_text(encoding="utf-8")
+
+
+def test_import_plan_markdown_samples_all_resource_types() -> None:
+    from fairwddi.importer.plan import ImportActionItem, ImportPlan
+
+    actions: list[ImportActionItem] = [
+        ImportActionItem(
+            id=f"cat-{i:03d}",
+            action="create" if i <= 20 else "reuse",
+            resource_type="Category",
+            source_urn=f"urn:ddi:fr.cdsp:cat_{i}:1.0.0",
+        )
+        for i in range(1, 26)
+    ] + [
+        ImportActionItem(
+            id=f"var-{i:03d}",
+            action="create" if i <= 18 else "quarantine",
+            resource_type="InstanceVariable",
+            source_urn=f"urn:ddi:fr.cdsp:var_{i}:1.0.0",
+            target_urn=f"urn:ddi:fr.cdsp:canon_var_{i}:1.0.0" if i == 1 else None,
+        )
+        for i in range(1, 21)
+    ]
+    plan = ImportPlan(
+        stage="import",
+        job_id="import-test-1234",
+        summary={
+            "planned_codes": 120,
+            "planned_frequency_rows": 532,
+            "planned_summary_stat_variables": 18,
+        },
+        actions=actions,
+    )
+    md = plan.to_markdown()
+
+    assert "### Actions by Resource Type" in md
+    assert "### Nested & Observation Rows (Expected)" in md
+    assert "| `Code` (nested in `CodeList`) | 120 |" in md
+    assert "| `DatafileVariableFrequency` | 532 |" in md
+    assert "| **Expected Total Created URNs** | **158** |" in md
+    assert "| Resource Type | create | reuse | quarantine | Total |" in md
+    assert "| `Category` | 20 | 5 | 0 | **25** |" in md
+    assert "| `InstanceVariable` | 18 | 0 | 2 | **20** |" in md
+    assert "| **Total** | **38** | **5** | **2** | **45** |" in md
+    assert "45 total across 2 resource type(s)" in md
+    assert "`cat-015`" in md
+    assert "`cat-016`" not in md
+    assert "and 10 additional `Category` item(s)" in md
+    assert "`var-001`" in md
+    assert "`var-015`" in md
+    assert "`var-016`" not in md
+    assert "| ID | Action | Resource Type | URN |" in md
+    assert "`urn:ddi:fr.cdsp:var_1:1.0.0` → `urn:ddi:fr.cdsp:canon_var_1:1.0.0`" in md
+    assert "and 5 additional `InstanceVariable` item(s)" in md
+
+
+@pytest.mark.django_db
+def test_studyunit_citation_title_crosswalk_multilingual(tmp_path: Path) -> None:
+    import json
+
+    from fairwddi.importer.loader import execute_import
+    from fairwddi.models import StudyUnit
+
+    ddi_file = tmp_path / "bilingual_study.ddi40.json"
+    ddi_file.write_text(
+        json.dumps(
+            {
+                "$type": "DDIInstance",
+                "items": [
+                    {
+                        "$type": "StudyUnit",
+                        "URN": "urn:ddi:fr.cdsp:study_test_01:1.0.0",
+                        "Citation": {
+                            "Title": [
+                                {"@language": "fr", "@value": "Enquête Test 2024"},
+                                {"@language": "en", "@value": "Test Survey 2024"},
+                            ]
+                        },
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    res = execute_import(ddi_file, auto_approve=True)
+    assert res["status"] == "completed"
+    su = StudyUnit.objects.get(urn="urn:ddi:fr.cdsp:study_test_01:1.0.0")
+    assert su.name == {"fr": "Enquête Test 2024", "en": "Test Survey 2024"}
+    assert su.title == {"fr": "Enquête Test 2024", "en": "Test Survey 2024"}
 
 
 @pytest.mark.django_db
@@ -379,8 +468,12 @@ def test_cli_import_plan_execute_list_status_and_undo(
     assert status_res.exit_code == 0, status_res.stdout
     assert str(batch.id) in status_res.stdout
 
-    # 4. fairwddi import undo
-    undo_res = runner.invoke(app, ["import", "undo", str(batch.id)])
+    # 4. fairwddi import undo (decline confirmation, then confirm)
+    abort_res = runner.invoke(app, ["import", "undo", str(batch.id)], input="n\n")
+    assert abort_res.exit_code != 0
+    assert IngestBatch.objects.get(id=batch.id).status == "completed"
+
+    undo_res = runner.invoke(app, ["import", "undo", str(batch.id)], input="y\n")
     assert undo_res.exit_code == 0, undo_res.stdout
     assert IngestBatch.objects.get(id=batch.id).status == "undone"
 

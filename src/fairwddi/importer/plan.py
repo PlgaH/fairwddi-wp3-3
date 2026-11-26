@@ -167,7 +167,11 @@ class ImportPlan(BaseModel):
         data = yaml.safe_load(raw_text) or {}
         return cls.model_validate(data)
 
-    def to_markdown(self, path: Path | str | None = None) -> str:
+    def to_markdown(
+        self,
+        path: Path | str | None = None,
+        max_actions_per_type: int = 15,
+    ) -> str:
         """Render a human-readable Markdown report for this plan."""
         gate_status = (
             "APPROVED"
@@ -200,23 +204,90 @@ class ImportPlan(BaseModel):
             for k, v in self.summary.items():
                 lines.append(f"| `{k}` | `{v}` |")
 
+        if self.actions:
+            action_order = ["create", "reuse", "quarantine", "upgrade", "skip"]
+            present_actions = [
+                a for a in action_order if any(act.action == a for act in self.actions)
+            ]
+            crosstab: dict[str, dict[str, int]] = {}
+            col_totals: dict[str, int] = {a: 0 for a in present_actions}
+            for act in self.actions:
+                row = crosstab.setdefault(act.resource_type, {a: 0 for a in present_actions})
+                row[act.action] = row.get(act.action, 0) + 1
+                col_totals[act.action] = col_totals.get(act.action, 0) + 1
+
+            header_cols = ["Resource Type", *present_actions, "Total"]
+            align_cols = [":---", *["---:" for _ in present_actions], "---:"]
+            lines.extend(
+                [
+                    "",
+                    "### Actions by Resource Type",
+                    "",
+                    "| " + " | ".join(header_cols) + " |",
+                    "| " + " | ".join(align_cols) + " |",
+                ]
+            )
+            for r_type, counts in crosstab.items():
+                row_total = sum(counts.values())
+                vals = [f"`{r_type}`", *[f"{counts.get(a, 0):,}" for a in present_actions]]
+                vals.append(f"**{row_total:,}**")
+                lines.append("| " + " | ".join(vals) + " |")
+            total_vals = [
+                "**Total**",
+                *[f"**{col_totals.get(a, 0):,}**" for a in present_actions],
+                f"**{len(self.actions):,}**",
+            ]
+            lines.append("| " + " | ".join(total_vals) + " |")
+
+        planned_codes = int((self.summary or {}).get("planned_codes") or 0)
+        planned_freqs = int((self.summary or {}).get("planned_frequency_rows") or 0)
+        planned_stats = int((self.summary or {}).get("planned_summary_stat_variables") or 0)
+        if planned_codes or planned_freqs or planned_stats:
+            create_actions_cnt = sum(1 for a in self.actions if a.action == "create")
+            lines.extend(
+                [
+                    "",
+                    "### Nested & Observation Rows (Expected)",
+                    "",
+                    "| Category | Count | Notes |",
+                    "| :--- | ---: | :--- |",
+                    (
+                        f"| `Code` (nested in `CodeList`) | {planned_codes:,} | "
+                        "Created under parent `CodeList` URNs |"
+                    ),
+                    (
+                        f"| `DatafileVariableFrequency` | {planned_freqs:,} | "
+                        "Category frequency observations |"
+                    ),
+                    (
+                        f"| `DatafileVariable` (summary stats) | {planned_stats:,} | "
+                        "Variables carrying summary statistics |"
+                    ),
+                    (
+                        f"| **Expected Total Created URNs** | "
+                        f"**{create_actions_cnt + planned_codes:,}** | "
+                        f"Top-level `create` actions ({create_actions_cnt:,}) + "
+                        f"nested `Code`s ({planned_codes:,}) |"
+                    ),
+                ]
+            )
+
         if self.issues:
             lines.extend(
                 [
                     "",
                     "## Findings & Diagnostics",
                     "",
-                    "| Severity | Code | Type | URN / Context | Review? | Message |",
-                    "| :--- | :--- | :--- | :--- | :---: | :--- |",
+                    "| Severity | Code | Type | URN / Context | Message |",
+                    "| :--- | :--- | :--- | :--- | :--- |",
                 ]
             )
             for issue in self.issues:
                 r_type = f"`{issue.resource_type}`" if issue.resource_type else "-"
                 r_urn = f"`{issue.resource_urn}`" if issue.resource_urn else "-"
-                rev = "Yes" if issue.requires_review else "No"
                 lines.append(
                     f"| **{issue.severity.upper()}** | `{issue.code}` | {r_type} | "
-                    f"{r_urn} | {rev} | {issue.message} |"
+                    f"{r_urn} | {issue.message} |"
                 )
 
         reuse_actions = [a for a in self.actions if a.action == "reuse"]
@@ -262,24 +333,36 @@ class ImportPlan(BaseModel):
                 lines.append(f"| `{act.resource_type}` | `{act.source_urn}` | {act.notes} |")
 
         if self.actions:
+            actions_by_type: dict[str, list[ImportActionItem]] = {}
+            for act in self.actions:
+                actions_by_type.setdefault(act.resource_type, []).append(act)
+
             lines.extend(
                 [
                     "",
-                    f"## Planned Actions ({len(self.actions)} total)",
+                    f"## Planned Actions ({len(self.actions):,} total across "
+                    f"{len(actions_by_type)} resource type(s))",
                     "",
-                    "| ID | Action | Resource Type | Source URN | Target URN | Review? |",
-                    "| :--- | :--- | :--- | :--- | :--- | :---: |",
+                    "| ID | Action | Resource Type | URN |",
+                    "| :--- | :--- | :--- | :--- |",
                 ]
             )
-            for act in self.actions[:200]:
-                tgt = f"`{act.target_urn}`" if act.target_urn else "-"
-                rev = "Yes" if act.requires_review else "No"
-                lines.append(
-                    f"| `{act.id}` | `{act.action}` | `{act.resource_type}` | "
-                    f"`{act.source_urn}` | {tgt} | {rev} |"
-                )
-            if len(self.actions) > 200:
-                lines.append(f"\n*... and {len(self.actions) - 200} additional action items.*")
+            for r_type, group in actions_by_type.items():
+                for act in group[:max_actions_per_type]:
+                    urn_col = (
+                        f"`{act.source_urn}` → `{act.target_urn}`"
+                        if act.target_urn and act.target_urn != act.source_urn
+                        else f"`{act.source_urn}`"
+                    )
+                    lines.append(
+                        f"| `{act.id}` | `{act.action}` | `{act.resource_type}` | {urn_col} |"
+                    )
+                remaining = len(group) - max_actions_per_type
+                if remaining > 0:
+                    lines.append(
+                        f"| `...` | `...` | `{r_type}` | "
+                        f"*... and {remaining:,} additional `{r_type}` item(s)* |"
+                    )
 
         lines.append("")
         content = "\n".join(lines)

@@ -260,12 +260,267 @@ def test_explorer_html_view() -> None:
     resp = explorer_view(req)
     html = resp.content.decode("utf-8")
     assert resp.status_code == 200
-    assert "FAIRwDDI Question Bank & Harmonization Explorer" in html
+    assert "FAIRwDDI Explorer" in html
     assert "cascade-canvas" in html
-    assert "Code List Explorer" in html
-    assert "Category Explorer" in html
+    assert ">Questions</button>" in html
+    assert ">Variables</button>" in html
+    assert ">Code Lists</button>" in html
+    assert ">Categories</button>" in html
+    assert "var-relation-svg" in html
+    assert "setVariableTier" in html
+    assert "Resources" in html
+    assert "res-type-select" in html
+    assert "Groups" in html
+    assert "Import Batches" in html
+    assert "Quarantine" in html
+    assert "global-study-filter" in html
+    assert "global-batch-filter" not in html
     assert "btn-hist-back" in html
     assert "btn-hist-forward" in html
     assert "Code List URN" in html
     assert "Cross-Wave Harmonization Matrix" not in html
     assert "URN Alias Crosswalk" not in html
+
+
+@pytest.mark.django_db
+def test_api_groups_batches_and_quarantine(api_client: TestClient) -> None:
+    from fairwddi.models import Group, IngestBatch, MetadataQuarantine
+
+    Group.objects.create(
+        urn="urn:ddi:fr.cdsp:grp_enef2024:1.0.0",
+        slug="enef-2024",
+        name={"en": "ENEF 2024"},
+        group_type="series",
+        references=[{"resource_type": "StudyUnit", "urn": "urn:ddi:fr.cdsp:study_1:1.0.0"}],
+    )
+    IngestBatch.objects.create(
+        source_format="ddi-l:4.0:json",
+        file_name="enef2024_v1.ddi40.json",
+        file_sha256="a" * 64,
+        status="completed",
+        created_urns=["urn:ddi:fr.cdsp:study_1:1.0.0"],
+        reused_urns=[],
+    )
+    MetadataQuarantine.objects.create(
+        incoming_urn="urn:ddi:fr.cdsp:qi_1:1.0.0",
+        existing_urn="urn:ddi:fr.cdsp:qi_1:1.0.0",
+        entity_type="QuestionItem",
+        existing_content_hash="b" * 64,
+        incoming_content_hash="c" * 64,
+        incoming_content={"urn": "urn:ddi:fr.cdsp:qi_1:1.0.0"},
+        conflict_type="hash_mismatch",
+        resolution=None,
+        source_file="enef2024_v2.ddi40.json",
+    )
+
+    g_resp = api_client.get("/groups?q=enef-2024")
+    assert g_resp.status_code == 200
+    g_data = g_resp.json()
+    assert len(g_data) == 1
+    assert g_data[0]["slug"] == "enef-2024"
+    assert g_data[0]["member_count"] == 1
+
+    b_resp = api_client.get("/batches")
+    assert b_resp.status_code == 200
+    b_data = b_resp.json()
+    assert any(
+        b["file_name"] == "enef2024_v1.ddi40.json" and b["created_count"] == 1 for b in b_data
+    )
+
+    q_resp = api_client.get("/quarantine")
+    assert q_resp.status_code == 200
+    q_data = q_resp.json()
+    assert len(q_data) == 1
+    assert q_data[0]["incoming_urn"] == "urn:ddi:fr.cdsp:qi_1:1.0.0"
+
+
+@pytest.mark.django_db
+def test_api_global_study_and_batch_filters(api_client: TestClient) -> None:
+    from fairwddi.models import (
+        Category,
+        CodeItem,
+        CodeList,
+        Datafile,
+        DatafileVariable,
+        IngestBatch,
+        InstanceVariable,
+        QuestionItem,
+        QuestionVariable,
+        RepresentedVariable,
+        StudyUnit,
+    )
+
+    su1 = StudyUnit.objects.create(urn="urn:ddi:fr.cdsp:su_1:1.0.0", name={"en": "Study 1"})
+    su2 = StudyUnit.objects.create(urn="urn:ddi:fr.cdsp:su_2:1.0.0", name={"en": "Study 2"})
+    df1 = Datafile.objects.create(urn="urn:ddi:fr.cdsp:df_1:1.0.0", name="F1", study_unit=su1)
+    df2 = Datafile.objects.create(urn="urn:ddi:fr.cdsp:df_2:1.0.0", name="F2", study_unit=su2)
+
+    cat1 = Category.objects.create(urn="urn:ddi:fr.cdsp:cat_1:1.0.0", name={"en": "Yes"})
+    cl1 = CodeList.objects.create(urn="urn:ddi:fr.cdsp:cl_1:1.0.0", name={"en": "YN"})
+    CodeItem.objects.create(code_list=cl1, category=cat1, code_value="1")
+
+    q1 = QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:qi_1:1.0.0",
+        name={"en": "Q1"},
+        question_text={"en": "Vote?"},
+    )
+    rv1 = RepresentedVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:rv_1:1.0.0",
+        name={"en": "RV1"},
+        code_list=cl1,
+    )
+    QuestionVariable.objects.create(question_item=q1, represented_variable=rv1)
+    iv1 = InstanceVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:iv_1:1.0.0",
+        name={"en": "V1"},
+        represented_variable=rv1,
+    )
+    DatafileVariable.objects.create(datafile=df1, instance_variable=iv1)
+
+    q2 = QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:qi_2:1.0.0",
+        name={"en": "Q2"},
+        question_text={"en": "Age?"},
+    )
+    rv2 = RepresentedVariable.objects.create(urn="urn:ddi:fr.cdsp:rv_2:1.0.0", name={"en": "RV2"})
+    QuestionVariable.objects.create(question_item=q2, represented_variable=rv2)
+    iv2 = InstanceVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:iv_2:1.0.0",
+        name={"en": "V2"},
+        represented_variable=rv2,
+    )
+    DatafileVariable.objects.create(datafile=df2, instance_variable=iv2)
+
+    b1 = IngestBatch.objects.create(
+        source_format="ddi-l:4.0:json",
+        file_name="s1.json",
+        file_sha256="1" * 64,
+        status="completed",
+        created_urns=[su1.urn, q1.urn, cl1.urn, cat1.urn, iv1.urn],
+    )
+
+    ov_su1 = api_client.get(f"/overview?study_urn={su1.urn}").json()
+    assert ov_su1["survey_count"] == 1
+    assert ov_su1["question_count"] == 1
+    assert ov_su1["codelist_count"] == 1
+    assert ov_su1["category_count"] == 1
+
+    q_su1 = api_client.get(f"/questions?study_urn={su1.urn}").json()
+    assert [item["urn"] for item in q_su1] == [q1.urn]
+
+    q_b1 = api_client.get(f"/questions?batch_id={b1.id}").json()
+    assert [item["urn"] for item in q_b1] == [q1.urn]
+
+    cl_b1 = api_client.get(f"/codelists?batch_id={b1.id}").json()
+    assert [item["urn"] for item in cl_b1] == [cl1.urn]
+
+    cat_su1 = api_client.get(f"/categories?study_urn={su1.urn}").json()
+    assert [item["urn"] for item in cat_su1] == [cat1.urn]
+
+
+@pytest.mark.django_db
+def test_api_variable_explorer_endpoints(api_client: TestClient) -> None:
+    from fairwddi.models import (
+        Category,
+        CodeItem,
+        CodeList,
+        Concept,
+        ConceptualVariable,
+        Datafile,
+        DatafileVariable,
+        DatafileVariableFrequency,
+        InstanceVariable,
+        QuestionItem,
+        QuestionVariable,
+        RepresentedVariable,
+        SemanticRelationship,
+        StudyUnit,
+    )
+
+    concept = Concept.objects.create(
+        urn="urn:ddi:elsst:pol_interest:1.0.0",
+        label={"en": "POLITICAL INTEREST"},
+        uri="https://elsst.cessda.eu/id/4/pol_interest",
+        vocabulary="ELSST",
+    )
+    cv = ConceptualVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:cv_pol:1.0.0",
+        name={"en": "Political Interest"},
+        concept=concept,
+    )
+    cat = Category.objects.create(urn="urn:ddi:fr.cdsp:cat_high:1.0.0", name={"en": "High"})
+    cl = CodeList.objects.create(urn="urn:ddi:fr.cdsp:cl_pol:1.0.0", name={"en": "Interest Scale"})
+    CodeItem.objects.create(code_list=cl, category=cat, code_value="1")
+
+    rv = RepresentedVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:rv_pol:1.0.0",
+        name={"en": "RV_PolInterest"},
+        conceptual_variable=cv,
+        code_list=cl,
+    )
+    qi = QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:qi_pol:1.0.0",
+        name={"en": "Q_Pol"},
+        question_text={"en": "How interested are you in politics?"},
+    )
+    QuestionVariable.objects.create(question_item=qi, represented_variable=rv)
+
+    su = StudyUnit.objects.create(urn="urn:ddi:fr.cdsp:su_pol:1.0.0", name={"en": "ENEF 2024"})
+    df = Datafile.objects.create(urn="urn:ddi:fr.cdsp:df_pol:1.0.0", name="enef.csv", study_unit=su)
+    iv = InstanceVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:iv_pol:1.0.0",
+        name={"en": "Y1INTPOL"},
+        represented_variable=rv,
+    )
+    DatafileVariable.objects.create(
+        datafile=df,
+        instance_variable=iv,
+        order=1,
+        statistics={"mean": 2.4, "valid_cases": 500},
+    )
+    DatafileVariableFrequency.objects.create(
+        datafile=df,
+        instance_variable=iv,
+        code_value="1",
+        frequency=250.0,
+    )
+    rv_other = RepresentedVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:rv_other:1.0.0",
+        name={"en": "RV_Other"},
+    )
+    SemanticRelationship.objects.create(
+        subject_urn=rv.urn,
+        subject_type="RepresentedVariable",
+        predicate="skos:closeMatch",
+        object_urn=rv_other.urn,
+        object_type="RepresentedVariable",
+        extended_attributes=[{"type": "correspondence_level", "value": "semantic"}],
+    )
+
+    rv_list = api_client.get(f"/variables/represented?study_urn={su.urn}").json()
+    assert len(rv_list) == 1
+    assert rv_list[0]["urn"] == rv.urn
+    assert rv_list[0]["conceptual_variable_urn"] == cv.urn
+    assert len(rv_list[0]["semantic_links"]) == 1
+
+    iv_detail = api_client.get(f"/variables/instance/{iv.urn}").json()
+    assert iv_detail["urn"] == iv.urn
+    assert iv_detail["has_statistics"] is True
+    assert iv_detail["occurrences"][0]["statistics"]["mean"] == 2.4
+    assert iv_detail["occurrences"][0]["frequencies"][0]["category_label"] == "High"
+
+    cv_detail = api_client.get(f"/variables/conceptual/{cv.urn}").json()
+    assert cv_detail["urn"] == cv.urn
+    assert cv_detail["concept_uri"] == "https://elsst.cessda.eu/id/4/pol_interest"
+    assert cv_detail["represented_count"] == 1
+
+    types_resp = api_client.get("/resources/types").json()
+    assert any(t["resource_type"] == "StudyUnit" and t["count"] >= 1 for t in types_resp)
+
+    su_list = api_client.get("/resources?resource_type=StudyUnit").json()
+    assert any(r["urn"] == su.urn for r in su_list)
+
+    su_detail = api_client.get(f"/resources/{su.urn}").json()
+    assert su_detail["urn"] == su.urn
+    assert su_detail["resource_type"] == "StudyUnit"
+    assert su_detail["name"] == "ENEF 2024"

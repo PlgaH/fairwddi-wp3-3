@@ -504,7 +504,7 @@ def preflight_check_cmd(
         Path("."),
         "--output-dir",
         "-o",
-        help="Directory to write .preflight.{json,plan.yaml,report.md} (default: '.').",
+        help="Directory to write .preflight.json & .preflight.report.md (default: '.').",
     ),
     auto_approve: bool = typer.Option(
         False, "--auto-approve", help="Mark the preflight review gate as approved."
@@ -553,10 +553,9 @@ def preflight_check_cmd(
 
     stem = Path(file_path).stem
     console.print(
-        f"[bold green]Preflight artifacts written:[/bold green] "
+        f"[bold green]Preflight report written:[/bold green] "
         f"[cyan]{output_dir / f'{stem}.preflight.json'}[/cyan], "
-        f"[cyan]{output_dir / f'{stem}.preflight.report.md'}[/cyan], "
-        f"[cyan]{output_dir / f'{stem}.preflight.plan.yaml'}[/cyan]"
+        f"[cyan]{output_dir / f'{stem}.preflight.report.md'}[/cyan]"
     )
 
 
@@ -898,11 +897,28 @@ def import_execute_cmd(
 @import_app.command("undo")
 def import_undo_cmd(
     batch_id: int = typer.Argument(..., help="IngestBatch ID to roll back cleanly."),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Bypass confirmation prompt.",
+    ),
 ) -> None:
     """Atomically roll back an imported batch while enforcing referential integrity."""
-    from fairwddi.importer.loader import undo_import
+    from fairwddi.importer.loader import get_import_batch_status, undo_import
 
     configure_django_for_cli()
+    if not force:
+        try:
+            info = get_import_batch_status(batch_id)
+            prompt_msg = (
+                f"Roll back Import Batch #{batch_id} "
+                f"({info['file_name']}, {info['created_count']} created URN(s))?"
+            )
+        except Exception:
+            prompt_msg = f"Roll back Import Batch #{batch_id}?"
+        typer.confirm(prompt_msg, default=False, abort=True)
+
     try:
         res = undo_import(batch_id)
     except Exception as exc:

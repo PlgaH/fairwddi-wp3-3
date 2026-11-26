@@ -5,7 +5,7 @@ EXPLORER_HTML = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FAIRwDDI Question Bank & Harmonization Explorer</title>
+  <title>FAIRwDDI Explorer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -522,15 +522,20 @@ EXPLORER_HTML = """<!DOCTYPE html>
     <div class="brand">
       <div class="brand-logo">DDI</div>
       <div>
-        <div class="brand-title">FAIRwDDI Question Bank & Harmonization Explorer</div>
+        <div class="brand-title">FAIRwDDI Explorer</div>
         <div class="brand-subtitle">CDSP Sciences Po / CNRS — Multi-Wave Longitudinal Question Bank</div>
       </div>
     </div>
 
     <div class="nav-tabs">
-      <button class="nav-tab active" onclick="switchTab('explorer')">Question & Variable Cascade</button>
-      <button class="nav-tab" onclick="switchTab('codelists')">Code List Explorer</button>
-      <button class="nav-tab" onclick="switchTab('categories')">Category Explorer</button>
+      <button class="nav-tab active" data-tab="explorer" onclick="switchTab('explorer')">Questions</button>
+      <button class="nav-tab" data-tab="variables" onclick="switchTab('variables')">Variables</button>
+      <button class="nav-tab" data-tab="codelists" onclick="switchTab('codelists')">Code Lists</button>
+      <button class="nav-tab" data-tab="categories" onclick="switchTab('categories')">Categories</button>
+      <button class="nav-tab" data-tab="resources" onclick="switchTab('resources')">Resources</button>
+      <button class="nav-tab" data-tab="groups" onclick="switchTab('groups')">Groups</button>
+      <button class="nav-tab" data-tab="batches" onclick="switchTab('batches')">Import Batches</button>
+      <button class="nav-tab" data-tab="quarantine" onclick="switchTab('quarantine')">Quarantine</button>
     </div>
 
     <div class="header-links">
@@ -572,6 +577,17 @@ EXPLORER_HTML = """<!DOCTYPE html>
         <div class="kpi-val" id="kpi-categories" style="color: #38bdf8;">-</div>
       </div>
       <div class="kpi-badge">Harmonized</div>
+    </div>
+    <div class="kpi-card" style="min-width: 260px; flex: 1.3;">
+      <div style="width: 100%; display: flex; flex-direction: column; gap: 6px;">
+        <div class="kpi-label">Study Unit Filter</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <select id="global-study-filter" class="search-input" style="padding: 5px 8px; font-size: 12px; flex: 1; min-width: 140px;" onchange="applyGlobalFilter()">
+            <option value="">All Study Units</option>
+          </select>
+          <button class="action-btn" onclick="resetGlobalFilter()" title="Clear study filter" style="padding: 5px 8px; font-size: 11px;">Reset</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -630,6 +646,43 @@ EXPLORER_HTML = """<!DOCTYPE html>
           <div style="color: var(--text-dim); text-align: center; margin-top: 40px;">
             Click on any node in the cascade graph to view full URN attributes and hashes.
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 1B: Hybrid Variable Explorer -->
+  <div id="tab-variables" class="tab-content">
+    <div class="two-pane-layout">
+      <div class="sidebar">
+        <div class="search-box">
+          <div style="display: flex; gap: 4px; margin-bottom: 8px; background: var(--bg-base); padding: 3px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+            <button type="button" class="action-btn var-tier-btn" data-tier="conceptual" onclick="setVariableTier('conceptual')" style="flex: 1; padding: 5px 4px; font-size: 11px;">Conceptual</button>
+            <button type="button" class="action-btn var-tier-btn" data-tier="represented" onclick="setVariableTier('represented')" style="flex: 1; padding: 5px 4px; font-size: 11px; background: var(--accent-primary); color: #fff; border-color: var(--accent-primary);">Represented</button>
+            <button type="button" class="action-btn var-tier-btn" data-tier="instance" onclick="setVariableTier('instance')" style="flex: 1; padding: 5px 4px; font-size: 11px;">Instance</button>
+          </div>
+          <input type="text" id="var-search" class="search-input" placeholder="Search variables by name, label, or URN..." oninput="filterVariables()" />
+          <div class="filter-row" id="var-filter-row">
+            <label id="var-filter-label">
+              <input type="checkbox" id="var-filter-flag" onchange="loadVariables(0)" />
+              <span id="var-filter-flag-text">Reused / linked only</span>
+            </label>
+            <span id="var-count-label">0 items</span>
+          </div>
+          <div class="filter-row" style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-subtle);">
+            <button class="action-btn" id="var-prev-btn" onclick="prevVariablesPage()" style="padding: 2px 8px; font-size: 11px;">‹ Prev</button>
+            <span id="var-page-label" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">0–0</span>
+            <button class="action-btn" id="var-next-btn" onclick="nextVariablesPage()" style="padding: 2px 8px; font-size: 11px;">Next ›</button>
+          </div>
+        </div>
+        <div id="variable-list" class="question-list">
+          <div class="spinner">Loading variables...</div>
+        </div>
+      </div>
+
+      <div class="detail-area" id="variable-detail">
+        <div style="color: var(--text-dim); text-align: center; margin-top: 60px;">
+          Select a variable from the sidebar to inspect its relationship graph, metadata, and statistics.
         </div>
       </div>
     </div>
@@ -703,6 +756,82 @@ EXPLORER_HTML = """<!DOCTYPE html>
     </div>
   </div>
 
+  <!-- TAB 3B: Generic Resource Browser -->
+  <div id="tab-resources" class="tab-content">
+    <div class="two-pane-layout">
+      <div class="sidebar">
+        <div class="search-box">
+          <select id="res-type-select" class="search-input" style="margin-bottom: 8px; padding: 6px 8px; font-size: 12px;" onchange="loadResources(0)">
+            <option value="">All Resource Types</option>
+          </select>
+          <input type="text" id="res-search" class="search-input" placeholder="Search by URN, name, or label..." oninput="filterResources()" />
+          <div class="filter-row" style="margin-top: 6px;">
+            <span id="res-count-label">0 items</span>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button class="action-btn" id="res-prev-btn" onclick="prevResourcesPage()" style="padding: 2px 8px; font-size: 11px;">‹ Prev</button>
+              <span id="res-page-label" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">0–0</span>
+              <button class="action-btn" id="res-next-btn" onclick="nextResourcesPage()" style="padding: 2px 8px; font-size: 11px;">Next ›</button>
+            </div>
+          </div>
+        </div>
+        <div id="resource-list" class="question-list">
+          <div class="spinner">Loading resources...</div>
+        </div>
+      </div>
+
+      <div class="detail-area" id="resource-detail">
+        <div style="color: var(--text-dim); text-align: center; margin-top: 60px;">
+          Select any DDI resource from the sidebar (StudyUnit, Scheme, Variable, CodeList, etc.) to inspect its URN and common attributes.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: DDI Groups -->
+  <div id="tab-groups" class="tab-content">
+    <div class="detail-area" style="padding: 24px 32px; height: 100%; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap;">
+        <div>
+          <h2 style="margin: 0; font-size: 18px;">Curated DDI Groups</h2>
+          <div style="font-size: 12px; color: var(--text-dim);">Longitudinal series, thematic scopes, and question grids (with short slugs for CLI &amp; comparison)</div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="text" class="search-input" id="group-search" placeholder="Filter by slug, name, or type..." style="width: 240px;" oninput="loadGroups()" />
+          <button class="action-btn" onclick="loadGroups()">↻ Refresh</button>
+        </div>
+      </div>
+      <div id="groups-container"><div class="spinner">Loading groups...</div></div>
+    </div>
+  </div>
+
+  <!-- TAB 5: Import Batches -->
+  <div id="tab-batches" class="tab-content">
+    <div class="detail-area" style="padding: 24px 32px; height: 100%; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <h2 style="margin: 0; font-size: 18px;">Import Batches</h2>
+          <div style="font-size: 12px; color: var(--text-dim);">IngestBatch provenance receipts, SHA-256 digests, and created/reused URN counts</div>
+        </div>
+        <button class="action-btn" onclick="loadBatches()">↻ Refresh</button>
+      </div>
+      <div id="batches-container"><div class="spinner">Loading batches...</div></div>
+    </div>
+  </div>
+
+  <!-- TAB 6: Metadata Quarantine -->
+  <div id="tab-quarantine" class="tab-content">
+    <div class="detail-area" style="padding: 24px 32px; height: 100%; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <h2 style="margin: 0; font-size: 18px;">Metadata Quarantine</h2>
+          <div style="font-size: 12px; color: var(--text-dim);">Same-URN content-hash drift records flagged during deterministic import</div>
+        </div>
+        <button class="action-btn" onclick="loadQuarantine()">↻ Refresh</button>
+      </div>
+      <div id="quarantine-container"><div class="spinner">Loading quarantine records...</div></div>
+    </div>
+  </div>
+
   <script>
     let currentQuestions = [];
     let selectedQuestionUrn = null;
@@ -729,9 +858,13 @@ EXPLORER_HTML = """<!DOCTYPE html>
     let isPanning = false;
     let startPoint = { x: 0, y: 0 };
 
+    let globalStudyUrn = '';
+    let globalBatchId = '';
+
     async function init() {
       setupPanZoom();
       setupHistoryListeners();
+      await loadGlobalFilterOptions();
       await loadOverview();
       await loadQuestions();
       loadCodeLists();
@@ -938,9 +1071,55 @@ EXPLORER_HTML = """<!DOCTYPE html>
       applyTransform();
     }
 
+    function buildGlobalFilterParams() {
+      const params = new URLSearchParams();
+      if (globalStudyUrn) params.set('study_urn', globalStudyUrn);
+      return params.toString();
+    }
+
+    async function loadGlobalFilterOptions() {
+      try {
+        const surveysRes = await fetch('/api/surveys');
+        if (surveysRes.ok) {
+          const surveys = await surveysRes.json();
+          const sSel = document.getElementById('global-study-filter');
+          if (sSel && Array.isArray(surveys)) {
+            surveys.sort((a, b) => (a.title || a.name || a.urn).localeCompare(b.title || b.name || b.urn, undefined, { sensitivity: 'base' }));
+            sSel.innerHTML = '<option value="">All Study Units</option>' + surveys.map(s => {
+              const label = s.title || s.name || s.urn;
+              return `<option value="${escapeHtml(s.urn)}" title="${escapeHtml(s.urn)}">${escapeHtml(label)} (${s.variable_count} vars)</option>`;
+            }).join('');
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load study filter options:', err);
+      }
+    }
+
+    async function applyGlobalFilter() {
+      const sSel = document.getElementById('global-study-filter');
+      globalStudyUrn = sSel ? sSel.value : '';
+      selectedQuestionUrn = null;
+      selectedVariableUrn = null;
+      selectedCodeListUrn = null;
+      selectedCategoryUrn = null;
+      await loadOverview();
+      await loadQuestions(0);
+      loadVariables(0);
+      loadCodeLists(0);
+      loadCategories(0);
+    }
+
+    function resetGlobalFilter() {
+      const sSel = document.getElementById('global-study-filter');
+      if (sSel) sSel.value = '';
+      applyGlobalFilter();
+    }
+
     async function loadOverview() {
       try {
-        const res = await fetch('/api/overview');
+        const qs = buildGlobalFilterParams();
+        const res = await fetch('/api/overview' + (qs ? `?${qs}` : ''));
         const data = await res.json();
         document.getElementById('kpi-surveys').textContent = data.survey_count;
         document.getElementById('kpi-questions').textContent = data.question_count;
@@ -969,7 +1148,9 @@ EXPLORER_HTML = """<!DOCTYPE html>
       listEl.innerHTML = '<div class="spinner">Loading questions...</div>';
 
       try {
-        const res = await fetch(`/api/questions?limit=${PAGE_SIZE}&offset=${offset}&q=${encodeURIComponent(q)}&reused_only=${reusedOnly}`);
+        const gqs = buildGlobalFilterParams();
+        const extra = gqs ? `&${gqs}` : '';
+        const res = await fetch(`/api/questions?limit=${PAGE_SIZE}&offset=${offset}&q=${encodeURIComponent(q)}&reused_only=${reusedOnly}${extra}`);
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         }
@@ -1402,7 +1583,9 @@ EXPLORER_HTML = """<!DOCTYPE html>
       listEl.innerHTML = '<div class="spinner">Loading code lists...</div>';
 
       try {
-        const res = await fetch(`/api/codelists?limit=${PAGE_SIZE}&offset=${offset}&q=${encodeURIComponent(q)}&reused_only=${reusedOnly}`);
+        const gqs = buildGlobalFilterParams();
+        const extra = gqs ? `&${gqs}` : '';
+        const res = await fetch(`/api/codelists?limit=${PAGE_SIZE}&offset=${offset}&q=${encodeURIComponent(q)}&reused_only=${reusedOnly}${extra}`);
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         }
@@ -1644,7 +1827,9 @@ EXPLORER_HTML = """<!DOCTYPE html>
       listEl.innerHTML = '<div class="spinner">Loading categories...</div>';
 
       try {
-        const res = await fetch(`/api/categories?limit=${PAGE_SIZE}&offset=${offset}&q=${encodeURIComponent(q)}&reused_only=${reusedOnly}`);
+        const gqs = buildGlobalFilterParams();
+        const extra = gqs ? `&${gqs}` : '';
+        const res = await fetch(`/api/categories?limit=${PAGE_SIZE}&offset=${offset}&q=${encodeURIComponent(q)}&reused_only=${reusedOnly}${extra}`);
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         }
@@ -1832,29 +2017,734 @@ EXPLORER_HTML = """<!DOCTYPE html>
       `;
     }
 
+    let currentVariables = [];
+    let currentVariableTier = 'represented';
+    let selectedVariableUrn = null;
+    let variablesOffset = 0;
+    let variablesHasMore = false;
+    let varSearchTimer = null;
+
+    function setVariableTier(tier) {
+      currentVariableTier = tier;
+      selectedVariableUrn = null;
+      document.querySelectorAll('.var-tier-btn').forEach(btn => {
+        const active = btn.dataset.tier === tier;
+        btn.style.background = active ? 'var(--accent-primary)' : '';
+        btn.style.color = active ? '#fff' : '';
+        btn.style.borderColor = active ? 'var(--accent-primary)' : '';
+      });
+      const flagWrap = document.getElementById('var-filter-label');
+      const flagEl = document.getElementById('var-filter-flag');
+      const flagText = document.getElementById('var-filter-flag-text');
+      if (flagEl) flagEl.checked = false;
+      if (tier === 'represented') {
+        if (flagWrap) flagWrap.style.visibility = 'visible';
+        if (flagText) flagText.textContent = 'Reused / linked only';
+      } else if (tier === 'instance') {
+        if (flagWrap) flagWrap.style.visibility = 'visible';
+        if (flagText) flagText.textContent = 'Has stats / frequencies';
+      } else {
+        if (flagWrap) flagWrap.style.visibility = 'hidden';
+      }
+      loadVariables(0);
+    }
+
+    function filterVariables() {
+      clearTimeout(varSearchTimer);
+      varSearchTimer = setTimeout(() => loadVariables(0), 250);
+    }
+
+    function prevVariablesPage() {
+      if (variablesOffset > 0) loadVariables(Math.max(0, variablesOffset - PAGE_SIZE));
+    }
+
+    function nextVariablesPage() {
+      if (variablesHasMore) loadVariables(variablesOffset + PAGE_SIZE);
+    }
+
+    async function loadVariables(offset = 0) {
+      variablesOffset = offset;
+      const q = (document.getElementById('var-search')?.value || '').trim();
+      const flagChecked = Boolean(document.getElementById('var-filter-flag')?.checked);
+      const listEl = document.getElementById('variable-list');
+      if (!listEl) return;
+      listEl.innerHTML = '<div class="spinner">Loading variables...</div>';
+
+      const params = new URLSearchParams();
+      params.set('limit', String(PAGE_SIZE));
+      params.set('offset', String(offset));
+      if (q) params.set('q', q);
+      if (currentVariableTier === 'represented' && flagChecked) params.set('reused_only', 'true');
+      if (currentVariableTier === 'instance' && flagChecked) params.set('has_stats', 'true');
+      if (globalStudyUrn) params.set('study_urn', globalStudyUrn);
+      if (globalBatchId) params.set('batch_id', globalBatchId);
+
+      try {
+        const res = await fetch(`/api/variables/${currentVariableTier}?${params.toString()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        const data = await res.json();
+        currentVariables = Array.isArray(data) ? data : [];
+        variablesHasMore = currentVariables.length === PAGE_SIZE;
+        updateVariablePagination();
+        renderVariableList(currentVariables);
+        if (currentVariables.length > 0 && !selectedVariableUrn) {
+          await selectVariable(currentVariables[0].urn);
+        } else if (currentVariables.length === 0) {
+          const detailEl = document.getElementById('variable-detail');
+          if (detailEl) {
+            detailEl.innerHTML = `<div style="color: var(--text-dim); text-align: center; margin-top: 60px;">No ${currentVariableTier} variables match the active filters.</div>`;
+          }
+        }
+      } catch (err) {
+        listEl.innerHTML = `<div style="color: #f87171; padding: 12px;">Failed to load variables: ${escapeHtml(err)}</div>`;
+      }
+    }
+
+    function updateVariablePagination() {
+      const prevBtn = document.getElementById('var-prev-btn');
+      const nextBtn = document.getElementById('var-next-btn');
+      const pageLabel = document.getElementById('var-page-label');
+      const countLabel = document.getElementById('var-count-label');
+      if (prevBtn) prevBtn.disabled = variablesOffset === 0;
+      if (nextBtn) nextBtn.disabled = !variablesHasMore;
+      const start = currentVariables.length > 0 ? variablesOffset + 1 : 0;
+      const end = variablesOffset + currentVariables.length;
+      if (pageLabel) pageLabel.textContent = `${start}–${end}`;
+      if (countLabel) countLabel.textContent = `${currentVariables.length} shown`;
+    }
+
+    function renderVariableList(items) {
+      const listEl = document.getElementById('variable-list');
+      if (!listEl) return;
+      if (!items.length) {
+        listEl.innerHTML = '<div style="padding: 16px; color: var(--text-dim); font-size: 12px;">No variables found.</div>';
+        return;
+      }
+      listEl.innerHTML = items.map(v => {
+        const active = v.urn === selectedVariableUrn ? 'active' : '';
+        const meta = currentVariableTier === 'instance'
+          ? `${v.surveys?.length || 0} study · ${v.frequency_count || 0} freqs`
+          : currentVariableTier === 'represented'
+            ? `${v.instance_variables?.length || 0} IV · ${v.surveys?.length || 0} study`
+            : `${v.represented_count || 0} RV · ${v.surveys?.length || 0} study`;
+        return `
+          <div class="q-item ${active}" onclick="selectVariable('${escapeHtml(v.urn)}')">
+            <div class="q-item-text">${escapeHtml(v.name)}</div>
+            ${v.label ? `<div style="font-size: 11px; color: var(--text-muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(v.label)}</div>` : ''}
+            <div class="q-item-meta">
+              <span class="tag">${escapeHtml(meta)}</span>
+              ${v.codelist_name ? `<span class="tag" style="color: #818cf8;">CL</span>` : ''}
+              ${v.has_statistics ? `<span class="tag" style="color: #34d399;">Stats</span>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function openVariable(tier, urn) {
+      if (currentVariableTier !== tier) {
+        setVariableTier(tier);
+      }
+      switchTab('variables', false);
+      await selectVariable(urn);
+    }
+
+    async function selectVariable(urn) {
+      selectedVariableUrn = urn;
+      renderVariableList(currentVariables);
+      const detailEl = document.getElementById('variable-detail');
+      if (!detailEl) return;
+      detailEl.innerHTML = '<div class="spinner">Loading variable details...</div>';
+      try {
+        const res = await fetch(`/api/variables/${currentVariableTier}/${encodeURIComponent(urn)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        const item = await res.json();
+        renderVariableDetail(currentVariableTier, item);
+      } catch (err) {
+        detailEl.innerHTML = `<div class="detail-card" style="color: #f87171;">Failed to load variable detail: ${escapeHtml(err)}</div>`;
+      }
+    }
+
+    const RESOURCE_COLORS = {
+      QuestionItem: '#10b981',
+      RepresentedVariable: '#8b5cf6',
+      InstanceVariable: '#f59e0b',
+      ConceptualVariable: '#ec4899',
+      Concept: '#ec4899',
+      CodeList: '#6366f1',
+      StudyUnit: '#3b82f6',
+      Datafile: '#3b82f6',
+      SemanticRelationship: '#06b6d4',
+      URNAlias: '#06b6d4',
+    };
+
+    function renderVariableRelationGraph(tier, item) {
+      const nodes = [];
+      const edges = [];
+      const addNode = (id, col, type, title, sub, color, onClick, isFocus = false) => {
+        nodes.push({ id, col, type, title: title || id, sub: sub || '', color, onClick, isFocus });
+      };
+
+      if (tier === 'represented') {
+        // Left (col 0): InstanceVariables + SemanticRelationship links
+        (item.instance_variables || []).slice(0, 4).forEach((iv, idx) => {
+          const ivid = `iv_${idx}`;
+          addNode(ivid, 0, 'InstanceVariable', iv.name, iv.study_name || iv.urn, RESOURCE_COLORS.InstanceVariable, `openVariable('instance', '${escapeHtml(iv.urn)}')`);
+          edges.push({ from: ivid, to: 'rv', label: 'realizes' });
+        });
+        (item.semantic_links || []).slice(0, 3).forEach((sl, idx) => {
+          const slid = `sl_${idx}`;
+          addNode(slid, 0, sl.predicate, sl.target_urn.split(':').slice(-2, -1)[0] || sl.target_urn, sl.correspondence_level || sl.target_type, RESOURCE_COLORS.SemanticRelationship, `openVariable('represented', '${escapeHtml(sl.target_urn)}')`);
+          edges.push({ from: slid, to: 'rv', label: sl.predicate, dashed: true });
+        });
+        // Center (col 1): ConceptualVariable (above) -> RepresentedVariable (focus) -> CodeList (under)
+        if (item.conceptual_variable_urn) {
+          addNode('cv', 1, 'ConceptualVariable', item.conceptual_variable_name || item.conceptual_variable_urn, item.conceptual_variable_urn, RESOURCE_COLORS.ConceptualVariable, `openVariable('conceptual', '${escapeHtml(item.conceptual_variable_urn)}')`);
+          edges.push({ from: 'cv', to: 'rv', label: 'defines' });
+        }
+        addNode('rv', 1, 'RepresentedVariable', item.name, item.urn, RESOURCE_COLORS.RepresentedVariable, '', true);
+        if (item.codelist_urn) {
+          addNode('cl', 1, 'CodeList', item.codelist_name || item.codelist_urn, item.codelist_urn, RESOURCE_COLORS.CodeList, `navigateTo('codelists', '${escapeHtml(item.codelist_urn)}')`);
+          edges.push({ from: 'rv', to: 'cl', label: 'uses' });
+        }
+        // Right (col 2): QuestionItems
+        (item.questions || []).slice(0, 4).forEach((q, idx) => {
+          const qid = `q_${idx}`;
+          addNode(qid, 2, 'QuestionItem', q.name, q.label || q.urn, RESOURCE_COLORS.QuestionItem, `navigateTo('explorer', '${escapeHtml(q.urn)}')`);
+          edges.push({ from: 'rv', to: qid, label: 'asked by' });
+        });
+      } else if (tier === 'instance') {
+        // Left (col 0): InstanceVariable (focus) + Datafile / Study below
+        addNode('iv', 0, 'InstanceVariable', item.name, item.urn, RESOURCE_COLORS.InstanceVariable, '', true);
+        (item.occurrences || []).slice(0, 2).forEach((occ, idx) => {
+          const dfid = `df_${idx}`;
+          addNode(dfid, 0, 'Datafile / Study', occ.study_name || occ.datafile_name, occ.datafile_name, RESOURCE_COLORS.Datafile, '');
+          edges.push({ from: 'iv', to: dfid, label: 'in datafile' });
+        });
+        // Center (col 1): ConceptualVariable (above) -> RepresentedVariable -> CodeList (under)
+        if (item.conceptual_variable_urn) {
+          addNode('cv', 1, 'ConceptualVariable', item.conceptual_variable_name || item.conceptual_variable_urn, item.conceptual_variable_urn, RESOURCE_COLORS.ConceptualVariable, `openVariable('conceptual', '${escapeHtml(item.conceptual_variable_urn)}')`);
+          if (item.represented_variable_urn) {
+            edges.push({ from: 'cv', to: 'rv', label: 'defines' });
+          } else {
+            edges.push({ from: 'iv', to: 'cv', label: 'concept' });
+          }
+        }
+        if (item.represented_variable_urn) {
+          addNode('rv', 1, 'RepresentedVariable', item.represented_variable_name || item.represented_variable_urn, item.represented_variable_urn, RESOURCE_COLORS.RepresentedVariable, `openVariable('represented', '${escapeHtml(item.represented_variable_urn)}')`);
+          edges.push({ from: 'iv', to: 'rv', label: 'realizes' });
+        }
+        if (item.codelist_urn) {
+          addNode('cl', 1, 'CodeList', item.codelist_name || item.codelist_urn, item.codelist_urn, RESOURCE_COLORS.CodeList, `navigateTo('codelists', '${escapeHtml(item.codelist_urn)}')`);
+          edges.push({ from: item.represented_variable_urn ? 'rv' : 'iv', to: 'cl', label: 'uses' });
+        }
+        // Right (col 2): QuestionItems (to the right of RepresentedVariable)
+        (item.questions || []).slice(0, 4).forEach((q, idx) => {
+          const qid = `q_${idx}`;
+          addNode(qid, 2, 'QuestionItem', q.name, q.label || q.urn, RESOURCE_COLORS.QuestionItem, `navigateTo('explorer', '${escapeHtml(q.urn)}')`);
+          edges.push({ from: item.represented_variable_urn ? 'rv' : 'iv', to: qid, label: 'asked by' });
+        });
+      } else {
+        if (item.concept_urn || item.concept_uri) {
+          addNode('concept', 0, item.concept_vocabulary || 'Concept', item.concept_label || item.concept_uri || item.concept_urn, item.concept_uri || item.concept_urn, RESOURCE_COLORS.Concept, '');
+          edges.push({ from: 'concept', to: 'cv', label: 'anchors' });
+        }
+        addNode('cv', 1, 'ConceptualVariable', item.name, item.urn, RESOURCE_COLORS.ConceptualVariable, '', true);
+        (item.represented_variables || []).slice(0, 5).forEach((rv, idx) => {
+          const rvid = `rv_${idx}`;
+          addNode(rvid, 2, 'RepresentedVariable', rv.name, rv.label || rv.urn, RESOURCE_COLORS.RepresentedVariable, `openVariable('represented', '${escapeHtml(rv.urn)}')`);
+          edges.push({ from: 'cv', to: rvid, label: 'clusters' });
+        });
+      }
+
+      const byCol = { 0: [], 1: [], 2: [] };
+      nodes.forEach(n => byCol[n.col].push(n));
+      const colX = { 0: 24, 1: 310, 2: 596 };
+      const nodeW = 228;
+      const nodeH = 54;
+      const rowGap = 22;
+      const maxRows = Math.max(byCol[0].length, byCol[1].length, byCol[2].length, 1);
+      const svgH = Math.max(150, maxRows * (nodeH + rowGap) + 32);
+      const pos = {};
+      [0, 1, 2].forEach(c => {
+        const list = byCol[c];
+        const totalH = list.length * nodeH + Math.max(0, list.length - 1) * rowGap;
+        const startY = (svgH - totalH) / 2;
+        list.forEach((n, idx) => {
+          pos[n.id] = { x: colX[c], y: startY + idx * (nodeH + rowGap) };
+        });
+      });
+
+      const edgeSvg = edges.map(e => {
+        const p1 = pos[e.from];
+        const p2 = pos[e.to];
+        if (!p1 || !p2) return '';
+        const stroke = e.dashed ? '#ec4899' : '#64748b';
+        const dashAttr = e.dashed ? 'stroke-dasharray="5,4"' : '';
+        // Same-column vertical edge (e.g., ConceptualVariable -> RepresentedVariable -> CodeList)
+        if (p1.x === p2.x) {
+          const x = p1.x + nodeW / 2;
+          const y1 = p1.y < p2.y ? p1.y + nodeH : p1.y;
+          const y2 = p1.y < p2.y ? p2.y : p2.y + nodeH;
+          return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${stroke}" stroke-width="1.6" ${dashAttr} opacity="0.85" />`;
+        }
+        const x1 = p1.x < p2.x ? p1.x + nodeW : p1.x;
+        const y1 = p1.y + nodeH / 2;
+        const x2 = p1.x < p2.x ? p2.x : p2.x + nodeW;
+        const y2 = p2.y + nodeH / 2;
+        const mx = (x1 + x2) / 2;
+        return `<path d="M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" fill="none" stroke="${stroke}" stroke-width="1.6" ${dashAttr} opacity="0.85" />`;
+      }).join('');
+
+      const nodeSvg = nodes.map(n => {
+        const p = pos[n.id];
+        const trunc = (s, max) => (s && s.length > max ? s.slice(0, max - 1) + '…' : (s || ''));
+        const cursor = n.onClick ? 'cursor: pointer;' : '';
+        return `
+          <g transform="translate(${p.x}, ${p.y})" ${n.onClick ? `onclick="${n.onClick}"` : ''} style="${cursor}">
+            <rect width="${nodeW}" height="${nodeH}" rx="8" fill="${n.isFocus ? '#1e293b' : '#0f172a'}" stroke="${n.color}" stroke-width="${n.isFocus ? 2.4 : 1.3}" />
+            <rect width="5" height="${nodeH}" rx="2" fill="${n.color}" />
+            <text x="14" y="17" fill="${n.color}" font-size="9.5" font-weight="700">${escapeHtml(trunc(n.type, 28))}</text>
+            <text x="14" y="33" fill="#f8fafc" font-size="12" font-weight="600">${escapeHtml(trunc(n.title, 28))}</text>
+            <text x="14" y="47" fill="#94a3b8" font-size="9.5" font-family="var(--font-mono)">${escapeHtml(trunc(n.sub, 32))}</text>
+          </g>
+        `;
+      }).join('');
+
+      return `
+        <div class="detail-card" style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong style="font-size: 13px;">Related Resources Graph</strong>
+            <span style="font-size: 11px; color: var(--text-dim);">Click any related node to navigate</span>
+          </div>
+          <svg id="var-relation-svg" viewBox="0 0 850 ${svgH}" style="width: 100%; height: auto; max-height: 360px; background: rgba(15, 23, 42, 0.5); border-radius: 8px; border: 1px solid var(--border-subtle);">
+            ${edgeSvg}
+            ${nodeSvg}
+          </svg>
+        </div>
+      `;
+    }
+
+    function renderVariableDetail(tier, item) {
+      const detailEl = document.getElementById('variable-detail');
+      if (!detailEl) return;
+      const graphHtml = renderVariableRelationGraph(tier, item);
+
+      let extraHtml = '';
+      if (tier === 'represented') {
+        const ivRows = (item.instance_variables || []).map(iv => `
+          <tr style="border-bottom: 1px solid var(--border-subtle); cursor: pointer;" onclick="openVariable('instance', '${escapeHtml(iv.urn)}')">
+            <td style="padding: 8px; font-weight: 600; color: var(--c-instvar);">${escapeHtml(iv.name)}</td>
+            <td style="padding: 8px;">${escapeHtml(iv.study_name || '-')}</td>
+            <td style="padding: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">${escapeHtml(iv.urn)}</td>
+          </tr>
+        `).join('');
+        const semRows = (item.semantic_links || []).map(sl => `
+          <span class="tag" style="background: rgba(6,182,212,0.15); color: var(--c-alias); cursor: pointer;" onclick="openVariable('represented', '${escapeHtml(sl.target_urn)}')">
+            ${escapeHtml(sl.predicate)} → ${escapeHtml(sl.target_urn)} ${sl.correspondence_level ? `(${escapeHtml(sl.correspondence_level)})` : ''}
+          </span>
+        `).join('');
+        extraHtml = `
+          ${semRows ? `<div class="detail-card" style="margin-bottom: 16px;"><strong style="font-size: 13px; display: block; margin-bottom: 8px;">Harmonization Links</strong><div style="display: flex; flex-wrap: wrap; gap: 6px;">${semRows}</div></div>` : ''}
+          <div class="detail-card">
+            <strong style="font-size: 13px; display: block; margin-bottom: 8px;">Child Instance Variables (${(item.instance_variables || []).length})</strong>
+            ${ivRows ? `<table style="width: 100%; border-collapse: collapse; font-size: 12px;"><thead><tr style="text-align: left; border-bottom: 1px solid var(--border-subtle); color: var(--text-dim);"><th style="padding: 8px;">Name</th><th style="padding: 8px;">Study</th><th style="padding: 8px;">URN</th></tr></thead><tbody>${ivRows}</tbody></table>` : '<div style="color: var(--text-dim); font-size: 12px;">No InstanceVariables linked.</div>'}
+          </div>
+        `;
+      } else if (tier === 'instance') {
+        const statLabels = {
+          vald: 'Valid Cases',
+          invd: 'Invalid / Missing',
+          valid_cases: 'Valid Cases',
+          min: 'Minimum',
+          max: 'Maximum',
+          mean: 'Mean',
+          medn: 'Median',
+          mode: 'Mode',
+          stdev: 'Std. Dev.',
+          stddev: 'Std. Dev.',
+        };
+        const formatStatVal = (v) => {
+          if (typeof v === 'number') {
+            return Number.isInteger(v) ? v.toLocaleString() : Number(v.toFixed(4)).toLocaleString();
+          }
+          return String(v);
+        };
+        const occHtml = (item.occurrences || []).map(occ => {
+          const statEntries = Object.entries(occ.statistics || {});
+          const statsGrid = statEntries.length
+            ? `<div style="margin-bottom: 14px;"><div style="font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px;">Descriptive Statistics</div><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 8px;">${statEntries.map(([k, v]) => `<div style="background: rgba(15,23,42,0.6); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);"><div style="font-size: 10px; color: var(--text-dim); text-transform: uppercase;">${escapeHtml(statLabels[k.toLowerCase()] || k)}</div><div style="font-size: 14px; font-weight: 700; font-family: var(--font-mono); color: #f8fafc;">${escapeHtml(formatStatVal(v))}</div></div>`).join('')}</div></div>`
+            : '<div style="margin-bottom: 12px; font-size: 12px; color: var(--text-dim);">No descriptive statistics recorded for this datafile.</div>';
+          const freqRows = (occ.frequencies || []).map(f => {
+            const pct = f.percentage != null ? f.percentage : 0;
+            return `
+              <tr style="border-bottom: 1px solid var(--border-subtle);">
+                <td style="padding: 6px 8px; font-family: var(--font-mono);">${escapeHtml(f.code_value)}</td>
+                <td style="padding: 6px 8px;">${escapeHtml(f.category_label || '-')}${f.is_missing ? ' <span class="tag" style="color: #fbbf24;">missing</span>' : ''}</td>
+                <td style="padding: 6px 8px; text-align: right; font-family: var(--font-mono);">${f.frequency.toLocaleString()}</td>
+                <td style="padding: 6px 8px; width: 180px;">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="flex: 1; height: 8px; background: rgba(148,163,184,0.18); border-radius: 4px; overflow: hidden;">
+                      <div style="width: ${Math.min(100, pct)}%; height: 100%; background: ${f.is_missing ? '#f59e0b' : '#38bdf8'};"></div>
+                    </div>
+                    <span style="font-size: 11px; font-family: var(--font-mono); min-width: 42px; text-align: right;">${f.percentage != null ? pct.toFixed(1) + '%' : '-'}</span>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
+          return `
+            <div class="detail-card" style="margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <strong style="font-size: 13px;">Datafile: ${escapeHtml(occ.datafile_name)} ${occ.study_name ? `(${escapeHtml(occ.study_name)})` : ''}</strong>
+                <span class="tag">Order #${occ.order}</span>
+              </div>
+              ${statsGrid}
+              ${freqRows ? `<table style="width: 100%; border-collapse: collapse; font-size: 12px;"><thead><tr style="text-align: left; border-bottom: 1px solid var(--border-subtle); color: var(--text-dim);"><th style="padding: 6px 8px;">Code</th><th style="padding: 6px 8px;">Category Label</th><th style="padding: 6px 8px; text-align: right;">Freq</th><th style="padding: 6px 8px;">Share</th></tr></thead><tbody>${freqRows}</tbody></table>` : '<div style="color: var(--text-dim); font-size: 12px;">No frequency observations recorded for this datafile.</div>'}
+            </div>
+          `;
+        }).join('');
+        extraHtml = occHtml || '<div class="detail-card" style="color: var(--text-dim);">No datafile occurrences found.</div>';
+      } else {
+        const rvRows = (item.represented_variables || []).map(rv => `
+          <tr style="border-bottom: 1px solid var(--border-subtle); cursor: pointer;" onclick="openVariable('represented', '${escapeHtml(rv.urn)}')">
+            <td style="padding: 8px; font-weight: 600; color: var(--c-repvar);">${escapeHtml(rv.name)}</td>
+            <td style="padding: 8px;">${escapeHtml(rv.label || '-')}</td>
+            <td style="padding: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">${escapeHtml(rv.urn)}</td>
+          </tr>
+        `).join('');
+        extraHtml = `
+          ${item.concept_uri ? `<div class="detail-card" style="margin-bottom: 16px;"><strong style="font-size: 13px;">Controlled Vocabulary Anchor:</strong> <span class="tag">${escapeHtml(item.concept_vocabulary || 'Concept')}</span> <code style="margin-left: 6px; font-size: 12px;">${escapeHtml(item.concept_uri)}</code></div>` : ''}
+          <div class="detail-card">
+            <strong style="font-size: 13px; display: block; margin-bottom: 8px;">Clustered Represented Variables (${(item.represented_variables || []).length})</strong>
+            ${rvRows ? `<table style="width: 100%; border-collapse: collapse; font-size: 12px;"><thead><tr style="text-align: left; border-bottom: 1px solid var(--border-subtle); color: var(--text-dim);"><th style="padding: 8px;">Name</th><th style="padding: 8px;">Label</th><th style="padding: 8px;">URN</th></tr></thead><tbody>${rvRows}</tbody></table>` : '<div style="color: var(--text-dim); font-size: 12px;">No RepresentedVariables clustered yet.</div>'}
+          </div>
+        `;
+      }
+
+      detailEl.innerHTML = `
+        <div class="detail-card" style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div>
+              <h2 style="margin: 0; font-size: 18px;">${escapeHtml(item.name)}</h2>
+              ${item.label ? `<div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">${escapeHtml(item.label)}</div>` : ''}
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <span class="tag">${escapeHtml(tier.toUpperCase())}</span>
+              <span class="tag">${escapeHtml(item.origin || 'imported')}</span>
+            </div>
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-top: 8px;">${escapeHtml(item.urn)}</div>
+          ${item.description ? `<div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">${escapeHtml(item.description)}</div>` : ''}
+        </div>
+        ${graphHtml}
+        ${extraHtml}
+      `;
+    }
+
+    let currentResources = [];
+    let selectedResourceUrn = null;
+    let resourcesOffset = 0;
+    let resourcesHasMore = false;
+    let resSearchTimer = null;
+
+    async function loadResourceTypes() {
+      const sel = document.getElementById('res-type-select');
+      if (!sel) return;
+      try {
+        const res = await fetch('/api/resources/types');
+        if (!res.ok) return;
+        const types = await res.json();
+        const curVal = sel.value;
+        sel.innerHTML = '<option value="">All Resource Types</option>' + types.map(t =>
+          `<option value="${escapeHtml(t.resource_type)}">${escapeHtml(t.resource_type)} (${t.count})</option>`
+        ).join('');
+        if (curVal) sel.value = curVal;
+      } catch (err) {
+        console.error('Failed to load resource types:', err);
+      }
+    }
+
+    function filterResources() {
+      clearTimeout(resSearchTimer);
+      resSearchTimer = setTimeout(() => loadResources(0), 250);
+    }
+
+    function prevResourcesPage() {
+      if (resourcesOffset > 0) loadResources(Math.max(0, resourcesOffset - PAGE_SIZE));
+    }
+
+    function nextResourcesPage() {
+      if (resourcesHasMore) loadResources(resourcesOffset + PAGE_SIZE);
+    }
+
+    async function loadResources(offset = 0) {
+      resourcesOffset = offset;
+      const rType = document.getElementById('res-type-select')?.value || '';
+      const q = (document.getElementById('res-search')?.value || '').trim();
+      const listEl = document.getElementById('resource-list');
+      if (!listEl) return;
+      listEl.innerHTML = '<div class="spinner">Loading resources...</div>';
+
+      const params = new URLSearchParams();
+      params.set('limit', String(PAGE_SIZE));
+      params.set('offset', String(offset));
+      if (rType) params.set('resource_type', rType);
+      if (q) params.set('q', q);
+
+      try {
+        const res = await fetch(`/api/resources?${params.toString()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        const data = await res.json();
+        currentResources = Array.isArray(data) ? data : [];
+        resourcesHasMore = currentResources.length === PAGE_SIZE;
+        const prevBtn = document.getElementById('res-prev-btn');
+        const nextBtn = document.getElementById('res-next-btn');
+        const pageLabel = document.getElementById('res-page-label');
+        const countLabel = document.getElementById('res-count-label');
+        if (prevBtn) prevBtn.disabled = resourcesOffset === 0;
+        if (nextBtn) nextBtn.disabled = !resourcesHasMore;
+        const start = currentResources.length > 0 ? resourcesOffset + 1 : 0;
+        const end = resourcesOffset + currentResources.length;
+        if (pageLabel) pageLabel.textContent = `${start}–${end}`;
+        if (countLabel) countLabel.textContent = `${currentResources.length} shown`;
+
+        if (!currentResources.length) {
+          listEl.innerHTML = '<div style="padding: 16px; color: var(--text-dim); font-size: 12px;">No resources found.</div>';
+          return;
+        }
+        renderResourceList();
+        if (!selectedResourceUrn) {
+          await selectResource(currentResources[0].urn);
+        }
+      } catch (err) {
+        listEl.innerHTML = `<div style="color: #f87171; padding: 12px;">Failed to load resources: ${escapeHtml(err)}</div>`;
+      }
+    }
+
+    function renderResourceList() {
+      const listEl = document.getElementById('resource-list');
+      if (!listEl) return;
+      listEl.innerHTML = currentResources.map(r => {
+        const active = r.urn === selectedResourceUrn ? 'active' : '';
+        const color = RESOURCE_COLORS[r.resource_type] || '#94a3b8';
+        return `
+          <div class="q-item ${active}" onclick="selectResource('${escapeHtml(r.urn)}')">
+            <div class="q-item-text">${escapeHtml(r.name)}</div>
+            <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(r.urn)}</div>
+            <div class="q-item-meta">
+              <span class="tag" style="color: ${color}; border-color: ${color};">${escapeHtml(r.resource_type)}</span>
+              <span class="tag">${escapeHtml(r.origin)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function selectResource(urn) {
+      selectedResourceUrn = urn;
+      renderResourceList();
+      const detailEl = document.getElementById('resource-detail');
+      if (!detailEl) return;
+      detailEl.innerHTML = '<div class="spinner">Loading resource attributes...</div>';
+      try {
+        const res = await fetch(`/api/resources/${encodeURIComponent(urn)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        const item = await res.json();
+        const color = RESOURCE_COLORS[item.resource_type] || '#94a3b8';
+        const hashRows = Object.entries(item.hashes || {}).map(([k, v]) => `
+          <tr><td style="padding: 6px 8px; color: var(--text-dim); font-family: var(--font-mono);">${escapeHtml(k)}</td><td style="padding: 6px 8px; font-family: var(--font-mono); font-size: 11px; word-break: break-all;">${escapeHtml(String(v))}</td></tr>
+        `).join('');
+        const extRows = (item.extended_attributes || []).map(a => `
+          <tr><td style="padding: 6px 8px; color: var(--text-dim); font-family: var(--font-mono);">${escapeHtml(a.type || '-')}</td><td style="padding: 6px 8px; font-size: 12px; word-break: break-word;">${escapeHtml(typeof a.value === 'object' ? JSON.stringify(a.value) : String(a.value ?? ''))}</td></tr>
+        `).join('');
+        detailEl.innerHTML = `
+          <div class="detail-card" style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <div>
+                <h2 style="margin: 0; font-size: 18px;">${escapeHtml(item.name)}</h2>
+                ${item.label && item.label !== item.name ? `<div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">${escapeHtml(item.label)}</div>` : ''}
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <span class="tag" style="color: ${color}; border-color: ${color};">${escapeHtml(item.resource_type)}</span>
+                <span class="tag">${escapeHtml(item.origin)}</span>
+              </div>
+            </div>
+            <div style="margin-top: 12px; padding: 10px 12px; background: rgba(15,23,42,0.6); border-radius: 6px; border: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: 12px; word-break: break-all;">
+              <span style="color: var(--text-dim);">URN:</span> ${escapeHtml(item.urn)}
+            </div>
+            ${item.description ? `<div style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">${escapeHtml(item.description)}</div>` : ''}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 12px; font-size: 12px;">
+              <div><span style="color: var(--text-dim);">Scheme URN:</span> <span style="font-family: var(--font-mono);">${escapeHtml(item.scheme_urn || '-')}</span></div>
+              <div><span style="color: var(--text-dim);">Created:</span> <span style="font-family: var(--font-mono);">${escapeHtml(item.created_at || '-')}</span></div>
+              <div><span style="color: var(--text-dim);">Updated:</span> <span style="font-family: var(--font-mono);">${escapeHtml(item.updated_at || '-')}</span></div>
+            </div>
+          </div>
+          ${hashRows ? `<div class="detail-card" style="margin-bottom: 16px;"><strong style="font-size: 13px; display: block; margin-bottom: 8px;">Content Hashes</strong><table style="width: 100%; border-collapse: collapse; font-size: 12px;"><tbody>${hashRows}</tbody></table></div>` : ''}
+          ${extRows ? `<div class="detail-card"><strong style="font-size: 13px; display: block; margin-bottom: 8px;">Extended Attributes (${(item.extended_attributes || []).length})</strong><table style="width: 100%; border-collapse: collapse; font-size: 12px;"><tbody>${extRows}</tbody></table></div>` : ''}
+        `;
+      } catch (err) {
+        detailEl.innerHTML = `<div class="detail-card" style="color: #f87171;">Failed to load resource detail: ${escapeHtml(err)}</div>`;
+      }
+    }
+
     function switchTab(tabId, pushHistory = true) {
-      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tabId);
+      });
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
       let urn = null;
       if (tabId === 'explorer') {
-        document.querySelectorAll('.nav-tab')[0].classList.add('active');
         document.getElementById('tab-explorer').classList.add('active');
         urn = selectedQuestionUrn;
+      } else if (tabId === 'variables') {
+        document.getElementById('tab-variables').classList.add('active');
+        if (currentVariables.length === 0) loadVariables(0);
+        urn = selectedVariableUrn;
       } else if (tabId === 'codelists') {
-        document.querySelectorAll('.nav-tab')[1].classList.add('active');
         document.getElementById('tab-codelists').classList.add('active');
         if (currentCodeLists.length === 0) loadCodeLists();
         urn = selectedCodeListUrn;
       } else if (tabId === 'categories') {
-        document.querySelectorAll('.nav-tab')[2].classList.add('active');
         document.getElementById('tab-categories').classList.add('active');
         if (currentCategories.length === 0) loadCategories();
         urn = selectedCategoryUrn;
+      } else if (tabId === 'resources') {
+        document.getElementById('tab-resources').classList.add('active');
+        loadResourceTypes();
+        if (currentResources.length === 0) loadResources(0);
+        urn = selectedResourceUrn;
+      } else if (tabId === 'groups') {
+        document.getElementById('tab-groups').classList.add('active');
+        loadGroups();
+      } else if (tabId === 'batches') {
+        document.getElementById('tab-batches').classList.add('active');
+        loadBatches();
+      } else if (tabId === 'quarantine') {
+        document.getElementById('tab-quarantine').classList.add('active');
+        loadQuarantine();
       }
 
       if (pushHistory && urn) {
         recordHistory(tabId, urn);
+      }
+    }
+
+    async function loadGroups() {
+      const container = document.getElementById('groups-container');
+      const q = (document.getElementById('group-search')?.value || '').trim();
+      const url = q ? `/api/groups?q=${encodeURIComponent(q)}` : '/api/groups';
+      try {
+        const res = await fetch(url);
+        const rows = await res.json();
+        if (!rows.length) {
+          container.innerHTML = '<div class="detail-card" style="color: var(--text-dim);">No DDI Groups found. Create one with <code>fairwddi group create</code>.</div>';
+          return;
+        }
+        container.innerHTML = rows.map(g => `
+          <div class="detail-card" style="margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <div>
+                <strong style="font-size: 15px;">${escapeHtml(g.name)}</strong>
+                ${g.slug ? `<span class="tag" style="margin-left: 8px; background: rgba(56,189,248,0.15); color: #38bdf8;">slug: ${escapeHtml(g.slug)}</span>` : ''}
+                <span class="tag" style="margin-left: 6px;">${escapeHtml(g.group_type)}</span>
+              </div>
+              <span class="tag">${g.member_count} member(s)</span>
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-top: 6px;">${escapeHtml(g.urn)}</div>
+            ${g.description ? `<div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">${escapeHtml(g.description)}</div>` : ''}
+            ${g.members.length ? `<div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px;">${g.members.map(m => `<span class="tag" style="font-family: var(--font-mono); font-size: 11px;">${escapeHtml(m.resource_type)}: ${escapeHtml(m.urn)}</span>`).join('')}</div>` : ''}
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `<div class="detail-card" style="color: #f87171;">Failed to load groups: ${escapeHtml(err)}</div>`;
+      }
+    }
+
+    async function loadBatches() {
+      const container = document.getElementById('batches-container');
+      try {
+        const res = await fetch('/api/batches');
+        const rows = await res.json();
+        if (!rows.length) {
+          container.innerHTML = '<div class="detail-card" style="color: var(--text-dim);">No import batches recorded yet.</div>';
+          return;
+        }
+        container.innerHTML = `
+          <div class="detail-card" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+              <thead>
+                <tr style="text-align: left; border-bottom: 1px solid var(--border-subtle); color: var(--text-dim);">
+                  <th style="padding: 8px;">ID</th>
+                  <th style="padding: 8px;">File</th>
+                  <th style="padding: 8px;">Format</th>
+                  <th style="padding: 8px;">Status</th>
+                  <th style="padding: 8px; text-align: right;">Created</th>
+                  <th style="padding: 8px; text-align: right;">Reused</th>
+                  <th style="padding: 8px;">SHA-256</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.map(b => `
+                  <tr style="border-bottom: 1px solid var(--border-subtle);">
+                    <td style="padding: 8px; font-family: var(--font-mono);">#${b.id}</td>
+                    <td style="padding: 8px;">${escapeHtml(b.file_name)}</td>
+                    <td style="padding: 8px; font-family: var(--font-mono);">${escapeHtml(b.source_format)}</td>
+                    <td style="padding: 8px;"><span class="tag">${escapeHtml(b.status)}</span></td>
+                    <td style="padding: 8px; text-align: right; font-family: var(--font-mono);">${b.created_count.toLocaleString()}</td>
+                    <td style="padding: 8px; text-align: right; font-family: var(--font-mono);">${b.reused_count.toLocaleString()}</td>
+                    <td style="padding: 8px; font-family: var(--font-mono); color: var(--text-dim);">${escapeHtml((b.file_sha256 || '').slice(0, 16))}…</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (err) {
+        container.innerHTML = `<div class="detail-card" style="color: #f87171;">Failed to load batches: ${escapeHtml(err)}</div>`;
+      }
+    }
+
+    async function loadQuarantine() {
+      const container = document.getElementById('quarantine-container');
+      try {
+        const res = await fetch('/api/quarantine');
+        const rows = await res.json();
+        if (!rows.length) {
+          container.innerHTML = '<div class="detail-card" style="color: var(--text-dim);">No quarantined metadata drift records.</div>';
+          return;
+        }
+        container.innerHTML = `
+          <div class="detail-card" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+              <thead>
+                <tr style="text-align: left; border-bottom: 1px solid var(--border-subtle); color: var(--text-dim);">
+                  <th style="padding: 8px;">ID</th>
+                  <th style="padding: 8px;">Type</th>
+                  <th style="padding: 8px;">Incoming URN</th>
+                  <th style="padding: 8px;">Conflict</th>
+                  <th style="padding: 8px;">Status</th>
+                  <th style="padding: 8px;">Source File</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.map(q => `
+                  <tr style="border-bottom: 1px solid var(--border-subtle);">
+                    <td style="padding: 8px; font-family: var(--font-mono);">#${q.id}</td>
+                    <td style="padding: 8px;">${escapeHtml(q.entity_type)}</td>
+                    <td style="padding: 8px; font-family: var(--font-mono);">${escapeHtml(q.incoming_urn)}</td>
+                    <td style="padding: 8px;">${escapeHtml(q.conflict_type)}</td>
+                    <td style="padding: 8px;"><span class="tag">${escapeHtml(q.status)}</span></td>
+                    <td style="padding: 8px;">${escapeHtml(q.source_file || '-')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (err) {
+        container.innerHTML = `<div class="detail-card" style="color: #f87171;">Failed to load quarantine records: ${escapeHtml(err)}</div>`;
       }
     }
 

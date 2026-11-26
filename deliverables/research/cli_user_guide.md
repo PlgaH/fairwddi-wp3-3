@@ -502,9 +502,25 @@ The `preflight` command group inspects incoming files, validates profile conform
 uv run fairwddi preflight --help
 ```
 
+#### Command Roles: `preflight profile` vs. `preflight check` vs. `import plan`
+
+| Command | Core Question Answered | DB Access | Converts DDI-C? | Default Outputs (in `.` unless noted) | Executable by `import execute`? |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `fairwddi preflight profile` | *"What is inside this XML file, and what is its documentation quality?"* | **None** | No | `<stem>.profile.json`, `<stem>.profile.md` | No |
+| `fairwddi preflight check` | *"Is this file clean, non-duplicate, and URN-ready for this ReQuest DB?"* | **Read-only** (`IngestBatch`, `UrnRegistry`) | No (flags recommendation only) | `<stem>.preflight.json`, `<stem>.preflight.report.md` | No (readiness report only) |
+| `fairwddi preflight upgrade` | *"Convert DDI-C XML to DDI-L 4.0/3.3 files on disk."* | **None** | **Yes** (writes to disk) | `*.ddi40.json`, `*.stats.ddi40.json`, `*.upgrade.report.md` | No (produces input for `import plan` / `run`) |
+| `fairwddi import plan` | *"Exactly which DB entities will be created, reused, or quarantined?"* | **Read-only** (`UrnRegistry`, `IngestBatch`) | **No** (streams raw DDI-C in-memory without `CodebookToLifecycleConverter`) | `<stem>.import.plan.yaml`, `<stem>.import.report.md` | **Yes** |
+| `fairwddi import run` | *"Run preflight, optional DDI-C upgrade, plan, and atomic load end-to-end."* | **Read + Atomic Write** (or read-only with `--dry-run`) | **Yes** (writes `*.ddi40.json` when given DDI-C) | Writes DB rows + `IngestBatch` receipt | N/A (executes directly) |
+
+> [!TIP]
+> **Which input should you pass to `fairwddi import plan` for DDI-Codebook?**
+> - **Step-by-step:** Run `fairwddi preflight upgrade study.ddic.xml` first, then pass the upgraded `study.ddic.ddi40.json` to `fairwddi import plan` (this preserves `CodebookToLifecycleConverter` deduplication, `--category-scheme-mode`, `--id-strategy`, and `VariableStatistics` splitting).
+> - **All-in-one:** Pass `study.ddic.xml` directly to `fairwddi import run` (add `--dry-run` to stop after `upgrade` + `import plan` without writing to the DB).
+> - `preflight profile` and `preflight check` remain optional read-only QA reports before planning.
+
 #### Preflight Readiness Check (`fairwddi preflight check`)
 
-Audits metadata structure and generates a JSON summary (`.preflight.json`), Markdown report (`.preflight.report.md`), and zero-write plan (`.preflight.plan.yaml`) in the output directory (default: `.`):
+Audits metadata structure and generates a JSON report (`.preflight.json`) and Markdown report (`.preflight.report.md`) in the output directory (default: `.`):
 
 ```bash
 uv run fairwddi preflight check tests/fixtures/FSD3562_eng.ddic.xml \
@@ -513,8 +529,20 @@ uv run fairwddi preflight check tests/fixtures/FSD3562_eng.ddic.xml \
 ```
 
 *Key Options:*
-- `-o, --output-dir`: Destination directory for `.preflight.json`, `.preflight.report.md`, and `.preflight.plan.yaml` (default: `.`).
+- `-o, --output-dir`: Destination directory for `.preflight.json` and `.preflight.report.md` (default: `.`).
 - `--auto-approve`: Automatically mark review gates as approved.
+
+*Interpreting Findings & Remediation:*
+
+| Finding / Code | Meaning | What to Do |
+| :--- | :--- | :--- |
+| **`PRE-FMT-001`** *(error)* | Unrecognized format or XML namespace | Verify the file isn't truncated and check its root XML namespace (`ddi:codebook:2_5`, `ddi:instance:3_3`) or DDI 4.0 JSON structure. |
+| **`PRE-DUP-001`** *(warning)* | Identical file SHA-256 already exists in `IngestBatch` | Inspect the existing batch with `fairwddi import status <batch_id>`. Skip re-importing, or pass `--force-reload` to `fairwddi import plan` / `run` if you intentionally want a new batch. |
+| **`PRE-URN-002`** *(warning)* | Resources have synthesized/anonymous URNs (`:anonymous:` / `:unknown.agency:`) | For DDI-C, run `fairwddi preflight upgrade <file> --agency <agency> --identifier <id>` (or pass `--agency` to `import run`) to assign proper canonical URNs before loading; for DDI-L, fix missing agency/IDs in the source XML. |
+| **`PRE-REF-002`** *(warning)* | External `urn:ddi:...` references are missing from the file and `UrnRegistry` | Import the referenced dependency file/scheme first (or load controlled vocabularies with `fairwddi db load-vocab`), or confirm dangling external refs are acceptable before planning. |
+| **Profiler QA findings / `PRE-DDIC-001`** | Missing study/variable documentation (from `dartfx-ddi` `recommended` / `cdif` / `schema` checks) or 0 variables | Run `fairwddi preflight profile <file>` for full variable-level details, fix the source XML upstream, or switch `--profile` (e.g., to `schema` or a custom profile YAML) if those rules are stricter than needed. |
+
+If blocking errors exist (`error_count > 0`), resolve them before planning; if only acceptable warnings remain, proceed to `fairwddi import plan <file>` (or `fairwddi import run <file>`).
 
 #### Explicit DDI-C to DDI-L Upgrade on Disk (`fairwddi preflight upgrade`)
 
@@ -609,6 +637,13 @@ uv run fairwddi import plan ./import_output/survey.ddi40.json \
 ```
 
 Emits `./import_output/survey.ddi40.import.plan.yaml` and `.import.report.md`.
+
+> [!NOTE]
+> **Why use `import plan` and `deliverables/editors/import_plan_editor.html` when import does zero harmonization?**
+> Even without cross-study harmonization, deterministic loading still encounters identity and integrity edge cases that should not silently mutate the database:
+> - **Same-URN Content Drift (`IMP-DRIFT-001`):** Incoming entity matches an existing URN in `UrnRegistry` with a *different* SHA-256 `content_hash` (triage for `MetadataQuarantine` vs. skip).
+> - **Same-URN Cross-File Reuse (`IMP-URN-REUSE-001`):** Incoming entity matches an existing URN with an *identical* `content_hash` (confirm intentional reuse rather than accidental ID collision).
+> - **Duplicate File (`PRE-DUP-001`) & Zero-Write Audit:** Preview exact `create` / `reuse` / `quarantine` counts and sign the `ReviewGate` before committing. For clean first-time imports, `fairwddi import run` can bypass manual plan editing.
 
 #### Execute Import Plan (`fairwddi import execute`)
 

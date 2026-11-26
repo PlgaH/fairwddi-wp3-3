@@ -1,0 +1,217 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 960" width="1440" height="960" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="55%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F766E"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-4%" y="-4%" width="108%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.07"/>
+    </filter>
+    <marker id="arrowSlate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1440" height="960" fill="#F8FAFC"/>
+
+  <!-- Header -->
+  <rect width="1440" height="104" fill="url(#headerGrad)"/>
+  <text x="48" y="46" fill="#FFFFFF" font-size="25" font-weight="700" letter-spacing="-0.3">
+    FAIRwDDI Interactive Plan Viewers, Editors &amp; Database Explorers
+  </text>
+  <text x="48" y="76" fill="#CBD5E1" font-size="14" font-weight="400">
+    Human-in-the-Loop Review Tools (Standalone HTML) &amp; Live ReQuest Question Bank Web App (django-ninja)
+  </text>
+  <rect x="1146" y="28" width="250" height="46" rx="8" fill="#134E4A" stroke="#2DD4BF" stroke-width="1.2"/>
+  <text x="1271" y="48" text-anchor="middle" fill="#99F6E4" font-size="11" font-weight="700" letter-spacing="0.8">UI ECOSYSTEM</text>
+  <text x="1271" y="65" text-anchor="middle" fill="#FFFFFF" font-size="12.5" font-weight="600">2 Plan Editors · 2 DB Explorers</text>
+
+  <!-- Section Headers -->
+  <rect x="44" y="122" width="664" height="32" rx="6" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1"/>
+  <text x="376" y="142" text-anchor="middle" fill="#1E40AF" font-size="12" font-weight="700" letter-spacing="0.5">
+    PLAN VIEWERS &amp; EDITORS · Zero-Backend Browser HTML (YAML / JSON Review &amp; Export)
+  </text>
+  <rect x="732" y="122" width="664" height="32" rx="6" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1"/>
+  <text x="1064" y="142" text-anchor="middle" fill="#065F46" font-size="12" font-weight="700" letter-spacing="0.5">
+    DATABASE &amp; QUESTION BANK EXPLORERS · Schema Design &amp; Live PostgreSQL Inspection
+  </text>
+
+  <!-- ==================== CARD 1: INGEST PLAN EDITOR ==================== -->
+  <g filter="url(#cardShadow)">
+    <rect x="44" y="168" width="664" height="322" rx="12" fill="#FFFFFF" stroke="#93C5FD" stroke-width="1.4"/>
+    <rect x="44" y="168" width="664" height="48" rx="12" fill="#2563EB"/>
+    <rect x="44" y="204" width="664" height="12" fill="#2563EB"/>
+    <rect x="64" y="180" width="24" height="24" rx="6" fill="#FFFFFF"/>
+    <text x="76" y="197" text-anchor="middle" fill="#2563EB" font-size="13" font-weight="800">1</text>
+    <text x="100" y="198" fill="#FFFFFF" font-size="16.5" font-weight="700">Import &amp; Preflight Plan Editor</text>
+    <text x="688" y="197" text-anchor="end" fill="#DBEAFE" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">import_plan_editor.html</text>
+  </g>
+
+  <rect x="64" y="230" width="624" height="34" rx="6" fill="#0F172A"/>
+  <text x="76" y="251" fill="#93C5FD" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">File: deliverables/editors/import_plan_editor.html  (Open directly in any browser)</text>
+
+  <!-- Left column -->
+  <text x="64" y="288" fill="#0F172A" font-size="12.5" font-weight="700">Supported Inputs</text>
+  <rect x="64" y="298" width="296" height="58" rx="6" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="76" y="317" fill="#1E3A8A" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">*.import.plan.yaml</text>
+  <text x="76" y="336" fill="#1E3A8A" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">*.import.report.md</text>
+
+  <text x="64" y="378" fill="#0F172A" font-size="12.5" font-weight="700">Archivist Actions</text>
+  <text x="64" y="398" fill="#334155" font-size="11.5">• Inspect format, SHA-256 &amp; QA findings</text>
+  <text x="64" y="416" fill="#334155" font-size="11.5">• Triage MetadataQuarantine &amp; URN reuse</text>
+  <text x="64" y="434" fill="#334155" font-size="11.5">• Toggle action items (create / reuse / skip)</text>
+  <text x="64" y="452" fill="#334155" font-size="11.5">• Sign ReviewGate (reviewer + comments)</text>
+
+  <!-- Right column -->
+  <rect x="378" y="276" width="310" height="196" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="394" y="298" fill="#475569" font-size="11" font-weight="700" letter-spacing="0.5">ROUND-TRIP CLI HANDOFF</text>
+  <text x="394" y="322" fill="#0F172A" font-size="11.5" font-weight="600">1. Generate Plan:</text>
+  <rect x="394" y="330" width="278" height="26" rx="4" fill="#E2E8F0"/>
+  <text x="402" y="347" fill="#0F172A" font-size="10.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">fairwddi import plan study.ddi40.json</text>
+  <text x="394" y="376" fill="#0F172A" font-size="11.5" font-weight="600">2. Review &amp; Export YAML in Browser</text>
+  <text x="394" y="394" fill="#475569" font-size="11">Downloads approved *.import.plan.yaml</text>
+  <text x="394" y="418" fill="#0F172A" font-size="11.5" font-weight="600">3. Execute Atomically:</text>
+  <rect x="394" y="426" width="278" height="26" rx="4" fill="#DBEAFE"/>
+  <text x="400" y="443" fill="#1E3A8A" font-size="9.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">fairwddi import execute study.import.plan.yaml</text>
+
+  <!-- ==================== CARD 2: HARMONIZATION PLAN EDITOR ==================== -->
+  <g filter="url(#cardShadow)">
+    <rect x="44" y="508" width="664" height="322" rx="12" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.4"/>
+    <rect x="44" y="508" width="664" height="48" rx="12" fill="#6D28D9"/>
+    <rect x="44" y="544" width="664" height="12" fill="#6D28D9"/>
+    <rect x="64" y="520" width="24" height="24" rx="6" fill="#FFFFFF"/>
+    <text x="76" y="537" text-anchor="middle" fill="#6D28D9" font-size="13" font-weight="800">2</text>
+    <text x="100" y="538" fill="#FFFFFF" font-size="16.5" font-weight="700">Harmonization Plan &amp; Comparison Editor</text>
+    <text x="688" y="537" text-anchor="end" fill="#EDE9FE" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">harmonization_plan_editor.html</text>
+  </g>
+
+  <rect x="64" y="570" width="624" height="34" rx="6" fill="#0F172A"/>
+  <text x="76" y="591" fill="#C4B5FD" font-size="10.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">File: deliverables/editors/harmonization_plan_editor.html  (Client-side YAML/JSON)</text>
+
+  <!-- Left column -->
+  <text x="64" y="628" fill="#0F172A" font-size="12.5" font-weight="700">Supported Inputs</text>
+  <rect x="64" y="638" width="296" height="58" rx="6" fill="#F5F3FF" stroke="#DDD6FE"/>
+  <text x="76" y="657" fill="#4C1D95" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">*.comparison.yaml / .json</text>
+  <text x="76" y="676" fill="#4C1D95" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">*.harmonize.plan.yaml</text>
+
+  <text x="64" y="718" fill="#0F172A" font-size="12.5" font-weight="700">Curator Actions</text>
+  <text x="64" y="738" fill="#334155" font-size="11.5">• Filter by level (syntactic / semantic / conceptual)</text>
+  <text x="64" y="756" fill="#334155" font-size="11.5">• Inspect CodeListQualification &amp; confidence</text>
+  <text x="64" y="774" fill="#334155" font-size="11.5">• Bulk approve high-confidence tier or review items</text>
+  <text x="64" y="792" fill="#334155" font-size="11.5">• Override action: promote_reuse / link_only / cluster</text>
+
+  <!-- Right column -->
+  <rect x="378" y="616" width="310" height="196" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="394" y="638" fill="#475569" font-size="11" font-weight="700" letter-spacing="0.5">ROUND-TRIP CLI HANDOFF</text>
+  <text x="394" y="662" fill="#0F172A" font-size="11.5" font-weight="600">1. Compare &amp; Plan:</text>
+  <rect x="394" y="670" width="278" height="26" rx="4" fill="#E2E8F0"/>
+  <text x="402" y="687" fill="#0F172A" font-size="10.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">fairwddi harmonize plan compare.yaml</text>
+  <text x="394" y="716" fill="#0F172A" font-size="11.5" font-weight="600">2. Curate &amp; Export YAML in Browser</text>
+  <text x="394" y="734" fill="#475569" font-size="11">Downloads approved *.harmonize.plan.yaml</text>
+  <text x="394" y="758" fill="#0F172A" font-size="11.5" font-weight="600">3. Execute Harmonization:</text>
+  <rect x="394" y="766" width="278" height="26" rx="4" fill="#EDE9FE"/>
+  <text x="402" y="783" fill="#4C1D95" font-size="10.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">fairwddi harmonize execute harm.plan.yaml</text>
+
+  <!-- ==================== CARD 3: DATABASE SCHEMA EXPLORER ==================== -->
+  <g filter="url(#cardShadow)">
+    <rect x="732" y="168" width="664" height="322" rx="12" fill="#FFFFFF" stroke="#5EEAD4" stroke-width="1.4"/>
+    <rect x="732" y="168" width="664" height="48" rx="12" fill="#0D9488"/>
+    <rect x="732" y="204" width="664" height="12" fill="#0D9488"/>
+    <rect x="752" y="180" width="24" height="24" rx="6" fill="#FFFFFF"/>
+    <text x="764" y="197" text-anchor="middle" fill="#0D9488" font-size="13" font-weight="800">3</text>
+    <text x="788" y="198" fill="#FFFFFF" font-size="16.5" font-weight="700">PostgreSQL 17 Schema Explorer</text>
+    <text x="1376" y="197" text-anchor="end" fill="#CCFBF1" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">database_explorer.html</text>
+  </g>
+
+  <rect x="752" y="230" width="624" height="34" rx="6" fill="#0F172A"/>
+  <text x="764" y="251" fill="#5EEAD4" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">File: deliverables/research/database_explorer.html  (Static Interactive ER Canvas)</text>
+
+  <!-- Left column -->
+  <text x="752" y="288" fill="#0F172A" font-size="12.5" font-weight="700">Interactive ER Capabilities</text>
+  <text x="752" y="310" fill="#334155" font-size="11.5">• Native SVG/Canvas with pan, zoom &amp; search</text>
+  <text x="752" y="328" fill="#334155" font-size="11.5">• Click any table to inspect columns, types &amp; FKs</text>
+  <text x="752" y="346" fill="#334155" font-size="11.5">• Question &amp; Variable Cascade spotlight mode</text>
+  <text x="752" y="364" fill="#334155" font-size="11.5">• Highlights UrnRegistry CASCADE constraints</text>
+  <text x="752" y="382" fill="#334155" font-size="11.5">• Synchronized with database.md &amp; .mmd</text>
+
+  <rect x="752" y="400" width="296" height="72" rx="6" fill="#F0FDFA" stroke="#99F6E4"/>
+  <text x="764" y="420" fill="#115E59" font-size="11.5" font-weight="700">AUDIENCE</text>
+  <text x="764" y="439" fill="#334155" font-size="11.5">Architects, DBAs &amp; developers reviewing</text>
+  <text x="764" y="456" fill="#334155" font-size="11.5">tables, JSONB shapes &amp; index design.</text>
+
+  <!-- Right column: 5 schema layers -->
+  <rect x="1066" y="276" width="310" height="196" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="1082" y="298" fill="#475569" font-size="11" font-weight="700" letter-spacing="0.5">5 SCHEMA LAYERS COVERED</text>
+  <rect x="1082" y="310" width="278" height="26" rx="4" fill="#EDE9FE" stroke="#C4B5FD"/>
+  <text x="1092" y="327" fill="#4C1D95" font-size="11" font-weight="600">Concept: ConceptScheme, ConceptualVariable</text>
+  <rect x="1082" y="342" width="278" height="26" rx="4" fill="#D1FAE5" stroke="#6EE7B7"/>
+  <text x="1092" y="359" fill="#064E3B" font-size="11" font-weight="600">Representation: QuestionItem, CodeList, RV</text>
+  <rect x="1082" y="374" width="278" height="26" rx="4" fill="#E0F2FE" stroke="#7DD3FC"/>
+  <text x="1092" y="391" fill="#0C4A6E" font-size="11" font-weight="600">Dataset: StudyUnit, InstanceVariable, Datafile</text>
+  <rect x="1082" y="406" width="278" height="26" rx="4" fill="#FEF3C7" stroke="#FDE68A"/>
+  <text x="1092" y="423" fill="#92400E" font-size="11" font-weight="600">Organization: Group (slug), Organization</text>
+  <rect x="1082" y="438" width="278" height="26" rx="4" fill="#F1F5F9" stroke="#CBD5E1"/>
+  <text x="1092" y="455" fill="#334155" font-size="11" font-weight="600">Infra: UrnRegistry, IngestBatch, EventLog</text>
+
+  <!-- ==================== CARD 4: LIVE QUESTION BANK EXPLORER ==================== -->
+  <g filter="url(#cardShadow)">
+    <rect x="732" y="508" width="664" height="322" rx="12" fill="#FFFFFF" stroke="#6EE7B7" stroke-width="1.4"/>
+    <rect x="732" y="508" width="664" height="48" rx="12" fill="#059669"/>
+    <rect x="732" y="544" width="664" height="12" fill="#059669"/>
+    <rect x="752" y="520" width="24" height="24" rx="6" fill="#FFFFFF"/>
+    <text x="764" y="537" text-anchor="middle" fill="#059669" font-size="13" font-weight="800">4</text>
+    <text x="788" y="538" fill="#FFFFFF" font-size="16.5" font-weight="700">Live Question Bank Explorer &amp; REST API</text>
+    <text x="1376" y="537" text-anchor="end" fill="#D1FAE5" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">fairwddi serve / explorer</text>
+  </g>
+
+  <rect x="752" y="570" width="624" height="34" rx="6" fill="#0F172A"/>
+  <text x="764" y="591" fill="#6EE7B7" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">$ fairwddi serve --open   →   http://127.0.0.1:8000/explorer  &amp;  /api/docs</text>
+
+  <!-- Left column -->
+  <text x="752" y="628" fill="#0F172A" font-size="12.5" font-weight="700">Live Database Views</text>
+  <text x="752" y="650" fill="#334155" font-size="11.5">• Question &amp; Variable Cascade lineage graph</text>
+  <text x="752" y="668" fill="#334155" font-size="11.5">• Cross-wave survey comparison matrix</text>
+  <text x="752" y="686" fill="#334155" font-size="11.5">• CodeList &amp; Category browsers (i18n JSONB)</text>
+  <text x="752" y="704" fill="#334155" font-size="11.5">• URN Alias provenance &amp; hash inspection</text>
+  <text x="752" y="722" fill="#334155" font-size="11.5">• Backed by django-ninja REST endpoints</text>
+
+  <rect x="752" y="740" width="296" height="72" rx="6" fill="#ECFDF5" stroke="#A7F3D0"/>
+  <text x="764" y="760" fill="#065F46" font-size="11.5" font-weight="700">AUDIENCE</text>
+  <text x="764" y="779" fill="#334155" font-size="11.5">Data archivists &amp; researchers browsing</text>
+  <text x="764" y="796" fill="#334155" font-size="11.5">ingested surveys &amp; harmonized cascades.</text>
+
+  <!-- Right column: endpoints & tabs -->
+  <rect x="1066" y="616" width="310" height="196" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="1082" y="638" fill="#475569" font-size="11" font-weight="700" letter-spacing="0.5">WEB ROUTES &amp; API STACK</text>
+  <rect x="1082" y="652" width="278" height="32" rx="5" fill="#ECFDF5" stroke="#A7F3D0"/>
+  <text x="1092" y="672" fill="#064E3B" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">/explorer   (Interactive SPA)</text>
+  <rect x="1082" y="692" width="278" height="32" rx="5" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="1092" y="712" fill="#1E3A8A" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">/api/docs   (OpenAPI / Swagger)</text>
+  <rect x="1082" y="732" width="278" height="32" rx="5" fill="#F1F5F9" stroke="#CBD5E1"/>
+  <text x="1092" y="752" fill="#334155" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">/api/*      (django-ninja JSON)</text>
+  <text x="1082" y="788" fill="#475569" font-size="11">Queries live PostgreSQL 17 / SQLite</text>
+  <text x="1082" y="804" fill="#475569" font-size="11">populated by import &amp; harmonize.</text>
+
+  <!-- ==================== BOTTOM SUMMARY BAR ==================== -->
+  <rect x="44" y="850" width="1352" height="68" rx="10" fill="#0F172A"/>
+  <text x="72" y="878" fill="#93C5FD" font-size="12.5" font-weight="700">WHEN TO USE WHICH TOOL:</text>
+  <text x="276" y="878" fill="#F8FAFC" font-size="12">
+    <tspan font-weight="700" fill="#60A5FA">import_plan_editor.html</tspan> before DB load  ·
+    <tspan font-weight="700" fill="#C4B5FD">harmonization_plan_editor.html</tspan> before linking/clustering  ·
+    <tspan font-weight="700" fill="#5EEAD4">database_explorer.html</tspan> for schema ER  ·
+    <tspan font-weight="700" fill="#6EE7B7">fairwddi serve</tspan> for live data
+  </text>
+  <text x="72" y="901" fill="#94A3B8" font-size="11">
+    All three static HTML tools run offline in any browser with zero server setup; fairwddi serve launches the live Django + django-ninja web explorer.
+  </text>
+
+  <!-- Footer -->
+  <text x="48" y="942" fill="#64748B" font-size="11">
+    FAIRwDDI WP3 ST3 · Centre des Données Socio-Politiques (CDSP), Sciences Po / CNRS · Interactive UI &amp; Explorer Overview
+  </text>
+  <text x="1396" y="942" text-anchor="end" fill="#64748B" font-size="11">
+    viewers_editors_and_explorers_infographic.svg
+  </text>
+</svg>

@@ -366,7 +366,6 @@ def run_preflight_check(
     if output_dir is not None:
         out_dir = Path(output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
-        plan.to_yaml(out_dir / f"{path.stem}.preflight.plan.yaml")
         plan.to_json(out_dir / f"{path.stem}.preflight.json")
         plan.to_markdown(out_dir / f"{path.stem}.preflight.report.md")
 

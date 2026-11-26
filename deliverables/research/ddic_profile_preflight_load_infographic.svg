@@ -104,10 +104,9 @@
   <line x1="406" y1="412" x2="690" y2="412" stroke="#E2E8F0" stroke-width="1"/>
   <text x="406" y="432" fill="#0F172A" font-size="12" font-weight="700">Default Outputs in "."</text>
   <text x="552" y="432" fill="#64748B" font-size="10.5">(no -o needed)</text>
-  <rect x="406" y="444" width="284" height="72" rx="6" fill="#F0FDFA" stroke="#99F6E4" stroke-width="1"/>
-  <text x="418" y="463" fill="#115E59" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">study.ddic.preflight.json</text>
-  <text x="418" y="482" fill="#115E59" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">study.ddic.preflight.report.md</text>
-  <text x="418" y="501" fill="#115E59" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">study.ddic.preflight.plan.yaml</text>
+  <rect x="406" y="444" width="284" height="54" rx="6" fill="#F0FDFA" stroke="#99F6E4" stroke-width="1"/>
+  <text x="418" y="464" fill="#115E59" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">study.ddic.preflight.json</text>
+  <text x="418" y="484" fill="#115E59" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">study.ddic.preflight.report.md</text>
 
   <rect x="406" y="528" width="284" height="86" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="418" y="548" fill="#475569" font-size="11" font-weight="700">REVIEW GATE</text>
@@ -166,8 +165,8 @@
   <rect x="1096" y="230" width="284" height="72" rx="6" fill="#0F172A"/>
   <text x="1106" y="247" fill="#6EE7B7" font-size="9.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">$ fairwddi import plan study.ddic.ddi40.json</text>
   <text x="1106" y="263" fill="#F8FAFC" font-size="9.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">$ fairwddi import execute \</text>
-  <text x="1116" y="277" fill="#F8FAFC" font-size="9.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">study.ddic.import.plan.yaml</text>
-  <text x="1106" y="294" fill="#94A3B8" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"># or: fairwddi import run study.ddic.xml</text>
+  <text x="1116" y="277" fill="#F8FAFC" font-size="9.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">study.ddic.ddi40.import.plan.yaml</text>
+  <text x="1106" y="294" fill="#94A3B8" font-size="8.8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"># or: fairwddi import run study.ddic.xml [--dry-run]</text>
 
   <text x="1096" y="322" fill="#0F172A" font-size="12.5" font-weight="700">Deterministic Ingestion</text>
   <text x="1096" y="342" fill="#334155" font-size="11.5">• Streaming O(1) JSON/XML parser</text>
@@ -178,8 +177,8 @@
   <line x1="1096" y1="412" x2="1380" y2="412" stroke="#E2E8F0" stroke-width="1"/>
   <text x="1096" y="432" fill="#0F172A" font-size="12" font-weight="700">Plan &amp; Execution Artifacts</text>
   <rect x="1096" y="444" width="284" height="54" rx="6" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1"/>
-  <text x="1108" y="464" fill="#065F46" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">study.ddic.import.plan.yaml</text>
-  <text x="1108" y="484" fill="#065F46" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">study.ddic.import.report.md</text>
+  <text x="1108" y="464" fill="#065F46" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">study.ddic.ddi40.import.plan.yaml</text>
+  <text x="1108" y="484" fill="#065F46" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600">study.ddic.ddi40.import.report.md</text>
 
   <rect x="1096" y="514" width="284" height="100" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="1108" y="534" fill="#065F46" font-size="11" font-weight="700">ROLLBACK &amp; PROVENANCE</text>

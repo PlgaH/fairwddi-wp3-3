@@ -950,9 +950,9 @@
     </div>
 
     <div class="header-actions">
-      <!-- Switch to Ingest -->
-      <a href="ingest_plan_editor.html" class="btn btn-switch" title="Open Ingest Plan Editor">
-        Ingest Editor ↗
+      <!-- Switch to Import Plan Editor -->
+      <a href="import_plan_editor.html" class="btn btn-switch" title="Open Import Plan Editor">
+        Import Editor ↗
       </a>
 
       <!-- Open File -->
@@ -1446,9 +1446,9 @@
       }
 
       // Check stage and guide user if needed
-      if (data.stage && data.stage === "ingest") {
-        if (confirm("This file appears to be an Ingestion Plan (stage: ingest). Would you like to switch to the Ingest Plan Editor?")) {
-          window.location.href = "ingest_plan_editor.html";
+      if (data.stage && (data.stage === "import" || data.stage === "preflight" || data.stage === "ingest")) {
+        if (confirm(`This file appears to be an Import/Preflight Plan (stage: ${data.stage}). Would you like to switch to the Import Plan Editor?`)) {
+          window.location.href = "import_plan_editor.html";
           return;
         }
       }

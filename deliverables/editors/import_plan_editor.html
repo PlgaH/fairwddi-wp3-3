@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FAIRwDDI Ingest Plan Editor — Review Gate & Action Authoring</title>
+  <title>FAIRwDDI Import Plan Editor — Review Gate & Action Authoring</title>
   <meta name="description" content="Interactive visual editor and review gate sign-off for FAIRwDDI deterministic file-to-core import plans (.import.plan.yaml)." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -521,23 +521,55 @@
       border-radius: 8px;
       padding: 12px 16px;
       display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toolbar-top {
+      display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
     }
-    .toolbar-left {
+    .toolbar-top-left {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 12px;
       flex: 1;
+      min-width: 0;
+    }
+    .toolbar-filters {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .filter-group + .filter-group {
+      padding-left: 14px;
+      border-left: 1px solid var(--border);
+    }
+    .filter-group-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-right: 2px;
     }
     .search-box {
       position: relative;
       min-width: 260px;
       flex: 1;
-      max-width: 400px;
+      max-width: 460px;
     }
     .search-input {
       width: 100%;
@@ -783,7 +815,7 @@
 
   <!-- Drag and drop full window overlay -->
   <div id="dropzone-overlay">
-    <h2>📂 Drop Ingest Plan YAML / JSON Here</h2>
+    <h2>📂 Drop Import / Preflight Plan YAML / JSON Here</h2>
     <p>File will load and parse instantly in constant memory</p>
   </div>
 
@@ -951,16 +983,30 @@
             <span style="color: var(--c-create);">●</span>
           </div>
           <div class="kpi-num" style="color: var(--c-create);" id="kpi-create">0</div>
-          <div style="font-size: 11px; color: var(--text-dim);">New rows in core tables</div>
+          <div style="font-size: 11px; color: var(--text-dim);" id="kpi-create-sub">New rows in core tables</div>
         </div>
 
         <div class="kpi-card">
           <div class="kpi-header">
-            <span>Aliased / Deduplicated</span>
+            <span>Nested &amp; Stats</span>
+            <span style="color: var(--accent-cyan);">●</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px 8px; font-size: 11px; white-space: nowrap;">
+            <div><span style="color: var(--text-dim);">Codes:</span> <strong id="kpi-codes" style="color: var(--text);">0</strong></div>
+            <div><span style="color: var(--text-dim);">Freqs:</span> <strong id="kpi-freqs" style="color: var(--text);">0</strong></div>
+            <div><span style="color: var(--text-dim);">Stats:</span> <strong id="kpi-stats" style="color: var(--text);">0</strong></div>
+            <div><span style="color: var(--text-dim);">URNs:</span> <strong id="kpi-total-urns" style="color: var(--c-create);">0</strong></div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim);">Codes + stats rows</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Reused (Existing URNs)</span>
             <span style="color: var(--c-alias);">●</span>
           </div>
           <div class="kpi-num" style="color: var(--c-alias);" id="kpi-alias">0</div>
-          <div style="font-size: 11px; color: var(--text-dim);">Reusing existing canonical URNs</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Identical URN &amp; content hash</div>
         </div>
 
         <div class="kpi-card">
@@ -995,42 +1041,59 @@
 
       <!-- Filters & Bulk Operations Toolbar -->
       <div class="toolbar">
-        <div class="toolbar-left">
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" class="search-input" id="search-input" placeholder="Filter by URN, name, notes, or action..." oninput="handleSearch(this.value)" />
+        <div class="toolbar-top">
+          <div class="toolbar-top-left">
+            <div class="search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" class="search-input" id="search-input" placeholder="Filter by URN, name, notes, or action..." oninput="handleSearch(this.value)" />
+            </div>
+
+            <div class="filter-group filter-chips">
+              <span class="filter-group-label">Review</span>
+              <span class="chip active" data-filter-review="all" data-label="All" onclick="setFilterReview('all', this)">All (0)</span>
+              <span class="chip" data-filter-review="yes" data-label="Yes" onclick="setFilterReview('yes', this)">Yes (0)</span>
+              <span class="chip" data-filter-review="no" data-label="No" onclick="setFilterReview('no', this)">No (0)</span>
+            </div>
+
+            <div class="filter-group filter-chips">
+              <span class="filter-group-label">Target URN</span>
+              <span class="chip active" data-filter-target-urn="all" data-label="All" onclick="setFilterTargetUrn('all', this)">All (0)</span>
+              <span class="chip" data-filter-target-urn="same" data-label="Same" onclick="setFilterTargetUrn('same', this)">Same (0)</span>
+              <span class="chip" data-filter-target-urn="diff" data-label="Diff" onclick="setFilterTargetUrn('diff', this)">Diff (0)</span>
+            </div>
           </div>
 
-          <div class="filter-chips">
-            <span class="chip active" onclick="setFilterType('all', this)">All Types</span>
-            <span class="chip" onclick="setFilterType('QuestionItem', this)">QuestionItem</span>
-            <span class="chip" onclick="setFilterType('CodeList', this)">CodeList</span>
-            <span class="chip" onclick="setFilterType('Category', this)">Category</span>
-            <span class="chip" onclick="setFilterType('RepresentedVariable', this)">RepresentedVariable</span>
-            <span class="chip" onclick="setFilterType('InstanceVariable', this)">InstanceVariable</span>
-            <span class="chip" onclick="setFilterType('StudyUnit', this)">StudyUnit</span>
-          </div>
-
-          <div class="filter-chips" style="border-left: 1px solid var(--border); padding-left: 8px;">
-            <span class="chip active" onclick="setFilterAction('all', this)">All Actions</span>
-            <span class="chip" onclick="setFilterAction('create', this)">Create</span>
-            <span class="chip" onclick="setFilterAction('link_existing', this)">Link Existing</span>
-            <span class="chip" onclick="setFilterAction('generate_harmonized', this)">Create Harmonized</span>
-            <span class="chip" onclick="setFilterAction('reuse', this)">Reuse</span>
-            <span class="chip" onclick="setFilterAction('alias', this)">Alias</span>
-            <span class="chip" onclick="setFilterAction('group', this)">Group</span>
-            <span class="chip" onclick="setFilterAction('skip', this)">Skip</span>
-            <span class="chip" onclick="setFilterAction('quarantine', this)">Quarantine</span>
+          <div class="toolbar-right">
+            <button class="btn btn-secondary btn-sm" onclick="approveAllVisible()">
+              ✓ Approve Visible (<span id="visible-count">0</span>)
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="rejectAllVisible()">
+              ✗ Reject Visible
+            </button>
           </div>
         </div>
 
-        <div class="toolbar-right">
-          <button class="btn btn-secondary btn-sm" onclick="approveAllVisible()">
-            ✓ Approve Visible (<span id="visible-count">0</span>)
-          </button>
-          <button class="btn btn-secondary btn-sm" onclick="rejectAllVisible()">
-            ✗ Reject Visible
-          </button>
+        <div class="toolbar-filters">
+          <div class="filter-group filter-chips">
+            <span class="filter-group-label">Type</span>
+            <span class="chip active" data-filter-type="all" data-label="All Types" onclick="setFilterType('all', this)">All Types (0)</span>
+            <span class="chip" data-filter-type="QuestionItem" data-label="QuestionItem" onclick="setFilterType('QuestionItem', this)">QuestionItem (0)</span>
+            <span class="chip" data-filter-type="CodeList" data-label="CodeList" onclick="setFilterType('CodeList', this)">CodeList (0)</span>
+            <span class="chip" data-filter-type="Category" data-label="Category" onclick="setFilterType('Category', this)">Category (0)</span>
+            <span class="chip" data-filter-type="RepresentedVariable" data-label="RepresentedVariable" onclick="setFilterType('RepresentedVariable', this)">RepresentedVariable (0)</span>
+            <span class="chip" data-filter-type="InstanceVariable" data-label="InstanceVariable" onclick="setFilterType('InstanceVariable', this)">InstanceVariable (0)</span>
+            <span class="chip" data-filter-type="StudyUnit" data-label="StudyUnit" onclick="setFilterType('StudyUnit', this)">StudyUnit (0)</span>
+            <span class="chip" data-filter-type="__other__" data-label="Other" onclick="setFilterType('__other__', this)">Other (0)</span>
+          </div>
+
+          <div class="filter-group filter-chips">
+            <span class="filter-group-label">Action</span>
+            <span class="chip active" data-filter-action="all" data-label="All Actions" onclick="setFilterAction('all', this)">All Actions (0)</span>
+            <span class="chip" data-filter-action="create" data-label="Create" onclick="setFilterAction('create', this)">Create (0)</span>
+            <span class="chip" data-filter-action="reuse" data-label="Reuse" onclick="setFilterAction('reuse', this)">Reuse (0)</span>
+            <span class="chip" data-filter-action="quarantine" data-label="Quarantine" onclick="setFilterAction('quarantine', this)">Quarantine (0)</span>
+            <span class="chip" data-filter-action="skip" data-label="Skip" onclick="setFilterAction('skip', this)">Skip (0)</span>
+          </div>
         </div>
       </div>
 
@@ -1046,8 +1109,7 @@
                 <th style="width: 80px;">ID</th>
                 <th style="width: 100px;">Action</th>
                 <th style="width: 140px;">Resource Type</th>
-                <th>Source URN / Name</th>
-                <th>Target Canonical URN</th>
+                <th>URN</th>
                 <th style="width: 80px; text-align: center;">Review?</th>
                 <th>Notes / Match Basis</th>
                 <th style="width: 80px; text-align: right;">Inspect</th>
@@ -1162,6 +1224,8 @@
     let searchQuery = "";
     let filterType = "all";
     let filterAction = "all";
+    let filterReview = "all";
+    let filterTargetUrn = "all";
     let currentPage = 1;
     let pageSize = 50;
     let inspectingItem = null;
@@ -1291,6 +1355,8 @@
       searchQuery = "";
       filterType = "all";
       filterAction = "all";
+      filterReview = "all";
+      filterTargetUrn = "all";
       currentPage = 1;
       renderAll();
       showToast("Plan unloaded");
@@ -1414,13 +1480,47 @@
       currentPage = 1;
       renderTable();
     }
+    function setFilterReview(rev, chipEl) {
+      filterReview = rev;
+      chipEl.parentElement.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+      chipEl.classList.add("active");
+      currentPage = 1;
+      renderTable();
+    }
+    function setFilterTargetUrn(mode, chipEl) {
+      filterTargetUrn = mode;
+      chipEl.parentElement.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+      chipEl.classList.add("active");
+      currentPage = 1;
+      renderTable();
+    }
 
-    function getFilteredActions() {
+    const CORE_RESOURCE_TYPES = new Set([
+      "QuestionItem",
+      "CodeList",
+      "Category",
+      "RepresentedVariable",
+      "InstanceVariable",
+      "StudyUnit",
+    ]);
+
+    function getFilteredActions(opts = {}) {
       if (!currentPlan) return [];
       const actions = currentPlan.actions || [];
       return actions.filter(a => {
-        if (filterType !== "all" && a.resource_type !== filterType) return false;
-        if (filterAction !== "all" && a.action !== filterAction) return false;
+        if (!opts.ignoreType && filterType !== "all") {
+          if (filterType === "__other__") {
+            if (CORE_RESOURCE_TYPES.has(a.resource_type)) return false;
+          } else if (a.resource_type !== filterType) {
+            return false;
+          }
+        }
+        if (!opts.ignoreAction && filterAction !== "all" && a.action !== filterAction) return false;
+        if (!opts.ignoreReview && filterReview === "yes" && !a.requires_review) return false;
+        if (!opts.ignoreReview && filterReview === "no" && a.requires_review) return false;
+        const hasDiffTarget = Boolean(a.target_urn && a.target_urn !== a.source_urn);
+        if (!opts.ignoreTargetUrn && filterTargetUrn === "same" && hasDiffTarget) return false;
+        if (!opts.ignoreTargetUrn && filterTargetUrn === "diff" && !hasDiffTarget) return false;
         if (searchQuery) {
           const u1 = (a.source_urn || "").toLowerCase();
           const u2 = (a.target_urn || "").toLowerCase();
@@ -1514,19 +1614,88 @@
       document.getElementById("gate-comments").value = gate.comments || "";
     }
 
+    function renderFilterCounts() {
+      const forType = getFilteredActions({ ignoreType: true });
+      const forAction = getFilteredActions({ ignoreAction: true });
+      const forReview = getFilteredActions({ ignoreReview: true });
+      const forTargetUrn = getFilteredActions({ ignoreTargetUrn: true });
+
+      const typeCounts = {};
+      let otherTypeCount = 0;
+      for (const a of forType) {
+        typeCounts[a.resource_type] = (typeCounts[a.resource_type] || 0) + 1;
+        if (!CORE_RESOURCE_TYPES.has(a.resource_type)) otherTypeCount += 1;
+      }
+
+      const actionCounts = {};
+      for (const a of forAction) {
+        actionCounts[a.action] = (actionCounts[a.action] || 0) + 1;
+      }
+
+      let revYes = 0;
+      let revNo = 0;
+      for (const a of forReview) {
+        if (a.requires_review) revYes += 1;
+        else revNo += 1;
+      }
+
+      let urnSame = 0;
+      let urnDiff = 0;
+      for (const a of forTargetUrn) {
+        if (a.target_urn && a.target_urn !== a.source_urn) urnDiff += 1;
+        else urnSame += 1;
+      }
+
+      document.querySelectorAll("[data-filter-type]").forEach(el => {
+        const key = el.dataset.filterType;
+        const label = el.dataset.label;
+        const cnt = key === "all"
+          ? forType.length
+          : (key === "__other__" ? otherTypeCount : (typeCounts[key] || 0));
+        el.textContent = `${label} (${cnt.toLocaleString()})`;
+      });
+      document.querySelectorAll("[data-filter-action]").forEach(el => {
+        const key = el.dataset.filterAction;
+        const label = el.dataset.label;
+        const cnt = key === "all" ? forAction.length : (actionCounts[key] || 0);
+        el.textContent = `${label} (${cnt.toLocaleString()})`;
+      });
+      document.querySelectorAll("[data-filter-review]").forEach(el => {
+        const key = el.dataset.filterReview;
+        const label = el.dataset.label;
+        const cnt = key === "all" ? forReview.length : (key === "yes" ? revYes : revNo);
+        el.textContent = `${label} (${cnt.toLocaleString()})`;
+      });
+      document.querySelectorAll("[data-filter-target-urn]").forEach(el => {
+        const key = el.dataset.filterTargetUrn;
+        const label = el.dataset.label;
+        const cnt = key === "all" ? forTargetUrn.length : (key === "same" ? urnSame : urnDiff);
+        el.textContent = `${label} (${cnt.toLocaleString()})`;
+      });
+    }
+
     function renderKpis() {
+      renderFilterCounts();
       if (!currentPlan) return;
       const actions = currentPlan.actions || [];
       const total = actions.length;
       const approvedCount = actions.filter(a => a.approved).length;
       const createCount = actions.filter(a => a.action === "create").length;
-      const aliasCount = actions.filter(a => a.action === "reuse" || a.action === "alias").length;
+      const aliasCount = actions.filter(a => a.action === "reuse").length;
       const skipCount = actions.filter(a => a.action === "skip").length;
       const pendingItems = actions.filter(a => !a.approved || a.requires_review).length;
 
+      const plannedCodes = Number(currentPlan.summary?.planned_codes || 0);
+      const plannedFreqs = Number(currentPlan.summary?.planned_frequency_rows || 0);
+      const plannedStats = Number(currentPlan.summary?.planned_summary_stat_variables || 0);
       document.getElementById("kpi-total").textContent = total.toLocaleString();
-      document.getElementById("kpi-streamed-sub").textContent = `Streamed: ${(currentPlan.summary?.streamed_nodes || total).toLocaleString()} nodes`;
+      document.getElementById("kpi-streamed-sub").textContent =
+        `Streamed: ${(currentPlan.summary?.streamed_nodes || total).toLocaleString()} nodes`;
       document.getElementById("kpi-create").textContent = createCount.toLocaleString();
+      document.getElementById("kpi-codes").textContent = plannedCodes.toLocaleString();
+      document.getElementById("kpi-freqs").textContent = plannedFreqs.toLocaleString();
+      document.getElementById("kpi-stats").textContent = plannedStats.toLocaleString();
+      document.getElementById("kpi-total-urns").textContent = (createCount + plannedCodes).toLocaleString();
       document.getElementById("kpi-alias").textContent = aliasCount.toLocaleString();
       document.getElementById("kpi-skip").textContent = skipCount.toLocaleString();
       
@@ -1543,6 +1712,7 @@
 
     function renderTable() {
       if (!currentPlan) return;
+      renderFilterCounts();
       const filtered = getFilteredActions();
       const tbody = document.getElementById("actions-tbody");
       tbody.innerHTML = "";
@@ -1565,7 +1735,7 @@
       document.getElementById("btn-next-page").disabled = currentPage >= maxPages;
 
       if (pageItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 36px; color: var(--text-dim);">No action items match the active search or filters.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 36px; color: var(--text-dim);">No action items match the active search or filters.</td></tr>`;
         return;
       }
 
@@ -1582,26 +1752,24 @@
           <td>
             <select class="field-select" style="padding: 2px 6px; font-size: 11px; font-weight: 600;" onchange="changeItemAction('${item.id}', this.value)">
               <option value="create" ${item.action === 'create' ? 'selected' : ''}>CREATE</option>
-              <option value="link_existing" ${item.action === 'link_existing' || item.action === 'absorb' ? 'selected' : ''}>LINK_EXISTING</option>
-              <option value="generate_harmonized" ${item.action === 'generate_harmonized' || item.action === 'elevate' ? 'selected' : ''}>GENERATE_HARMONIZED</option>
               <option value="reuse" ${item.action === 'reuse' ? 'selected' : ''}>REUSE</option>
-              <option value="alias" ${item.action === 'alias' ? 'selected' : ''}>ALIAS</option>
-              <option value="group" ${item.action === 'group' ? 'selected' : ''}>GROUP</option>
-              <option value="skip" ${item.action === 'skip' ? 'selected' : ''}>SKIP</option>
               <option value="quarantine" ${item.action === 'quarantine' ? 'selected' : ''}>QUARANTINE</option>
+              <option value="skip" ${item.action === 'skip' ? 'selected' : ''}>SKIP</option>
             </select>
           </td>
           <td><span class="type-badge">${escapeHtml(item.resource_type)}</span></td>
           <td>
-            <div style="display: flex; align-items: center; gap: 4px;">
-              <span class="urn-text" title="${escapeHtml(item.source_urn)}">${escapeHtml(item.source_urn)}</span>
-              <button class="urn-copy-btn" onclick="copyText('${escapeHtml(item.source_urn)}')">📋</button>
-            </div>
-          </td>
-          <td>
-            <div style="display: flex; align-items: center; gap: 4px;">
-              <span class="urn-text" style="color: ${item.target_urn ? 'var(--accent-cyan)' : 'var(--text-dim)'};" title="${escapeHtml(item.target_urn || 'None')}">${escapeHtml(item.target_urn || '-')}</span>
-              ${item.target_urn ? `<button class="urn-copy-btn" onclick="copyText('${escapeHtml(item.target_urn)}')">📋</button>` : ''}
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span class="urn-text" title="${escapeHtml(item.source_urn)}">${escapeHtml(item.source_urn)}</span>
+                <button class="urn-copy-btn" onclick="copyText('${escapeHtml(item.source_urn)}')">📋</button>
+              </div>
+              ${item.target_urn && item.target_urn !== item.source_urn ? `
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="color: var(--text-dim); font-size: 11px;">→</span>
+                <span class="urn-text" style="color: var(--accent-cyan);" title="Target URN: ${escapeHtml(item.target_urn)}">${escapeHtml(item.target_urn)}</span>
+                <button class="urn-copy-btn" onclick="copyText('${escapeHtml(item.target_urn)}')">📋</button>
+              </div>` : ''}
             </div>
           </td>
           <td style="text-align: center;">
@@ -1634,13 +1802,9 @@
             <label class="field-label">Action Operation</label>
             <select class="field-select" id="ins-action">
               <option value="create" ${item.action === 'create' ? 'selected' : ''}>create (Insert new row)</option>
-              <option value="link_existing" ${item.action === 'link_existing' || item.action === 'absorb' ? 'selected' : ''}>link_existing (Link to existing generated/instantiated entity)</option>
-              <option value="generate_harmonized" ${item.action === 'generate_harmonized' || item.action === 'elevate' ? 'selected' : ''}>generate_harmonized (Create synthesized harmonized entity)</option>
-              <option value="reuse" ${item.action === 'reuse' ? 'selected' : ''}>reuse (Exact match)</option>
-              <option value="alias" ${item.action === 'alias' ? 'selected' : ''}>alias (Link to canonical URN via URNAlias)</option>
-              <option value="group" ${item.action === 'group' ? 'selected' : ''}>group (Group into Question Grid / shared stem)</option>
-              <option value="skip" ${item.action === 'skip' ? 'selected' : ''}>skip (Do not insert)</option>
+              <option value="reuse" ${item.action === 'reuse' ? 'selected' : ''}>reuse (Exact URN &amp; content match)</option>
               <option value="quarantine" ${item.action === 'quarantine' ? 'selected' : ''}>quarantine (Flagged metadata drift)</option>
+              <option value="skip" ${item.action === 'skip' ? 'selected' : ''}>skip (Do not insert)</option>
             </select>
           </div>
 
@@ -1707,14 +1871,13 @@
       const actions = currentPlan.actions || [];
       currentPlan.summary.total_actions = actions.length;
       currentPlan.summary.create = actions.filter(a => a.action === "create").length;
-      currentPlan.summary.alias = actions.filter(a => a.action === "alias").length;
       currentPlan.summary.reuse = actions.filter(a => a.action === "reuse").length;
       currentPlan.summary.skip = actions.filter(a => a.action === "skip").length;
       currentPlan.summary.quarantine = actions.filter(a => a.action === "quarantine").length;
       currentPlan.summary.pending_review_count = actions.filter(a => !a.approved || a.requires_review).length;
 
       let content = "";
-      let filename = `${currentPlan.job_id || 'ingest'}.plan.${format}`;
+      let filename = `${currentPlan.job_id || 'import'}.import.plan.${format}`;
 
       if (format === "yaml") {
         if (window.jsyaml && window.jsyaml.dump) {

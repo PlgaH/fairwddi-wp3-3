@@ -178,3 +178,177 @@ class CategorySummary(BaseModel):
     codelists: list[CategoryReference] = Field(default_factory=list)
     surveys: list[str] = Field(default_factory=list)
     is_reused: bool = False
+
+
+class GroupMemberSummary(BaseModel):
+    """Member reference inside a DDI Group."""
+
+    resource_type: str
+    urn: str
+    label: str = ""
+
+
+class GroupSummary(BaseModel):
+    """Curated DDI Group (longitudinal series, thematic scope, etc.)."""
+
+    urn: str
+    slug: str | None = None
+    name: str
+    description: str = ""
+    group_type: str = "custom"
+    member_count: int = 0
+    members: list[GroupMemberSummary] = Field(default_factory=list)
+
+
+class IngestBatchSummary(BaseModel):
+    """Summary of an IngestBatch import receipt."""
+
+    id: int
+    source_format: str
+    file_name: str
+    file_sha256: str
+    status: str
+    created_count: int = 0
+    reused_count: int = 0
+    stats: dict[str, Any] = Field(default_factory=dict)
+    created_at: str | None = None
+
+
+class QuarantineSummary(BaseModel):
+    """Summary of a MetadataQuarantine content-drift record."""
+
+    id: int
+    incoming_urn: str
+    existing_urn: str | None = None
+    entity_type: str
+    conflict_type: str
+    status: str
+    source_file: str | None = None
+    existing_content_hash: str | None = None
+    incoming_content_hash: str
+    created_at: str | None = None
+
+
+class FrequencyBarItem(BaseModel):
+    """Single category frequency entry for an InstanceVariable in a Datafile."""
+
+    code_value: str
+    category_label: str = ""
+    is_missing: bool = False
+    frequency: float = 0.0
+    percentage: float | None = None
+    weight: str | None = None
+
+
+class DatafileOccurrence(BaseModel):
+    """Physical occurrence of an InstanceVariable in a Datafile with statistics."""
+
+    datafile_urn: str
+    datafile_name: str
+    study_urn: str | None = None
+    study_name: str | None = None
+    order: int = 0
+    statistics: dict[str, Any] = Field(default_factory=dict)
+    frequencies: list[FrequencyBarItem] = Field(default_factory=list)
+
+
+class VariableRefItem(BaseModel):
+    """Compact reference to a related Variable, Question, or CodeList."""
+
+    urn: str
+    name: str
+    label: str = ""
+    resource_type: str = ""
+    study_name: str | None = None
+
+
+class SemanticLinkInfo(BaseModel):
+    """Harmonization or provenance SemanticRelationship edge."""
+
+    predicate: str
+    target_urn: str
+    target_type: str = ""
+    correspondence_level: str | None = None
+    confidence: float | None = None
+
+
+class InstanceVariableSummary(BaseModel):
+    """Dataset-level InstanceVariable with cascade links, stats, and frequencies."""
+
+    urn: str
+    origin: str = "imported"
+    name: str
+    label: str = ""
+    description: str = ""
+    represented_variable_urn: str | None = None
+    represented_variable_name: str | None = None
+    conceptual_variable_urn: str | None = None
+    conceptual_variable_name: str | None = None
+    codelist_urn: str | None = None
+    codelist_name: str | None = None
+    questions: list[VariableRefItem] = Field(default_factory=list)
+    surveys: list[str] = Field(default_factory=list)
+    datafile_count: int = 0
+    frequency_count: int = 0
+    has_statistics: bool = False
+    occurrences: list[DatafileOccurrence] = Field(default_factory=list)
+
+
+class RepresentedVariableDetail(BaseModel):
+    """Reusable RepresentedVariable with cascade, harmonization links, and child IVs."""
+
+    urn: str
+    origin: str = "imported"
+    name: str
+    label: str = ""
+    description: str = ""
+    conceptual_variable_urn: str | None = None
+    conceptual_variable_name: str | None = None
+    codelist_urn: str | None = None
+    codelist_name: str | None = None
+    value_representation: dict[str, Any] = Field(default_factory=dict)
+    questions: list[VariableRefItem] = Field(default_factory=list)
+    instance_variables: list[VariableRefItem] = Field(default_factory=list)
+    surveys: list[str] = Field(default_factory=list)
+    semantic_links: list[SemanticLinkInfo] = Field(default_factory=list)
+    is_reused: bool = False
+
+
+class ConceptualVariableSummary(BaseModel):
+    """Abstract ConceptualVariable with thesaurus anchor and clustered RVs."""
+
+    urn: str
+    origin: str = "imported"
+    name: str
+    label: str = ""
+    description: str = ""
+    concept_urn: str | None = None
+    concept_uri: str | None = None
+    concept_vocabulary: str | None = None
+    concept_label: str | None = None
+    represented_variables: list[VariableRefItem] = Field(default_factory=list)
+    surveys: list[str] = Field(default_factory=list)
+    represented_count: int = 0
+
+
+class ResourceTypeCount(BaseModel):
+    """Resource type inventory count from UrnRegistry."""
+
+    resource_type: str
+    count: int
+
+
+class GenericResourceSummary(BaseModel):
+    """Common attributes across any DDI resource registered in UrnRegistry."""
+
+    urn: str
+    resource_type: str
+    origin: str = "imported"
+    name: str = ""
+    label: str = ""
+    description: str = ""
+    scheme_urn: str | None = None
+    extended_attributes: list[dict[str, Any]] = Field(default_factory=list)
+    hashes: dict[str, Any] = Field(default_factory=dict)
+    created_at: str | None = None
+    updated_at: str | None = None
