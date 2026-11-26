@@ -578,14 +578,20 @@ EXPLORER_HTML = """<!DOCTYPE html>
       </div>
       <div class="kpi-badge">Harmonized</div>
     </div>
-    <div class="kpi-card" style="min-width: 260px; flex: 1.3;">
+    <div class="kpi-card" style="min-width: 300px; flex: 1.6;">
       <div style="width: 100%; display: flex; flex-direction: column; gap: 6px;">
-        <div class="kpi-label">Study Unit Filter</div>
+        <div class="kpi-label">Global Scope Filter</div>
         <div style="display: flex; gap: 8px; align-items: center;">
-          <select id="global-study-filter" class="search-input" style="padding: 5px 8px; font-size: 12px; flex: 1; min-width: 140px;" onchange="applyGlobalFilter()">
+          <select id="global-study-filter" class="search-input" style="padding: 5px 8px; font-size: 12px; flex: 1.3; min-width: 130px;" onchange="applyGlobalFilter()">
             <option value="">All Study Units</option>
           </select>
-          <button class="action-btn" onclick="resetGlobalFilter()" title="Clear study filter" style="padding: 5px 8px; font-size: 11px;">Reset</button>
+          <select id="global-origin-filter" class="search-input" style="padding: 5px 8px; font-size: 12px; flex: 0.9; min-width: 110px;" onchange="applyGlobalFilter()">
+            <option value="">All Origins</option>
+            <option value="imported">Imported</option>
+            <option value="generated">Generated</option>
+            <option value="instantiated">Instantiated</option>
+          </select>
+          <button class="action-btn" onclick="resetGlobalFilter()" title="Clear global filters" style="padding: 5px 8px; font-size: 11px;">Reset</button>
         </div>
       </div>
     </div>
@@ -601,7 +607,7 @@ EXPLORER_HTML = """<!DOCTYPE html>
           <div class="filter-row">
             <label>
               <input type="checkbox" id="q-reused-only" checked onchange="loadQuestions(0)" />
-              Reused across surveys only
+              Reused
             </label>
             <span id="q-count-label">0 items</span>
           </div>
@@ -859,7 +865,7 @@ EXPLORER_HTML = """<!DOCTYPE html>
     let startPoint = { x: 0, y: 0 };
 
     let globalStudyUrn = '';
-    let globalBatchId = '';
+    let globalOrigin = '';
 
     async function init() {
       setupPanZoom();
@@ -1074,6 +1080,7 @@ EXPLORER_HTML = """<!DOCTYPE html>
     function buildGlobalFilterParams() {
       const params = new URLSearchParams();
       if (globalStudyUrn) params.set('study_urn', globalStudyUrn);
+      if (globalOrigin) params.set('origin', globalOrigin);
       return params.toString();
     }
 
@@ -1098,21 +1105,27 @@ EXPLORER_HTML = """<!DOCTYPE html>
 
     async function applyGlobalFilter() {
       const sSel = document.getElementById('global-study-filter');
+      const oSel = document.getElementById('global-origin-filter');
       globalStudyUrn = sSel ? sSel.value : '';
+      globalOrigin = oSel ? oSel.value : '';
       selectedQuestionUrn = null;
       selectedVariableUrn = null;
       selectedCodeListUrn = null;
       selectedCategoryUrn = null;
+      selectedResourceUrn = null;
       await loadOverview();
       await loadQuestions(0);
       loadVariables(0);
       loadCodeLists(0);
       loadCategories(0);
+      loadResources(0);
     }
 
     function resetGlobalFilter() {
       const sSel = document.getElementById('global-study-filter');
+      const oSel = document.getElementById('global-origin-filter');
       if (sSel) sSel.value = '';
+      if (oSel) oSel.value = '';
       applyGlobalFilter();
     }
 
@@ -1160,11 +1173,27 @@ EXPLORER_HTML = """<!DOCTYPE html>
         updateQuestionPagination();
         renderQuestionList(currentQuestions);
 
-        if (currentQuestions.length > 0 && !selectedQuestionUrn) {
+        if (currentQuestions.length === 0) {
+          clearQuestionSelection();
+        } else if (!selectedQuestionUrn || !currentQuestions.some(item => item.urn === selectedQuestionUrn)) {
           await selectQuestion(currentQuestions[0].urn, false);
         }
       } catch (err) {
+        clearQuestionSelection();
         listEl.innerHTML = `<div style="color: #f87171; padding: 12px;">Failed to load questions: ${err}</div>`;
+      }
+    }
+
+    function clearQuestionSelection() {
+      selectedQuestionUrn = null;
+      selectedNodeId = null;
+      const titleEl = document.getElementById('graph-title');
+      if (titleEl) titleEl.textContent = 'Select a question to inspect variable cascade';
+      const svgEl = document.getElementById('cascade-canvas');
+      if (svgEl) svgEl.innerHTML = '<g id="viewport"></g>';
+      const inspEl = document.getElementById('inspector-body');
+      if (inspEl) {
+        inspEl.innerHTML = '<div style="color: var(--text-dim); text-align: center; margin-top: 40px;">Click on any node in the cascade graph to view full URN attributes and hashes.</div>';
       }
     }
 
@@ -2077,7 +2106,7 @@ EXPLORER_HTML = """<!DOCTYPE html>
       if (currentVariableTier === 'represented' && flagChecked) params.set('reused_only', 'true');
       if (currentVariableTier === 'instance' && flagChecked) params.set('has_stats', 'true');
       if (globalStudyUrn) params.set('study_urn', globalStudyUrn);
-      if (globalBatchId) params.set('batch_id', globalBatchId);
+      if (globalOrigin) params.set('origin', globalOrigin);
 
       try {
         const res = await fetch(`/api/variables/${currentVariableTier}?${params.toString()}`);
@@ -2490,6 +2519,7 @@ EXPLORER_HTML = """<!DOCTYPE html>
       params.set('limit', String(PAGE_SIZE));
       params.set('offset', String(offset));
       if (rType) params.set('resource_type', rType);
+      if (globalOrigin) params.set('origin', globalOrigin);
       if (q) params.set('q', q);
 
       try {

@@ -274,6 +274,7 @@ def test_explorer_html_view() -> None:
     assert "Import Batches" in html
     assert "Quarantine" in html
     assert "global-study-filter" in html
+    assert "global-origin-filter" in html
     assert "global-batch-filter" not in html
     assert "btn-hist-back" in html
     assert "btn-hist-forward" in html
@@ -524,3 +525,37 @@ def test_api_variable_explorer_endpoints(api_client: TestClient) -> None:
     assert su_detail["urn"] == su.urn
     assert su_detail["resource_type"] == "StudyUnit"
     assert su_detail["name"] == "ENEF 2024"
+
+    gen_res = api_client.get("/resources?origin=instantiated&resource_type=StudyUnit").json()
+    assert any(r["urn"] == su.urn for r in gen_res)
+    imp_res = api_client.get("/resources?origin=imported&resource_type=StudyUnit").json()
+    assert imp_res == []
+
+
+@pytest.mark.django_db
+def test_api_question_reuse_any_level(api_client: TestClient) -> None:
+    """QuestionItem linked to >1 RepresentedVariable is treated as reused even within one study."""
+    from fairwddi.models import QuestionItem, QuestionVariable, RepresentedVariable
+
+    qi = QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:q_shared:1.0.0",
+        name="q_shared",
+        question_text={"fr": "Question partagée"},
+    )
+    rv1 = RepresentedVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:rv_1:1.0.0",
+        name="rv_1",
+    )
+    rv2 = RepresentedVariable.objects.create(
+        urn="urn:ddi:fr.cdsp:rv_2:1.0.0",
+        name="rv_2",
+    )
+    QuestionVariable.objects.create(question_item=qi, represented_variable=rv1)
+    QuestionVariable.objects.create(question_item=qi, represented_variable=rv2)
+
+    resp = api_client.get("/questions?reused_only=true")
+    assert resp.status_code == 200
+    items = resp.json()
+    match = [x for x in items if x["urn"] == qi.urn]
+    assert len(match) == 1
+    assert match[0]["is_reused"] is True

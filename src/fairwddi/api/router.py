@@ -112,9 +112,17 @@ def get_overview(
     request: Any,
     study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
     batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
+    origin: str | None = Query(
+        None, description="Optional UrnRegistry origin filter (imported, generated, instantiated)"
+    ),
 ) -> OverviewStats:
     """Return counts of surveys, questions, harmonized questions, and URN aliases."""
     batch_urns = _resolve_batch_urns(batch_id)
+    origin_urns = (
+        set(UrnRegistry.objects.filter(origin=origin).values_list("urn", flat=True))
+        if origin
+        else None
+    )
 
     su_qs = StudyUnit.objects.all()
     q_qs = QuestionItem.objects.all()
@@ -141,6 +149,13 @@ def get_overview(
         iv_qs = iv_qs.filter(urn__in=batch_urns)
         cl_qs = cl_qs.filter(urn__in=batch_urns)
         cat_qs = cat_qs.filter(urn__in=batch_urns)
+
+    if origin_urns is not None:
+        su_qs = su_qs.filter(urn__in=origin_urns)
+        q_qs = q_qs.filter(urn__in=origin_urns)
+        iv_qs = iv_qs.filter(urn__in=origin_urns)
+        cl_qs = cl_qs.filter(urn__in=origin_urns)
+        cat_qs = cat_qs.filter(urn__in=origin_urns)
 
     total_surveys = su_qs.count()
     total_questions = q_qs.count()
@@ -207,10 +222,12 @@ def list_questions(
     request: Any,
     q: str = Query("", description="Keyword search across text, name, or URN"),
     reused_only: bool = Query(
-        False, description="Filter for cross-survey harmonized questions only"
+        False,
+        description="Filter for reused questions (multiple variables, surveys, or aliases)",
     ),
     study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
     batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
+    origin: str | None = Query(None, description="Optional UrnRegistry origin filter"),
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ) -> list[QuestionItemSummary]:
@@ -246,8 +263,9 @@ def list_questions(
         aliases = alias_map.get(qi.urn, [])
         derived_from = derived_map.get(qi.urn, [])
 
-        # Collect unique surveys and variable names
+        # Collect unique surveys, represented variables, and instance variable names
         surveys_set: set[str] = set()
+        rv_urns: set[str] = set()
         var_names: list[str] = []
         iv_urns: list[str] = []
 
@@ -255,6 +273,7 @@ def list_questions(
             rv = qv.represented_variable
             if not rv:
                 continue
+            rv_urns.add(rv.urn)
             for iv in rv.instance_variables.all():
                 iv_urns.append(iv.urn)
                 vname = iv.name or iv.urn
@@ -266,9 +285,18 @@ def list_questions(
                         s_name = _extract_display_text(dfv.datafile.study_unit.name)
                         surveys_set.add(s_name)
 
-        is_reused = len(surveys_set) > 1 or len(aliases) > 0 or len(derived_from) > 0
+        is_reused = (
+            len(rv_urns) > 1
+            or len(set(iv_urns)) > 1
+            or len(surveys_set) > 1
+            or len(aliases) > 0
+            or len(derived_from) > 0
+        )
 
         if reused_only and not is_reused:
+            continue
+
+        if origin and origin_map.get(qi.urn, "instantiated") != origin:
             continue
 
         if q:
@@ -757,6 +785,7 @@ def list_codelists(
     ),
     study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
     batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
+    origin: str | None = Query(None, description="Optional UrnRegistry origin filter"),
 ) -> list[CodeListSummary]:
     """Return all code lists with their response categories and variable usages."""
     qs = (
@@ -786,6 +815,9 @@ def list_codelists(
         summary = _build_codelist_summary(cl)
 
         if is_reused_filter and not summary.is_reused:
+            continue
+
+        if origin and summary.origin != origin:
             continue
 
         if q_lower:
@@ -819,6 +851,7 @@ def list_categories(
     ),
     study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
     batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
+    origin: str | None = Query(None, description="Optional UrnRegistry origin filter"),
 ) -> list[CategorySummary]:
     """Return all categories with their code list memberships and survey footprints."""
     qs = (
@@ -872,6 +905,9 @@ def list_categories(
         is_reused = len(cl_refs) > 1 or len(surveys_set) > 1
 
         if reused_only and not is_reused:
+            continue
+
+        if origin and origin_map.get(cat.urn, "instantiated") != origin:
             continue
 
         if q_lower:
@@ -1232,6 +1268,7 @@ def list_instance_variables(
     has_stats: bool = Query(False, description="Only variables with statistics or frequencies"),
     study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
     batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
+    origin: str | None = Query(None, description="Optional UrnRegistry origin filter"),
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ) -> list[InstanceVariableSummary]:
@@ -1262,6 +1299,8 @@ def list_instance_variables(
     for iv in qs:
         summary = _build_instance_variable_summary(iv, origin_map, include_occurrences=False)
         if has_stats and not summary.has_statistics:
+            continue
+        if origin and summary.origin != origin:
             continue
         if q_lower:
             hay = (
@@ -1413,6 +1452,7 @@ def list_represented_variables(
     has_codelist: bool = Query(False, description="Only variables with a linked CodeList"),
     study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
     batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
+    origin: str | None = Query(None, description="Optional UrnRegistry origin filter"),
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ) -> list[RepresentedVariableDetail]:
@@ -1444,6 +1484,8 @@ def list_represented_variables(
     for rv in qs:
         detail = _build_represented_variable_detail(rv, origin_map, links_map)
         if reused_only and not detail.is_reused:
+            continue
+        if origin and detail.origin != origin:
             continue
         if q_lower:
             hay = f"{detail.name} {detail.label} {detail.urn} {detail.codelist_name or ''}".lower()
@@ -1532,6 +1574,7 @@ def list_conceptual_variables(
     q: str = Query("", description="Search by name, label, concept URI, or URN"),
     study_urn: str | None = Query(None, description="Optional StudyUnit URN scope filter"),
     batch_id: int | None = Query(None, description="Optional IngestBatch ID scope filter"),
+    origin: str | None = Query(None, description="Optional UrnRegistry origin filter"),
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ) -> list[ConceptualVariableSummary]:
@@ -1558,6 +1601,8 @@ def list_conceptual_variables(
 
     for cv in qs:
         summary = _build_conceptual_variable_summary(cv, origin_map)
+        if origin and summary.origin != origin:
+            continue
         if q_lower:
             hay = (
                 f"{summary.name} {summary.label} {summary.urn} "
@@ -1664,6 +1709,7 @@ def list_resource_types(request: Any) -> list[ResourceTypeCount]:
 def list_generic_resources(
     request: Any,
     resource_type: str | None = Query(None, description="Filter by UrnRegistry resource_type"),
+    origin: str | None = Query(None, description="Filter by UrnRegistry origin"),
     q: str = Query("", description="Search by URN, name, or label"),
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
@@ -1674,6 +1720,8 @@ def list_generic_resources(
     qs = UrnRegistry.objects.all().order_by("resource_type", "urn")
     if resource_type:
         qs = qs.filter(resource_type=resource_type)
+    if origin:
+        qs = qs.filter(origin=origin)
 
     reg_rows = list(qs)
     urns_by_type: dict[str, list[str]] = {}

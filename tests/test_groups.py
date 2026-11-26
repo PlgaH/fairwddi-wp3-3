@@ -194,6 +194,8 @@ def test_unified_resource_set_resolver_cascade_and_nested_group_cycle_safety() -
     assert cv.urn in resolve_resource_set("bank:harmonized").all_urns
     assert qi.urn in resolve_resource_set("bank:imported").all_urns
     assert resolve_resource_set(f"urn:{qi.urn},{rv.urn}").all_urns == {qi.urn, rv.urn}
+    assert resolve_resource_set(f"{qi.urn},{rv.urn}").all_urns == {qi.urn, rv.urn}
+    assert qi.urn in resolve_resource_set(su.urn).all_urns
 
 
 @pytest.mark.django_db

@@ -8,13 +8,18 @@ paraphrases and semantic correspondences beyond surface spelling.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable, Sequence
 from typing import Any
+
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover - optional acceleration
+    np = None  # type: ignore[assignment]
 
 from dartfx.ddi.harmonizer import (
     DefaultTfIdfEmbeddingProvider,
     EmbeddingProvider,
-    SemanticVectorComparator,
 )
 from dartfx.ddi.harmonizer.comparators.agent import RuleBasedMockAgentComparator
 
@@ -120,23 +125,56 @@ def compare_semantic_sets(
     candidates: list[dict[str, Any]] = []
     seen_sym_pairs: set[tuple[str, str]] = set()
 
+    if np is not None:
+        src_mat = np.asarray(src_vecs, dtype=np.float32)
+        tgt_mat = np.asarray(tgt_vecs, dtype=np.float32)
+        src_norms = np.linalg.norm(src_mat, axis=1, keepdims=True)
+        src_norms[src_norms == 0] = 1.0
+        tgt_norms = np.linalg.norm(tgt_mat, axis=1, keepdims=True)
+        tgt_norms[tgt_norms == 0] = 1.0
+        sim_matrix = (src_mat / src_norms) @ (tgt_mat / tgt_norms).T
+    else:
+        sim_matrix = None
+        src_unit = []
+        for vec in src_vecs:
+            n = math.sqrt(sum(x * x for x in vec)) or 1.0
+            src_unit.append([x / n for x in vec])
+        tgt_unit = []
+        for vec in tgt_vecs:
+            n = math.sqrt(sum(x * x for x in vec)) or 1.0
+            tgt_unit.append([x / n for x in vec])
+
     for s_pos, src_orig_idx in enumerate(valid_src_idx):
         src = source_records[src_orig_idx]
-        s_vec = src_vecs[s_pos]
         scored: list[tuple[float, dict[str, Any], int]] = []
 
-        for t_pos, tgt_orig_idx in enumerate(valid_tgt_idx):
-            tgt = target_records[tgt_orig_idx]
-            if exclude_same_urn and src["urn"] == tgt["urn"]:
-                continue
-            if symmetric_sets:
-                pair_key = (min(src["urn"], tgt["urn"]), max(src["urn"], tgt["urn"]))
-                if pair_key in seen_sym_pairs:
+        if sim_matrix is not None:
+            row = sim_matrix[s_pos]
+            hit_indices = np.where(row >= sem_cfg.threshold)[0]
+            for t_pos_np in hit_indices:
+                t_pos = int(t_pos_np)
+                tgt = target_records[valid_tgt_idx[t_pos]]
+                if exclude_same_urn and src["urn"] == tgt["urn"]:
                     continue
-
-            cos_sim = SemanticVectorComparator._cosine_similarity(s_vec, tgt_vecs[t_pos])
-            if cos_sim >= sem_cfg.threshold:
-                scored.append((cos_sim, tgt, t_pos))
+                if symmetric_sets:
+                    pair_key = (min(src["urn"], tgt["urn"]), max(src["urn"], tgt["urn"]))
+                    if pair_key in seen_sym_pairs:
+                        continue
+                scored.append((float(row[t_pos]), tgt, t_pos))
+        else:
+            s_vec = src_unit[s_pos]
+            for t_pos, tgt_orig_idx in enumerate(valid_tgt_idx):
+                tgt = target_records[tgt_orig_idx]
+                if exclude_same_urn and src["urn"] == tgt["urn"]:
+                    continue
+                if symmetric_sets:
+                    pair_key = (min(src["urn"], tgt["urn"]), max(src["urn"], tgt["urn"]))
+                    if pair_key in seen_sym_pairs:
+                        continue
+                t_vec = tgt_unit[t_pos]
+                cos_sim = sum(a * b for a, b in zip(s_vec, t_vec, strict=False))
+                if cos_sim >= sem_cfg.threshold:
+                    scored.append((cos_sim, tgt, t_pos))
 
         scored.sort(key=lambda x: x[0], reverse=True)
         for cos_sim, tgt, _ in scored[: sem_cfg.top_k]:

@@ -143,6 +143,8 @@ def run_comparison(
 
         src_urns = src_set.urns_for(r_type)
         tgt_urns = tgt_set.urns_for(r_type)
+        if not symmetric_sets and cfg.exclude_same_urn:
+            tgt_urns = tgt_urns - src_urns
         if not src_urns or not tgt_urns:
             continue
 
@@ -216,6 +218,7 @@ def run_comparison(
             CorrespondenceLevel.SEMANTIC: 1,
             CorrespondenceLevel.CONCEPTUAL: 2,
         }
+        qual_cache: dict[tuple[str, str], Any] = {}
         for s_u in sorted(by_source.keys()):
             hits_for_src = sorted(
                 by_source[s_u],
@@ -229,7 +232,16 @@ def run_comparison(
             for hit in hits_for_src:
                 src_rec = hit["source_rec"]
                 tgt_rec = hit["target_rec"]
-                qual = evaluate_qualification(src_rec, tgt_rec, r_type, rule.qualification)
+                cl_a = src_rec.get("codelist_urn")
+                cl_b = tgt_rec.get("codelist_urn")
+                if cl_a and cl_b and not rule.qualification.warn_on_administration_context:
+                    qkey = (str(cl_a), str(cl_b))
+                    qual = qual_cache.get(qkey)
+                    if qual is None:
+                        qual = evaluate_qualification(src_rec, tgt_rec, r_type, rule.qualification)
+                        qual_cache[qkey] = qual
+                else:
+                    qual = evaluate_qualification(src_rec, tgt_rec, r_type, rule.qualification)
                 rec_act, req_rev = _determine_recommended_action(
                     hit["level"],
                     hit["match_type"],

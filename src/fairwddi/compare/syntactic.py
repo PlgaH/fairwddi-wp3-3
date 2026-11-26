@@ -31,13 +31,12 @@ class _BlockerItem(BaseModel):
 def _detect_wording_or_typo(
     raw_a: str,
     raw_b: str,
-    normalizer: TextNormalizer,
     *,
-    lang: str,
+    tvc_cmp: TextVariantComparator,
+    nec_cmp: NearExactComparator,
     threshold: float,
-    near_exact_threshold: float,
 ) -> tuple[float, str, dict[str, Any]] | None:
-    tvc = TextVariantComparator(normalizer, language=lang).compare(raw_a, raw_b)
+    tvc = tvc_cmp.compare(raw_a, raw_b)
     if tvc is not None:
         return (
             float(tvc.score),
@@ -48,12 +47,7 @@ def _detect_wording_or_typo(
             },
         )
 
-    nec = NearExactComparator(
-        normalizer,
-        language=lang,
-        near_exact_threshold=near_exact_threshold,
-        syntactic_threshold=threshold,
-    ).compare(raw_a, raw_b)
+    nec = nec_cmp.compare(raw_a, raw_b)
     if nec.score >= threshold and nec.match_type != MatchType.DISTINCT:
         return (
             float(nec.score),
@@ -90,6 +84,33 @@ def compare_syntactic_sets(
     normalizer = TextNormalizer()
     blocker: TokenBlocker[_BlockerItem] | None = None
     target_by_urn = {r["urn"]: r for r in target_records}
+
+    # Pre-cache CodeList models/signatures, normalized fallback text, and per-language comparators
+    hcl_cache: dict[str, HCodeList] = {}
+    cl_sig_cache: dict[str, tuple[tuple[str, str], ...]] = {}
+    norm_text_cache: dict[str, str] = {}
+    comparators_by_lang: dict[str, tuple[TextVariantComparator, NearExactComparator]] = {}
+
+    if resource_type == "CodeList":
+        for rec in (*source_records, *target_records):
+            u = rec["urn"]
+            if u in hcl_cache:
+                continue
+            sub = [c for c in (rec.get("codes") or []) if not c[2]]
+            if not sub:
+                continue
+            norm_codes = [(v, normalizer.normalize(lbl).casefold()) for v, lbl, _ in sub]
+            cl_sig_cache[u] = tuple(norm_codes)
+            hcl_cache[u] = HCodeList(
+                name=u,
+                urn=u,
+                codes=[HCode(value=v, category=HCat(label=nl)) for v, nl in norm_codes],
+            )
+    else:
+        for rec in (*source_records, *target_records):
+            u = rec["urn"]
+            if u not in norm_text_cache and rec.get("text"):
+                norm_text_cache[u] = normalizer.normalize(rec["text"]).casefold()
 
     use_blocker = (
         syn_cfg.enable_token_blocking and len(target_records) > 25 and resource_type != "CodeList"
@@ -130,7 +151,15 @@ def compare_syntactic_sets(
                 seen_sym_pairs.add(pair_key)
 
             res = _compare_pair_syntactic(
-                src, tgt, resource_type, syn_cfg=syn_cfg, normalizer=normalizer
+                src,
+                tgt,
+                resource_type,
+                syn_cfg=syn_cfg,
+                normalizer=normalizer,
+                hcl_cache=hcl_cache,
+                cl_sig_cache=cl_sig_cache,
+                norm_text_cache=norm_text_cache,
+                comparators_by_lang=comparators_by_lang,
             )
             if res is not None:
                 candidates.append(res)
@@ -145,28 +174,49 @@ def _compare_pair_syntactic(
     *,
     syn_cfg: Any,
     normalizer: TextNormalizer,
+    hcl_cache: dict[str, HCodeList] | None = None,
+    cl_sig_cache: dict[str, tuple[tuple[str, str], ...]] | None = None,
+    norm_text_cache: dict[str, str] | None = None,
+    comparators_by_lang: dict[str, tuple[TextVariantComparator, NearExactComparator]] | None = None,
 ) -> dict[str, Any] | None:
     if resource_type == "CodeList":
-        sub_a = [c for c in (src.get("codes") or []) if not c[2]]
-        sub_b = [c for c in (tgt.get("codes") or []) if not c[2]]
-        if not sub_a or not sub_b:
-            return None
-        hcl_a = HCodeList(
-            name=src["urn"],
-            urn=src["urn"],
-            codes=[
-                HCode(value=v, category=HCat(label=normalizer.normalize(lbl).casefold()))
-                for v, lbl, _ in sub_a
-            ],
-        )
-        hcl_b = HCodeList(
-            name=tgt["urn"],
-            urn=tgt["urn"],
-            codes=[
-                HCode(value=v, category=HCat(label=normalizer.normalize(lbl).casefold()))
-                for v, lbl, _ in sub_b
-            ],
-        )
+        hcl_a = hcl_cache.get(src["urn"]) if hcl_cache is not None else None
+        hcl_b = hcl_cache.get(tgt["urn"]) if hcl_cache is not None else None
+        if hcl_a is None or hcl_b is None:
+            sub_a = [c for c in (src.get("codes") or []) if not c[2]]
+            sub_b = [c for c in (tgt.get("codes") or []) if not c[2]]
+            if not sub_a or not sub_b:
+                return None
+            hcl_a = HCodeList(
+                name=src["urn"],
+                urn=src["urn"],
+                codes=[
+                    HCode(value=v, category=HCat(label=normalizer.normalize(lbl).casefold()))
+                    for v, lbl, _ in sub_a
+                ],
+            )
+            hcl_b = HCodeList(
+                name=tgt["urn"],
+                urn=tgt["urn"],
+                codes=[
+                    HCode(value=v, category=HCat(label=normalizer.normalize(lbl).casefold()))
+                    for v, lbl, _ in sub_b
+                ],
+            )
+        if cl_sig_cache is not None:
+            sig_a = cl_sig_cache.get(src["urn"])
+            sig_b = cl_sig_cache.get(tgt["urn"])
+            if sig_a is not None and sig_a == sig_b:
+                return {
+                    "level": CorrespondenceLevel.SYNTACTIC,
+                    "resource_type": resource_type,
+                    "source_rec": src,
+                    "target_rec": tgt,
+                    "match_type": MatchType.EXACT_IDENTICAL.value,
+                    "confidence": 1.0,
+                    "requires_review": False,
+                    "details": {"codelist_score": 1.0},
+                }
         cl_res = compare_codelists(hcl_a, hcl_b, threshold=syn_cfg.threshold)
         if cl_res.score < syn_cfg.threshold:
             return None
@@ -214,13 +264,25 @@ def _compare_pair_syntactic(
         raw_a = src_raw_ml[lang]
         raw_b = tgt_raw_ml[lang]
         if syn_cfg.detect_wording or syn_cfg.detect_typos or syn_cfg.detect_inclusive:
+            cmp_pair = comparators_by_lang.get(lang) if comparators_by_lang is not None else None
+            if cmp_pair is None:
+                cmp_pair = (
+                    TextVariantComparator(normalizer, language=lang),
+                    NearExactComparator(
+                        normalizer,
+                        language=lang,
+                        near_exact_threshold=syn_cfg.near_exact_threshold,
+                        syntactic_threshold=syn_cfg.threshold,
+                    ),
+                )
+                if comparators_by_lang is not None:
+                    comparators_by_lang[lang] = cmp_pair
             var = _detect_wording_or_typo(
                 raw_a,
                 raw_b,
-                normalizer,
-                lang=lang,
+                tvc_cmp=cmp_pair[0],
+                nec_cmp=cmp_pair[1],
                 threshold=syn_cfg.threshold,
-                near_exact_threshold=syn_cfg.near_exact_threshold,
             )
             if var is not None and var[0] >= best_score:
                 if var[1] == MatchType.TYPOGRAPHICAL_VARIANT.value and not syn_cfg.detect_typos:
@@ -255,11 +317,17 @@ def _compare_pair_syntactic(
 
     # Fallback direct string comparison when ml dictionaries are absent
     if best_type is None and src.get("text") and tgt.get("text"):
-        ratio = difflib.SequenceMatcher(
-            None,
-            normalizer.normalize(src["text"]).casefold(),
-            normalizer.normalize(tgt["text"]).casefold(),
-        ).ratio()
+        txt_a = (
+            norm_text_cache.get(src["urn"])
+            if norm_text_cache is not None
+            else normalizer.normalize(src["text"]).casefold()
+        ) or normalizer.normalize(src["text"]).casefold()
+        txt_b = (
+            norm_text_cache.get(tgt["urn"])
+            if norm_text_cache is not None
+            else normalizer.normalize(tgt["text"]).casefold()
+        ) or normalizer.normalize(tgt["text"]).casefold()
+        ratio = difflib.SequenceMatcher(None, txt_a, txt_b).ratio()
         if ratio >= syn_cfg.threshold:
             best_score = float(ratio)
             best_type = (

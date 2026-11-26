@@ -64,6 +64,9 @@ def parse_resource_set_spec(spec: str) -> ResourceSetSpec:
         raise ValueError("Resource set specifier cannot be empty.")
 
     low = raw.lower()
+    if low.startswith("urn:ddi:"):
+        return ResourceSetSpec(raw_spec=raw, kind="urns", identifier=raw)
+
     if low == "bank" or low.startswith("bank:"):
         scope = low.split(":", 1)[1] if ":" in low else "all"
         if scope not in ("all", "imported", "harmonized"):

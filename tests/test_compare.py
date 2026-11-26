@@ -367,3 +367,53 @@ def test_cli_compare_configs_init_and_run(tmp_path: Path) -> None:
     assert run_res.exit_code == 0, run_res.output
     assert list(out_dir.glob("*.comparison.json"))
     assert list(out_dir.glob("*.comparison.report.md"))
+
+
+@pytest.mark.django_db
+def test_compare_overlapping_sets_excludes_source_resources() -> None:
+    """Overlapping source/target sets should not self-match within the overlapping source set."""
+    from fairwddi.models import QuestionItem
+
+    qa1 = QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:qi_ov_a1:1.0.0",
+        name="QOA1",
+        question_text={"fr": "Faites-vous confiance au gouvernement ?"},
+        origin="imported",
+    )
+    qa2 = QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:qi_ov_a2:1.0.0",
+        name="QOA2",
+        question_text={"fr": "Faites-vous confiance au gouvernement"},
+        origin="imported",
+    )
+    qb1 = QuestionItem.objects.create(
+        urn="urn:ddi:fr.cdsp:qi_ov_b1:1.0.0",
+        name="QOB1",
+        question_text={"fr": "Faites-vous confiance au gouvernement ?"},
+        origin="imported",
+    )
+
+    # Overlapping sets (source is a subset of target): only qb1 should appear as target
+    res = run_comparison(
+        source=f"{qa1.urn},{qa2.urn}",
+        target=f"{qa1.urn},{qa2.urn},{qb1.urn}",
+        levels=[CorrespondenceLevel.SYNTACTIC],
+        resource_types=["QuestionItem"],
+    )
+    assert {(c.source_urn, c.target_urn) for c in res.candidates} == {
+        (qa1.urn, qb1.urn),
+        (qa2.urn, qb1.urn),
+    }
+
+    # Identical set (source == target) still compares internal items against each other
+    sym_res = run_comparison(
+        source=f"{qa1.urn},{qa2.urn}",
+        target=f"{qa1.urn},{qa2.urn}",
+        levels=[CorrespondenceLevel.SYNTACTIC],
+        resource_types=["QuestionItem"],
+    )
+    assert len(sym_res.candidates) == 1
+    assert {sym_res.candidates[0].source_urn, sym_res.candidates[0].target_urn} == {
+        qa1.urn,
+        qa2.urn,
+    }
